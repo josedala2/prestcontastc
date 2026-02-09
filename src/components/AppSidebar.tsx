@@ -13,9 +13,9 @@ import {
   ChevronRight,
   FileText,
   History,
-  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BrasaoAngola } from "./BrasaoAngola";
 
 const navSections = [
   {
@@ -64,9 +64,7 @@ export function AppSidebar() {
       {/* Logo / Brand */}
       <div className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded gold-gradient flex items-center justify-center shrink-0">
-            <Shield className="h-5 w-5 text-primary" />
-          </div>
+          <BrasaoAngola size="md" className="shrink-0" />
           {!collapsed && (
             <div className="animate-fade-in min-w-0">
               <h1 className="text-sm font-bold text-sidebar-primary tracking-wide leading-tight">PGC</h1>

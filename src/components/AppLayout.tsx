@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation } from "react-router-dom";
+import { BrasaoAngola } from "./BrasaoAngola";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -30,6 +31,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* Top Header — Republic red band */}
         <header className="header-gradient h-11 flex items-center justify-between px-5 shrink-0">
           <div className="flex items-center gap-3">
+            <BrasaoAngola size="sm" className="shrink-0" />
             <span className="text-[13px] font-semibold text-header-foreground tracking-wide">
               REPÚBLICA DE ANGOLA
             </span>
