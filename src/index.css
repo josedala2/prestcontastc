@@ -49,16 +49,16 @@
 
     --radius: 0.375rem;
 
-    /* Sidebar — institutional blue */
-    --sidebar-background: 216 50% 18%;
-    --sidebar-foreground: 210 30% 82%;
+    /* Sidebar — institutional blue (lighter) */
+    --sidebar-background: 214 45% 28%;
+    --sidebar-foreground: 210 30% 88%;
     --sidebar-primary: 43 90% 52%;
-    --sidebar-primary-foreground: 216 50% 14%;
-    --sidebar-accent: 216 45% 24%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 216 40% 25%;
+    --sidebar-primary-foreground: 214 45% 18%;
+    --sidebar-accent: 214 40% 34%;
+    --sidebar-accent-foreground: 0 0% 97%;
+    --sidebar-border: 214 35% 35%;
     --sidebar-ring: 43 90% 52%;
-    --sidebar-muted: 216 25% 38%;
+    --sidebar-muted: 214 25% 45%;
 
     /* Header — republic red band */
     --header-background: 0 72% 42%;
@@ -127,7 +127,7 @@
     background: linear-gradient(135deg, hsl(0 72% 42%), hsl(0 65% 36%));
   }
   .sidebar-gradient {
-    background: linear-gradient(180deg, hsl(216 50% 18%), hsl(216 48% 14%));
+    background: linear-gradient(180deg, hsl(214 45% 28%), hsl(214 45% 24%));
   }
   .gold-gradient {
     background: linear-gradient(135deg, hsl(43 90% 48%), hsl(38 85% 42%));
