@@ -1,17 +1,16 @@
-import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { mockTrialBalance, formatKz } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FileDown, FileSpreadsheet } from "lucide-react";
+import { FileDown, FileSpreadsheet, Printer } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { toast } from "sonner";
 
 const COLORS = ["hsl(210,70%,28%)", "hsl(170,50%,42%)", "hsl(38,92%,50%)", "hsl(0,72%,51%)", "hsl(280,60%,50%)"];
 
 const Relatorios = () => {
-  // Calc from trial balance
   const ativoLines = mockTrialBalance.filter((l) => ["11.1", "11.2", "11.3", "18", "22", "31", "43", "45"].includes(l.accountCode));
   const totalAtivo = ativoLines.reduce((s, l) => s + l.balance, 0);
 
@@ -40,18 +39,32 @@ const Relatorios = () => {
     ...proveitos.map((p) => ({ name: p.description, Custos: 0, Proveitos: Math.abs(p.balance) })),
   ];
 
-  // Indicators
   const liquidezGeral = totalAtivo / totalPassivo;
   const endividamento = (totalPassivo / (totalPassivo + totalCapital)) * 100;
   const rentabilidade = (resultado / totalProveitos) * 100;
 
+  const handleExportPdf = () => {
+    toast.success("Relatório exportado em PDF (simulado). Integre jsPDF para exportação real.");
+  };
+
+  const handleExportExcel = () => {
+    toast.success("Relatório exportado em Excel (simulado). Integre xlsx para exportação real.");
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <AppLayout>
       <PageHeader title="Relatórios e Demonstrações" description="Balanço Patrimonial, DRE e Indicadores Financeiros">
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="gap-2" onClick={handlePrint}>
+          <Printer className="h-4 w-4" /> Imprimir
+        </Button>
+        <Button variant="outline" className="gap-2" onClick={handleExportPdf}>
           <FileDown className="h-4 w-4" /> Exportar PDF
         </Button>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="gap-2" onClick={handleExportExcel}>
           <FileSpreadsheet className="h-4 w-4" /> Exportar Excel
         </Button>
       </PageHeader>
