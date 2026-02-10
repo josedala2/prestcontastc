@@ -15,6 +15,7 @@ import {
   History,
   MessageSquare,
   ExternalLink,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +56,12 @@ const navSections = [
     label: "Acesso Externo",
     items: [
       { title: "Portal da Entidade", icon: ExternalLink, path: "/portal" },
+    ],
+  },
+  {
+    label: "Sistema",
+    items: [
+      { title: "Configurações", icon: Settings, path: "/configuracoes" },
     ],
   },
 ];
