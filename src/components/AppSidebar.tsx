@@ -15,7 +15,7 @@ import {
   History,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BrasaoAngola } from "./BrasaoAngola";
+
 
 const navSections = [
   {
@@ -64,10 +64,10 @@ export function AppSidebar() {
       {/* Logo / Brand */}
       <div className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <BrasaoAngola size="md" className="shrink-0" />
+          <img src="/logo-tca.png" alt="TCA" className="w-9 h-9 shrink-0" />
           {!collapsed && (
             <div className="animate-fade-in min-w-0">
-              <h1 className="text-sm font-bold text-sidebar-primary tracking-wide leading-tight">PGC</h1>
+              <h1 className="text-sm font-bold text-sidebar-primary tracking-wide leading-tight font-serif">TCA</h1>
               <p className="text-[10px] text-sidebar-foreground/50 leading-tight">Prestação de Contas</p>
             </div>
           )}
