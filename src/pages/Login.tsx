@@ -59,7 +59,7 @@ export default function Login() {
       if (matched?.role === "Preparador / Contabilista") {
         navigate("/portal");
       } else {
-        navigate("/");
+        navigate("/dashboard");
       }
     }, 600);
   };

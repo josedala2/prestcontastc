@@ -24,7 +24,7 @@ const navSections = [
   {
     label: "Principal",
     items: [
-      { title: "Dashboard", icon: LayoutDashboard, path: "/" },
+      { title: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
       { title: "Entidades", icon: Building2, path: "/entidades" },
       { title: "Exercícios", icon: Calendar, path: "/exercicios" },
     ],
