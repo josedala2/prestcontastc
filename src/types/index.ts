@@ -182,3 +182,56 @@ export const COMPLIANCE_NIVEL_LABELS: Record<1 | 2 | 3, { label: string; descrip
   2: { label: "Em Termos com Recomendações", description: "A Conta poderá ser considerada em Termos, contudo, deverão ser feitas recomendações para a melhoria." },
   3: { label: "Não em Termos", description: "A Conta não está em Termos e deve constar do programa de auditorias para o ano seguinte." },
 };
+
+// ─── Documentos do Tribunal ───
+export type DocumentoTribunalTipo = "notificacao" | "diligencia" | "relatorio_analise" | "acordao" | "notif_acordao";
+export type DocumentoTribunalEstado = "rascunho" | "em_revisao" | "aprovado" | "emitido" | "anulado";
+
+export interface DocumentoTribunal {
+  id: string;
+  processoId: string;
+  exercicioId: string;
+  entidadeId: string;
+  tipo: DocumentoTribunalTipo;
+  numeroDocumento: string;
+  assunto: string;
+  conteudo: string;
+  estado: DocumentoTribunalEstado;
+  versao: number;
+  imutavel: boolean;
+  hashSha256?: string;
+  seloTemporal?: string;
+  criadoPor: string;
+  aprovadoPor?: string;
+  emitidoAt?: string;
+  prazoResposta?: string; // for diligencias
+  resultadoAcordao?: "em_termos" | "com_recomendacoes" | "nao_em_termos"; // for acordaos
+  juizRelator?: string; // for acordaos
+  createdAt: string;
+  updatedAt: string;
+  historico?: DocumentoVersao[];
+}
+
+export interface DocumentoVersao {
+  versao: number;
+  alteradoPor: string;
+  alteradoAt: string;
+  resumoAlteracao: string;
+  hashSha256: string;
+}
+
+export const DOCUMENTO_TIPO_LABELS: Record<DocumentoTribunalTipo, { label: string; icon: string }> = {
+  notificacao: { label: "Notificação", icon: "Bell" },
+  diligencia: { label: "Pedido de Esclarecimento / Diligência", icon: "HelpCircle" },
+  relatorio_analise: { label: "Relatório de Análise / Verificação", icon: "FileSearch" },
+  acordao: { label: "Acórdão", icon: "Gavel" },
+  notif_acordao: { label: "Notificação do Acórdão", icon: "Mail" },
+};
+
+export const DOCUMENTO_ESTADO_LABELS: Record<DocumentoTribunalEstado, { label: string; color: string }> = {
+  rascunho: { label: "Rascunho", color: "default" },
+  em_revisao: { label: "Em Revisão", color: "warning" },
+  aprovado: { label: "Aprovado", color: "info" },
+  emitido: { label: "Emitido", color: "success" },
+  anulado: { label: "Anulado", color: "destructive" },
+};
