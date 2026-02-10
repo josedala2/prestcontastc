@@ -15,6 +15,7 @@ import { STATUS_LABELS, VALIDATION_LEVEL_LABELS } from "@/types";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { BalancoPatrimonial } from "@/components/BalancoPatrimonial";
 import { AvaliacaoConta } from "@/components/AvaliacaoConta";
+import { DocumentosTribunal } from "@/components/DocumentosTribunal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -37,6 +38,7 @@ import {
   Send,
   Landmark,
   ClipboardCheck,
+  Scale,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -113,6 +115,7 @@ const PortalExercicioDetalhe = () => {
           <TabsTrigger value="validacoes" className="gap-1.5"><Shield className="h-3.5 w-3.5" /> Validações</TabsTrigger>
           <TabsTrigger value="esclarecimentos" className="gap-1.5"><MessageSquare className="h-3.5 w-3.5" /> Esclarecimentos</TabsTrigger>
           <TabsTrigger value="avaliacao" className="gap-1.5"><ClipboardCheck className="h-3.5 w-3.5" /> Avaliação CC-3</TabsTrigger>
+          <TabsTrigger value="docs_tribunal" className="gap-1.5"><Scale className="h-3.5 w-3.5" /> Docs. Tribunal</TabsTrigger>
         </TabsList>
 
         {/* ── Dados Gerais ── */}
@@ -424,6 +427,11 @@ const PortalExercicioDetalhe = () => {
         {/* ── Avaliação da Conta CC-3 ── */}
         <TabsContent value="avaliacao" className="space-y-4">
           <AvaliacaoConta entityId={fy.entityId} fiscalYearId={fy.id} year={fy.year} />
+        </TabsContent>
+
+        {/* ── Documentos do Tribunal (read-only) ── */}
+        <TabsContent value="docs_tribunal" className="space-y-4">
+          <DocumentosTribunal exercicioId={fy.id} entidadeId={fy.entityId} readOnly />
         </TabsContent>
       </Tabs>
     </PortalLayout>
