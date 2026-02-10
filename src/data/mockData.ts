@@ -1,5 +1,6 @@
-import { Entity, FiscalYear, TrialBalanceLine, ValidationResult, Account, Attachment, AuditLogEntry, ClarificationRequest } from "@/types";
+import { Entity, FiscalYear, TrialBalanceLine, ValidationResult, Account, Attachment, AuditLogEntry, ClarificationRequest, FinancialIndicators, ComplianceQuestion, ComplianceEvaluation } from "@/types";
 
+// ─── 10 Entidades Angolanas ───
 export const mockEntities: Entity[] = [
   {
     id: "1",
@@ -34,72 +35,117 @@ export const mockEntities: Entity[] = [
     provincia: "Luanda",
     createdAt: "2024-03-01",
   },
+  {
+    id: "4",
+    name: "Empresa de Águas de Luanda - EPAL, E.P.",
+    nif: "5404032156",
+    tutela: "Ministério da Energia e Águas",
+    contacto: "+244 222 321 400",
+    morada: "Rua do Engenheiro Ezequiel, Luanda",
+    tipologia: "empresa_publica",
+    provincia: "Luanda",
+    createdAt: "2024-01-20",
+  },
+  {
+    id: "5",
+    name: "Instituto Nacional da Aviação Civil - INAVIC",
+    nif: "5405045678",
+    tutela: "Ministério dos Transportes",
+    contacto: "+244 222 352 200",
+    morada: "Aeroporto Internacional 4 de Fevereiro, Luanda",
+    tipologia: "instituto_publico",
+    provincia: "Luanda",
+    createdAt: "2024-02-15",
+  },
+  {
+    id: "6",
+    name: "Fundo de Apoio ao Desenvolvimento Agrário - FADA",
+    nif: "5406058901",
+    tutela: "Ministério da Agricultura e Pescas",
+    contacto: "+244 222 323 800",
+    morada: "Rua Comandante Gika, Luanda",
+    tipologia: "fundo_autonomo",
+    provincia: "Luanda",
+    createdAt: "2024-03-10",
+  },
+  {
+    id: "7",
+    name: "Empresa Portuária do Lobito - EPL, E.P.",
+    nif: "5407061234",
+    tutela: "Ministério dos Transportes",
+    contacto: "+244 261 222 300",
+    morada: "Porto do Lobito, Benguela",
+    tipologia: "empresa_publica",
+    provincia: "Benguela",
+    createdAt: "2024-04-05",
+  },
+  {
+    id: "8",
+    name: "Serviço Nacional de Meteorologia e Geofísica - INAMET",
+    nif: "5408074567",
+    tutela: "Ministério das Telecomunicações e TI",
+    contacto: "+244 222 326 100",
+    morada: "Rua Cónego Manuel das Neves, Luanda",
+    tipologia: "servico_autonomo",
+    provincia: "Luanda",
+    createdAt: "2024-04-15",
+  },
+  {
+    id: "9",
+    name: "Empresa Nacional de Seguros de Angola - ENSA, E.P.",
+    nif: "5409087890",
+    tutela: "Ministério das Finanças",
+    contacto: "+244 222 332 400",
+    morada: "Av. 4 de Fevereiro, 93, Luanda",
+    tipologia: "empresa_publica",
+    provincia: "Luanda",
+    createdAt: "2024-05-01",
+  },
+  {
+    id: "10",
+    name: "Instituto de Gestão de Activos e Participações do Estado - IGAPE",
+    nif: "5410091234",
+    tutela: "Ministério das Finanças",
+    contacto: "+244 222 339 200",
+    morada: "Largo Kinaxixi, Luanda",
+    tipologia: "instituto_publico",
+    provincia: "Luanda",
+    createdAt: "2024-05-20",
+  },
 ];
 
+// ─── Exercícios Fiscais (2023 e 2024 para cada entidade) ───
 export const mockFiscalYears: FiscalYear[] = [
-  {
-    id: "fy1",
-    entityId: "1",
-    entityName: "ENDE, E.P.",
-    year: 2024,
-    startDate: "2024-01-01",
-    endDate: "2024-12-31",
-    status: "rascunho",
-    totalDebito: 15834567890,
-    totalCredito: 15834567890,
-    errorsCount: 5,
-    warningsCount: 3,
-    checklistProgress: 45,
-    deadline: "2025-04-30",
-  },
-  {
-    id: "fy2",
-    entityId: "2",
-    entityName: "INEA",
-    year: 2024,
-    startDate: "2024-01-01",
-    endDate: "2024-12-31",
-    status: "submetido",
-    totalDebito: 8921345000,
-    totalCredito: 8921345000,
-    errorsCount: 0,
-    warningsCount: 2,
-    checklistProgress: 100,
-    deadline: "2025-04-30",
-    submittedAt: "2025-04-15",
-  },
-  {
-    id: "fy3",
-    entityId: "3",
-    entityName: "FSDEA",
-    year: 2024,
-    startDate: "2024-01-01",
-    endDate: "2024-12-31",
-    status: "em_analise",
-    totalDebito: 45230000000,
-    totalCredito: 45230000000,
-    errorsCount: 1,
-    warningsCount: 0,
-    checklistProgress: 100,
-    deadline: "2025-04-30",
-    submittedAt: "2025-03-28",
-  },
-  {
-    id: "fy4",
-    entityId: "1",
-    entityName: "ENDE, E.P.",
-    year: 2023,
-    startDate: "2023-01-01",
-    endDate: "2023-12-31",
-    status: "conforme",
-    totalDebito: 14200000000,
-    totalCredito: 14200000000,
-    errorsCount: 0,
-    warningsCount: 0,
-    checklistProgress: 100,
-    deadline: "2024-04-30",
-    submittedAt: "2024-04-10",
-  },
+  // ENDE
+  { id: "fy1", entityId: "1", entityName: "ENDE, E.P.", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "rascunho", totalDebito: 15834567890, totalCredito: 15834567890, errorsCount: 5, warningsCount: 3, checklistProgress: 45, deadline: "2025-04-30" },
+  { id: "fy1b", entityId: "1", entityName: "ENDE, E.P.", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 14200000000, totalCredito: 14200000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-04-30", submittedAt: "2024-04-10" },
+  // INEA
+  { id: "fy2", entityId: "2", entityName: "INEA", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 8921345000, totalCredito: 8921345000, errorsCount: 0, warningsCount: 2, checklistProgress: 100, deadline: "2025-04-30", submittedAt: "2025-04-15" },
+  { id: "fy2b", entityId: "2", entityName: "INEA", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 7850000000, totalCredito: 7850000000, errorsCount: 0, warningsCount: 1, checklistProgress: 100, deadline: "2024-04-30", submittedAt: "2024-03-28" },
+  // FSDEA
+  { id: "fy3", entityId: "3", entityName: "FSDEA", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_analise", totalDebito: 45230000000, totalCredito: 45230000000, errorsCount: 1, warningsCount: 0, checklistProgress: 100, deadline: "2025-04-30", submittedAt: "2025-03-28" },
+  { id: "fy3b", entityId: "3", entityName: "FSDEA", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 42100000000, totalCredito: 42100000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-04-30", submittedAt: "2024-04-05" },
+  // EPAL
+  { id: "fy4", entityId: "4", entityName: "EPAL, E.P.", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_validacao", totalDebito: 12450000000, totalCredito: 12450000000, errorsCount: 3, warningsCount: 4, checklistProgress: 78, deadline: "2025-04-30" },
+  { id: "fy4b", entityId: "4", entityName: "EPAL, E.P.", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "nao_conforme", totalDebito: 11200000000, totalCredito: 11200000000, errorsCount: 7, warningsCount: 5, checklistProgress: 100, deadline: "2024-04-30", submittedAt: "2024-05-12" },
+  // INAVIC
+  { id: "fy5", entityId: "5", entityName: "INAVIC", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "com_pedidos", totalDebito: 3280000000, totalCredito: 3280000000, errorsCount: 2, warningsCount: 1, checklistProgress: 100, deadline: "2025-04-30", submittedAt: "2025-04-20" },
+  { id: "fy5b", entityId: "5", entityName: "INAVIC", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 2950000000, totalCredito: 2950000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-04-30", submittedAt: "2024-04-12" },
+  // FADA
+  { id: "fy6", entityId: "6", entityName: "FADA", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 5670000000, totalCredito: 5670000000, errorsCount: 0, warningsCount: 3, checklistProgress: 100, deadline: "2025-04-30", submittedAt: "2025-04-10" },
+  { id: "fy6b", entityId: "6", entityName: "FADA", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 4890000000, totalCredito: 4890000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-04-30", submittedAt: "2024-04-08" },
+  // EPL
+  { id: "fy7", entityId: "7", entityName: "EPL, E.P.", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "rascunho", totalDebito: 7890000000, totalCredito: 7890000000, errorsCount: 8, warningsCount: 6, checklistProgress: 25, deadline: "2025-04-30" },
+  { id: "fy7b", entityId: "7", entityName: "EPL, E.P.", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "nao_conforme", totalDebito: 7120000000, totalCredito: 7120000000, errorsCount: 4, warningsCount: 3, checklistProgress: 100, deadline: "2024-04-30", submittedAt: "2024-05-20" },
+  // INAMET
+  { id: "fy8", entityId: "8", entityName: "INAMET", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_validacao", totalDebito: 1560000000, totalCredito: 1560000000, errorsCount: 1, warningsCount: 2, checklistProgress: 92, deadline: "2025-04-30" },
+  { id: "fy8b", entityId: "8", entityName: "INAMET", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 1420000000, totalCredito: 1420000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-04-30", submittedAt: "2024-04-15" },
+  // ENSA
+  { id: "fy9", entityId: "9", entityName: "ENSA, E.P.", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_analise", totalDebito: 28900000000, totalCredito: 28900000000, errorsCount: 0, warningsCount: 1, checklistProgress: 100, deadline: "2025-04-30", submittedAt: "2025-03-20" },
+  { id: "fy9b", entityId: "9", entityName: "ENSA, E.P.", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 26500000000, totalCredito: 26500000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-04-30", submittedAt: "2024-04-02" },
+  // IGAPE
+  { id: "fy10", entityId: "10", entityName: "IGAPE", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 95400000000, totalCredito: 95400000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2025-04-30", submittedAt: "2025-04-01" },
+  { id: "fy10b", entityId: "10", entityName: "IGAPE", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 89200000000, totalCredito: 89200000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-04-30", submittedAt: "2024-03-25" },
 ];
 
 // ─── Plano de Contas PGC (Decreto nº 82/2001, actualizado pelo DP nº 180/19) ───
@@ -341,7 +387,7 @@ export const mockAccounts: Account[] = [
   { code: "88", description: "Resultado líquido do exercício", nature: "Credora", level: 2, parentCode: "8" },
 ];
 
-// ─── Balancete com dados reais do documento CC-2 ───
+// ─── Balancete com dados reais do documento CC-2/CC-3 ───
 export const mockTrialBalance: TrialBalanceLine[] = [
   { id: "tb01", accountCode: "11", description: "Imobilizações Corpóreas", debit: 9292889535.85, credit: 53258116.48, balance: 9239631419.37 },
   { id: "tb02", accountCode: "11.1", description: "Terrenos e recursos naturais", debit: 0, credit: 0, balance: 0 },
@@ -382,6 +428,63 @@ export const mockTrialBalance: TrialBalanceLine[] = [
   { id: "tb37", accountCode: "88", description: "Resultado líquido do exercício", debit: -7024518958.19, credit: -5350318765.24, balance: -1674200192.95 },
 ];
 
+// ─── Indicadores Financeiros por Entidade (Modelo CC-3) ───
+export const mockFinancialIndicators: FinancialIndicators[] = [
+  // ENDE 2024 (dados reais do CC-3)
+  { entityId: "1", fiscalYearId: "fy1", year: 2024, activoNaoCorrentes: 3444950457.10, activoCorrentes: 1565093126.43, activoTotal: 5010043583.53, capitalProprio: 3181566010.09, passivoNaoCorrente: 0, passivoCorrente: 1938036280.86, passivoTotal: 1938036280.86, proveitosOperacionais: 4832131205.92, custosOperacionais: 5506116713.71, resultadoOperacional: -673985507.79, resultadoFinanceiro: -5788889.03, resultadoNaoOperacional: -994425796.13, resultadoAntesImpostos: -1674200192.95, impostoRendimento: 0, resultadoLiquido: -1674200192.95, liquidezCorrente: 0.81, liquidezSeca: 0.78, liquidezGeral: 2.59, roe: -52.62, roa: -33.42, margemLiquida: -34.40, giroActivo: 0.97, prazoMedioRecebimento: 100.5, prazoMedioRenovacaoEstoque: 0, prazoMedioPagamento: 2045.52, cicloFinanceiro: -1945.02, cicloOperacional: 100.5, endividamentoGeral: 38.68, composicaoEndividamento: 100 },
+  // ENDE 2023
+  { entityId: "1", fiscalYearId: "fy1b", year: 2023, activoNaoCorrentes: 3100000000, activoCorrentes: 1380000000, activoTotal: 4480000000, capitalProprio: 2890000000, passivoNaoCorrente: 150000000, passivoCorrente: 1440000000, passivoTotal: 1590000000, proveitosOperacionais: 4250000000, custosOperacionais: 4780000000, resultadoOperacional: -530000000, resultadoFinanceiro: -3200000, resultadoNaoOperacional: -320000000, resultadoAntesImpostos: -853200000, impostoRendimento: 0, resultadoLiquido: -853200000, liquidezCorrente: 0.96, liquidezSeca: 0.92, liquidezGeral: 2.82, roe: -29.52, roa: -19.04, margemLiquida: -20.08, giroActivo: 0.95, prazoMedioRecebimento: 95.2, prazoMedioRenovacaoEstoque: 0, prazoMedioPagamento: 1820.5, cicloFinanceiro: -1725.3, cicloOperacional: 95.2, endividamentoGeral: 35.49, composicaoEndividamento: 90.57 },
+  // INEA 2024
+  { entityId: "2", fiscalYearId: "fy2", year: 2024, activoNaoCorrentes: 5200000000, activoCorrentes: 2100000000, activoTotal: 7300000000, capitalProprio: 4800000000, passivoNaoCorrente: 800000000, passivoCorrente: 1700000000, passivoTotal: 2500000000, proveitosOperacionais: 3500000000, custosOperacionais: 3200000000, resultadoOperacional: 300000000, resultadoFinanceiro: -12000000, resultadoNaoOperacional: -45000000, resultadoAntesImpostos: 243000000, impostoRendimento: 72900000, resultadoLiquido: 170100000, liquidezCorrente: 1.24, liquidezSeca: 1.18, liquidezGeral: 2.92, roe: 3.54, roa: 2.33, margemLiquida: 4.86, giroActivo: 0.48, prazoMedioRecebimento: 78.3, prazoMedioRenovacaoEstoque: 12.5, prazoMedioPagamento: 145.2, cicloFinanceiro: -54.4, cicloOperacional: 90.8, endividamentoGeral: 34.25, composicaoEndividamento: 68.0 },
+  // FSDEA 2024
+  { entityId: "3", fiscalYearId: "fy3", year: 2024, activoNaoCorrentes: 32000000000, activoCorrentes: 12500000000, activoTotal: 44500000000, capitalProprio: 38200000000, passivoNaoCorrente: 2800000000, passivoCorrente: 3500000000, passivoTotal: 6300000000, proveitosOperacionais: 8200000000, custosOperacionais: 5900000000, resultadoOperacional: 2300000000, resultadoFinanceiro: 450000000, resultadoNaoOperacional: -120000000, resultadoAntesImpostos: 2630000000, impostoRendimento: 789000000, resultadoLiquido: 1841000000, liquidezCorrente: 3.57, liquidezSeca: 3.45, liquidezGeral: 7.06, roe: 4.82, roa: 4.14, margemLiquida: 22.45, giroActivo: 0.18, prazoMedioRecebimento: 45.2, prazoMedioRenovacaoEstoque: 0, prazoMedioPagamento: 85.3, cicloFinanceiro: -40.1, cicloOperacional: 45.2, endividamentoGeral: 14.16, composicaoEndividamento: 55.56 },
+  // EPAL 2024
+  { entityId: "4", fiscalYearId: "fy4", year: 2024, activoNaoCorrentes: 8500000000, activoCorrentes: 2800000000, activoTotal: 11300000000, capitalProprio: 6200000000, passivoNaoCorrente: 2100000000, passivoCorrente: 3000000000, passivoTotal: 5100000000, proveitosOperacionais: 4800000000, custosOperacionais: 5100000000, resultadoOperacional: -300000000, resultadoFinanceiro: -28000000, resultadoNaoOperacional: -85000000, resultadoAntesImpostos: -413000000, impostoRendimento: 0, resultadoLiquido: -413000000, liquidezCorrente: 0.93, liquidezSeca: 0.87, liquidezGeral: 2.22, roe: -6.66, roa: -3.65, margemLiquida: -8.60, giroActivo: 0.42, prazoMedioRecebimento: 120.5, prazoMedioRenovacaoEstoque: 22.3, prazoMedioPagamento: 195.6, cicloFinanceiro: -52.8, cicloOperacional: 142.8, endividamentoGeral: 45.13, composicaoEndividamento: 58.82 },
+  // INAVIC 2024
+  { entityId: "5", fiscalYearId: "fy5", year: 2024, activoNaoCorrentes: 1800000000, activoCorrentes: 980000000, activoTotal: 2780000000, capitalProprio: 1950000000, passivoNaoCorrente: 280000000, passivoCorrente: 550000000, passivoTotal: 830000000, proveitosOperacionais: 2100000000, custosOperacionais: 1850000000, resultadoOperacional: 250000000, resultadoFinanceiro: -5000000, resultadoNaoOperacional: -18000000, resultadoAntesImpostos: 227000000, impostoRendimento: 68100000, resultadoLiquido: 158900000, liquidezCorrente: 1.78, liquidezSeca: 1.72, liquidezGeral: 3.35, roe: 8.15, roa: 5.72, margemLiquida: 7.57, giroActivo: 0.76, prazoMedioRecebimento: 55.8, prazoMedioRenovacaoEstoque: 0, prazoMedioPagamento: 68.4, cicloFinanceiro: -12.6, cicloOperacional: 55.8, endividamentoGeral: 29.86, composicaoEndividamento: 66.27 },
+  // FADA 2024
+  { entityId: "6", fiscalYearId: "fy6", year: 2024, activoNaoCorrentes: 2800000000, activoCorrentes: 1900000000, activoTotal: 4700000000, capitalProprio: 3100000000, passivoNaoCorrente: 500000000, passivoCorrente: 1100000000, passivoTotal: 1600000000, proveitosOperacionais: 2800000000, custosOperacionais: 2450000000, resultadoOperacional: 350000000, resultadoFinanceiro: -8000000, resultadoNaoOperacional: -25000000, resultadoAntesImpostos: 317000000, impostoRendimento: 95100000, resultadoLiquido: 221900000, liquidezCorrente: 1.73, liquidezSeca: 1.55, liquidezGeral: 2.94, roe: 7.16, roa: 4.72, margemLiquida: 7.93, giroActivo: 0.60, prazoMedioRecebimento: 68.2, prazoMedioRenovacaoEstoque: 35.4, prazoMedioPagamento: 112.8, cicloFinanceiro: -9.2, cicloOperacional: 103.6, endividamentoGeral: 34.04, composicaoEndividamento: 68.75 },
+  // EPL 2024
+  { entityId: "7", fiscalYearId: "fy7", year: 2024, activoNaoCorrentes: 5400000000, activoCorrentes: 1600000000, activoTotal: 7000000000, capitalProprio: 4200000000, passivoNaoCorrente: 1200000000, passivoCorrente: 1600000000, passivoTotal: 2800000000, proveitosOperacionais: 3200000000, custosOperacionais: 3550000000, resultadoOperacional: -350000000, resultadoFinanceiro: -15000000, resultadoNaoOperacional: -120000000, resultadoAntesImpostos: -485000000, impostoRendimento: 0, resultadoLiquido: -485000000, liquidezCorrente: 1.00, liquidezSeca: 0.88, liquidezGeral: 2.50, roe: -11.55, roa: -6.93, margemLiquida: -15.16, giroActivo: 0.46, prazoMedioRecebimento: 92.4, prazoMedioRenovacaoEstoque: 45.2, prazoMedioPagamento: 168.5, cicloFinanceiro: -30.9, cicloOperacional: 137.6, endividamentoGeral: 40.0, composicaoEndividamento: 57.14 },
+  // INAMET 2024
+  { entityId: "8", fiscalYearId: "fy8", year: 2024, activoNaoCorrentes: 850000000, activoCorrentes: 420000000, activoTotal: 1270000000, capitalProprio: 920000000, passivoNaoCorrente: 80000000, passivoCorrente: 270000000, passivoTotal: 350000000, proveitosOperacionais: 980000000, custosOperacionais: 890000000, resultadoOperacional: 90000000, resultadoFinanceiro: -2000000, resultadoNaoOperacional: -5000000, resultadoAntesImpostos: 83000000, impostoRendimento: 24900000, resultadoLiquido: 58100000, liquidezCorrente: 1.56, liquidezSeca: 1.50, liquidezGeral: 3.63, roe: 6.32, roa: 4.57, margemLiquida: 5.93, giroActivo: 0.77, prazoMedioRecebimento: 38.5, prazoMedioRenovacaoEstoque: 0, prazoMedioPagamento: 55.2, cicloFinanceiro: -16.7, cicloOperacional: 38.5, endividamentoGeral: 27.56, composicaoEndividamento: 77.14 },
+  // ENSA 2024
+  { entityId: "9", fiscalYearId: "fy9", year: 2024, activoNaoCorrentes: 15000000000, activoCorrentes: 12500000000, activoTotal: 27500000000, capitalProprio: 18500000000, passivoNaoCorrente: 3500000000, passivoCorrente: 5500000000, passivoTotal: 9000000000, proveitosOperacionais: 12000000000, custosOperacionais: 10200000000, resultadoOperacional: 1800000000, resultadoFinanceiro: 320000000, resultadoNaoOperacional: -80000000, resultadoAntesImpostos: 2040000000, impostoRendimento: 612000000, resultadoLiquido: 1428000000, liquidezCorrente: 2.27, liquidezSeca: 2.20, liquidezGeral: 3.06, roe: 7.72, roa: 5.19, margemLiquida: 11.90, giroActivo: 0.44, prazoMedioRecebimento: 62.3, prazoMedioRenovacaoEstoque: 0, prazoMedioPagamento: 98.5, cicloFinanceiro: -36.2, cicloOperacional: 62.3, endividamentoGeral: 32.73, composicaoEndividamento: 61.11 },
+  // IGAPE 2024
+  { entityId: "10", fiscalYearId: "fy10", year: 2024, activoNaoCorrentes: 72000000000, activoCorrentes: 22000000000, activoTotal: 94000000000, capitalProprio: 78000000000, passivoNaoCorrente: 8500000000, passivoCorrente: 7500000000, passivoTotal: 16000000000, proveitosOperacionais: 18500000000, custosOperacionais: 14200000000, resultadoOperacional: 4300000000, resultadoFinanceiro: 850000000, resultadoNaoOperacional: -350000000, resultadoAntesImpostos: 4800000000, impostoRendimento: 1440000000, resultadoLiquido: 3360000000, liquidezCorrente: 2.93, liquidezSeca: 2.85, liquidezGeral: 5.88, roe: 4.31, roa: 3.57, margemLiquida: 18.16, giroActivo: 0.20, prazoMedioRecebimento: 52.8, prazoMedioRenovacaoEstoque: 0, prazoMedioPagamento: 78.4, cicloFinanceiro: -25.6, cicloOperacional: 52.8, endividamentoGeral: 17.02, composicaoEndividamento: 46.88 },
+];
+
+// ─── 27 Questões de Avaliação da Conta (Modelo CC-3) ───
+export const complianceQuestions: ComplianceQuestion[] = [
+  { id: "q1", question: "Envio da prestação de contas fora do prazo legalmente estabelecido", norma: "Nº 1 do artigo 73º da Lei nº 13/10 de 9 de Julho", classification: "grave", score: 2, responsabilidade: "Sancionatória - Multa nos termos do artigo 29º, nº 1, alínea g) da Lei nº 13/10" },
+  { id: "q2", question: "Não envio da prestação de contas", norma: "Nº 1 do artigo 73º da Lei nº 13/10 de 9 de Julho", classification: "sem_gravidade", score: 1 },
+  { id: "q3", question: "Não remessa dos documentos requeridos nos instrutivos da Resolução", norma: "Nº 1 do artigo 3º da Resolução 1/17", classification: "grave", score: 2, responsabilidade: "Sancionatória - Multa nos termos do artigo 29º, nº 1, alínea g) da Lei nº 13/10" },
+  { id: "q4", question: "Falta de ordenação documental da prestação de contas mantendo inalterada a designação de cada modelo", norma: "Nº 2 das Instruções Gerais de Preenchimento da Resolução 1/17", classification: "grave", score: 2, responsabilidade: "Sancionatória - Multa" },
+  { id: "q5", question: "Falta de submissão de determinados modelos de prestação de contas", norma: "Instruções específicas da Resolução 1/17", classification: "sem_gravidade", score: 1 },
+  { id: "q6", question: "Não envio de todos os contratos celebrados ou mapas financeiros relativos aos contratos de locação financeira", norma: "Instruções específicas da Resolução 1/17", classification: "grave", score: 2, responsabilidade: "Sancionatória - Multa" },
+  { id: "q7", question: "Falta de inclusão dos dados de cada responsável pela gestão", norma: "Nº 3 das Instruções Específicas da Resolução 1/17", classification: "grave", score: 2, responsabilidade: "Sancionatória - Multa" },
+  { id: "q8", question: "Falta de envio dos mapas constitutivos das Demonstrações Financeiras", norma: "Nº 4 das Instruções específicas da Resolução 1/17", classification: "sem_gravidade", score: 1 },
+  { id: "q9", question: "Não observância das instruções de preenchimento dos modelos, com falta de consistência dos dados", norma: "Instruções específicas de preenchimento de cada modelo", classification: "grave", score: 2, responsabilidade: "Sancionatória - Multa" },
+  { id: "q10", question: "Falta de detalhamento e organização do Balanço Patrimonial de acordo com a estrutura prevista", norma: "Normas técnicas de estruturação e apresentação das Demonstrações Financeiras", classification: "sem_gravidade", score: 1 },
+  { id: "q11", question: "Ausência de assinatura do técnico e do responsável da área, falta de homologação do responsável máximo", norma: "Nº 3, 4 e 5 das Instruções Gerais da Resolução 1/17", classification: "grave", score: 2, responsabilidade: "Sancionatória - Multa" },
+  { id: "q12", question: "Falta de detalhamento da Demonstração de Resultados, não reflectindo a estrutura por classes de contas", norma: "Normas Técnicas do PGC", classification: "sem_gravidade", score: 1 },
+  { id: "q13", question: "Falta de elaboração adequada da Demonstração dos Fluxos de Caixa", norma: "Normas Técnicas do PGC", classification: "grave", score: 2, responsabilidade: "Sancionatória - Multa" },
+  { id: "q14", question: "Falta de envio de documentos adicionais", norma: "Instruções específicas da Resolução 1/17", classification: "sem_gravidade", score: 1 },
+  { id: "q15", question: "Situações que possam alterar o resultado financeiro do exercício", norma: "Normas Técnicas do PGC", classification: "grave", score: 2, responsabilidade: "Sancionatória - Multa" },
+  { id: "q16", question: "Execução de contratos sem concessão do visto do Tribunal de Contas", norma: "Nº 3 do artigo 8º da Lei nº 13/10", classification: "sem_gravidade", score: 1 },
+  { id: "q17", question: "Execução de contratos devolvidos pelo Tribunal para melhor instrução", norma: "Nº 2 do artigo 66º da Lei nº 13/10", classification: "grave", score: 2, responsabilidade: "Sancionatória - Multa" },
+  { id: "q18", question: "Pagamentos ou adiantamentos iniciais não respeitando normas", norma: "Norma anual de execução do Orçamento", classification: "sem_gravidade", score: 1 },
+  { id: "q19", question: "Falta de redução a escrito de contratos obrigatórios", norma: "Artigo 107º da Lei nº 41/20 (Lei dos Contratos Públicos)", classification: "sem_gravidade", score: 1 },
+  { id: "q20", question: "Realização de despesas não autorizadas", norma: "Artigos 30º-33º da Lei nº 15/10 (Lei do OGE)", classification: "grave", score: 2, responsabilidade: "Sancionatória - Multa" },
+  { id: "q21", question: "Falta do envio do relatório e parecer do auditor externo", norma: "Artigo 25º da Lei nº 11/13 (Sector Empresarial Público)", classification: "sem_gravidade", score: 1 },
+  { id: "q22", question: "Demonstrações financeiras elaboradas por softwares não certificados pela AGT", norma: "Artigo 25º da Lei nº 11/13", classification: "sem_gravidade", score: 1 },
+  { id: "q23", question: "Violação de normas financeiras e contabilísticas", norma: "Artigo 25º da Lei nº 11/13", classification: "grave", score: 2, responsabilidade: "Sancionatória - Multa" },
+  { id: "q24", question: "Falta de efectivação dos descontos obrigatórios por lei", norma: "Norma aplicável", classification: "grave", score: 2, responsabilidade: "Sancionatória - Multa" },
+  { id: "q25", question: "Retenção indevida dos descontos obrigatórios por lei", norma: "Norma aplicável", classification: "muito_grave", score: 3, responsabilidade: "Sancionatória - Multa" },
+  { id: "q26", question: "Falta de prestação de informações pedidas, remessa de documentos ou comparência", norma: "Artigo 18º da Lei nº 13/10", classification: "grave", score: 2, responsabilidade: "Sancionatória - Multa" },
+  { id: "q27", question: "Demonstração Numérica irregular", norma: "Resolução 1/17", classification: "grave", score: 2, responsabilidade: "Sancionatória - Multa" },
+];
+
 // ─── Validações com 3 níveis (Resolução 1/17) ───
 export const mockValidations: ValidationResult[] = [
   // Nível 1 — Completude
@@ -419,6 +522,10 @@ export const mockAuditLog: AuditLogEntry[] = [
   { id: "al6", action: "Aprovação de Exercício", user: "Técnico Validador TCA", timestamp: "2025-04-20 09:30", detail: "ENDE 2023 — Marcado como Conforme", actionType: "aprovacao" },
   { id: "al7", action: "Pedido de Esclarecimento", user: "Técnico Validador TCA", timestamp: "2025-04-22 11:00", detail: "FSDEA 2024 — Solicitada justificação de variação em custos", actionType: "validacao" },
   { id: "al8", action: "Exportação de Dossiê", user: "Maria Santos", timestamp: "2025-04-25 15:45", detail: "Pacote ZIP — INEA 2024 (12 ficheiros)", actionType: "exportacao" },
+  { id: "al9", action: "Importação de Balancete", user: "Ana Ferreira", timestamp: "2025-03-22 09:15", detail: "EPAL — 42 linhas importadas — Modelo CC-3", actionType: "importacao" },
+  { id: "al10", action: "Submissão de Exercício", user: "Dr. Manuel Costa", timestamp: "2025-04-10 14:30", detail: "FADA 2024 — Submetido ao Tribunal de Contas", actionType: "submissao" },
+  { id: "al11", action: "Validação executada", user: "Sistema", timestamp: "2025-03-25 08:00", detail: "ENSA 2024 — 0 erros, 1 aviso encontrado", actionType: "validacao" },
+  { id: "al12", action: "Upload de Anexo", user: "Pedro Neto", timestamp: "2025-04-01 11:00", detail: "IGAPE — Relatório de Gestão 2024 (v1)", actionType: "upload" },
 ];
 
 export const mockClarifications: ClarificationRequest[] = [
@@ -444,6 +551,36 @@ export const mockClarifications: ClarificationRequest[] = [
     responses: [
       { user: "Contabilista INEA", message: "As obras são financiadas pelo OGE 2024, rubrica 04.03.02.", date: "2025-04-25" },
     ],
+  },
+  {
+    id: "cr3",
+    exercicioId: "fy5",
+    entityName: "INAVIC",
+    subject: "Esclarecimento sobre contratos sem visto do TCA",
+    message: "Foram identificados 3 contratos executados sem visto prévio do Tribunal de Contas. Solicita-se justificação e cópia dos contratos.",
+    status: "pendente",
+    createdAt: "2025-04-25",
+    deadline: "2025-05-09",
+  },
+  {
+    id: "cr4",
+    exercicioId: "fy4",
+    entityName: "EPAL, E.P.",
+    subject: "Inconsistência no Balanço Patrimonial",
+    message: "Detectou-se uma diferença de Kz 109.560.280,86 entre o Activo e o Capital Próprio + Passivo. Solicita-se correcção ou justificação.",
+    status: "pendente",
+    createdAt: "2025-04-28",
+    deadline: "2025-05-12",
+  },
+  {
+    id: "cr5",
+    exercicioId: "fy7",
+    entityName: "EPL, E.P.",
+    subject: "Falta de documentos obrigatórios",
+    message: "A entidade não submeteu o Relatório de Gestão, Demonstração de Fluxos de Caixa e Parecer do Auditor Externo. Prazo para entrega: 10 dias.",
+    status: "pendente",
+    createdAt: "2025-05-01",
+    deadline: "2025-05-11",
   },
 ];
 

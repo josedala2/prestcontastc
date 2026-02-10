@@ -113,3 +113,72 @@ export const VALIDATION_LEVEL_LABELS: Record<ValidationResult["level"], { label:
   consistencia: { label: "Nível 2 — Consistência", description: "Verifica coerência contabilística (saldos, totais, equações)" },
   regras_tribunal: { label: "Nível 3 — Regras do Tribunal", description: "Regras parametrizáveis do Tribunal de Contas" },
 };
+
+// ─── Indicadores Financeiros (Modelo CC-3) ───
+export interface FinancialIndicators {
+  entityId: string;
+  fiscalYearId: string;
+  year: number;
+  // Balanço Patrimonial
+  activoNaoCorrentes: number;
+  activoCorrentes: number;
+  activoTotal: number;
+  capitalProprio: number;
+  passivoNaoCorrente: number;
+  passivoCorrente: number;
+  passivoTotal: number;
+  // Demonstração de Resultados
+  proveitosOperacionais: number;
+  custosOperacionais: number;
+  resultadoOperacional: number;
+  resultadoFinanceiro: number;
+  resultadoNaoOperacional: number;
+  resultadoAntesImpostos: number;
+  impostoRendimento: number;
+  resultadoLiquido: number;
+  // Indicadores de Liquidez
+  liquidezCorrente: number;
+  liquidezSeca: number;
+  liquidezGeral: number;
+  // Indicadores de Rentabilidade
+  roe: number;
+  roa: number;
+  margemLiquida: number;
+  giroActivo: number;
+  // Indicadores de Actividade
+  prazoMedioRecebimento: number;
+  prazoMedioRenovacaoEstoque: number;
+  prazoMedioPagamento: number;
+  cicloFinanceiro: number;
+  cicloOperacional: number;
+  // Endividamento
+  endividamentoGeral: number;
+  composicaoEndividamento: number;
+}
+
+// ─── Avaliação da Conta (Modelo CC-3) ───
+export interface ComplianceQuestion {
+  id: string;
+  question: string;
+  norma: string;
+  classification: "sem_gravidade" | "grave" | "muito_grave";
+  score: 1 | 2 | 3;
+  responsabilidade?: string;
+}
+
+export interface ComplianceEvaluation {
+  entityId: string;
+  fiscalYearId: string;
+  nivel: 1 | 2 | 3;
+  nivelLabel: string;
+  totalQuestoes: number;
+  questoesPorNivel: { nivel1: number; nivel2: number; nivel3: number };
+  percentagemPorNivel: { nivel1: number; nivel2: number; nivel3: number };
+  questionResults: { questionId: string; applicable: boolean; resolved: boolean }[];
+}
+
+export const COMPLIANCE_NIVEL_LABELS: Record<1 | 2 | 3, { label: string; description: string }> = {
+  1: { label: "Em Termos", description: "Deverá ser devolvida aos Gestores da Entidade." },
+  2: { label: "Em Termos com Recomendações", description: "A Conta poderá ser considerada em Termos, contudo, deverão ser feitas recomendações para a melhoria." },
+  3: { label: "Não em Termos", description: "A Conta não está em Termos e deve constar do programa de auditorias para o ano seguinte." },
+};
