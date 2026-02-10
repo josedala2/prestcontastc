@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, FileText, Trash2, Package, CheckSquare, Square, Download, AlertTriangle, Send, History } from "lucide-react";
+import { Upload, FileText, Trash2, Package, CheckSquare, Square, Download, AlertTriangle, Send, History, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { generateDossierZip } from "@/lib/exportUtils";
 
 const categoryLabels: Record<string, string> = {
   inventario: "Inventário",
@@ -68,13 +69,23 @@ const Anexos = () => {
     }
   };
 
-  const handleGenerateZip = () => {
+  const [generatingZip, setGeneratingZip] = useState(false);
+
+  const handleGenerateZip = async () => {
     const pending = checklist.filter((c) => c.required && !c.done).length;
     if (pending > 0) {
       toast.warning(`Atenção: ${pending} item(ns) obrigatório(s) do checklist ainda não estão concluídos.`);
       return;
     }
-    toast.success("Pacote ZIP gerado com sucesso (simulado). Integre JSZip para geração real.");
+    setGeneratingZip(true);
+    try {
+      await generateDossierZip();
+      toast.success("Pacote ZIP do dossiê gerado e descarregado com sucesso.");
+    } catch (e) {
+      toast.error("Erro ao gerar pacote ZIP.");
+    } finally {
+      setGeneratingZip(false);
+    }
   };
 
   const handleDownload = (att: Attachment) => {
@@ -87,8 +98,8 @@ const Anexos = () => {
         <Button variant="outline" className="gap-2" onClick={handleUploadClick}>
           <Upload className="h-4 w-4" /> Carregar Anexo
         </Button>
-        <Button className="gap-2" onClick={handleGenerateZip} disabled={!canSubmit}>
-          <Package className="h-4 w-4" /> Gerar Pacote ZIP
+        <Button className="gap-2" onClick={handleGenerateZip} disabled={!canSubmit || generatingZip}>
+          {generatingZip ? <Loader2 className="h-4 w-4 animate-spin" /> : <Package className="h-4 w-4" />} Gerar Pacote ZIP
         </Button>
       </PageHeader>
 

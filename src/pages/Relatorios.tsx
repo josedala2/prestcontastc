@@ -1,12 +1,14 @@
+import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { mockTrialBalance, formatKz } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FileDown, FileSpreadsheet, Printer } from "lucide-react";
+import { FileDown, FileSpreadsheet, Printer, Loader2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { toast } from "sonner";
+import { exportBalancoPdf, exportDrePdf, exportFullReportExcel } from "@/lib/exportUtils";
 
 const COLORS = ["hsl(210,70%,28%)", "hsl(170,50%,42%)", "hsl(38,92%,50%)", "hsl(0,72%,51%)", "hsl(280,60%,50%)"];
 
@@ -43,12 +45,31 @@ const Relatorios = () => {
   const endividamento = (totalPassivo / (totalPassivo + totalCapital)) * 100;
   const rentabilidade = (resultado / totalProveitos) * 100;
 
+  const [exporting, setExporting] = useState(false);
+
   const handleExportPdf = () => {
-    toast.success("Relatório exportado em PDF (simulado). Integre jsPDF para exportação real.");
+    setExporting(true);
+    try {
+      exportBalancoPdf(ativoLines, passivoLines, capitalLines);
+      exportDrePdf(custos, proveitos, resultado);
+      toast.success("PDF do Balanço e DRE exportados com sucesso.");
+    } catch (e) {
+      toast.error("Erro ao exportar PDF.");
+    } finally {
+      setExporting(false);
+    }
   };
 
   const handleExportExcel = () => {
-    toast.success("Relatório exportado em Excel (simulado). Integre xlsx para exportação real.");
+    setExporting(true);
+    try {
+      exportFullReportExcel(mockTrialBalance, ativoLines, passivoLines, capitalLines, custos, proveitos);
+      toast.success("Relatório Excel exportado com sucesso (3 folhas: Balancete, Balanço, DRE).");
+    } catch (e) {
+      toast.error("Erro ao exportar Excel.");
+    } finally {
+      setExporting(false);
+    }
   };
 
   const handlePrint = () => {
@@ -61,11 +82,11 @@ const Relatorios = () => {
         <Button variant="outline" className="gap-2" onClick={handlePrint}>
           <Printer className="h-4 w-4" /> Imprimir
         </Button>
-        <Button variant="outline" className="gap-2" onClick={handleExportPdf}>
-          <FileDown className="h-4 w-4" /> Exportar PDF
+        <Button variant="outline" className="gap-2" onClick={handleExportPdf} disabled={exporting}>
+          {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />} Exportar PDF
         </Button>
-        <Button variant="outline" className="gap-2" onClick={handleExportExcel}>
-          <FileSpreadsheet className="h-4 w-4" /> Exportar Excel
+        <Button variant="outline" className="gap-2" onClick={handleExportExcel} disabled={exporting}>
+          {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />} Exportar Excel
         </Button>
       </PageHeader>
 
