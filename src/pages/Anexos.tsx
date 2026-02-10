@@ -1,39 +1,33 @@
 import { useState, useRef } from "react";
 import { AppLayout } from "@/components/AppLayout";
-import { PageHeader } from "@/components/ui-custom/PageElements";
-import { mockAttachments } from "@/data/mockData";
+import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
+import { mockAttachments, submissionChecklist } from "@/data/mockData";
 import { Attachment } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, FileText, Trash2, Package, CheckSquare, Square, Download } from "lucide-react";
+import { Upload, FileText, Trash2, Package, CheckSquare, Square, Download, AlertTriangle, Send, History } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-
-const checklistItems = [
-  { id: "c1", label: "Relatório de Gestão", done: true },
-  { id: "c2", label: "Balanço Patrimonial", done: true },
-  { id: "c3", label: "Demonstração de Resultados", done: true },
-  { id: "c4", label: "Demonstração do Fluxo de Caixa", done: false },
-  { id: "c5", label: "Balancete Analítico e Sintético", done: true },
-  { id: "c6", label: "Parecer do Conselho Fiscal", done: true },
-  { id: "c7", label: "Relatório e Parecer do Auditor Externo", done: false },
-  { id: "c8", label: "Modelos de Prestação de Contas (1 a 10)", done: false },
-  { id: "c9", label: "Certidão de Regularidade Fiscal", done: false },
-  { id: "c10", label: "Certidão de Regularidade Segurança Social", done: false },
-];
 
 const categoryLabels: Record<string, string> = {
   inventario: "Inventário",
   reconciliacao: "Reconciliação",
   parecer: "Parecer/Auditoria",
+  balancete: "Balancete",
+  relatorio_gestao: "Relatório de Gestão",
+  demonstracoes: "Demonstrações",
   outro: "Outros",
 };
 
 const Anexos = () => {
   const [attachments, setAttachments] = useState<Attachment[]>(mockAttachments);
-  const [checklist, setChecklist] = useState(checklistItems);
+  const [checklist, setChecklist] = useState(submissionChecklist.map((item) => ({
+    ...item,
+    done: mockAttachments.some((a) => a.category === item.category),
+  })));
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [uploadCategory, setUploadCategory] = useState<Attachment["category"]>("outro");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,6 +39,10 @@ const Anexos = () => {
   };
 
   const completedCount = checklist.filter((c) => c.done).length;
+  const requiredCount = checklist.filter((c) => c.required).length;
+  const requiredDone = checklist.filter((c) => c.required && c.done).length;
+  const progress = Math.round((completedCount / checklist.length) * 100);
+  const canSubmit = requiredDone === requiredCount;
 
   const handleUploadClick = () => {
     setUploadDialogOpen(true);
@@ -53,6 +51,7 @@ const Anexos = () => {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const existingVersions = attachments.filter((a) => a.name === file.name);
       const newAttachment: Attachment = {
         id: `a_${Date.now()}`,
         name: file.name,
@@ -60,35 +59,62 @@ const Anexos = () => {
         category: uploadCategory,
         size: file.size,
         uploadedAt: new Date().toISOString().split("T")[0],
+        version: existingVersions.length + 1,
+        required: false,
       };
       setAttachments((prev) => [newAttachment, ...prev]);
       setUploadDialogOpen(false);
-      toast.success(`Anexo "${file.name}" carregado com sucesso.`);
+      toast.success(`Anexo "${file.name}" carregado (v${newAttachment.version}).`);
     }
   };
 
   const handleGenerateZip = () => {
-    const pending = checklist.filter((c) => !c.done).length;
+    const pending = checklist.filter((c) => c.required && !c.done).length;
     if (pending > 0) {
-      toast.warning(`Atenção: ${pending} item(ns) do checklist ainda não estão concluídos.`);
+      toast.warning(`Atenção: ${pending} item(ns) obrigatório(s) do checklist ainda não estão concluídos.`);
+      return;
     }
     toast.success("Pacote ZIP gerado com sucesso (simulado). Integre JSZip para geração real.");
   };
 
   const handleDownload = (att: Attachment) => {
-    toast.info(`Download de "${att.name}" iniciado (simulado).`);
+    toast.info(`Download de "${att.name}" v${att.version || 1} iniciado (simulado).`);
   };
 
   return (
     <AppLayout>
-      <PageHeader title="Anexos e Dossiê" description="Gestão de anexos e checklist do dossiê de prestação de contas">
+      <PageHeader title="Anexos e Dossiê" description="Gestão de anexos e checklist obrigatório — Resolução 1/17">
         <Button variant="outline" className="gap-2" onClick={handleUploadClick}>
           <Upload className="h-4 w-4" /> Carregar Anexo
         </Button>
-        <Button className="gap-2" onClick={handleGenerateZip}>
+        <Button className="gap-2" onClick={handleGenerateZip} disabled={!canSubmit}>
           <Package className="h-4 w-4" /> Gerar Pacote ZIP
         </Button>
       </PageHeader>
+
+      {/* Submission readiness */}
+      <div className={cn(
+        "rounded-lg border p-4 mb-6 flex items-center gap-3 animate-fade-in",
+        canSubmit ? "bg-success/5 border-success/30" : "bg-warning/5 border-warning/30"
+      )}>
+        {canSubmit ? (
+          <Send className="h-5 w-5 text-success shrink-0" />
+        ) : (
+          <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
+        )}
+        <div className="flex-1">
+          <p className="text-sm font-medium text-foreground">
+            {canSubmit ? "Dossiê completo — pronto para submissão" : `${requiredCount - requiredDone} documento(s) obrigatório(s) em falta`}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {completedCount}/{checklist.length} itens completos • {requiredDone}/{requiredCount} obrigatórios
+          </p>
+        </div>
+        <div className="w-24">
+          <Progress value={progress} className="h-2" />
+          <p className="text-[10px] text-muted-foreground text-right mt-0.5">{progress}%</p>
+        </div>
+      </div>
 
       {/* Upload Dialog */}
       <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
@@ -104,13 +130,15 @@ const Anexos = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="inventario">Inventário</SelectItem>
-                  <SelectItem value="reconciliacao">Reconciliação</SelectItem>
-                  <SelectItem value="parecer">Parecer/Auditoria</SelectItem>
-                  <SelectItem value="outro">Outros</SelectItem>
+                  {Object.entries(categoryLabels).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Cada novo upload do mesmo ficheiro cria uma nova versão (histórico mantido).
+            </p>
             <div
               className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors relative"
               onClick={() => fileInputRef.current?.click()}
@@ -143,6 +171,11 @@ const Anexos = () => {
                     <span className="text-xs text-muted-foreground">{categoryLabels[att.category]}</span>
                     <span className="text-xs text-muted-foreground">{(att.size / 1024 / 1024).toFixed(1)} MB</span>
                     <span className="text-xs text-muted-foreground">{att.uploadedAt}</span>
+                    {att.version && att.version > 1 && (
+                      <span className="flex items-center gap-0.5 text-[10px] text-primary font-medium">
+                        <History className="h-3 w-3" /> v{att.version}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <Button variant="ghost" size="icon" onClick={() => handleDownload(att)}>
@@ -169,7 +202,7 @@ const Anexos = () => {
         {/* Checklist */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold text-foreground">Checklist do Dossiê</h2>
+            <h2 className="text-base font-semibold text-foreground">Checklist do Dossiê (Resolução 1/17)</h2>
             <span className="text-xs text-muted-foreground">{completedCount}/{checklist.length} itens</span>
           </div>
           <div className="bg-card rounded-lg border border-border card-shadow p-4 animate-fade-in">
@@ -185,9 +218,17 @@ const Anexos = () => {
                   ) : (
                     <Square className="h-4 w-4 text-muted-foreground shrink-0" />
                   )}
-                  <span className={cn("text-sm", item.done ? "text-muted-foreground line-through" : "text-foreground")}>
+                  <span className={cn("text-sm flex-1", item.done ? "text-muted-foreground line-through" : "text-foreground")}>
                     {item.label}
                   </span>
+                  {item.required && !item.done && (
+                    <span className="text-[10px] text-destructive font-semibold px-1.5 py-0.5 rounded bg-destructive/10">
+                      Obrigatório
+                    </span>
+                  )}
+                  {item.required && item.done && (
+                    <span className="text-[10px] text-success font-medium">✓</span>
+                  )}
                 </button>
               ))}
             </div>
