@@ -14,7 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Source Sans 3", "system-ui", "sans-serif"],
+        sans: ["Segoe UI", "Inter", "system-ui", "sans-serif"],
+        serif: ["Playfair Display", "Palatino Linotype", "Palatino", "Georgia", "serif"],
         mono: ["JetBrains Mono", "monospace"],
       },
       colors: {
