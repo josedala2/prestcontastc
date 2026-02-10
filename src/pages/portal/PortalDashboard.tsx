@@ -5,6 +5,7 @@ import { STATUS_LABELS } from "@/types";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import {
   Calendar,
   Clock,
@@ -18,12 +19,11 @@ import {
 } from "lucide-react";
 
 const PortalDashboard = () => {
-  // Simular entidade logada: ENDE, E.P.
-  const entityId = "1";
+  const { entity, entityId } = usePortalEntity();
   const entityExercicios = mockFiscalYears.filter((fy) => fy.entityId === entityId);
   const activeExercicio = entityExercicios.find((fy) => fy.year === 2024);
   const pendingClarifications = mockClarifications.filter(
-    (cr) => cr.entityName.includes("ENDE") && cr.status === "pendente"
+    (cr) => cr.entityName.includes(entity.name.split(" - ")[1]?.split(",")[0] || entity.name.split(" ")[0]) && cr.status === "pendente"
   );
 
   const today = new Date();
@@ -33,11 +33,14 @@ const PortalDashboard = () => {
 
   const checklistDone = Math.round((activeExercicio?.checklistProgress || 0) / 100 * submissionChecklist.length);
 
+  // Short name for display
+  const shortName = entity.name.split(" - ")[1] || entity.name;
+
   return (
     <PortalLayout>
       <PageHeader
         title="Painel da Entidade"
-        description="ENDE, E.P. — Empresa Nacional de Distribuição de Electricidade"
+        description={`${entity.name}`}
       />
 
       {/* Deadline alert */}
@@ -136,6 +139,9 @@ const PortalDashboard = () => {
                 </div>
               </div>
             ))}
+            {entityExercicios.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">Sem exercícios registados.</p>
+            )}
           </div>
         </div>
 

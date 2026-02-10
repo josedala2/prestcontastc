@@ -9,10 +9,18 @@ import {
   Map,
   Menu,
   X,
-  LogOut,
   Building2,
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { usePortalEntity } from "@/contexts/PortalEntityContext";
+import { mockEntities } from "@/data/mockData";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface PortalLayoutProps {
   children: ReactNode;
@@ -40,6 +48,10 @@ export function PortalLayout({ children }: PortalLayoutProps) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pageTitle = routeTitles[location.pathname] || "Portal";
+  const { entity, setEntityId } = usePortalEntity();
+
+  // Short name for display
+  const shortName = entity.name.split(" - ")[1] || entity.name.split(" — ")[0] || entity.name;
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -54,10 +66,35 @@ export function PortalLayout({ children }: PortalLayoutProps) {
           <span className="text-[12px] text-header-foreground/80 hidden sm:inline">Portal da Entidade</span>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1 rounded bg-header-foreground/10">
-            <Building2 className="h-3.5 w-3.5 text-header-foreground/70" />
-            <span className="text-[11px] text-header-foreground/90 font-medium">ENDE, E.P.</span>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 px-3 py-1 rounded bg-header-foreground/10 hover:bg-header-foreground/20 transition-colors">
+                <Building2 className="h-3.5 w-3.5 text-header-foreground/70" />
+                <span className="text-[11px] text-header-foreground/90 font-medium max-w-[200px] truncate">
+                  {shortName}
+                </span>
+                <ChevronDown className="h-3 w-3 text-header-foreground/60" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80 max-h-[400px] overflow-auto">
+              {mockEntities.map((e) => {
+                const eName = e.name.split(" - ")[1] || e.name;
+                return (
+                  <DropdownMenuItem
+                    key={e.id}
+                    onClick={() => setEntityId(e.id)}
+                    className={cn(
+                      "flex flex-col items-start gap-0.5 py-2",
+                      e.id === entity.id && "bg-primary/10"
+                    )}
+                  >
+                    <span className="text-sm font-medium">{eName}</span>
+                    <span className="text-[10px] text-muted-foreground">NIF: {e.nif} · {e.provincia}</span>
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <button className="md:hidden text-header-foreground" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
