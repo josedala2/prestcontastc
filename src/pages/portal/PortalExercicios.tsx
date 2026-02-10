@@ -1,11 +1,14 @@
+import { useNavigate } from "react-router-dom";
 import { PortalLayout } from "@/components/PortalLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
 import { mockFiscalYears, formatKz } from "@/data/mockData";
 import { STATUS_LABELS } from "@/types";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, AlertTriangle, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, AlertTriangle, CheckCircle, Eye } from "lucide-react";
 
 const PortalExercicios = () => {
+  const navigate = useNavigate();
   const entityExercicios = mockFiscalYears.filter((fy) => fy.entityId === "1");
   const today = new Date();
 
@@ -78,6 +81,12 @@ const PortalExercicios = () => {
                     <span className="text-xs font-medium text-muted-foreground">{fy.checklistProgress}%</span>
                   </div>
                 </div>
+              </div>
+
+              <div className="flex justify-end mt-3 pt-3 border-t border-border">
+                <Button variant="ghost" size="sm" className="text-xs gap-1.5" onClick={() => navigate(`/portal/exercicios/${fy.id}`)}>
+                  <Eye className="h-3.5 w-3.5" /> Ver Detalhe
+                </Button>
               </div>
             </div>
           );
