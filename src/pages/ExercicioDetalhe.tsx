@@ -12,6 +12,7 @@ import {
   formatKz,
 } from "@/data/mockData";
 import { STATUS_LABELS, VALIDATION_LEVEL_LABELS } from "@/types";
+import { BalancoPatrimonial } from "@/components/BalancoPatrimonial";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -33,6 +34,7 @@ import {
   Download,
   Send,
   Paperclip,
+  Landmark,
 } from "lucide-react";
 
 const ExercicioDetalhe = () => {
@@ -99,6 +101,7 @@ const ExercicioDetalhe = () => {
       <Tabs defaultValue="geral" className="space-y-4">
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="geral" className="gap-1.5"><Calendar className="h-3.5 w-3.5" /> Dados Gerais</TabsTrigger>
+          <TabsTrigger value="balanco" className="gap-1.5"><Landmark className="h-3.5 w-3.5" /> Balanço Patrimonial</TabsTrigger>
           <TabsTrigger value="mapas" className="gap-1.5"><BarChart3 className="h-3.5 w-3.5" /> Mapas</TabsTrigger>
           <TabsTrigger value="documentos" className="gap-1.5"><FileText className="h-3.5 w-3.5" /> Documentos</TabsTrigger>
           <TabsTrigger value="validacoes" className="gap-1.5"><Shield className="h-3.5 w-3.5" /> Validações</TabsTrigger>
@@ -154,6 +157,11 @@ const ExercicioDetalhe = () => {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        {/* ── Balanço Patrimonial (CC-3) ── */}
+        <TabsContent value="balanco" className="space-y-4">
+          <BalancoPatrimonial entityId={fy.entityId} fiscalYearId={fy.id} year={fy.year} />
         </TabsContent>
 
         {/* ── Mapas Preenchidos ── */}
