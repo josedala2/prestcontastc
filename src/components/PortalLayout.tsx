@@ -6,6 +6,7 @@ import {
   Paperclip,
   MessageSquare,
   ShieldCheck,
+  Map,
   Menu,
   X,
   LogOut,
@@ -21,6 +22,7 @@ const portalNav = [
   { title: "Painel", icon: LayoutDashboard, path: "/portal" },
   { title: "Exercícios", icon: FileBarChart, path: "/portal/exercicios" },
   { title: "Documentos", icon: Paperclip, path: "/portal/documentos" },
+  { title: "Mapas/Modelos", icon: Map, path: "/portal/mapas" },
   { title: "Esclarecimentos", icon: MessageSquare, path: "/portal/esclarecimentos" },
   { title: "Validações", icon: ShieldCheck, path: "/portal/validacoes" },
 ];
@@ -29,6 +31,7 @@ const routeTitles: Record<string, string> = {
   "/portal": "Painel da Entidade",
   "/portal/exercicios": "Exercícios Fiscais",
   "/portal/documentos": "Documentos & Anexos",
+  "/portal/mapas": "Mapas e Modelos",
   "/portal/esclarecimentos": "Pedidos de Esclarecimento",
   "/portal/validacoes": "Estado das Validações",
 };

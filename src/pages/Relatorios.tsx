@@ -94,6 +94,7 @@ const Relatorios = () => {
         <TabsList className="mb-4">
           <TabsTrigger value="balanco">Balanço Patrimonial</TabsTrigger>
           <TabsTrigger value="dre">DRE</TabsTrigger>
+          <TabsTrigger value="fluxo">Fluxo de Caixa</TabsTrigger>
           <TabsTrigger value="graficos">Gráficos</TabsTrigger>
           <TabsTrigger value="indicadores">Indicadores</TabsTrigger>
         </TabsList>
@@ -189,6 +190,117 @@ const Relatorios = () => {
                 <TableRow className="bg-primary/10 font-bold">
                   <TableCell colSpan={2} className="text-sm text-primary">RESULTADO LÍQUIDO</TableCell>
                   <TableCell className="text-right font-mono text-sm text-primary">{formatKz(resultado)}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="fluxo">
+          <div className="bg-card rounded-lg border border-border card-shadow overflow-hidden">
+            <div className="p-4 bg-primary/5 border-b border-border">
+              <h3 className="text-sm font-semibold text-primary">Demonstração do Fluxo de Caixa — Exercício 2024</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Método Indirecto (conforme PGC)</p>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="text-xs font-semibold">Rubrica</TableHead>
+                  <TableHead className="text-xs font-semibold text-right">Valor (Kz)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow className="bg-primary/5">
+                  <TableCell colSpan={2} className="font-bold text-sm text-primary">A. ACTIVIDADES OPERACIONAIS</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-sm pl-6">Resultado líquido do exercício</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatKz(resultado)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-sm pl-6">Amortizações e depreciações</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatKz(1250000000)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-sm pl-6">Provisões do exercício</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatKz(340000000)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-sm pl-6">Variação de clientes e devedores</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatKz(-520000000)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-sm pl-6">Variação de fornecedores e credores</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatKz(410000000)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-sm pl-6">Variação de existências</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatKz(-180000000)}</TableCell>
+                </TableRow>
+                <TableRow className="bg-muted/30 font-semibold">
+                  <TableCell className="text-sm font-semibold pl-6">Fluxo das actividades operacionais (1)</TableCell>
+                  <TableCell className="text-right font-mono text-sm font-semibold">{formatKz(resultado + 1250000000 + 340000000 - 520000000 + 410000000 - 180000000)}</TableCell>
+                </TableRow>
+
+                <TableRow className="bg-primary/5">
+                  <TableCell colSpan={2} className="font-bold text-sm text-primary">B. ACTIVIDADES DE INVESTIMENTO</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-sm pl-6">Aquisição de imobilizações corpóreas</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatKz(-2100000000)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-sm pl-6">Alienação de imobilizações</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatKz(150000000)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-sm pl-6">Investimentos financeiros</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatKz(-450000000)}</TableCell>
+                </TableRow>
+                <TableRow className="bg-muted/30 font-semibold">
+                  <TableCell className="text-sm font-semibold pl-6">Fluxo das actividades de investimento (2)</TableCell>
+                  <TableCell className="text-right font-mono text-sm font-semibold">{formatKz(-2400000000)}</TableCell>
+                </TableRow>
+
+                <TableRow className="bg-primary/5">
+                  <TableCell colSpan={2} className="font-bold text-sm text-primary">C. ACTIVIDADES DE FINANCIAMENTO</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-sm pl-6">Obtenção de empréstimos</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatKz(3000000000)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-sm pl-6">Reembolso de empréstimos</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatKz(-800000000)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-sm pl-6">Juros pagos</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatKz(-350000000)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-sm pl-6">Subsídios recebidos</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatKz(600000000)}</TableCell>
+                </TableRow>
+                <TableRow className="bg-muted/30 font-semibold">
+                  <TableCell className="text-sm font-semibold pl-6">Fluxo das actividades de financiamento (3)</TableCell>
+                  <TableCell className="text-right font-mono text-sm font-semibold">{formatKz(2450000000)}</TableCell>
+                </TableRow>
+
+                <TableRow className="bg-primary/10 font-bold">
+                  <TableCell className="text-sm font-bold text-primary">VARIAÇÃO DE CAIXA E EQUIVALENTES (1+2+3)</TableCell>
+                  <TableCell className="text-right font-mono text-sm font-bold text-primary">
+                    {formatKz(resultado + 1250000000 + 340000000 - 520000000 + 410000000 - 180000000 - 2400000000 + 2450000000)}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-sm">Caixa e equivalentes no início do período</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatKz(1200000000)}</TableCell>
+                </TableRow>
+                <TableRow className="bg-primary/10 font-bold">
+                  <TableCell className="text-sm font-bold text-primary">CAIXA E EQUIVALENTES NO FIM DO PERÍODO</TableCell>
+                  <TableCell className="text-right font-mono text-sm font-bold text-primary">
+                    {formatKz(1200000000 + resultado + 1250000000 + 340000000 - 520000000 + 410000000 - 180000000 - 2400000000 + 2450000000)}
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>

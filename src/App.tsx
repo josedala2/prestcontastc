@@ -14,11 +14,13 @@ import Mapas from "./pages/Mapas";
 import Anexos from "./pages/Anexos";
 import Auditoria from "./pages/Auditoria";
 import Esclarecimentos from "./pages/Esclarecimentos";
+import Configuracoes from "./pages/Configuracoes";
 import PortalDashboard from "./pages/portal/PortalDashboard";
 import PortalExercicios from "./pages/portal/PortalExercicios";
 import PortalDocumentos from "./pages/portal/PortalDocumentos";
 import PortalEsclarecimentos from "./pages/portal/PortalEsclarecimentos";
 import PortalValidacoes from "./pages/portal/PortalValidacoes";
+import PortalMapas from "./pages/portal/PortalMapas";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,11 +43,13 @@ const App = () => (
           <Route path="/anexos" element={<Anexos />} />
           <Route path="/auditoria" element={<Auditoria />} />
           <Route path="/esclarecimentos" element={<Esclarecimentos />} />
+          <Route path="/configuracoes" element={<Configuracoes />} />
           <Route path="/portal" element={<PortalDashboard />} />
           <Route path="/portal/exercicios" element={<PortalExercicios />} />
           <Route path="/portal/documentos" element={<PortalDocumentos />} />
           <Route path="/portal/esclarecimentos" element={<PortalEsclarecimentos />} />
           <Route path="/portal/validacoes" element={<PortalValidacoes />} />
+          <Route path="/portal/mapas" element={<PortalMapas />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
