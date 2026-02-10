@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { PortalEntityProvider } from "@/contexts/PortalEntityContext";
+import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Entidades from "./pages/Entidades";
 import Exercicios from "./pages/Exercicios";
@@ -35,6 +36,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<Login />} />
           <Route path="/" element={<Dashboard />} />
           <Route path="/entidades" element={<Entidades />} />
           <Route path="/exercicios" element={<Exercicios />} />
