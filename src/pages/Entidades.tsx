@@ -2,19 +2,28 @@ import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { mockEntities } from "@/data/mockData";
-import { Entity } from "@/types";
+import { Entity, TIPOLOGIA_LABELS } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Building2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Building2, Search, MapPin } from "lucide-react";
 
 const Entidades = () => {
   const [entities, setEntities] = useState<Entity[]>(mockEntities);
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Entity | null>(null);
-  const [form, setForm] = useState({ name: "", nif: "", tutela: "", contacto: "", morada: "" });
+  const [form, setForm] = useState({
+    name: "",
+    nif: "",
+    tutela: "",
+    contacto: "",
+    morada: "",
+    tipologia: "orgao_autonomo" as Entity["tipologia"],
+    provincia: "",
+  });
 
   const filtered = entities.filter(
     (e) =>
@@ -28,31 +37,41 @@ const Entidades = () => {
         prev.map((e) => (e.id === editing.id ? { ...e, ...form } : e))
       );
     } else {
-      setEntities((prev) => [
-        ...prev,
-        { id: Date.now().toString(), ...form, createdAt: new Date().toISOString().split("T")[0] },
-      ]);
+      const newEntity: Entity = {
+        id: Date.now().toString(),
+        ...form,
+        createdAt: new Date().toISOString().split("T")[0],
+      };
+      setEntities((prev) => [...prev, newEntity]);
     }
     setDialogOpen(false);
-    setForm({ name: "", nif: "", tutela: "", contacto: "", morada: "" });
+    setForm({ name: "", nif: "", tutela: "", contacto: "", morada: "", tipologia: "orgao_autonomo", provincia: "" });
     setEditing(null);
   };
 
   const openEdit = (entity: Entity) => {
     setEditing(entity);
-    setForm({ name: entity.name, nif: entity.nif, tutela: entity.tutela, contacto: entity.contacto, morada: entity.morada });
+    setForm({
+      name: entity.name,
+      nif: entity.nif,
+      tutela: entity.tutela,
+      contacto: entity.contacto,
+      morada: entity.morada,
+      tipologia: entity.tipologia,
+      provincia: entity.provincia || "",
+    });
     setDialogOpen(true);
   };
 
   const openNew = () => {
     setEditing(null);
-    setForm({ name: "", nif: "", tutela: "", contacto: "", morada: "" });
+    setForm({ name: "", nif: "", tutela: "", contacto: "", morada: "", tipologia: "orgao_autonomo", provincia: "" });
     setDialogOpen(true);
   };
 
   return (
     <AppLayout>
-      <PageHeader title="Entidades" description="Gestão de órgãos e entidades sujeitas a prestação de contas">
+      <PageHeader title="Entidades" description="Gestão de órgãos e entidades sujeitas a prestação de contas (Resolução 1/17)">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openNew} className="gap-2">
@@ -74,8 +93,27 @@ const Entidades = () => {
                   <Input value={form.nif} onChange={(e) => setForm({ ...form, nif: e.target.value })} placeholder="NIF" />
                 </div>
                 <div>
+                  <Label>Tipologia</Label>
+                  <Select value={form.tipologia} onValueChange={(v) => setForm({ ...form, tipologia: v as Entity["tipologia"] })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(TIPOLOGIA_LABELS).map(([key, label]) => (
+                        <SelectItem key={key} value={key}>{label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
                   <Label>Tutela</Label>
                   <Input value={form.tutela} onChange={(e) => setForm({ ...form, tutela: e.target.value })} placeholder="Ministério" />
+                </div>
+                <div>
+                  <Label>Província</Label>
+                  <Input value={form.provincia} onChange={(e) => setForm({ ...form, provincia: e.target.value })} placeholder="Luanda" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -121,6 +159,14 @@ const Entidades = () => {
               <div className="flex items-center gap-4 mt-1">
                 <span className="text-xs text-muted-foreground">NIF: {entity.nif}</span>
                 <span className="text-xs text-muted-foreground">{entity.tutela}</span>
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-primary/10 text-primary">
+                  {TIPOLOGIA_LABELS[entity.tipologia]}
+                </span>
+                {entity.provincia && (
+                  <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                    <MapPin className="h-3 w-3" /> {entity.provincia}
+                  </span>
+                )}
               </div>
             </div>
             <div className="flex gap-1 shrink-0">

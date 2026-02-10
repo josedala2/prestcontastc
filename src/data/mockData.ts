@@ -1,4 +1,4 @@
-import { Entity, FiscalYear, TrialBalanceLine, ValidationResult, Account, Attachment, AuditLogEntry } from "@/types";
+import { Entity, FiscalYear, TrialBalanceLine, ValidationResult, Account, Attachment, AuditLogEntry, ClarificationRequest } from "@/types";
 
 export const mockEntities: Entity[] = [
   {
@@ -8,6 +8,8 @@ export const mockEntities: Entity[] = [
     tutela: "Ministério da Energia e Águas",
     contacto: "+244 222 310 000",
     morada: "Rua Rainha Ginga, Luanda",
+    tipologia: "empresa_publica",
+    provincia: "Luanda",
     createdAt: "2024-01-15",
   },
   {
@@ -17,7 +19,20 @@ export const mockEntities: Entity[] = [
     tutela: "Ministério das Obras Públicas",
     contacto: "+244 222 330 500",
     morada: "Av. 4 de Fevereiro, Luanda",
+    tipologia: "instituto_publico",
+    provincia: "Luanda",
     createdAt: "2024-02-10",
+  },
+  {
+    id: "3",
+    name: "Fundo Soberano de Angola - FSDEA",
+    nif: "5402019845",
+    tutela: "Ministério das Finanças",
+    contacto: "+244 222 390 100",
+    morada: "Rua Major Kanhangulo, Luanda",
+    tipologia: "fundo_autonomo",
+    provincia: "Luanda",
+    createdAt: "2024-03-01",
   },
 ];
 
@@ -29,12 +44,13 @@ export const mockFiscalYears: FiscalYear[] = [
     year: 2024,
     startDate: "2024-01-01",
     endDate: "2024-12-31",
-    status: "em_preparacao",
+    status: "rascunho",
     totalDebito: 15834567890,
     totalCredito: 15834567890,
-    errorsCount: 3,
-    warningsCount: 5,
+    errorsCount: 5,
+    warningsCount: 3,
     checklistProgress: 45,
+    deadline: "2025-04-30",
   },
   {
     id: "fy2",
@@ -43,20 +59,52 @@ export const mockFiscalYears: FiscalYear[] = [
     year: 2024,
     startDate: "2024-01-01",
     endDate: "2024-12-31",
-    status: "em_validacao",
+    status: "submetido",
     totalDebito: 8921345000,
     totalCredito: 8921345000,
     errorsCount: 0,
     warningsCount: 2,
-    checklistProgress: 78,
+    checklistProgress: 100,
+    deadline: "2025-04-30",
+    submittedAt: "2025-04-15",
+  },
+  {
+    id: "fy3",
+    entityId: "3",
+    entityName: "FSDEA",
+    year: 2024,
+    startDate: "2024-01-01",
+    endDate: "2024-12-31",
+    status: "em_analise",
+    totalDebito: 45230000000,
+    totalCredito: 45230000000,
+    errorsCount: 1,
+    warningsCount: 0,
+    checklistProgress: 100,
+    deadline: "2025-04-30",
+    submittedAt: "2025-03-28",
+  },
+  {
+    id: "fy4",
+    entityId: "1",
+    entityName: "ENDE, E.P.",
+    year: 2023,
+    startDate: "2023-01-01",
+    endDate: "2023-12-31",
+    status: "conforme",
+    totalDebito: 14200000000,
+    totalCredito: 14200000000,
+    errorsCount: 0,
+    warningsCount: 0,
+    checklistProgress: 100,
+    deadline: "2024-04-30",
+    submittedAt: "2024-04-10",
   },
 ];
 
 // ─── Plano de Contas PGC (Decreto nº 82/2001, actualizado pelo DP nº 180/19) ───
 export const mockAccounts: Account[] = [
-  // ══════════════════════════════════════════════
   // CLASSE 1 — MEIOS FIXOS E INVESTIMENTOS
-  // ══════════════════════════════════════════════
   { code: "1", description: "Meios Fixos e Investimentos", nature: "Devedora", level: 1 },
   { code: "11", description: "Imobilizações Corpóreas", nature: "Devedora", level: 2, parentCode: "1" },
   { code: "11.1", description: "Terrenos e recursos naturais", nature: "Devedora", level: 3, parentCode: "11" },
@@ -93,10 +141,7 @@ export const mockAccounts: Account[] = [
   { code: "19.2", description: "Empresas associadas", nature: "Credora", level: 3, parentCode: "19" },
   { code: "19.3", description: "Outras empresas", nature: "Credora", level: 3, parentCode: "19" },
   { code: "19.9", description: "Outros investimentos financeiros", nature: "Credora", level: 3, parentCode: "19" },
-
-  // ══════════════════════════════════════════════
   // CLASSE 2 — EXISTÊNCIAS
-  // ══════════════════════════════════════════════
   { code: "2", description: "Existências", nature: "Devedora", level: 1 },
   { code: "21", description: "Compras", nature: "Devedora", level: 2, parentCode: "2" },
   { code: "22", description: "Matérias-primas, subsidiárias e de consumo", nature: "Devedora", level: 2, parentCode: "2" },
@@ -107,10 +152,7 @@ export const mockAccounts: Account[] = [
   { code: "27", description: "Matérias-primas, mercadorias e materiais em trânsito", nature: "Devedora", level: 2, parentCode: "2" },
   { code: "28", description: "Adiantamentos por conta de compras", nature: "Devedora", level: 2, parentCode: "2" },
   { code: "29", description: "Provisões para depreciação de existências", nature: "Credora", level: 2, parentCode: "2" },
-
-  // ══════════════════════════════════════════════
   // CLASSE 3 — TERCEIROS
-  // ══════════════════════════════════════════════
   { code: "3", description: "Terceiros", nature: "Devedora", level: 1 },
   { code: "31", description: "Clientes", nature: "Devedora", level: 2, parentCode: "3" },
   { code: "31.1", description: "Clientes - correntes", nature: "Devedora", level: 3, parentCode: "31" },
@@ -165,10 +207,7 @@ export const mockAccounts: Account[] = [
   { code: "39.3", description: "Provisões para acidentes de trabalho", nature: "Credora", level: 3, parentCode: "39" },
   { code: "39.4", description: "Provisões para garantias dadas a clientes", nature: "Credora", level: 3, parentCode: "39" },
   { code: "39.9", description: "Provisões para outros riscos e encargos", nature: "Credora", level: 3, parentCode: "39" },
-
-  // ══════════════════════════════════════════════
   // CLASSE 4 — MEIOS MONETÁRIOS
-  // ══════════════════════════════════════════════
   { code: "4", description: "Meios Monetários", nature: "Devedora", level: 1 },
   { code: "41", description: "Títulos negociáveis", nature: "Devedora", level: 2, parentCode: "4" },
   { code: "42", description: "Depósitos a prazo", nature: "Devedora", level: 2, parentCode: "4" },
@@ -181,10 +220,7 @@ export const mockAccounts: Account[] = [
   { code: "45.2", description: "Valores para depositar", nature: "Devedora", level: 3, parentCode: "45" },
   { code: "48", description: "Conta transitória", nature: "Devedora", level: 2, parentCode: "4" },
   { code: "49", description: "Provisões para aplicações de tesouraria", nature: "Credora", level: 2, parentCode: "4" },
-
-  // ══════════════════════════════════════════════
   // CLASSE 5 — CAPITAL E RESERVAS
-  // ══════════════════════════════════════════════
   { code: "5", description: "Capital e Reservas", nature: "Credora", level: 1 },
   { code: "51", description: "Capital", nature: "Credora", level: 2, parentCode: "5" },
   { code: "52", description: "Acções/Quotas próprias", nature: "Credora", level: 2, parentCode: "5" },
@@ -194,10 +230,7 @@ export const mockAccounts: Account[] = [
   { code: "56", description: "Reservas de reavaliação", nature: "Credora", level: 2, parentCode: "5" },
   { code: "57", description: "Reservas com fins especiais", nature: "Credora", level: 2, parentCode: "5" },
   { code: "58", description: "Reservas livres", nature: "Credora", level: 2, parentCode: "5" },
-
-  // ══════════════════════════════════════════════
   // CLASSE 6 — PROVEITOS E GANHOS POR NATUREZA
-  // ══════════════════════════════════════════════
   { code: "6", description: "Proveitos e Ganhos por Natureza", nature: "Credora", level: 1 },
   { code: "61", description: "Vendas", nature: "Credora", level: 2, parentCode: "6" },
   { code: "61.1", description: "Produtos acabados e intermédios", nature: "Credora", level: 3, parentCode: "61" },
@@ -244,10 +277,7 @@ export const mockAccounts: Account[] = [
   { code: "69.3", description: "Ganhos resultantes de expropriações", nature: "Credora", level: 3, parentCode: "69" },
   { code: "69.5", description: "Subsídios", nature: "Credora", level: 3, parentCode: "69" },
   { code: "69.6", description: "Anulação de passivos não exigíveis", nature: "Credora", level: 3, parentCode: "69" },
-
-  // ══════════════════════════════════════════════
   // CLASSE 7 — CUSTOS E PERDAS POR NATUREZA
-  // ══════════════════════════════════════════════
   { code: "7", description: "Custos e Perdas por Natureza", nature: "Devedora", level: 1 },
   { code: "71", description: "Custo das existências vendidas", nature: "Devedora", level: 2, parentCode: "7" },
   { code: "71.1", description: "Matérias-primas", nature: "Devedora", level: 3, parentCode: "71" },
@@ -299,10 +329,7 @@ export const mockAccounts: Account[] = [
   { code: "79.2", description: "Perdas resultantes de convulsões políticas", nature: "Devedora", level: 3, parentCode: "79" },
   { code: "79.3", description: "Perdas resultantes de expropriações", nature: "Devedora", level: 3, parentCode: "79" },
   { code: "79.4", description: "Perdas resultantes de sinistros", nature: "Devedora", level: 3, parentCode: "79" },
-
-  // ══════════════════════════════════════════════
   // CLASSE 8 — RESULTADOS
-  // ══════════════════════════════════════════════
   { code: "8", description: "Resultados", nature: "Credora", level: 1 },
   { code: "81", description: "Resultados transitados", nature: "Credora", level: 2, parentCode: "8" },
   { code: "82", description: "Resultados operacionais", nature: "Credora", level: 2, parentCode: "8" },
@@ -316,7 +343,6 @@ export const mockAccounts: Account[] = [
 
 // ─── Balancete com dados reais do documento CC-2 ───
 export const mockTrialBalance: TrialBalanceLine[] = [
-  // Classe 1 — Meios Fixos
   { id: "tb01", accountCode: "11", description: "Imobilizações Corpóreas", debit: 9292889535.85, credit: 53258116.48, balance: 9239631419.37 },
   { id: "tb02", accountCode: "11.1", description: "Terrenos e recursos naturais", debit: 0, credit: 0, balance: 0 },
   { id: "tb03", accountCode: "11.2", description: "Edifícios e outras construções", debit: 4397482892.23, credit: 0, balance: 4397482892.23 },
@@ -326,7 +352,6 @@ export const mockTrialBalance: TrialBalanceLine[] = [
   { id: "tb07", accountCode: "11.9", description: "Outras imobilizações corpóreas", debit: 492983217.51, credit: 53258116.48, balance: 439725101.03 },
   { id: "tb08", accountCode: "12", description: "Imobilizações Incorpóreas", debit: 281877106.81, credit: 0, balance: 281877106.81 },
   { id: "tb09", accountCode: "18", description: "Amortizações Acumuladas", debit: 53258116.48, credit: 6129816185.56, balance: -6076558069.08 },
-  // Classe 3 — Terceiros
   { id: "tb10", accountCode: "31", description: "Clientes", debit: 3471819970.33, credit: 2857084817.45, balance: 614735152.88 },
   { id: "tb11", accountCode: "31.1", description: "Clientes - correntes", debit: 3220403798.46, credit: 2848505429.44, balance: 371898369.02 },
   { id: "tb12", accountCode: "31.8", description: "Clientes de cobrança duvidosa", debit: 251416171.87, credit: 8579388.01, balance: 242836783.86 },
@@ -339,50 +364,87 @@ export const mockTrialBalance: TrialBalanceLine[] = [
   { id: "tb19", accountCode: "36", description: "Pessoal", debit: 2216593950.52, credit: 2160551952.65, balance: 56041997.87 },
   { id: "tb20", accountCode: "37", description: "Outros valores a receber e a pagar", debit: 281930723.11, credit: 864919251.48, balance: -582988528.37 },
   { id: "tb21", accountCode: "38", description: "Provisões para cobrança duvidosa", debit: 0, credit: 242836783.87, balance: -242836783.87 },
-  // Classe 4 — Meios Monetários
   { id: "tb22", accountCode: "42", description: "Depósitos a prazo", debit: 2400000.00, credit: 0, balance: 2400000.00 },
   { id: "tb23", accountCode: "43", description: "Depósitos à ordem", debit: 6104784710.01, credit: 6055680235.92, balance: 49104474.09 },
   { id: "tb24", accountCode: "45", description: "Caixa", debit: 267360591.53, credit: 266207572.97, balance: 1153018.56 },
-  // Classe 5 — Capital e Reservas
   { id: "tb25", accountCode: "51", description: "Capital", debit: 0, credit: 262500000.00, balance: -262500000.00 },
-  // Classe 6 — Proveitos e Ganhos
   { id: "tb26", accountCode: "62", description: "Prestações de Serviço", debit: 289137792.14, credit: 2058350119.86, balance: -1769212327.72 },
   { id: "tb27", accountCode: "63", description: "Outros proveitos operacionais", debit: 0, credit: 3062918878.20, balance: -3062918878.20 },
   { id: "tb28", accountCode: "66", description: "Proveitos e ganhos financeiros gerais", debit: 500000.00, credit: 10589891.13, balance: -10089891.13 },
   { id: "tb29", accountCode: "68", description: "Outros proveitos e ganhos não operacionais", debit: 0, credit: 25000000.00, balance: -25000000.00 },
-  // Classe 7 — Custos e Perdas
   { id: "tb30", accountCode: "71", description: "Custo das existências vendidas", debit: 180034097.24, credit: 349316.27, balance: 179684780.97 },
   { id: "tb31", accountCode: "72", description: "Custos com o pessoal", debit: 3319046110.28, credit: 1194800.00, balance: 3317851310.28 },
   { id: "tb32", accountCode: "73", description: "Amortizações do exercício", debit: 508397950.43, credit: 0, balance: 508397950.43 },
   { id: "tb33", accountCode: "75", description: "Outros custos e perdas operacionais", debit: 1630174424.96, credit: 129991752.93, balance: 1500182672.03 },
   { id: "tb34", accountCode: "76", description: "Custos e perdas financeiras gerais", debit: 15878780.16, credit: 0, balance: 15878780.16 },
   { id: "tb35", accountCode: "78", description: "Outros custos e perdas não operacionais", debit: 1081349802.98, credit: 61924006.85, balance: 1019425796.13 },
-  // Classe 8 — Resultados
   { id: "tb36", accountCode: "81", description: "Resultados transitados", debit: 18333181838.19, credit: 22926448041.23, balance: -4593266203.04 },
   { id: "tb37", accountCode: "88", description: "Resultado líquido do exercício", debit: -7024518958.19, credit: -5350318765.24, balance: -1674200192.95 },
 ];
 
+// ─── Validações com 3 níveis (Resolução 1/17) ───
 export const mockValidations: ValidationResult[] = [
-  { id: "v1", code: "TB-001", type: "error", message: "Soma dos Débitos ≠ Soma dos Créditos", detail: "Diferença de 0 Kz — OK após reimportação", resolved: true },
-  { id: "v2", code: "FS-001", type: "error", message: "Ativo ≠ Passivo + Capital Próprio", detail: "Desequilíbrio de 234.500 Kz no Balanço", resolved: false },
-  { id: "v3", code: "ACC-001", type: "warning", message: "Conta 32 (Fornecedores) com saldo devedor", detail: "Natureza da conta é Credora mas saldo é devedor", resolved: false },
-  { id: "v4", code: "MAP-REQ", type: "error", message: "Modelo nº 3 — Mapa de Despesas com o Pessoal não preenchido", detail: "Campo obrigatório para prestação de contas", resolved: false },
-  { id: "v5", code: "ACC-001", type: "warning", message: "Conta 34 (Estado) com saldo credor", detail: "Verificar natureza da conta", resolved: false },
-  { id: "v6", code: "MAP-REQ", type: "error", message: "Modelo nº 5 — Mapa de Investimentos incompleto", detail: "Faltam colunas de financiamento", resolved: false },
+  // Nível 1 — Completude
+  { id: "v1", code: "COMP-001", level: "completude", type: "error", message: "Relatório de Gestão não carregado", detail: "Documento obrigatório para submissão — Art. 3º da Resolução 1/17", resolved: false },
+  { id: "v2", code: "COMP-002", level: "completude", type: "error", message: "Demonstração do Fluxo de Caixa em falta", detail: "Documento obrigatório para submissão", resolved: false },
+  { id: "v3", code: "COMP-003", level: "completude", type: "error", message: "Modelo nº 3 — Mapa de Despesas com o Pessoal não preenchido", detail: "Campo obrigatório para prestação de contas", resolved: false },
+  { id: "v4", code: "COMP-004", level: "completude", type: "warning", message: "Certidão de Regularidade Fiscal não carregada", detail: "Documento recomendado", resolved: false },
+  { id: "v5", code: "COMP-005", level: "completude", type: "error", message: "Parecer do Auditor Externo em falta", detail: "Obrigatório para entidades com orçamento > 1.000.000.000 Kz", resolved: false },
+  // Nível 2 — Consistência Contabilística
+  { id: "v6", code: "TB-001", level: "consistencia", type: "error", message: "Soma dos Débitos ≠ Soma dos Créditos", detail: "Diferença de 0 Kz — OK após reimportação", resolved: true },
+  { id: "v7", code: "FS-001", level: "consistencia", type: "error", message: "Ativo ≠ Passivo + Capital Próprio", detail: "Desequilíbrio de 234.500 Kz no Balanço", resolved: false },
+  { id: "v8", code: "ACC-001", level: "consistencia", type: "warning", message: "Conta 32 (Fornecedores) com saldo devedor", detail: "Natureza da conta é Credora mas saldo é devedor — verificar", resolved: false },
+  { id: "v9", code: "SAL-001", level: "consistencia", type: "error", message: "Saldo final ≠ Saldo inicial + Entradas - Saídas", detail: "Inconsistência no mapa de fluxo de caixa", resolved: false },
+  { id: "v10", code: "ACC-002", level: "consistencia", type: "warning", message: "Conta 34 (Estado) com saldo credor parcial", detail: "Verificar natureza da conta e subcontas", resolved: false },
+  // Nível 3 — Regras do Tribunal
+  { id: "v11", code: "TCA-001", level: "regras_tribunal", type: "warning", message: "Variação de custos com pessoal > 20% face ao ano anterior", detail: "Aumento de 28.5% — requer justificação no relatório de gestão", resolved: false },
+  { id: "v12", code: "TCA-002", level: "regras_tribunal", type: "error", message: "Modelo nº 5 — Mapa de Investimentos incompleto", detail: "Faltam colunas de financiamento — obrigatório para fundos e institutos", resolved: false },
+  { id: "v13", code: "TCA-003", level: "regras_tribunal", type: "warning", message: "Prazo de entrega ultrapassado (> 30 de Abril)", detail: "A entidade entregou com 12 dias de atraso", resolved: false },
 ];
 
 export const mockAttachments: Attachment[] = [
-  { id: "a1", name: "Inventário Patrimonial 2024.pdf", type: "application/pdf", category: "inventario", size: 2450000, uploadedAt: "2025-03-15" },
-  { id: "a2", name: "Reconciliação Bancária - BFA.xlsx", type: "application/xlsx", category: "reconciliacao", size: 1200000, uploadedAt: "2025-03-18" },
-  { id: "a3", name: "Parecer Conselho Fiscal.pdf", type: "application/pdf", category: "parecer", size: 890000, uploadedAt: "2025-04-02" },
+  { id: "a1", name: "Inventário Patrimonial 2024.pdf", type: "application/pdf", category: "inventario", size: 2450000, uploadedAt: "2025-03-15", version: 1, required: true },
+  { id: "a2", name: "Reconciliação Bancária - BFA.xlsx", type: "application/xlsx", category: "reconciliacao", size: 1200000, uploadedAt: "2025-03-18", version: 1, required: true },
+  { id: "a3", name: "Parecer Conselho Fiscal.pdf", type: "application/pdf", category: "parecer", size: 890000, uploadedAt: "2025-04-02", version: 1, required: true },
+  { id: "a4", name: "Balanço Patrimonial 2024.pdf", type: "application/pdf", category: "demonstracoes", size: 1560000, uploadedAt: "2025-04-05", version: 2, required: true },
+  { id: "a5", name: "Demonstração de Resultados 2024.pdf", type: "application/pdf", category: "demonstracoes", size: 980000, uploadedAt: "2025-04-05", version: 1, required: true },
 ];
 
 export const mockAuditLog: AuditLogEntry[] = [
-  { id: "al1", action: "Importação de Balancete", user: "João Silva", timestamp: "2025-03-15 10:30", detail: "37 linhas importadas — Modelo CC-2" },
-  { id: "al2", action: "Validação executada", user: "João Silva", timestamp: "2025-03-15 10:35", detail: "3 erros, 2 avisos encontrados" },
-  { id: "al3", action: "Upload de Anexo", user: "Maria Santos", timestamp: "2025-03-18 14:20", detail: "Reconciliação Bancária - BFA.xlsx" },
-  { id: "al4", action: "Edição de Entidade", user: "Admin", timestamp: "2025-03-20 09:00", detail: "Atualização de contacto" },
-  { id: "al5", action: "Mudança de Estado", user: "Dr. António", timestamp: "2025-04-01 16:00", detail: "Em Preparação → Em Validação" },
+  { id: "al1", action: "Importação de Balancete", user: "João Silva", timestamp: "2025-03-15 10:30", detail: "37 linhas importadas — Modelo CC-2", actionType: "importacao" },
+  { id: "al2", action: "Validação executada", user: "João Silva", timestamp: "2025-03-15 10:35", detail: "5 erros, 3 avisos encontrados (3 níveis)", actionType: "validacao" },
+  { id: "al3", action: "Upload de Anexo", user: "Maria Santos", timestamp: "2025-03-18 14:20", detail: "Reconciliação Bancária - BFA.xlsx (v1)", actionType: "upload" },
+  { id: "al4", action: "Edição de Entidade", user: "Admin", timestamp: "2025-03-20 09:00", detail: "ENDE, E.P. — Atualização de contacto e tipologia", actionType: "edicao" },
+  { id: "al5", action: "Submissão de Exercício", user: "Dr. António (Dirigente)", timestamp: "2025-04-15 16:00", detail: "INEA 2024 — Submetido ao Tribunal de Contas", actionType: "submissao" },
+  { id: "al6", action: "Aprovação de Exercício", user: "Técnico Validador TCA", timestamp: "2025-04-20 09:30", detail: "ENDE 2023 — Marcado como Conforme", actionType: "aprovacao" },
+  { id: "al7", action: "Pedido de Esclarecimento", user: "Técnico Validador TCA", timestamp: "2025-04-22 11:00", detail: "FSDEA 2024 — Solicitada justificação de variação em custos", actionType: "validacao" },
+  { id: "al8", action: "Exportação de Dossiê", user: "Maria Santos", timestamp: "2025-04-25 15:45", detail: "Pacote ZIP — INEA 2024 (12 ficheiros)", actionType: "exportacao" },
+];
+
+export const mockClarifications: ClarificationRequest[] = [
+  {
+    id: "cr1",
+    exercicioId: "fy3",
+    entityName: "FSDEA",
+    subject: "Justificação de variação em custos com pessoal",
+    message: "Solicita-se justificação para o aumento de 28.5% nos custos com pessoal face ao exercício anterior, conforme regra TCA-001.",
+    status: "pendente",
+    createdAt: "2025-04-22",
+    deadline: "2025-05-06",
+  },
+  {
+    id: "cr2",
+    exercicioId: "fy2",
+    entityName: "INEA",
+    subject: "Clarificação sobre investimentos em curso",
+    message: "Favor especificar a fonte de financiamento das obras em curso registadas na conta 14.1.",
+    status: "respondido",
+    createdAt: "2025-04-18",
+    deadline: "2025-05-02",
+    responses: [
+      { user: "Contabilista INEA", message: "As obras são financiadas pelo OGE 2024, rubrica 04.03.02.", date: "2025-04-25" },
+    ],
+  },
 ];
 
 export const formatKz = (value: number): string => {
@@ -392,3 +454,20 @@ export const formatKz = (value: number): string => {
     maximumFractionDigits: 2,
   }).format(value);
 };
+
+// Checklist obrigatório conforme Resolução 1/17
+export const submissionChecklist = [
+  { id: "c1", label: "Relatório de Gestão / Actividades", required: true, category: "relatorio_gestao" },
+  { id: "c2", label: "Balanço Patrimonial", required: true, category: "demonstracoes" },
+  { id: "c3", label: "Demonstração de Resultados", required: true, category: "demonstracoes" },
+  { id: "c4", label: "Demonstração do Fluxo de Caixa", required: true, category: "demonstracoes" },
+  { id: "c5", label: "Balancete Analítico e Sintético", required: true, category: "balancete" },
+  { id: "c6", label: "Parecer do Conselho Fiscal / Órgão de Fiscalização", required: true, category: "parecer" },
+  { id: "c7", label: "Relatório e Parecer do Auditor Externo", required: true, category: "parecer" },
+  { id: "c8", label: "Modelos de Prestação de Contas (nº 1 a 10)", required: true, category: "outro" },
+  { id: "c9", label: "Certidão de Regularidade Fiscal", required: false, category: "outro" },
+  { id: "c10", label: "Certidão de Regularidade Segurança Social", required: false, category: "outro" },
+  { id: "c11", label: "Inventário de Bens Patrimoniais", required: true, category: "inventario" },
+  { id: "c12", label: "Conta de Gerência", required: true, category: "demonstracoes" },
+  { id: "c13", label: "Mapa de Receitas e Despesas", required: true, category: "demonstracoes" },
+];
