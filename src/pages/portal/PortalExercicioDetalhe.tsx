@@ -12,6 +12,7 @@ import {
   formatKz,
 } from "@/data/mockData";
 import { STATUS_LABELS, VALIDATION_LEVEL_LABELS } from "@/types";
+import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -39,8 +40,9 @@ import { toast } from "sonner";
 const PortalExercicioDetalhe = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { entityId } = usePortalEntity();
 
-  const entityExercicios = mockFiscalYears.filter((fy) => fy.entityId === "1");
+  const entityExercicios = mockFiscalYears.filter((fy) => fy.entityId === entityId);
   const fy = entityExercicios.find((f) => f.id === id);
   const entity = fy ? mockEntities.find((e) => e.id === fy.entityId) : null;
 
@@ -59,7 +61,7 @@ const PortalExercicioDetalhe = () => {
 
   const daysLeft = Math.ceil((new Date(fy.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   const isOverdue = daysLeft < 0 && !["conforme", "nao_conforme", "submetido", "em_analise", "com_pedidos"].includes(fy.status);
-  const clarifications = mockClarifications.filter((c) => c.exercicioId === fy.id);
+  const clarifications = mockClarifications.filter((c) => c.entityName === fy.entityName || c.entityName.includes(fy.entityName.split(",")[0]));
   const validationsByLevel = {
     completude: mockValidations.filter((v) => v.level === "completude"),
     consistencia: mockValidations.filter((v) => v.level === "consistencia"),
@@ -156,7 +158,6 @@ const PortalExercicioDetalhe = () => {
             </Card>
           )}
 
-          {/* Acção de submissão para a entidade */}
           {fy.status === "rascunho" && (
             <Card className="border-primary/30 bg-primary/5">
               <CardContent className="py-5">
@@ -304,7 +305,7 @@ const PortalExercicioDetalhe = () => {
           </Card>
         </TabsContent>
 
-        {/* ── Validações (read-only para entidade) ── */}
+        {/* ── Validações ── */}
         <TabsContent value="validacoes" className="space-y-4">
           <div className="p-3 rounded-lg bg-muted/40 border border-border mb-2">
             <p className="text-xs text-muted-foreground">
@@ -347,7 +348,7 @@ const PortalExercicioDetalhe = () => {
           ))}
         </TabsContent>
 
-        {/* ── Esclarecimentos (com resposta) ── */}
+        {/* ── Esclarecimentos ── */}
         <TabsContent value="esclarecimentos" className="space-y-4">
           {clarifications.length === 0 ? (
             <Card>

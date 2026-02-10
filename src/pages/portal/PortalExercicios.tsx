@@ -5,11 +5,13 @@ import { mockFiscalYears, formatKz } from "@/data/mockData";
 import { STATUS_LABELS } from "@/types";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { Calendar, AlertTriangle, CheckCircle, Eye } from "lucide-react";
 
 const PortalExercicios = () => {
   const navigate = useNavigate();
-  const entityExercicios = mockFiscalYears.filter((fy) => fy.entityId === "1");
+  const { entityId } = usePortalEntity();
+  const entityExercicios = mockFiscalYears.filter((fy) => fy.entityId === entityId);
   const today = new Date();
 
   return (
@@ -91,6 +93,9 @@ const PortalExercicios = () => {
             </div>
           );
         })}
+        {entityExercicios.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">Sem exercícios registados para esta entidade.</div>
+        )}
       </div>
     </PortalLayout>
   );

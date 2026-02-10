@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { PortalEntityProvider } from "@/contexts/PortalEntityContext";
 import Dashboard from "./pages/Dashboard";
 import Entidades from "./pages/Entidades";
 import Exercicios from "./pages/Exercicios";
@@ -47,13 +48,19 @@ const App = () => (
           <Route path="/auditoria" element={<Auditoria />} />
           <Route path="/esclarecimentos" element={<Esclarecimentos />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
-          <Route path="/portal" element={<PortalDashboard />} />
-          <Route path="/portal/exercicios" element={<PortalExercicios />} />
-          <Route path="/portal/exercicios/:id" element={<PortalExercicioDetalhe />} />
-          <Route path="/portal/documentos" element={<PortalDocumentos />} />
-          <Route path="/portal/esclarecimentos" element={<PortalEsclarecimentos />} />
-          <Route path="/portal/validacoes" element={<PortalValidacoes />} />
-          <Route path="/portal/mapas" element={<PortalMapas />} />
+          <Route path="/portal/*" element={
+            <PortalEntityProvider>
+              <Routes>
+                <Route path="/" element={<PortalDashboard />} />
+                <Route path="/exercicios" element={<PortalExercicios />} />
+                <Route path="/exercicios/:id" element={<PortalExercicioDetalhe />} />
+                <Route path="/documentos" element={<PortalDocumentos />} />
+                <Route path="/esclarecimentos" element={<PortalEsclarecimentos />} />
+                <Route path="/validacoes" element={<PortalValidacoes />} />
+                <Route path="/mapas" element={<PortalMapas />} />
+              </Routes>
+            </PortalEntityProvider>
+          } />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
