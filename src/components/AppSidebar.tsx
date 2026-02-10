@@ -14,6 +14,7 @@ import {
   FileText,
   History,
   MessageSquare,
+  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -48,6 +49,12 @@ const navSections = [
       { title: "Anexos & Dossiê", icon: Paperclip, path: "/anexos" },
       { title: "Esclarecimentos", icon: MessageSquare, path: "/esclarecimentos" },
       { title: "Auditoria", icon: History, path: "/auditoria" },
+    ],
+  },
+  {
+    label: "Acesso Externo",
+    items: [
+      { title: "Portal da Entidade", icon: ExternalLink, path: "/portal" },
     ],
   },
 ];

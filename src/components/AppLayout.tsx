@@ -18,6 +18,7 @@ const routeTitles: Record<string, string> = {
   "/mapas": "Mapas e Modelos",
   "/anexos": "Anexos e Dossiê",
   "/auditoria": "Trilha de Auditoria",
+  "/esclarecimentos": "Pedidos de Esclarecimento",
 };
 
 export function AppLayout({ children }: AppLayoutProps) {
