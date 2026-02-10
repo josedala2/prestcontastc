@@ -5,10 +5,11 @@ import { mockTrialBalance, formatKz } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FileDown, FileSpreadsheet, Printer, Loader2 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { FileDown, FileSpreadsheet, Printer, Loader2, TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line } from "recharts";
 import { toast } from "sonner";
 import { exportBalancoPdf, exportDrePdf, exportFullReportExcel } from "@/lib/exportUtils";
+import { ComparacaoAnual } from "@/components/relatorios/ComparacaoAnual";
 
 const COLORS = ["hsl(210,70%,28%)", "hsl(170,50%,42%)", "hsl(38,92%,50%)", "hsl(0,72%,51%)", "hsl(280,60%,50%)"];
 
@@ -96,6 +97,7 @@ const Relatorios = () => {
           <TabsTrigger value="dre">DRE</TabsTrigger>
           <TabsTrigger value="fluxo">Fluxo de Caixa</TabsTrigger>
           <TabsTrigger value="graficos">Gráficos</TabsTrigger>
+          <TabsTrigger value="comparacao">Comparação Anual</TabsTrigger>
           <TabsTrigger value="indicadores">Indicadores</TabsTrigger>
         </TabsList>
 
@@ -337,6 +339,11 @@ const Relatorios = () => {
               </ResponsiveContainer>
             </div>
           </div>
+        </TabsContent>
+
+        {/* ── Comparação Ano-a-Ano ── */}
+        <TabsContent value="comparacao">
+          <ComparacaoAnual />
         </TabsContent>
 
         <TabsContent value="indicadores">
