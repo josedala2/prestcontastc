@@ -3,9 +3,10 @@ import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { mockTrialBalance, formatKz } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
-import { Upload, FileSpreadsheet, Eye, EyeOff, Save, RotateCcw, Download } from "lucide-react";
+import { Upload, FileSpreadsheet, Eye, EyeOff, Save, RotateCcw, Download, Loader2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
+import { exportBalanceteExcel, exportBalancetePdf } from "@/lib/exportUtils";
 
 const Importacao = () => {
   const [uploaded, setUploaded] = useState(false);
@@ -37,8 +38,30 @@ const Importacao = () => {
     toast.info("Importação reiniciada.");
   };
 
-  const handleExport = () => {
-    toast.success("Balancete exportado em Excel (simulado).");
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportExcel = () => {
+    setExporting(true);
+    try {
+      exportBalanceteExcel(mockTrialBalance);
+      toast.success("Balancete exportado em Excel com sucesso.");
+    } catch (e) {
+      toast.error("Erro ao exportar.");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleExportPdf = () => {
+    setExporting(true);
+    try {
+      exportBalancetePdf(mockTrialBalance);
+      toast.success("Balancete exportado em PDF com sucesso.");
+    } catch (e) {
+      toast.error("Erro ao exportar.");
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -47,8 +70,11 @@ const Importacao = () => {
         <div className="flex gap-2">
           {uploaded && (
             <>
-              <Button variant="outline" className="gap-2" onClick={handleExport}>
-                <Download className="h-4 w-4" /> Exportar
+              <Button variant="outline" className="gap-2" onClick={handleExportExcel} disabled={exporting}>
+                {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />} Excel
+              </Button>
+              <Button variant="outline" className="gap-2" onClick={handleExportPdf} disabled={exporting}>
+                {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} PDF
               </Button>
               <Button variant="outline" className="gap-2" onClick={handleReset}>
                 <RotateCcw className="h-4 w-4" /> Reiniciar
