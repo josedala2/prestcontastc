@@ -10,9 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Calendar, Pencil, Trash2, Eye, Clock, AlertTriangle, Send } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const Exercicios = () => {
+  const navigate = useNavigate();
   const [fiscalYears, setFiscalYears] = useState<FiscalYear[]>(mockFiscalYears);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<FiscalYear | null>(null);
@@ -311,7 +313,7 @@ const Exercicios = () => {
               </div>
 
               <div className="flex items-center gap-1 border-t border-border pt-3">
-                <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={() => setDetailId(fy.id)}>
+                <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={() => navigate(`/exercicios/${fy.id}`)}>
                   <Eye className="h-3.5 w-3.5" /> Ver
                 </Button>
                 <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={() => openEdit(fy)}>
