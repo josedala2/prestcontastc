@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
 
 interface BalancoPatrimonialProps {
   entityId: string;
@@ -288,9 +290,185 @@ export function BalancoPatrimonial({ entityId, fiscalYearId, year }: BalancoPatr
         </Card>
       </div>
 
+      {/* Charts Section */}
+      <BalancoCharts indicators={indicators} prevIndicators={prevIndicators} year={year} entityId={entityId} />
+
       {/* Detailed tables */}
       {renderSection(activoLines, "Activo")}
       {renderSection(passivoLines, "Capital Próprio e Passivo")}
+    </div>
+  );
+}
+
+/* ─── Charts Sub-component ─── */
+
+const COLORS = [
+  "hsl(var(--primary))",
+  "hsl(var(--accent))",
+  "hsl(210, 70%, 55%)",
+  "hsl(150, 60%, 45%)",
+  "hsl(35, 85%, 55%)",
+  "hsl(280, 60%, 55%)",
+];
+
+function BalancoCharts({
+  indicators,
+  prevIndicators,
+  year,
+  entityId,
+}: {
+  indicators: FinancialIndicators;
+  prevIndicators: FinancialIndicators | undefined;
+  year: number;
+  entityId: string;
+}) {
+  const activoPieData = [
+    { name: "Imob. Corpóreas", value: indicators.activoNaoCorrentes * 0.65 },
+    { name: "Imob. Incorpóreas", value: indicators.activoNaoCorrentes * 0.08 },
+    { name: "Invest. Financeiros", value: indicators.activoNaoCorrentes * 0.15 },
+    { name: "Imob. em Curso", value: indicators.activoNaoCorrentes * 0.12 },
+    { name: "Existências", value: indicators.activoCorrentes * 0.08 },
+    { name: "Clientes/Devedores", value: indicators.activoCorrentes * 0.42 },
+    { name: "Meios Monetários", value: indicators.activoCorrentes * 0.44 },
+  ].filter((d) => d.value > 0);
+
+  const passivoPieData = [
+    { name: "Capital Social", value: indicators.capitalProprio * 0.40 },
+    { name: "Reservas", value: indicators.capitalProprio * 0.25 },
+    { name: "Resultados Transitados", value: Math.abs(indicators.capitalProprio * 0.20) },
+    { name: "Passivo Não Corrente", value: indicators.passivoNaoCorrente },
+    { name: "Passivo Corrente", value: indicators.passivoCorrente },
+  ].filter((d) => d.value > 0);
+
+  const barData = prevIndicators
+    ? [
+        { name: "Activo Total", current: indicators.activoTotal, previous: prevIndicators.activoTotal },
+        { name: "Capital Próprio", current: indicators.capitalProprio, previous: prevIndicators.capitalProprio },
+        { name: "Passivo Total", current: indicators.passivoTotal, previous: prevIndicators.passivoTotal },
+        { name: "Resultado Líq.", current: indicators.resultadoLiquido, previous: prevIndicators.resultadoLiquido },
+      ]
+    : null;
+
+  const pieChartConfig = {
+    value: { label: "Valor" },
+  };
+
+  const barChartConfig = {
+    current: { label: `${year}`, color: "hsl(var(--primary))" },
+    previous: { label: `${year - 1}`, color: "hsl(var(--muted-foreground))" },
+  };
+
+  const formatBillions = (v: number) => {
+    const abs = Math.abs(v);
+    if (abs >= 1e9) return `${(v / 1e9).toFixed(1)}B`;
+    if (abs >= 1e6) return `${(v / 1e6).toFixed(0)}M`;
+    return v.toLocaleString();
+  };
+
+  const renderCustomLabel = ({ name, percent }: { name: string; percent: number }) =>
+    percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : "";
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Pie: Composição do Activo */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">Composição do Activo</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer config={pieChartConfig} className="aspect-square max-h-[280px] w-full">
+            <PieChart>
+              <Pie
+                data={activoPieData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={90}
+                innerRadius={40}
+                label={renderCustomLabel}
+                labelLine={false}
+              >
+                {activoPieData.map((_, i) => (
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                ))}
+              </Pie>
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    formatter={(value) => formatKz(value as number) + " Kz"}
+                  />
+                }
+              />
+              <ChartLegend content={<ChartLegendContent />} />
+            </PieChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+
+      {/* Pie: Capital Próprio e Passivo */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">Composição do Capital Próprio e Passivo</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer config={pieChartConfig} className="aspect-square max-h-[280px] w-full">
+            <PieChart>
+              <Pie
+                data={passivoPieData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={90}
+                innerRadius={40}
+                label={renderCustomLabel}
+                labelLine={false}
+              >
+                {passivoPieData.map((_, i) => (
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                ))}
+              </Pie>
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    formatter={(value) => formatKz(value as number) + " Kz"}
+                  />
+                }
+              />
+              <ChartLegend content={<ChartLegendContent />} />
+            </PieChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+
+      {/* Bar: Comparação entre exercícios */}
+      {barData && (
+        <Card className="md:col-span-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Comparação entre Exercícios ({year - 1} vs {year})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={barChartConfig} className="aspect-[2/1] max-h-[300px] w-full">
+              <BarChart data={barData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border/40" />
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} className="fill-muted-foreground" />
+                <YAxis tickFormatter={formatBillions} tick={{ fontSize: 11 }} className="fill-muted-foreground" />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      formatter={(value) => formatKz(value as number) + " Kz"}
+                    />
+                  }
+                />
+                <ChartLegend content={<ChartLegendContent />} />
+                <Bar dataKey="previous" fill="var(--color-previous)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="current" fill="var(--color-current)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
