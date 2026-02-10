@@ -18,6 +18,7 @@ import Esclarecimentos from "./pages/Esclarecimentos";
 import Configuracoes from "./pages/Configuracoes";
 import PortalDashboard from "./pages/portal/PortalDashboard";
 import PortalExercicios from "./pages/portal/PortalExercicios";
+import PortalExercicioDetalhe from "./pages/portal/PortalExercicioDetalhe";
 import PortalDocumentos from "./pages/portal/PortalDocumentos";
 import PortalEsclarecimentos from "./pages/portal/PortalEsclarecimentos";
 import PortalValidacoes from "./pages/portal/PortalValidacoes";
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/configuracoes" element={<Configuracoes />} />
           <Route path="/portal" element={<PortalDashboard />} />
           <Route path="/portal/exercicios" element={<PortalExercicios />} />
+          <Route path="/portal/exercicios/:id" element={<PortalExercicioDetalhe />} />
           <Route path="/portal/documentos" element={<PortalDocumentos />} />
           <Route path="/portal/esclarecimentos" element={<PortalEsclarecimentos />} />
           <Route path="/portal/validacoes" element={<PortalValidacoes />} />
