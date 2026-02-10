@@ -13,6 +13,7 @@ import {
 } from "@/data/mockData";
 import { STATUS_LABELS, VALIDATION_LEVEL_LABELS } from "@/types";
 import { BalancoPatrimonial } from "@/components/BalancoPatrimonial";
+import { AvaliacaoConta } from "@/components/AvaliacaoConta";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -35,6 +36,7 @@ import {
   Send,
   Paperclip,
   Landmark,
+  ClipboardCheck,
 } from "lucide-react";
 
 const ExercicioDetalhe = () => {
@@ -106,6 +108,7 @@ const ExercicioDetalhe = () => {
           <TabsTrigger value="documentos" className="gap-1.5"><FileText className="h-3.5 w-3.5" /> Documentos</TabsTrigger>
           <TabsTrigger value="validacoes" className="gap-1.5"><Shield className="h-3.5 w-3.5" /> Validações</TabsTrigger>
           <TabsTrigger value="esclarecimentos" className="gap-1.5"><MessageSquare className="h-3.5 w-3.5" /> Esclarecimentos</TabsTrigger>
+          <TabsTrigger value="avaliacao" className="gap-1.5"><ClipboardCheck className="h-3.5 w-3.5" /> Avaliação CC-3</TabsTrigger>
           <TabsTrigger value="auditoria" className="gap-1.5"><History className="h-3.5 w-3.5" /> Auditoria</TabsTrigger>
         </TabsList>
 
@@ -360,6 +363,11 @@ const ExercicioDetalhe = () => {
               );
             })
           )}
+        </TabsContent>
+
+        {/* ── Avaliação da Conta CC-3 ── */}
+        <TabsContent value="avaliacao" className="space-y-4">
+          <AvaliacaoConta entityId={fy.entityId} fiscalYearId={fy.id} year={fy.year} />
         </TabsContent>
 
         {/* ── Histórico de Auditoria ── */}
