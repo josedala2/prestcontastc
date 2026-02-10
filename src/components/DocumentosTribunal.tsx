@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { mockDocumentosTribunal } from "@/data/mockData";
+import { mockDocumentosTribunal, mockEntities } from "@/data/mockData";
+import { exportDocumentoTribunalPdf } from "@/lib/exportUtils";
 import {
   DocumentoTribunal,
   DocumentoTribunalTipo,
@@ -37,6 +38,7 @@ import {
   CheckCircle,
   XCircle,
   FileText,
+  Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -318,7 +320,13 @@ export function DocumentosTribunal({ exercicioId, entidadeId, readOnly = false }
                         <Unlock className="h-3.5 w-3.5 text-muted-foreground/40" />
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right space-x-1">
+                      <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={() => {
+                        const entity = mockEntities.find((e) => e.id === entidadeId);
+                        exportDocumentoTribunalPdf(doc, entity?.name || "Entidade");
+                      }}>
+                        <Download className="h-3 w-3" /> PDF
+                      </Button>
                       <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={() => setSelectedDoc(doc)}>
                         <Eye className="h-3 w-3" /> Ver
                       </Button>
@@ -359,9 +367,22 @@ export function DocumentosTribunal({ exercicioId, entidadeId, readOnly = false }
                       </Badge>
                     )}
                   </div>
-                  <div className="text-right text-[10px] text-muted-foreground">
-                    <p>Criado: {selectedDoc.createdAt}</p>
-                    {selectedDoc.emitidoAt && <p>Emitido: {selectedDoc.emitidoAt}</p>}
+                  <div className="flex items-center gap-2">
+                    <div className="text-right text-[10px] text-muted-foreground">
+                      <p>Criado: {selectedDoc.createdAt}</p>
+                      {selectedDoc.emitidoAt && <p>Emitido: {selectedDoc.emitidoAt}</p>}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 text-xs"
+                      onClick={() => {
+                        const entity = mockEntities.find((e) => e.id === entidadeId);
+                        exportDocumentoTribunalPdf(selectedDoc, entity?.name || "Entidade");
+                      }}
+                    >
+                      <Download className="h-3.5 w-3.5" /> Exportar PDF
+                    </Button>
                   </div>
                 </div>
 
