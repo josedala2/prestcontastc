@@ -13,6 +13,7 @@ import {
   ChevronRight,
   FileText,
   History,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +46,7 @@ const navSections = [
     label: "Dossiê",
     items: [
       { title: "Anexos & Dossiê", icon: Paperclip, path: "/anexos" },
+      { title: "Esclarecimentos", icon: MessageSquare, path: "/esclarecimentos" },
       { title: "Auditoria", icon: History, path: "/auditoria" },
     ],
   },

@@ -13,6 +13,7 @@ import Relatorios from "./pages/Relatorios";
 import Mapas from "./pages/Mapas";
 import Anexos from "./pages/Anexos";
 import Auditoria from "./pages/Auditoria";
+import Esclarecimentos from "./pages/Esclarecimentos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/mapas" element={<Mapas />} />
           <Route path="/anexos" element={<Anexos />} />
           <Route path="/auditoria" element={<Auditoria />} />
+          <Route path="/esclarecimentos" element={<Esclarecimentos />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
