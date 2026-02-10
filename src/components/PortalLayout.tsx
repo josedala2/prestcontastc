@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   FileBarChart,
@@ -9,6 +9,7 @@ import {
   Map,
   Menu,
   X,
+  LogOut,
   Building2,
   ChevronDown,
 } from "lucide-react";
@@ -46,6 +47,7 @@ const routeTitles: Record<string, string> = {
 
 export function PortalLayout({ children }: PortalLayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pageTitle = routeTitles[location.pathname] || "Portal";
   const { entity, setEntityId } = usePortalEntity();
@@ -95,6 +97,14 @@ export function PortalLayout({ children }: PortalLayoutProps) {
               })}
             </DropdownMenuContent>
           </DropdownMenu>
+          <button
+              onClick={() => navigate("/login")}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] text-header-foreground/70 hover:text-header-foreground hover:bg-header-foreground/10 transition-colors"
+              title="Terminar Sessão"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Sair</span>
+            </button>
           <button className="md:hidden text-header-foreground" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>

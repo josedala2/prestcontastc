@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { AppSidebar } from "./AppSidebar";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
 
 
 interface AppLayoutProps {
@@ -8,7 +9,7 @@ interface AppLayoutProps {
 }
 
 const routeTitles: Record<string, string> = {
-  "/": "Dashboard",
+  "/dashboard": "Dashboard",
   "/entidades": "Entidades",
   "/exercicios": "Exercícios Fiscais",
   "/importacao": "Importação de Balancete",
@@ -24,6 +25,7 @@ const routeTitles: Record<string, string> = {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const pageTitle = routeTitles[location.pathname] || "PGC";
 
   return (
@@ -47,6 +49,14 @@ export function AppLayout({ children }: AppLayoutProps) {
               Resolução nº 1/17
             </span>
             <div className="w-1.5 h-1.5 rounded-full bg-header-accent" />
+            <button
+              onClick={() => navigate("/login")}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] text-header-foreground/70 hover:text-header-foreground hover:bg-header-foreground/10 transition-colors"
+              title="Terminar Sessão"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Sair</span>
+            </button>
           </div>
         </header>
 
