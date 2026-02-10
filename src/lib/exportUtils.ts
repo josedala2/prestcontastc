@@ -3,7 +3,7 @@ import "jspdf-autotable";
 import * as XLSX from "xlsx";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import { TrialBalanceLine, ValidationResult } from "@/types";
+import { TrialBalanceLine, ValidationResult, DocumentoTribunal, DOCUMENTO_TIPO_LABELS, DOCUMENTO_ESTADO_LABELS } from "@/types";
 import { formatKz, mockTrialBalance, mockValidations, mockAttachments, mockFiscalYears, mockAuditLog } from "@/data/mockData";
 
 // ─── PDF Header helper ───
@@ -405,4 +405,199 @@ export async function generateDossierZip(entityName = "ENDE, E.P.", year = 2024)
   // Generate and download
   const content = await zip.generateAsync({ type: "blob" });
   saveAs(content, `Dossie_${entityName.replace(/[^a-zA-Z0-9]/g, "_")}_${year}.zip`);
+}
+
+// ─── Export Documento do Tribunal PDF ───
+export function exportDocumentoTribunalPdf(doc: DocumentoTribunal, entityName = "Entidade") {
+  const pdf = new jsPDF();
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+
+  // ── Header institucional ──
+  // Top bar azul profundo
+  pdf.setFillColor(40, 38, 72);
+  pdf.rect(0, 0, pageWidth, 22, "F");
+
+  // Brasão placeholder (circle with scales icon)
+  pdf.setFillColor(202, 148, 62);
+  pdf.circle(20, 11, 7, "F");
+  pdf.setFillColor(40, 38, 72);
+  pdf.circle(20, 11, 5.5, "F");
+  pdf.setTextColor(202, 148, 62);
+  pdf.setFontSize(8);
+  pdf.setFont("helvetica", "bold");
+  pdf.text("TCA", 20, 12.5, { align: "center" });
+
+  // Title
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(13);
+  pdf.setFont("helvetica", "bold");
+  pdf.text("TRIBUNAL DE CONTAS DE ANGOLA", 32, 9);
+  pdf.setFontSize(7.5);
+  pdf.setFont("helvetica", "normal");
+  pdf.text("REPÚBLICA DE ANGOLA", 32, 14);
+  pdf.setFontSize(6.5);
+  pdf.text("Sistema de Prestação de Contas — Resolução n.º 1/17", 32, 18.5);
+
+  // Gold accent line
+  pdf.setFillColor(202, 148, 62);
+  pdf.rect(0, 22, pageWidth, 2, "F");
+
+  // ── Document type title ──
+  const tipoLabel = DOCUMENTO_TIPO_LABELS[doc.tipo].label.toUpperCase();
+  pdf.setTextColor(40, 38, 72);
+  pdf.setFontSize(16);
+  pdf.setFont("helvetica", "bold");
+  pdf.text(tipoLabel, pageWidth / 2, 36, { align: "center" });
+
+  // Underline decoration
+  const textWidth = pdf.getTextWidth(tipoLabel);
+  pdf.setDrawColor(202, 148, 62);
+  pdf.setLineWidth(0.8);
+  pdf.line((pageWidth - textWidth) / 2, 38, (pageWidth + textWidth) / 2, 38);
+
+  // ── Document number ──
+  pdf.setFontSize(10);
+  pdf.setFont("helvetica", "normal");
+  pdf.setTextColor(100, 100, 100);
+  pdf.text(`N.º ${doc.numeroDocumento}`, pageWidth / 2, 44, { align: "center" });
+
+  // ── Metadata table ──
+  let y = 52;
+  const metaRows: [string, string][] = [
+    ["Entidade Fiscalizada", entityName],
+    ["Data de Emissão", doc.emitidoAt || doc.createdAt],
+    ["Estado", DOCUMENTO_ESTADO_LABELS[doc.estado].label],
+    ["Versão", `${doc.versao}`],
+    ["Criado por", doc.criadoPor],
+  ];
+
+  if (doc.aprovadoPor) metaRows.push(["Aprovado por", doc.aprovadoPor]);
+  if (doc.juizRelator) metaRows.push(["Juiz Relator", doc.juizRelator]);
+  if (doc.prazoResposta) metaRows.push(["Prazo de Resposta", doc.prazoResposta]);
+  if (doc.resultadoAcordao) {
+    const resultLabels = { em_termos: "Em Termos", com_recomendacoes: "Em Termos com Recomendações", nao_em_termos: "Não em Termos" };
+    metaRows.push(["Resultado / Deliberação", resultLabels[doc.resultadoAcordao]]);
+  }
+
+  (pdf as any).autoTable({
+    startY: y,
+    body: metaRows.map(([label, value]) => [label, value]),
+    theme: "plain",
+    columnStyles: {
+      0: { fontStyle: "bold", cellWidth: 55, textColor: [40, 38, 72], fontSize: 8.5 },
+      1: { fontSize: 8.5, textColor: [50, 50, 50] },
+    },
+    styles: { cellPadding: { top: 2, bottom: 2, left: 4, right: 4 } },
+    tableWidth: pageWidth - 28,
+    margin: { left: 14 },
+  });
+
+  y = (pdf as any).lastAutoTable.finalY + 6;
+
+  // ── Divider ──
+  pdf.setDrawColor(202, 148, 62);
+  pdf.setLineWidth(0.4);
+  pdf.line(14, y, pageWidth - 14, y);
+  y += 8;
+
+  // ── Subject ──
+  pdf.setFontSize(11);
+  pdf.setFont("helvetica", "bold");
+  pdf.setTextColor(40, 38, 72);
+  pdf.text("Assunto:", 14, y);
+  pdf.setFont("helvetica", "normal");
+  pdf.setTextColor(30, 30, 30);
+  const subjectLines = pdf.splitTextToSize(doc.assunto, pageWidth - 48);
+  pdf.text(subjectLines, 40, y);
+  y += subjectLines.length * 5 + 6;
+
+  // ── Content ──
+  pdf.setFontSize(9);
+  pdf.setFont("helvetica", "normal");
+  pdf.setTextColor(30, 30, 30);
+
+  const contentLines = pdf.splitTextToSize(doc.conteudo, pageWidth - 28);
+  const lineHeight = 4.5;
+  const maxY = pageHeight - 40;
+
+  for (let i = 0; i < contentLines.length; i++) {
+    if (y + lineHeight > maxY) {
+      pdf.addPage();
+      y = 20;
+    }
+    pdf.text(contentLines[i], 14, y);
+    y += lineHeight;
+  }
+
+  // ── Signature area (for emitted docs) ──
+  if (doc.estado === "emitido") {
+    if (y + 50 > maxY) {
+      pdf.addPage();
+      y = 30;
+    }
+    y += 15;
+    pdf.setDrawColor(180, 180, 180);
+    pdf.setLineWidth(0.3);
+
+    // Left signature
+    pdf.line(30, y + 20, 85, y + 20);
+    pdf.setFontSize(7.5);
+    pdf.setTextColor(80, 80, 80);
+    pdf.text(doc.criadoPor, 57.5, y + 25, { align: "center" });
+    pdf.text("Elaborado por", 57.5, y + 29, { align: "center" });
+
+    // Right signature
+    pdf.line(pageWidth - 85, y + 20, pageWidth - 30, y + 20);
+    const approver = doc.aprovadoPor || doc.juizRelator || "Coordenador TCA";
+    pdf.text(approver, pageWidth - 57.5, y + 25, { align: "center" });
+    pdf.text("Aprovado por", pageWidth - 57.5, y + 29, { align: "center" });
+  }
+
+  // ── Footer with hash on every page ──
+  const pageCount = pdf.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    pdf.setPage(i);
+
+    // Bottom gold line
+    pdf.setFillColor(202, 148, 62);
+    pdf.rect(0, pageHeight - 18, pageWidth, 0.8, "F");
+
+    // Footer text
+    pdf.setFontSize(6.5);
+    pdf.setTextColor(130, 130, 130);
+    pdf.text(
+      `© Tribunal de Contas de Angola — ${DOCUMENTO_TIPO_LABELS[doc.tipo].label}`,
+      14,
+      pageHeight - 12
+    );
+    pdf.text(
+      `Pág. ${i}/${pageCount}`,
+      pageWidth - 14,
+      pageHeight - 12,
+      { align: "right" }
+    );
+    pdf.text(
+      `Gerado em: ${new Date().toLocaleDateString("pt-AO")} ${new Date().toLocaleTimeString("pt-AO")}`,
+      pageWidth / 2,
+      pageHeight - 12,
+      { align: "center" }
+    );
+
+    // Hash integrity bar
+    if (doc.hashSha256) {
+      pdf.setFillColor(245, 245, 248);
+      pdf.rect(0, pageHeight - 8, pageWidth, 8, "F");
+      pdf.setFontSize(5.5);
+      pdf.setTextColor(150, 150, 150);
+      pdf.text(`Verificação de Integridade SHA-256: ${doc.hashSha256}`, 14, pageHeight - 3.5);
+      if (doc.imutavel) {
+        pdf.setTextColor(220, 53, 69);
+        pdf.text("🔒 DOCUMENTO IMUTÁVEL", pageWidth - 14, pageHeight - 3.5, { align: "right" });
+      }
+    }
+  }
+
+  const sanitized = doc.numeroDocumento.replace(/[^a-zA-Z0-9]/g, "_");
+  pdf.save(`${sanitized}_${DOCUMENTO_TIPO_LABELS[doc.tipo].label.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
 }
