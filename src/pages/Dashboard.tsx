@@ -33,7 +33,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard
           title="Entidades Registadas"
-          value={mockFiscalYears.length}
+          value={new Set(mockFiscalYears.map(fy => fy.entityId)).size}
           subtitle={`${conformeCount} conforme(s)`}
           icon={<Building2 className="h-5 w-5" />}
           variant="primary"
@@ -46,7 +46,7 @@ const Dashboard = () => {
           variant="warning"
         />
         <StatCard
-          title="Em Atraso (> 30/04)"
+          title="Em Atraso (> 30/06)"
           value={overdueCount}
           subtitle="prazo ultrapassado"
           icon={<AlertTriangle className="h-5 w-5" />}

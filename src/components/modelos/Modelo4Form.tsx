@@ -23,22 +23,23 @@ const designacoes = [
   "Outros Valores",
 ];
 
-type RowData = { saldoInicial: string; months: Record<string, string> };
+type RowData = { saldoInicial: string; months: Record<string, string>; entregasExercicio: string };
 
 export function Modelo4Form() {
   const [entidade, setEntidade] = useState("");
   const [gestaoInicio, setGestaoInicio] = useState("");
   const [gestaoFim, setGestaoFim] = useState("");
   const [data, setData] = useState<Record<string, RowData>>(
-    Object.fromEntries(designacoes.map((d) => [d, { saldoInicial: "", months: Object.fromEntries(meses.map((m) => [m, ""])) }]))
+    Object.fromEntries(designacoes.map((d) => [d, { saldoInicial: "", months: Object.fromEntries(meses.map((m) => [m, ""])), entregasExercicio: "" }]))
   );
   const [elaboradoPor, setElaboradoPor] = useState("");
   const [responsavel, setResponsavel] = useState("");
 
-  const update = (desig: string, field: "saldoInicial" | string, value: string) => {
+  const update = (desig: string, field: "saldoInicial" | "entregasExercicio" | string, value: string) => {
     setData((prev) => {
       const row = { ...prev[desig] };
       if (field === "saldoInicial") row.saldoInicial = value;
+      else if (field === "entregasExercicio") row.entregasExercicio = value;
       else row.months = { ...row.months, [field]: value };
       return { ...prev, [desig]: row };
     });
@@ -47,7 +48,8 @@ export function Modelo4Form() {
   return (
     <div className="space-y-6">
       <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-        <h3 className="text-sm font-semibold text-primary">MAPA DOS DESCONTOS, RETENÇÕES NA FONTE E OUTROS</h3>
+        <h3 className="text-sm font-semibold text-primary">MAPA DAS ENTREGAS DOS DESCONTOS, RETENÇÕES NA FONTE E OUTROS</h3>
+        <p className="text-xs text-muted-foreground mt-1">Conforme Modelo n.º 4 da Resolução n.º 1/17 do Tribunal de Contas.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -66,12 +68,17 @@ export function Modelo4Form() {
                 <TableHead key={m} className="text-xs min-w-[85px] text-center">{m}</TableHead>
               ))}
               <TableHead className="text-xs min-w-[100px] text-center font-bold">Total</TableHead>
+              <TableHead className="text-xs min-w-[120px] text-center font-bold bg-accent/10">Entregas no Exercício</TableHead>
+              <TableHead className="text-xs min-w-[110px] text-center font-bold bg-primary/10">Saldo Final</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {designacoes.map((d) => {
               const row = data[d];
-              const total = Object.values(row.months).reduce((s, v) => s + (parseFloat(v) || 0), 0);
+              const totalMensal = Object.values(row.months).reduce((s, v) => s + (parseFloat(v) || 0), 0);
+              const saldoInicial = parseFloat(row.saldoInicial) || 0;
+              const entregas = parseFloat(row.entregasExercicio) || 0;
+              const saldoFinal = saldoInicial + totalMensal - entregas;
               return (
                 <TableRow key={d}>
                   <TableCell className="text-xs font-medium sticky left-0 bg-card z-10">{d}</TableCell>
@@ -83,10 +90,42 @@ export function Modelo4Form() {
                       <Input className="h-7 text-xs text-right font-mono" value={row.months[m]} onChange={(e) => update(d, m, e.target.value)} />
                     </TableCell>
                   ))}
-                  <TableCell className="text-xs text-right font-mono font-bold">{total.toLocaleString("pt-AO", { minimumFractionDigits: 2 })}</TableCell>
+                  <TableCell className="text-xs text-right font-mono font-bold">{totalMensal.toLocaleString("pt-AO", { minimumFractionDigits: 2 })}</TableCell>
+                  <TableCell className="p-1 bg-accent/5">
+                    <Input className="h-7 text-xs text-right font-mono" value={row.entregasExercicio} onChange={(e) => update(d, "entregasExercicio", e.target.value)} />
+                  </TableCell>
+                  <TableCell className="text-xs text-right font-mono font-bold bg-primary/5">
+                    {saldoFinal.toLocaleString("pt-AO", { minimumFractionDigits: 2 })}
+                  </TableCell>
                 </TableRow>
               );
             })}
+            {/* Linha de totais */}
+            <TableRow className="bg-primary/5 font-bold">
+              <TableCell className="text-xs font-bold sticky left-0 bg-primary/5 z-10">Total</TableCell>
+              <TableCell className="text-xs text-right font-mono font-bold">
+                {designacoes.reduce((s, d) => s + (parseFloat(data[d].saldoInicial) || 0), 0).toLocaleString("pt-AO", { minimumFractionDigits: 2 })}
+              </TableCell>
+              {meses.map((m) => (
+                <TableCell key={m} className="text-xs text-right font-mono font-bold">
+                  {designacoes.reduce((s, d) => s + (parseFloat(data[d].months[m]) || 0), 0).toLocaleString("pt-AO", { minimumFractionDigits: 2 })}
+                </TableCell>
+              ))}
+              <TableCell className="text-xs text-right font-mono font-bold">
+                {designacoes.reduce((s, d) => s + Object.values(data[d].months).reduce((ms, v) => ms + (parseFloat(v) || 0), 0), 0).toLocaleString("pt-AO", { minimumFractionDigits: 2 })}
+              </TableCell>
+              <TableCell className="text-xs text-right font-mono font-bold bg-accent/10">
+                {designacoes.reduce((s, d) => s + (parseFloat(data[d].entregasExercicio) || 0), 0).toLocaleString("pt-AO", { minimumFractionDigits: 2 })}
+              </TableCell>
+              <TableCell className="text-xs text-right font-mono font-bold bg-primary/10">
+                {designacoes.reduce((s, d) => {
+                  const si = parseFloat(data[d].saldoInicial) || 0;
+                  const tm = Object.values(data[d].months).reduce((ms, v) => ms + (parseFloat(v) || 0), 0);
+                  const ee = parseFloat(data[d].entregasExercicio) || 0;
+                  return s + (si + tm - ee);
+                }, 0).toLocaleString("pt-AO", { minimumFractionDigits: 2 })}
+              </TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       </div>
