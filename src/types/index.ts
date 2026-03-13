@@ -31,7 +31,7 @@ export interface FiscalYear {
   errorsCount: number;
   warningsCount: number;
   checklistProgress: number;
-  deadline: string; // 30 de Abril do ano seguinte
+  deadline: string; // 30 de Junho do ano seguinte
   submittedAt?: string;
 }
 
