@@ -544,7 +544,7 @@ export const mockValidations: ValidationResult[] = [
   // Nível 3 — Regras do Tribunal
   { id: "v11", code: "TCA-001", level: "regras_tribunal", type: "warning", message: "Variação de custos com pessoal > 20% face ao ano anterior", detail: "Aumento de 28.5% — requer justificação no relatório de gestão", resolved: false },
   { id: "v12", code: "TCA-002", level: "regras_tribunal", type: "error", message: "Modelo nº 5 — Mapa de Investimentos incompleto", detail: "Faltam colunas de financiamento — obrigatório para fundos e institutos", resolved: false },
-  { id: "v13", code: "TCA-003", level: "regras_tribunal", type: "warning", message: "Prazo de entrega ultrapassado (> 30 de Abril)", detail: "A entidade entregou com 12 dias de atraso", resolved: false },
+  { id: "v13", code: "TCA-003", level: "regras_tribunal", type: "warning", message: "Prazo de entrega ultrapassado (> 30 de Junho)", detail: "A entidade entregou com 12 dias de atraso", resolved: false },
 ];
 
 export const mockAttachments: Attachment[] = [

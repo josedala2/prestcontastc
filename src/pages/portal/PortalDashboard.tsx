@@ -64,7 +64,7 @@ const PortalDashboard = () => {
                 : `${daysToDeadline} dia(s) restantes para submissão`}
             </p>
             <p className="text-xs text-muted-foreground">
-              Prazo legal: 30 de Abril de {activeExercicio.year + 1} (Resolução nº 1/17)
+              Prazo legal: 30 de Junho de {activeExercicio.year + 1} (Resolução nº 1/17)
             </p>
           </div>
           {activeExercicio.status === "rascunho" && (

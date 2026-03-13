@@ -86,7 +86,7 @@ const Exercicios = () => {
         errorsCount: 0,
         warningsCount: 0,
         checklistProgress: 0,
-        deadline: `${form.year + 1}-04-30`,
+        deadline: `${form.year + 1}-06-30`,
       };
       setFiscalYears((prev) => [newFy, ...prev]);
       toast.success("Exercício criado com sucesso.");
@@ -126,7 +126,7 @@ const Exercicios = () => {
 
   return (
     <AppLayout>
-      <PageHeader title="Exercícios Fiscais" description="Gestão de períodos contabilísticos — Prazo: 30 de Abril do ano seguinte">
+      <PageHeader title="Exercícios Fiscais" description="Gestão de períodos contabilísticos — Prazo: 30 de Junho do ano seguinte">
         <Button className="gap-2" onClick={openNew}>
           <Plus className="h-4 w-4" /> Novo Exercício
         </Button>
@@ -168,7 +168,7 @@ const Exercicios = () => {
             </div>
             <div className="p-3 bg-muted/40 rounded-lg">
               <p className="text-xs text-muted-foreground">Prazo de entrega (automático)</p>
-              <p className="text-sm font-medium">{form.year + 1}-04-30</p>
+              <p className="text-sm font-medium">{form.year + 1}-06-30</p>
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
