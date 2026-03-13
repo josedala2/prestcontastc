@@ -307,7 +307,7 @@ const Relatorios = () => {
                 <TableRow className="bg-muted/20">
                   <TableCell colSpan={3} className="text-xs font-semibold text-muted-foreground pl-6">Resultados (Classe 8)</TableCell>
                 </TableRow>
-                {renderLines(resultadosLines, true)}
+                {renderLines(resultadosLines, 'negate')}
 
                 {/* TOTAL PASSIVO + CP */}
                 <TableRow className="bg-primary/10 font-bold border-t-2 border-primary/30">
