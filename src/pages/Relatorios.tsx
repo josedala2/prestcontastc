@@ -296,7 +296,7 @@ const Relatorios = () => {
                   <TableCell colSpan={2} className="font-bold text-sm">PASSIVO (Classe 3 — saldos credores)</TableCell>
                   <TableCell className="text-right font-bold font-mono text-sm">{formatKz(totalPassivo)}</TableCell>
                 </TableRow>
-                {renderLines(passivoLines, true)}
+                {renderLines(passivoLines, 'negate')}
 
                 {/* CAPITAL PRÓPRIO */}
                 <TableRow className="bg-accent/10">
