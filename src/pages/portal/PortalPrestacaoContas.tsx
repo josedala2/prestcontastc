@@ -630,7 +630,8 @@ const PortalPrestacaoContas = () => {
               </h3>
               <p className="text-xs text-muted-foreground mt-1">
                 Carregue o ficheiro Excel do Modelo CC-2 para preenchimento automático, ou preencha manualmente abaixo.
-                Pode <button onClick={generateCC2Template} className="text-primary underline hover:text-primary/80 font-medium">descarregar o template</button> para preencher offline.
+                Pode <button type="button" onClick={generateCC2Template} className="text-primary underline hover:text-primary/80 font-medium">descarregar o template</button> para preencher offline.
+              </p>
               {uploadedFile && (
                 <div className="flex items-center gap-2 mt-2">
                   <Badge variant="secondary" className="text-xs gap-1">
