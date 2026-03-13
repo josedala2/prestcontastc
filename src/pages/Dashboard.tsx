@@ -46,7 +46,7 @@ const Dashboard = () => {
           variant="warning"
         />
         <StatCard
-          title="Em Atraso (> 30/04)"
+          title="Em Atraso (> 30/06)"
           value={overdueCount}
           subtitle="prazo ultrapassado"
           icon={<AlertTriangle className="h-5 w-5" />}
