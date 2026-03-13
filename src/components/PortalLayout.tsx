@@ -41,6 +41,7 @@ const routeTitles: Record<string, string> = {
   "/portal": "Painel da Entidade",
   "/portal/exercicios": "Exercícios Fiscais",
   "/portal/documentos": "Documentos & Anexos",
+  "/portal/prestacao-contas": "Prestação de Contas",
   "/portal/mapas": "Mapas e Modelos",
   "/portal/esclarecimentos": "Pedidos de Esclarecimento",
   "/portal/validacoes": "Estado das Validações",
