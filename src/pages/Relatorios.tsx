@@ -43,20 +43,16 @@ const Relatorios = () => {
   );
   const totalExistencias = existenciasLines.reduce((s, l) => s + l.balance, 0);
 
-  // Classe 3 — Contas a Receber (saldos devedores): 31, 34 (líquido debit), 36 (líquido debit)
-  // Nota: algumas contas da Classe 3 são devedoras (activo), outras credoras (passivo)
-  const contasReceberCodes = ["31"];
-  const contasReceberLines = mockTrialBalance.filter(
-    (l) => contasReceberCodes.includes(l.accountCode)
+  // Classe 3 — Classificação por saldo: devedores → Activo, credores → Passivo
+  // Excepção: conta 38 (provisão cobrança duvidosa) é sempre contra-activo
+  const classe3Codes = ["31", "32", "33", "34", "35", "36", "37", "39"];
+  const classe3Lines = mockTrialBalance.filter(
+    (l) => classe3Codes.includes(l.accountCode)
   );
-  // Estado e Pessoal com saldo devedor
-  const estadoLine = filterByCode("34").filter((l) => l.balance > 0);
-  const pessoalDevedorLine = filterByCode("36").filter((l) => l.balance > 0);
-  const outrosDevedoresLine = filterByCode("37").filter((l) => l.balance > 0);
-  const contasReceberAll = [...contasReceberLines, ...estadoLine, ...pessoalDevedorLine, ...outrosDevedoresLine];
+  const contasReceberAll = classe3Lines.filter((l) => l.balance > 0);
   const totalContasReceber = contasReceberAll.reduce((s, l) => s + l.balance, 0);
 
-  // Provisões para cobrança duvidosa (contra-activo)
+  // Provisões para cobrança duvidosa (contra-activo — sempre deduz do activo)
   const provisoesCDLines = filterByCode("38");
   const totalProvisoesCD = provisoesCDLines.reduce((s, l) => s + l.balance, 0);
 
@@ -72,19 +68,12 @@ const Relatorios = () => {
   const totalAtivo = totalActivoNC + totalActivoCorrentes;
 
   // ── PASSIVO ──
-  // Classe 3 credora: 32 (Fornecedores), 33 (Empréstimos), 34 (saldo credor), 35, 36 (credor), 37 (credor), 39
-  const passivoCodes = ["32", "33", "35", "39"];
-  const passivoFixedLines = mockTrialBalance.filter(
-    (l) => passivoCodes.includes(l.accountCode)
-  );
-  const estadoCredorLine = filterByCode("34").filter((l) => l.balance <= 0);
-  const pessoalCredorLine = filterByCode("36").filter((l) => l.balance <= 0);
-  const outrosCredoresLine = filterByCode("37").filter((l) => l.balance <= 0);
-
-  const passivoLines = [...passivoFixedLines, ...estadoCredorLine, ...pessoalCredorLine, ...outrosCredoresLine];
-  const totalPassivo = passivoLines.reduce((s, l) => s + Math.abs(l.balance), 0);
+  // Classe 3 com saldo credor (negativo), excluindo conta 38 (contra-activo)
+  const passivoLines = classe3Lines.filter((l) => l.balance < 0);
+  const totalPassivo = passivoLines.reduce((s, l) => s + (-l.balance), 0);
 
   // ── CAPITAL PRÓPRIO (Classe 5 + Classe 8) ──
+  // Usa -balance: credores (negativos) → positivos; devedores (positivos) → negativos (prejuízos)
   const capitalLines = mockTrialBalance.filter(
     (l) => ["51", "52", "53", "54", "55", "56", "57", "58"].includes(l.accountCode)
   );
@@ -92,7 +81,7 @@ const Relatorios = () => {
     (l) => ["81", "88"].includes(l.accountCode)
   );
   const capitalAllLines = [...capitalLines, ...resultadosLines];
-  const totalCapital = capitalAllLines.reduce((s, l) => s + Math.abs(l.balance), 0);
+  const totalCapital = capitalAllLines.reduce((s, l) => s + (-l.balance), 0);
 
   // Verificação equação fundamental
   const diferencaBalanco = totalAtivo - (totalPassivo + totalCapital);
