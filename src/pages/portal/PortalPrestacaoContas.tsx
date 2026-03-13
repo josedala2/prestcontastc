@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { PortalLayout } from "@/components/PortalLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
-import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle } from "lucide-react";
+import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X } from "lucide-react";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
 
 // ─── Helpers ───
 const formatKz = (v: number) =>
@@ -410,9 +411,150 @@ const PortalPrestacaoContas = () => {
   const [passCorr, setPassCorr] = useState<Record<string, number>>({});
   const [proveitos, setProveitos] = useState<Record<string, number>>({});
   const [custos, setCustos] = useState<Record<string, number>>({});
+  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Prior year (empty/disabled for now)
   const emptyPrior: Record<string, number> = {};
+
+  // ─── Excel parsing ───
+  const parseKzValue = (val: unknown): number => {
+    if (typeof val === "number") return val;
+    if (typeof val !== "string") return 0;
+    const cleaned = val.replace(/[Kz\s,R\$]/g, "").replace(/\(/g, "-").replace(/\)/g, "").trim();
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? 0 : num;
+  };
+
+  const mapExcelToForm = useCallback((workbook: XLSX.WorkBook) => {
+    // Map from all form line definitions
+    const allSections = [
+      { lines: activoNaoCorrente, setter: setAtivNaoCorr },
+      { lines: activoCorrentes, setter: setAtivCorr },
+      { lines: capitalProprio, setter: setCapProprio },
+      { lines: passivoNaoCorrente, setter: setPassNaoCorr },
+      { lines: passivoCorrente, setter: setPassCorr },
+      { lines: proveitosLines, setter: setProveitos },
+      { lines: custosLines, setter: setCustos },
+    ];
+
+    // Build a label-to-code map for fuzzy matching
+    const labelMap = new Map<string, { code: string; section: number }>();
+    allSections.forEach((sec, idx) => {
+      sec.lines.filter((l) => l.editable).forEach((l) => {
+        labelMap.set(l.label.toLowerCase().trim(), { code: l.code, section: idx });
+      });
+    });
+
+    // Parse all sheets looking for financial data
+    const sectionValues: Record<string, number>[] = allSections.map(() => ({}));
+    let matchCount = 0;
+
+    workbook.SheetNames.forEach((sheetName) => {
+      const sheet = workbook.Sheets[sheetName];
+      const data = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { header: 1 });
+
+      data.forEach((row: unknown) => {
+        if (!Array.isArray(row) || row.length < 3) return;
+
+        // Try to find a label cell and a value cell
+        for (let i = 0; i < row.length - 1; i++) {
+          const cellText = String(row[i] || "").toLowerCase().trim();
+          if (cellText.length < 3) continue;
+
+          // Try exact match
+          const match = labelMap.get(cellText);
+          if (match) {
+            // Find the next numeric value in the row
+            for (let j = i + 1; j < row.length; j++) {
+              const val = parseKzValue(row[j]);
+              if (val !== 0 || String(row[j]).includes("0")) {
+                sectionValues[match.section][match.code] = val;
+                matchCount++;
+                break;
+              }
+            }
+          }
+        }
+      });
+    });
+
+    // Also try matching by code patterns (e.g. "1.1.1.1" in first column)
+    workbook.SheetNames.forEach((sheetName) => {
+      const sheet = workbook.Sheets[sheetName];
+      const data = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { header: 1 });
+
+      data.forEach((row: unknown) => {
+        if (!Array.isArray(row) || row.length < 3) return;
+        const codeCell = String(row[0] || "").trim();
+        // Also check second column for code
+        const codeCell2 = String(row[1] || "").trim();
+
+        [codeCell, codeCell2].forEach((code) => {
+          allSections.forEach((sec, idx) => {
+            const line = sec.lines.find((l) => l.editable && l.code === code);
+            if (line && !sectionValues[idx][line.code]) {
+              // Find value in remaining columns
+              for (let j = 2; j < (row as unknown[]).length; j++) {
+                const val = parseKzValue((row as unknown[])[j]);
+                if (val !== 0) {
+                  sectionValues[idx][line.code] = val;
+                  matchCount++;
+                  break;
+                }
+              }
+            }
+          });
+        });
+      });
+    });
+
+    // Apply values
+    allSections.forEach((sec, idx) => {
+      if (Object.keys(sectionValues[idx]).length > 0) {
+        sec.setter((prev) => ({ ...prev, ...sectionValues[idx] }));
+      }
+    });
+
+    return matchCount;
+  }, []);
+
+  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = new Uint8Array(evt.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: "array" });
+        const matchCount = mapExcelToForm(workbook);
+        setUploadedFile(file.name);
+
+        if (matchCount > 0) {
+          toast.success(`Ficheiro carregado com sucesso! ${matchCount} campo(s) preenchido(s) automaticamente.`);
+        } else {
+          toast.warning("Ficheiro carregado, mas não foi possível mapear valores automaticamente. Verifique o formato.");
+        }
+      } catch {
+        toast.error("Erro ao processar o ficheiro. Verifique se é um ficheiro Excel válido.");
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, [mapExcelToForm]);
+
+  const handleClearData = () => {
+    setAtivNaoCorr({});
+    setAtivCorr({});
+    setCapProprio({});
+    setPassNaoCorr({});
+    setPassCorr({});
+    setProveitos({});
+    setCustos({});
+    setUploadedFile(null);
+    toast.info("Todos os campos foram limpos.");
+  };
 
   // Computed totals
   const sumEditable = (lines: BalancoLine[], vals: Record<string, number>) =>
@@ -471,6 +613,63 @@ const PortalPrestacaoContas = () => {
                 className="h-8 text-sm mt-1"
                 placeholder="Ex: 2024"
               />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Upload Section */}
+      <Card className="mb-6 border-dashed border-2 border-primary/30">
+        <CardContent className="pt-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                <Upload className="h-4 w-4 text-primary" />
+                Carregar Ficheiro Excel
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Carregue o ficheiro Excel do Modelo CC-2 para preenchimento automático, ou preencha manualmente abaixo.
+              </p>
+              {uploadedFile && (
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge variant="secondary" className="text-xs gap-1">
+                    <FileUp className="h-3 w-3" />
+                    {uploadedFile}
+                  </Badge>
+                  <button onClick={() => setUploadedFile(null)} className="text-muted-foreground hover:text-foreground">
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="gap-2"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                Seleccionar Ficheiro
+              </Button>
+              {(Object.keys(ativNaoCorr).length > 0 || Object.keys(proveitos).length > 0) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearData}
+                  className="gap-1 text-destructive hover:text-destructive"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Limpar
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>
