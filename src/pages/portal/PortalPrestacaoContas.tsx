@@ -644,7 +644,16 @@ const PortalPrestacaoContas = () => {
                 </div>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={generateCC2Template}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Descarregar Template
+              </Button>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -659,7 +668,7 @@ const PortalPrestacaoContas = () => {
                 className="gap-2"
               >
                 <FileSpreadsheet className="h-4 w-4" />
-                Seleccionar Ficheiro
+                Carregar Ficheiro
               </Button>
               {(Object.keys(ativNaoCorr).length > 0 || Object.keys(proveitos).length > 0) && (
                 <Button
