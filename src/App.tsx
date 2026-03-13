@@ -15,6 +15,7 @@ import Validacoes from "./pages/Validacoes";
 import Relatorios from "./pages/Relatorios";
 import Mapas from "./pages/Mapas";
 import Anexos from "./pages/Anexos";
+import DocumentosObrigatorios from "./pages/DocumentosObrigatorios";
 import Auditoria from "./pages/Auditoria";
 import Esclarecimentos from "./pages/Esclarecimentos";
 import Configuracoes from "./pages/Configuracoes";
@@ -49,6 +50,7 @@ const App = () => (
           <Route path="/relatorios" element={<Relatorios />} />
           <Route path="/mapas" element={<Mapas />} />
           <Route path="/anexos" element={<Anexos />} />
+          <Route path="/documentos-obrigatorios" element={<DocumentosObrigatorios />} />
           <Route path="/auditoria" element={<Auditoria />} />
           <Route path="/esclarecimentos" element={<Esclarecimentos />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
