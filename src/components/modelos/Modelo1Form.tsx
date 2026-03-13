@@ -6,6 +6,19 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
 
+const tipologias = [
+  "Órgão Autónomo",
+  "Instituto Público",
+  "Empresa Pública",
+  "Fundo Autónomo",
+  "Serviço Autónomo",
+  "Associação Pública",
+  "Associação Privada com participação pública",
+  "Fundação Pública",
+  "Sociedade Comercial com participação pública",
+  "Outro",
+];
+
 const guiaItems = [
   { key: "a", label: "Guia de Remessa (Modelo nº 1)" },
   { key: "b", label: "Mapa dos Subsídios Recebidos (Modelo nº 2)" },
@@ -21,7 +34,7 @@ const guiaItems = [
   { key: "l", label: "Demonstração de Resultados" },
   { key: "m", label: "Demonstração do Fluxo de Caixa" },
   { key: "n", label: "Balanço e respectivas notas" },
-  { key: "o", label: "Balancete Sintético" },
+  { key: "o", label: "Balancete Analítico e Sintético antes e depois do apuramento dos resultados" },
   { key: "p", label: "Parecer do Conselho Fiscal" },
   { key: "q", label: "Relatório e Parecer do Auditor Externo" },
   { key: "r", label: "Documentos de Arrecadação de Receita (DAR)" },
@@ -29,6 +42,12 @@ const guiaItems = [
   { key: "t", label: "Certidão de regularidade da contribuição à Segurança Social" },
   { key: "u", label: "Mapa detalhado dos direitos sobre terceiros" },
   { key: "v", label: "Mapa detalhado das obrigações com terceiros" },
+  { key: "w", label: "Acta de apreciação das contas pelo órgão fiscalizador" },
+  { key: "x", label: "Extractos bancários de fim de exercício" },
+  { key: "y", label: "Reconciliações bancárias" },
+  { key: "z", label: "Comprovativos de entrega de descontos às entidades competentes" },
+  { key: "aa", label: "Inventário patrimonial" },
+  { key: "ab", label: "Relação de bens imóveis e móveis abatidos" },
 ];
 
 export function Modelo1Form() {
