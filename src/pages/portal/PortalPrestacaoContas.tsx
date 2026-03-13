@@ -618,6 +618,63 @@ const PortalPrestacaoContas = () => {
         </CardContent>
       </Card>
 
+      {/* Upload Section */}
+      <Card className="mb-6 border-dashed border-2 border-primary/30">
+        <CardContent className="pt-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                <Upload className="h-4 w-4 text-primary" />
+                Carregar Ficheiro Excel
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Carregue o ficheiro Excel do Modelo CC-2 para preenchimento automático, ou preencha manualmente abaixo.
+              </p>
+              {uploadedFile && (
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge variant="secondary" className="text-xs gap-1">
+                    <FileUp className="h-3 w-3" />
+                    {uploadedFile}
+                  </Badge>
+                  <button onClick={() => setUploadedFile(null)} className="text-muted-foreground hover:text-foreground">
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="gap-2"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                Seleccionar Ficheiro
+              </Button>
+              {(Object.keys(ativNaoCorr).length > 0 || Object.keys(proveitos).length > 0) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearData}
+                  className="gap-1 text-destructive hover:text-destructive"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Limpar
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
           <TabsTrigger value="balanco" className="text-xs gap-1">
