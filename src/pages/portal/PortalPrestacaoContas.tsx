@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
-import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X } from "lucide-react";
+import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X, Download } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
+import { generateCC2Template } from "@/lib/cc2TemplateGenerator";
 
 // ─── Helpers ───
 const formatKz = (v: number) =>
@@ -629,6 +630,7 @@ const PortalPrestacaoContas = () => {
               </h3>
               <p className="text-xs text-muted-foreground mt-1">
                 Carregue o ficheiro Excel do Modelo CC-2 para preenchimento automático, ou preencha manualmente abaixo.
+                Pode <button type="button" onClick={generateCC2Template} className="text-primary underline hover:text-primary/80 font-medium">descarregar o template</button> para preencher offline.
               </p>
               {uploadedFile && (
                 <div className="flex items-center gap-2 mt-2">
@@ -642,7 +644,16 @@ const PortalPrestacaoContas = () => {
                 </div>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={generateCC2Template}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Descarregar Template
+              </Button>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -657,7 +668,7 @@ const PortalPrestacaoContas = () => {
                 className="gap-2"
               >
                 <FileSpreadsheet className="h-4 w-4" />
-                Seleccionar Ficheiro
+                Carregar Ficheiro
               </Button>
               {(Object.keys(ativNaoCorr).length > 0 || Object.keys(proveitos).length > 0) && (
                 <Button
