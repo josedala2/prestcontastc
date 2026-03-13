@@ -467,7 +467,7 @@ export const mockTrialBalance: TrialBalanceLine[] = [
   { id: "tb36c", accountCode: "83", description: "Resultados financeiros", debit: 0, credit: 0, balance: 0 },
   { id: "tb36d", accountCode: "85", description: "Resultados não operacionais", debit: 0, credit: 0, balance: 0 },
   { id: "tb36e", accountCode: "87", description: "Impostos sobre os lucros", debit: 0, credit: 0, balance: 0 },
-  { id: "tb37", accountCode: "88", description: "Resultado líquido do exercício", debit: -7024518958.19, credit: -5350318765.24, balance: -1674200192.95 },
+  { id: "tb37", accountCode: "88", description: "Resultado líquido do exercício", debit: 6727621290.00, credit: 5276221097.05, balance: 1451400192.95 },
 ];
 
 // ─── Indicadores Financeiros por Entidade (Modelo CC-3) ───
