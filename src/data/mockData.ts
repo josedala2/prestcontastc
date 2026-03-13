@@ -462,7 +462,7 @@ export const mockTrialBalance: TrialBalanceLine[] = [
   { id: "tb35", accountCode: "78", description: "Outros custos e perdas não operacionais", debit: 1081349802.98, credit: 61924006.85, balance: 1019425796.13 },
 
   // ── CLASSE 8 — RESULTADOS ──
-  { id: "tb36", accountCode: "81", description: "Resultados transitados", debit: 1200000000.00, credit: 858382035.36, balance: 341617964.64 },
+  { id: "tb36", accountCode: "81", description: "Resultados transitados", debit: 0, credit: 2783982421.26, balance: -2783982421.26 },
   { id: "tb36b", accountCode: "82", description: "Resultados operacionais", debit: 0, credit: 0, balance: 0 },
   { id: "tb36c", accountCode: "83", description: "Resultados financeiros", debit: 0, credit: 0, balance: 0 },
   { id: "tb36d", accountCode: "85", description: "Resultados não operacionais", debit: 0, credit: 0, balance: 0 },
