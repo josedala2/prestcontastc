@@ -15,6 +15,7 @@ import Validacoes from "./pages/Validacoes";
 import Relatorios from "./pages/Relatorios";
 import Mapas from "./pages/Mapas";
 import Anexos from "./pages/Anexos";
+import DocumentosObrigatorios from "./pages/DocumentosObrigatorios";
 import Auditoria from "./pages/Auditoria";
 import Esclarecimentos from "./pages/Esclarecimentos";
 import Configuracoes from "./pages/Configuracoes";
