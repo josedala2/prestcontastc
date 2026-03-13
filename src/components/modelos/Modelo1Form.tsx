@@ -56,6 +56,7 @@ export function Modelo1Form() {
   const [endereco, setEndereco] = useState("");
   const [gestaoInicio, setGestaoInicio] = useState("");
   const [gestaoFim, setGestaoFim] = useState("");
+  const [tipologia, setTipologia] = useState("");
   const [checked, setChecked] = useState<Record<string, boolean>>(
     Object.fromEntries(guiaItems.map((i) => [i.key, false]))
   );
