@@ -387,7 +387,7 @@ const Relatorios = () => {
                   <TableCell colSpan={2} className="font-bold text-sm">PROVEITOS NÃO OPERACIONAIS (68-69)</TableCell>
                   <TableCell className="text-right font-bold font-mono text-sm">{formatKz(totalProveitosNaoOp)}</TableCell>
                 </TableRow>
-                {renderLines(proveitosNaoOp, true)}
+                {renderLines(proveitosNaoOp, 'abs')}
 
                 {/* CUSTOS NÃO OPERACIONAIS */}
                 <TableRow className="bg-destructive/5">
