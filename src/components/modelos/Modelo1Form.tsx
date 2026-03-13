@@ -4,7 +4,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Save } from "lucide-react";
+
+const tipologias = [
+  "Órgão Autónomo",
+  "Instituto Público",
+  "Empresa Pública",
+  "Fundo Autónomo",
+  "Serviço Autónomo",
+  "Associação Pública",
+  "Associação Privada com participação pública",
+  "Fundação Pública",
+  "Sociedade Comercial com participação pública",
+  "Outro",
+];
 
 const guiaItems = [
   { key: "a", label: "Guia de Remessa (Modelo nº 1)" },
@@ -21,7 +35,7 @@ const guiaItems = [
   { key: "l", label: "Demonstração de Resultados" },
   { key: "m", label: "Demonstração do Fluxo de Caixa" },
   { key: "n", label: "Balanço e respectivas notas" },
-  { key: "o", label: "Balancete Sintético" },
+  { key: "o", label: "Balancete Analítico e Sintético antes e depois do apuramento dos resultados" },
   { key: "p", label: "Parecer do Conselho Fiscal" },
   { key: "q", label: "Relatório e Parecer do Auditor Externo" },
   { key: "r", label: "Documentos de Arrecadação de Receita (DAR)" },
@@ -29,6 +43,12 @@ const guiaItems = [
   { key: "t", label: "Certidão de regularidade da contribuição à Segurança Social" },
   { key: "u", label: "Mapa detalhado dos direitos sobre terceiros" },
   { key: "v", label: "Mapa detalhado das obrigações com terceiros" },
+  { key: "w", label: "Acta de apreciação das contas pelo órgão fiscalizador" },
+  { key: "x", label: "Extractos bancários de fim de exercício" },
+  { key: "y", label: "Reconciliações bancárias" },
+  { key: "z", label: "Comprovativos de entrega de descontos às entidades competentes" },
+  { key: "aa", label: "Inventário patrimonial" },
+  { key: "ab", label: "Relação de bens imóveis e móveis abatidos" },
 ];
 
 export function Modelo1Form() {
@@ -36,6 +56,7 @@ export function Modelo1Form() {
   const [endereco, setEndereco] = useState("");
   const [gestaoInicio, setGestaoInicio] = useState("");
   const [gestaoFim, setGestaoFim] = useState("");
+  const [tipologia, setTipologia] = useState("");
   const [checked, setChecked] = useState<Record<string, boolean>>(
     Object.fromEntries(guiaItems.map((i) => [i.key, false]))
   );
@@ -56,16 +77,29 @@ export function Modelo1Form() {
           <Input value={entidade} onChange={(e) => setEntidade(e.target.value)} placeholder="Nome da entidade" />
         </div>
         <div>
+          <Label>Tipologia</Label>
+          <Select value={tipologia} onValueChange={setTipologia}>
+            <SelectTrigger><SelectValue placeholder="Seleccione a tipologia" /></SelectTrigger>
+            <SelectContent>
+              {tipologias.map((t) => (
+                <SelectItem key={t} value={t}>{t}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
           <Label>Endereço</Label>
           <Input value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder="Endereço" />
         </div>
-        <div>
-          <Label>Gestão de</Label>
-          <Input type="date" value={gestaoInicio} onChange={(e) => setGestaoInicio(e.target.value)} />
-        </div>
-        <div>
-          <Label>a</Label>
-          <Input type="date" value={gestaoFim} onChange={(e) => setGestaoFim(e.target.value)} />
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <Label>Gestão de</Label>
+            <Input type="date" value={gestaoInicio} onChange={(e) => setGestaoInicio(e.target.value)} />
+          </div>
+          <div>
+            <Label>a</Label>
+            <Input type="date" value={gestaoFim} onChange={(e) => setGestaoFim(e.target.value)} />
+          </div>
         </div>
       </div>
 
