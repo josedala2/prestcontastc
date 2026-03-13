@@ -25,6 +25,7 @@ import PortalDocumentos from "./pages/portal/PortalDocumentos";
 import PortalEsclarecimentos from "./pages/portal/PortalEsclarecimentos";
 import PortalValidacoes from "./pages/portal/PortalValidacoes";
 import PortalMapas from "./pages/portal/PortalMapas";
+import PortalPrestacaoContas from "./pages/portal/PortalPrestacaoContas";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
