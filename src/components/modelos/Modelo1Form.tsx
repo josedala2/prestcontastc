@@ -77,16 +77,29 @@ export function Modelo1Form() {
           <Input value={entidade} onChange={(e) => setEntidade(e.target.value)} placeholder="Nome da entidade" />
         </div>
         <div>
+          <Label>Tipologia</Label>
+          <Select value={tipologia} onValueChange={setTipologia}>
+            <SelectTrigger><SelectValue placeholder="Seleccione a tipologia" /></SelectTrigger>
+            <SelectContent>
+              {tipologias.map((t) => (
+                <SelectItem key={t} value={t}>{t}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
           <Label>Endereço</Label>
           <Input value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder="Endereço" />
         </div>
-        <div>
-          <Label>Gestão de</Label>
-          <Input type="date" value={gestaoInicio} onChange={(e) => setGestaoInicio(e.target.value)} />
-        </div>
-        <div>
-          <Label>a</Label>
-          <Input type="date" value={gestaoFim} onChange={(e) => setGestaoFim(e.target.value)} />
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <Label>Gestão de</Label>
+            <Input type="date" value={gestaoInicio} onChange={(e) => setGestaoInicio(e.target.value)} />
+          </div>
+          <div>
+            <Label>a</Label>
+            <Input type="date" value={gestaoFim} onChange={(e) => setGestaoFim(e.target.value)} />
+          </div>
         </div>
       </div>
 
