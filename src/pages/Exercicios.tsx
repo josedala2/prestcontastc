@@ -86,7 +86,7 @@ const Exercicios = () => {
         errorsCount: 0,
         warningsCount: 0,
         checklistProgress: 0,
-        deadline: `${form.year + 1}-04-30`,
+        deadline: `${form.year + 1}-06-30`,
       };
       setFiscalYears((prev) => [newFy, ...prev]);
       toast.success("Exercício criado com sucesso.");
