@@ -185,16 +185,20 @@ const Relatorios = () => {
   };
 
   // ── Helper para renderizar secção de linhas ──
-  const renderLines = (lines: typeof mockTrialBalance, useAbsValue = false) =>
-    lines.map((l) => (
-      <TableRow key={l.id}>
-        <TableCell className="font-mono text-xs">{l.accountCode}</TableCell>
-        <TableCell className="text-sm">{l.description}</TableCell>
-        <TableCell className="text-right font-mono text-sm">
-          {formatKz(useAbsValue ? Math.abs(l.balance) : l.balance)}
-        </TableCell>
-      </TableRow>
-    ));
+  // mode: 'raw' = balance as-is, 'abs' = Math.abs, 'negate' = -balance (credit→positive)
+  const renderLines = (lines: typeof mockTrialBalance, mode: 'raw' | 'abs' | 'negate' = 'raw') =>
+    lines.map((l) => {
+      const val = mode === 'abs' ? Math.abs(l.balance) : mode === 'negate' ? -l.balance : l.balance;
+      return (
+        <TableRow key={l.id}>
+          <TableCell className="font-mono text-xs">{l.accountCode}</TableCell>
+          <TableCell className="text-sm">{l.description}</TableCell>
+          <TableCell className="text-right font-mono text-sm">
+            {formatKz(val)}
+          </TableCell>
+        </TableRow>
+      );
+    });
 
   return (
     <AppLayout>
