@@ -365,7 +365,7 @@ const Relatorios = () => {
                   <TableCell colSpan={2} className="font-bold text-sm">PROVEITOS FINANCEIROS (66-67)</TableCell>
                   <TableCell className="text-right font-bold font-mono text-sm">{formatKz(totalProveitosFin)}</TableCell>
                 </TableRow>
-                {renderLines(proveitosFinanceiros, true)}
+                {renderLines(proveitosFinanceiros, 'abs')}
 
                 {/* CUSTOS FINANCEIROS */}
                 <TableRow className="bg-destructive/5">
