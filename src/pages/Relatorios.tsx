@@ -303,7 +303,7 @@ const Relatorios = () => {
                   <TableCell colSpan={2} className="font-bold text-sm">CAPITAL PRÓPRIO (Classe 5)</TableCell>
                   <TableCell className="text-right font-bold font-mono text-sm">{formatKz(capitalLines.reduce((s, l) => s + (-l.balance), 0))}</TableCell>
                 </TableRow>
-                {renderLines(capitalLines, true)}
+                {renderLines(capitalLines, 'negate')}
                 <TableRow className="bg-muted/20">
                   <TableCell colSpan={3} className="text-xs font-semibold text-muted-foreground pl-6">Resultados (Classe 8)</TableCell>
                 </TableRow>
