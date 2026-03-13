@@ -389,7 +389,10 @@ export const mockAccounts: Account[] = [
 ];
 
 // ─── Balancete com dados reais do documento CC-2/CC-3 ───
+// Classes PGC: 1=Meios Fixos, 2=Existências, 3=Terceiros, 4=Meios Monetários,
+//              5=Capital e Reservas, 6=Proveitos e Ganhos, 7=Custos e Perdas, 8=Resultados
 export const mockTrialBalance: TrialBalanceLine[] = [
+  // ── CLASSE 1 — MEIOS FIXOS E INVESTIMENTOS ──
   { id: "tb01", accountCode: "11", description: "Imobilizações Corpóreas", debit: 9292889535.85, credit: 53258116.48, balance: 9239631419.37 },
   { id: "tb02", accountCode: "11.1", description: "Terrenos e recursos naturais", debit: 0, credit: 0, balance: 0 },
   { id: "tb03", accountCode: "11.2", description: "Edifícios e outras construções", debit: 4397482892.23, credit: 0, balance: 4397482892.23 },
@@ -398,34 +401,72 @@ export const mockTrialBalance: TrialBalanceLine[] = [
   { id: "tb06", accountCode: "11.5", description: "Equipamento administrativo", debit: 632923142.76, credit: 0, balance: 632923142.76 },
   { id: "tb07", accountCode: "11.9", description: "Outras imobilizações corpóreas", debit: 492983217.51, credit: 53258116.48, balance: 439725101.03 },
   { id: "tb08", accountCode: "12", description: "Imobilizações Incorpóreas", debit: 281877106.81, credit: 0, balance: 281877106.81 },
+  { id: "tb08b", accountCode: "13", description: "Investimentos Financeiros", debit: 45000000.00, credit: 0, balance: 45000000.00 },
+  { id: "tb08c", accountCode: "14", description: "Imobilizações em Curso", debit: 320500000.00, credit: 0, balance: 320500000.00 },
   { id: "tb09", accountCode: "18", description: "Amortizações Acumuladas", debit: 53258116.48, credit: 6129816185.56, balance: -6076558069.08 },
+  { id: "tb09b", accountCode: "19", description: "Provisões para Investimentos Financeiros", debit: 0, credit: 15500000.00, balance: -15500000.00 },
+
+  // ── CLASSE 2 — EXISTÊNCIAS ──
+  { id: "tb09c", accountCode: "22", description: "Matérias-primas, subsidiárias e de consumo", debit: 185230000.00, credit: 142800000.00, balance: 42430000.00 },
+  { id: "tb09d", accountCode: "26", description: "Mercadorias", debit: 58400000.00, credit: 31200000.00, balance: 27200000.00 },
+  { id: "tb09e", accountCode: "29", description: "Provisões para depreciação de existências", debit: 0, credit: 8500000.00, balance: -8500000.00 },
+
+  // ── CLASSE 3 — TERCEIROS ──
   { id: "tb10", accountCode: "31", description: "Clientes", debit: 3471819970.33, credit: 2857084817.45, balance: 614735152.88 },
   { id: "tb11", accountCode: "31.1", description: "Clientes - correntes", debit: 3220403798.46, credit: 2848505429.44, balance: 371898369.02 },
   { id: "tb12", accountCode: "31.8", description: "Clientes de cobrança duvidosa", debit: 251416171.87, credit: 8579388.01, balance: 242836783.86 },
   { id: "tb13", accountCode: "31.9", description: "Clientes - saldos credores", debit: 1564061767.84, credit: 1855447986.06, balance: -291386218.22 },
   { id: "tb14", accountCode: "32", description: "Fornecedores", debit: 4222392812.11, credit: 4186757668.04, balance: 35635144.07 },
+  { id: "tb14b", accountCode: "33", description: "Empréstimos", debit: 120000000.00, credit: 850000000.00, balance: -730000000.00 },
   { id: "tb15", accountCode: "34", description: "Estado", debit: 1806326898.42, credit: 1711569602.44, balance: 94757295.98 },
   { id: "tb16", accountCode: "34.1", description: "Impostos sobre os lucros", debit: 661109289.20, credit: 14214107.57, balance: 646895181.63 },
   { id: "tb17", accountCode: "34.3", description: "Imposto de rendimento de trabalho", debit: 154194749.00, credit: 427926816.35, balance: -273732067.35 },
   { id: "tb18", accountCode: "34.5", description: "IVA", debit: 882394310.22, credit: 946738103.35, balance: -64343793.13 },
+  { id: "tb18b", accountCode: "35", description: "Entidades participantes e participadas", debit: 0, credit: 12500000.00, balance: -12500000.00 },
   { id: "tb19", accountCode: "36", description: "Pessoal", debit: 2216593950.52, credit: 2160551952.65, balance: 56041997.87 },
   { id: "tb20", accountCode: "37", description: "Outros valores a receber e a pagar", debit: 281930723.11, credit: 864919251.48, balance: -582988528.37 },
   { id: "tb21", accountCode: "38", description: "Provisões para cobrança duvidosa", debit: 0, credit: 242836783.87, balance: -242836783.87 },
+  { id: "tb21b", accountCode: "39", description: "Provisões para outros riscos e encargos", debit: 0, credit: 185000000.00, balance: -185000000.00 },
+
+  // ── CLASSE 4 — MEIOS MONETÁRIOS ──
+  { id: "tb21c", accountCode: "41", description: "Títulos negociáveis", debit: 18500000.00, credit: 0, balance: 18500000.00 },
   { id: "tb22", accountCode: "42", description: "Depósitos a prazo", debit: 2400000.00, credit: 0, balance: 2400000.00 },
   { id: "tb23", accountCode: "43", description: "Depósitos à ordem", debit: 6104784710.01, credit: 6055680235.92, balance: 49104474.09 },
   { id: "tb24", accountCode: "45", description: "Caixa", debit: 267360591.53, credit: 266207572.97, balance: 1153018.56 },
+
+  // ── CLASSE 5 — CAPITAL E RESERVAS ──
   { id: "tb25", accountCode: "51", description: "Capital", debit: 0, credit: 262500000.00, balance: -262500000.00 },
-  { id: "tb26", accountCode: "62", description: "Prestações de Serviço", debit: 289137792.14, credit: 2058350119.86, balance: -1769212327.72 },
+  { id: "tb25b", accountCode: "53", description: "Prémios de emissão", debit: 0, credit: 45000000.00, balance: -45000000.00 },
+  { id: "tb25c", accountCode: "55", description: "Reservas legais", debit: 0, credit: 890000000.00, balance: -890000000.00 },
+  { id: "tb25d", accountCode: "56", description: "Reservas de reavaliação", debit: 0, credit: 320000000.00, balance: -320000000.00 },
+  { id: "tb25e", accountCode: "58", description: "Reservas livres", debit: 0, credit: 125000000.00, balance: -125000000.00 },
+
+  // ── CLASSE 6 — PROVEITOS E GANHOS POR NATUREZA ──
+  { id: "tb26", accountCode: "61", description: "Vendas", debit: 45200000.00, credit: 380500000.00, balance: -335300000.00 },
+  { id: "tb26b", accountCode: "62", description: "Prestações de Serviço", debit: 289137792.14, credit: 2058350119.86, balance: -1769212327.72 },
   { id: "tb27", accountCode: "63", description: "Outros proveitos operacionais", debit: 0, credit: 3062918878.20, balance: -3062918878.20 },
+  { id: "tb27b", accountCode: "64", description: "Variação nos inventários de prod. acabados e em curso", debit: 0, credit: 28500000.00, balance: -28500000.00 },
+  { id: "tb27c", accountCode: "65", description: "Trabalhos para a própria empresa", debit: 0, credit: 42000000.00, balance: -42000000.00 },
   { id: "tb28", accountCode: "66", description: "Proveitos e ganhos financeiros gerais", debit: 500000.00, credit: 10589891.13, balance: -10089891.13 },
+  { id: "tb28b", accountCode: "67", description: "Proveitos e ganhos financeiros em subsidiárias e associadas", debit: 0, credit: 3200000.00, balance: -3200000.00 },
   { id: "tb29", accountCode: "68", description: "Outros proveitos e ganhos não operacionais", debit: 0, credit: 25000000.00, balance: -25000000.00 },
+
+  // ── CLASSE 7 — CUSTOS E PERDAS POR NATUREZA ──
   { id: "tb30", accountCode: "71", description: "Custo das existências vendidas", debit: 180034097.24, credit: 349316.27, balance: 179684780.97 },
   { id: "tb31", accountCode: "72", description: "Custos com o pessoal", debit: 3319046110.28, credit: 1194800.00, balance: 3317851310.28 },
   { id: "tb32", accountCode: "73", description: "Amortizações do exercício", debit: 508397950.43, credit: 0, balance: 508397950.43 },
+  { id: "tb32b", accountCode: "74", description: "Provisões do exercício", debit: 185000000.00, credit: 0, balance: 185000000.00 },
   { id: "tb33", accountCode: "75", description: "Outros custos e perdas operacionais", debit: 1630174424.96, credit: 129991752.93, balance: 1500182672.03 },
   { id: "tb34", accountCode: "76", description: "Custos e perdas financeiras gerais", debit: 15878780.16, credit: 0, balance: 15878780.16 },
+  { id: "tb34b", accountCode: "77", description: "Custos e perdas financeiras em filiais e associadas", debit: 1200000.00, credit: 0, balance: 1200000.00 },
   { id: "tb35", accountCode: "78", description: "Outros custos e perdas não operacionais", debit: 1081349802.98, credit: 61924006.85, balance: 1019425796.13 },
+
+  // ── CLASSE 8 — RESULTADOS ──
   { id: "tb36", accountCode: "81", description: "Resultados transitados", debit: 18333181838.19, credit: 22926448041.23, balance: -4593266203.04 },
+  { id: "tb36b", accountCode: "82", description: "Resultados operacionais", debit: 0, credit: 0, balance: 0 },
+  { id: "tb36c", accountCode: "83", description: "Resultados financeiros", debit: 0, credit: 0, balance: 0 },
+  { id: "tb36d", accountCode: "85", description: "Resultados não operacionais", debit: 0, credit: 0, balance: 0 },
+  { id: "tb36e", accountCode: "87", description: "Impostos sobre os lucros", debit: 0, credit: 0, balance: 0 },
   { id: "tb37", accountCode: "88", description: "Resultado líquido do exercício", debit: -7024518958.19, credit: -5350318765.24, balance: -1674200192.95 },
 ];
 
