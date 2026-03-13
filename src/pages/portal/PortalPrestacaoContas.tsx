@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { PortalLayout } from "@/components/PortalLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
-import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle } from "lucide-react";
+import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X } from "lucide-react";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
 
 // ─── Helpers ───
 const formatKz = (v: number) =>
