@@ -25,7 +25,7 @@ const FILTER_OPTIONS: { value: FilterType; label: string }[] = [
 
 export function NotificacoesPanel() {
   const { entity } = usePortalEntity();
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useSubmissions();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, loadingNotifications } = useSubmissions();
   const [filter, setFilter] = useState<FilterType>("todas");
 
   const entityNotifications = notifications.filter((n) => n.entityId === entity.id);

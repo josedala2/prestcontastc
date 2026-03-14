@@ -85,12 +85,12 @@ const Secretaria = () => {
 
   const handleConfirmRecepcao = () => {
     const data = buildActaData();
-    if (!data || !selectedFy) return;
+    if (!data || !selectedFy || !selectedEntity) return;
     exportActaRecepcaoPdf(data);
     setActasGeradas((prev) => [...prev, selectedFy.id]);
-    // Update shared submission status to "recepcionado"
+    // Update shared submission status to "recepcionado" with entity info for email
     const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
-    recepcionar(selectedFy.entityId, fiscalYearId);
+    recepcionar(selectedFy.entityId, fiscalYearId, selectedEntity.name, `entidade@${selectedEntity.nif}.ao`);
     setConfirmDialogOpen(false);
     setSelectedId(null);
     setCheckedDocs({});
@@ -98,9 +98,9 @@ const Secretaria = () => {
   };
 
   const handleConfirmRejeicao = () => {
-    if (!selectedFy || !motivoRejeicao.trim()) return;
+    if (!selectedFy || !selectedEntity || !motivoRejeicao.trim()) return;
     const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
-    rejeitar(selectedFy.entityId, fiscalYearId, motivoRejeicao.trim());
+    rejeitar(selectedFy.entityId, fiscalYearId, motivoRejeicao.trim(), selectedEntity.name, `entidade@${selectedEntity.nif}.ao`);
     setActasGeradas((prev) => [...prev, selectedFy.id]);
     setRejectDialogOpen(false);
     setMotivoRejeicao("");
