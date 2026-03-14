@@ -14,7 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      submission_notifications: {
+        Row: {
+          created_at: string
+          detail: string | null
+          email_sent: boolean
+          entity_email: string | null
+          entity_id: string
+          entity_name: string
+          fiscal_year: string
+          fiscal_year_id: string
+          id: string
+          message: string
+          read: boolean
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          email_sent?: boolean
+          entity_email?: string | null
+          entity_id: string
+          entity_name: string
+          fiscal_year: string
+          fiscal_year_id: string
+          id?: string
+          message: string
+          read?: boolean
+          type: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          email_sent?: boolean
+          entity_email?: string | null
+          entity_id?: string
+          entity_name?: string
+          fiscal_year?: string
+          fiscal_year_id?: string
+          id?: string
+          message?: string
+          read?: boolean
+          type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
