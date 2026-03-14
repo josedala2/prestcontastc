@@ -1036,11 +1036,11 @@ const PortalPrestacaoContas = () => {
                 </Button>
                 <Button
                   onClick={() => {
-                    if (totalActivo === 0) {
-                      toast.error("Preencha os dados do Balanço Patrimonial antes de submeter.");
+                    if (Math.abs(totalActivo - totalCapPassivo) > 0.01 && totalActivo > 0) {
+                      toast.error("A equação patrimonial não está equilibrada. Corrija antes de submeter.");
                       return;
                     }
-                    toast.success("Prestação de contas submetida com sucesso!");
+                    toast.success("Prestação de contas submetida com sucesso ao Tribunal de Contas!");
                   }}
                   className="gap-2"
                 >
