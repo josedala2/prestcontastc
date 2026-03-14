@@ -382,8 +382,8 @@ export async function generateDossierZip(entityName = "ENDE, E.P.", year = 2024)
   });
 
   // Checklist
-  (indexPdf as any).autoTable({
-    startY: (indexPdf as any).lastAutoTable.finalY + 10,
+  autoTable(indexPdf, {
+    startY: (indexTable1 as any).finalY + 10,
     head: [["Documento", "Estado"]],
     body: [
       ["Relatório de Gestão", "Em falta"],
