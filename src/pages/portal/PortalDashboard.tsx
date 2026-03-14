@@ -6,6 +6,8 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
+import { useSubmissions } from "@/contexts/SubmissionContext";
+import { NotificacoesPanel } from "@/components/portal/NotificacoesPanel";
 import {
   Calendar,
   Clock,
@@ -16,15 +18,18 @@ import {
   Paperclip,
   ArrowRight,
   Send,
+  Bell,
 } from "lucide-react";
 
 const PortalDashboard = () => {
   const { entity, entityId } = usePortalEntity();
+  const { unreadCount } = useSubmissions();
   const entityExercicios = mockFiscalYears.filter((fy) => fy.entityId === entityId);
   const activeExercicio = entityExercicios.find((fy) => fy.year === 2024);
   const pendingClarifications = mockClarifications.filter(
     (cr) => cr.entityId === entityId && cr.status === "pendente"
   );
+  const entityUnread = unreadCount(entityId);
 
   const today = new Date();
   const daysToDeadline = activeExercicio
@@ -78,7 +83,7 @@ const PortalDashboard = () => {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <StatCard
           title="Exercício Activo"
           value={activeExercicio?.year || "—"}
@@ -106,6 +111,13 @@ const PortalDashboard = () => {
           subtitle="pendentes de resposta"
           icon={<MessageSquare className="h-5 w-5" />}
           variant={pendingClarifications.length > 0 ? "warning" : "success"}
+        />
+        <StatCard
+          title="Notificações"
+          value={entityUnread}
+          subtitle="não lidas"
+          icon={<Bell className="h-5 w-5" />}
+          variant={entityUnread > 0 ? "warning" : "success"}
         />
       </div>
 
@@ -228,6 +240,11 @@ const PortalDashboard = () => {
             </Button>
           </div>
         </div>
+      </div>
+
+      {/* Notifications Panel */}
+      <div className="mt-6">
+        <NotificacoesPanel />
       </div>
     </PortalLayout>
   );
