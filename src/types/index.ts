@@ -85,6 +85,7 @@ export interface AuditLogEntry {
 export interface ClarificationRequest {
   id: string;
   exercicioId: string;
+  entityId: string;
   entityName: string;
   subject: string;
   message: string;
