@@ -601,3 +601,209 @@ export function exportDocumentoTribunalPdf(doc: DocumentoTribunal, entityName = 
   const sanitized = doc.numeroDocumento.replace(/[^a-zA-Z0-9]/g, "_");
   pdf.save(`${sanitized}_${DOCUMENTO_TIPO_LABELS[doc.tipo].label.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
 }
+
+// ─── Export Acta de Recepção PDF ───
+export interface ActaRecepcaoData {
+  actaNumero: string;
+  entityName: string;
+  entityNif: string;
+  entityTutela: string;
+  entityMorada: string;
+  exercicioYear: number;
+  periodoInicio: string;
+  periodoFim: string;
+  submittedAt: string;
+  documentosVerificados: { label: string; required: boolean; checked: boolean }[];
+  totalDebito: number;
+  totalCredito: number;
+}
+
+export function exportActaRecepcaoPdf(data: ActaRecepcaoData) {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const centerX = pageWidth / 2;
+
+  // ── Brasão / Header Oficial ──
+  doc.setFillColor(40, 38, 72);
+  doc.rect(0, 0, pageWidth, 22, "F");
+  doc.setFillColor(202, 148, 62);
+  doc.rect(0, 22, pageWidth, 2, "F");
+
+  // Brasão placeholder (escudo estilizado)
+  doc.setFillColor(202, 148, 62);
+  doc.circle(centerX, 10, 7, "F");
+  doc.setFillColor(40, 38, 72);
+  doc.circle(centerX, 10, 5.5, "F");
+  doc.setTextColor(202, 148, 62);
+  doc.setFontSize(7);
+  doc.setFont("helvetica", "bold");
+  doc.text("TCA", centerX, 12, { align: "center" });
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(7);
+  doc.setFont("helvetica", "normal");
+  doc.text("REPÚBLICA DE ANGOLA", centerX, 5, { align: "center" });
+  doc.text("TRIBUNAL DE CONTAS", centerX, 18, { align: "center" });
+
+  // ── Título ──
+  let y = 34;
+  doc.setTextColor(40, 38, 72);
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("ACTA DE RECEPÇÃO", centerX, y, { align: "center" });
+  y += 7;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Nº ${data.actaNumero}`, centerX, y, { align: "center" });
+  y += 4;
+  doc.setFontSize(8);
+  doc.text("Prestação de Contas — Resolução nº 1/17 de 5 de Janeiro", centerX, y, { align: "center" });
+
+  // ── Linha separadora dourada ──
+  y += 6;
+  doc.setDrawColor(202, 148, 62);
+  doc.setLineWidth(0.5);
+  doc.line(14, y, pageWidth - 14, y);
+
+  // ── Dados da Entidade ──
+  y += 8;
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(40, 38, 72);
+  doc.text("1. IDENTIFICAÇÃO DA ENTIDADE", 14, y);
+  y += 7;
+
+  const addField = (label: string, value: string, yPos: number) => {
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(100, 100, 100);
+    doc.text(label, 18, yPos);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(40, 38, 72);
+    doc.text(value, 65, yPos);
+    return yPos + 6;
+  };
+
+  y = addField("Entidade:", data.entityName, y);
+  y = addField("NIF:", data.entityNif, y);
+  y = addField("Tutela:", data.entityTutela, y);
+  y = addField("Morada:", data.entityMorada, y);
+  y = addField("Exercício:", String(data.exercicioYear), y);
+  y = addField("Período:", `${data.periodoInicio} a ${data.periodoFim}`, y);
+  y = addField("Data de Submissão:", data.submittedAt, y);
+
+  // ── Dados Financeiros ──
+  y += 4;
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(40, 38, 72);
+  doc.text("2. DADOS FINANCEIROS", 14, y);
+  y += 7;
+  y = addField("Total Débito:", `${formatKz(data.totalDebito)} Kz`, y);
+  y = addField("Total Crédito:", `${formatKz(data.totalCredito)} Kz`, y);
+
+  // ── Documentos Verificados ──
+  y += 4;
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(40, 38, 72);
+  doc.text("3. DOCUMENTAÇÃO VERIFICADA", 14, y);
+  y += 3;
+
+  const docsChecked = data.documentosVerificados.filter(d => d.checked);
+  const docsTotal = data.documentosVerificados.length;
+
+  (doc as any).autoTable({
+    startY: y,
+    margin: { left: 14, right: 14 },
+    head: [["Nº", "Documento", "Obrigatório", "Estado"]],
+    body: data.documentosVerificados.map((d, i) => [
+      String(i + 1),
+      d.label,
+      d.required ? "Sim" : "Não",
+      d.checked ? "✓ Verificado" : "✗ Em falta",
+    ]),
+    headStyles: {
+      fillColor: [40, 38, 72],
+      textColor: [255, 255, 255],
+      fontSize: 7,
+      fontStyle: "bold",
+    },
+    bodyStyles: { fontSize: 7, textColor: [40, 40, 40] },
+    alternateRowStyles: { fillColor: [245, 245, 250] },
+    columnStyles: {
+      0: { cellWidth: 10, halign: "center" },
+      2: { cellWidth: 22, halign: "center" },
+      3: { cellWidth: 25, halign: "center" },
+    },
+    didParseCell: (hookData: any) => {
+      if (hookData.column.index === 3 && hookData.section === "body") {
+        const val = hookData.cell.raw as string;
+        if (val.startsWith("✓")) {
+          hookData.cell.styles.textColor = [39, 174, 96];
+          hookData.cell.styles.fontStyle = "bold";
+        } else {
+          hookData.cell.styles.textColor = [220, 53, 69];
+          hookData.cell.styles.fontStyle = "bold";
+        }
+      }
+    },
+  });
+
+  y = (doc as any).lastAutoTable.finalY + 8;
+
+  // ── Resumo ──
+  doc.setFillColor(240, 248, 240);
+  doc.roundedRect(14, y, pageWidth - 28, 14, 2, 2, "F");
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(39, 174, 96);
+  doc.text(`Documentos verificados: ${docsChecked.length}/${docsTotal}`, 20, y + 6);
+  doc.setTextColor(40, 38, 72);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.text(`Recepção confirmada em ${new Date().toLocaleDateString("pt-AO")} às ${new Date().toLocaleTimeString("pt-AO")}`, 20, y + 11);
+
+  // ── Assinaturas ──
+  y += 24;
+  doc.setDrawColor(180, 180, 180);
+  doc.setLineWidth(0.3);
+
+  const sig1x = 14;
+  const sig2x = pageWidth / 2 + 10;
+  const sigWidth = pageWidth / 2 - 24;
+
+  doc.line(sig1x, y + 12, sig1x + sigWidth, y + 12);
+  doc.line(sig2x, y + 12, sig2x + sigWidth, y + 12);
+
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 100, 100);
+  doc.text("Funcionário da Secretaria", sig1x + sigWidth / 2, y + 17, { align: "center" });
+  doc.text("Representante da Entidade", sig2x + sigWidth / 2, y + 17, { align: "center" });
+
+  // ── Footer oficial ──
+  const pageHeight = doc.internal.pageSize.getHeight();
+  doc.setFillColor(40, 38, 72);
+  doc.rect(0, pageHeight - 12, pageWidth, 12, "F");
+  doc.setFillColor(202, 148, 62);
+  doc.rect(0, pageHeight - 12, pageWidth, 1, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(6);
+  doc.text(
+    "© Tribunal de Contas de Angola — Sistema de Prestação de Contas — Resolução nº 1/17",
+    centerX,
+    pageHeight - 6,
+    { align: "center" }
+  );
+  doc.setFontSize(5.5);
+  doc.text(
+    `Documento gerado automaticamente em ${new Date().toLocaleDateString("pt-AO")} ${new Date().toLocaleTimeString("pt-AO")}`,
+    centerX,
+    pageHeight - 3,
+    { align: "center" }
+  );
+
+  doc.save(`Acta_Recepcao_${data.actaNumero.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
+}
