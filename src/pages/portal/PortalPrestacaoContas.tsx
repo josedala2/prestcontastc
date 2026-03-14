@@ -1286,7 +1286,7 @@ function EntidadeView({
       </Tabs>
 
       {/* Submit button */}
-      {!isSubmitted && (
+      {(!isSubmitted || canResubmit) && (
         <div className="flex justify-end">
           <AlertDialog>
             <AlertDialogTrigger asChild>
