@@ -18,6 +18,7 @@ import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2
 import { toast } from "sonner";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 import { EntityProfilePanel } from "@/components/secretaria/EntityProfilePanel";
+import { useSubmissions } from "@/contexts/SubmissionContext";
 
 const Secretaria = () => {
   const submetidos = mockFiscalYears.filter((fy) => fy.status === "submetido");
@@ -26,6 +27,7 @@ const Secretaria = () => {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [actasGeradas, setActasGeradas] = useState<string[]>([]);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const { recepcionar } = useSubmissions();
 
   const selectedFy = submetidos.find((fy) => fy.id === selectedId);
   const selectedEntity = selectedFy ? mockEntities.find((e) => e.id === selectedFy.entityId) : null;
@@ -82,6 +84,9 @@ const Secretaria = () => {
     if (!data || !selectedFy) return;
     exportActaRecepcaoPdf(data);
     setActasGeradas((prev) => [...prev, selectedFy.id]);
+    // Update shared submission status to "recepcionado"
+    const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
+    recepcionar(selectedFy.entityId, fiscalYearId);
     setConfirmDialogOpen(false);
     setSelectedId(null);
     setCheckedDocs({});
