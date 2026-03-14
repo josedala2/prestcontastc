@@ -714,7 +714,7 @@ export function exportActaRecepcaoPdf(data: ActaRecepcaoData) {
   const docsChecked = data.documentosVerificados.filter(d => d.checked);
   const docsTotal = data.documentosVerificados.length;
 
-  const docsTable = autoTable(doc, {
+  autoTable(doc, {
     startY: y,
     margin: { left: 14, right: 14 },
     head: [["Nº", "Documento", "Obrigatório", "Estado"]],
