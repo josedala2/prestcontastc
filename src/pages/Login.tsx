@@ -67,6 +67,8 @@ export default function Login() {
       setLoading(false);
       if (matched?.role === "Preparador / Contabilista") {
         navigate("/portal");
+      } else if (matched?.role === "Secretaria") {
+        navigate("/secretaria");
       } else {
         navigate("/dashboard");
       }
