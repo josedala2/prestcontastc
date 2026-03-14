@@ -171,10 +171,7 @@ const Secretaria = () => {
                         size="sm"
                         className="h-7 w-7 p-0"
                         title={`Visualizar ${item.label}`}
-                        onClick={() => {
-                          const data = buildActaData();
-                          if (data) exportActaRecepcaoPdf(data, true);
-                        }}
+                        onClick={handlePreviewPdf}
                       >
                         <Eye className="h-3.5 w-3.5" />
                       </Button>
