@@ -767,7 +767,7 @@ export const mockDocumentosTribunal: DocumentoTribunal[] = [
     versao: 1,
     imutavel: true,
     hashSha256: "f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6",
-    criadoPor: "Secretaria TCA",
+    criadoPor: "Rosa Tavares (Secretaria TCA)",
     emitidoAt: "2025-04-18",
     createdAt: "2025-04-18",
     updatedAt: "2025-04-18",
