@@ -6,6 +6,8 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
+import { useSubmissions } from "@/contexts/SubmissionContext";
+import { NotificacoesPanel } from "@/components/portal/NotificacoesPanel";
 import {
   Calendar,
   Clock,
@@ -16,6 +18,7 @@ import {
   Paperclip,
   ArrowRight,
   Send,
+  Bell,
 } from "lucide-react";
 
 const PortalDashboard = () => {
