@@ -267,9 +267,40 @@ const Secretaria = () => {
                       <FileText className="h-4 w-4" />
                       Verificação Documental (Resolução 1/17)
                     </CardTitle>
-                    <Badge variant={allRequiredChecked ? "default" : "secondary"}>
-                      {checkedCount}/{submissionChecklist.length} verificados
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5 text-xs"
+                        onClick={() => {
+                          if (!selectedFy || !selectedEntity) return;
+                          exportActaRecepcaoPdf({
+                            actaNumero,
+                            entityName: selectedEntity.name,
+                            entityNif: selectedEntity.nif,
+                            entityTutela: selectedEntity.tutela,
+                            entityMorada: selectedEntity.morada,
+                            exercicioYear: selectedFy.year,
+                            periodoInicio: selectedFy.startDate,
+                            periodoFim: selectedFy.endDate,
+                            submittedAt: selectedFy.submittedAt || "",
+                            totalDebito: selectedFy.totalDebito,
+                            totalCredito: selectedFy.totalCredito,
+                            documentosVerificados: submissionChecklist.map((item) => ({
+                              label: item.label,
+                              required: item.required,
+                              checked: !!checkedDocs[item.id],
+                            })),
+                          }, true);
+                        }}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        Visualizar PDF
+                      </Button>
+                      <Badge variant={allRequiredChecked ? "default" : "secondary"}>
+                        {checkedCount}/{submissionChecklist.length} verificados
+                      </Badge>
+                    </div>
                   </div>
                   <p className="text-xs text-muted-foreground">Confirme a existência de cada documento antes de emitir a acta de recepção.</p>
                 </CardHeader>
