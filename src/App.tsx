@@ -55,6 +55,7 @@ const App = () => (
           <Route path="/auditoria" element={<Auditoria />} />
           <Route path="/esclarecimentos" element={<Esclarecimentos />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
+          <Route path="/secretaria" element={<Secretaria />} />
           <Route path="/portal/*" element={
             <PortalEntityProvider>
               <Routes>
