@@ -359,7 +359,7 @@ export async function generateDossierZip(entityName = "ENDE, E.P.", year = 2024)
   const indexPdf = new jsPDF();
   addPdfHeader(indexPdf, `Dossiê de Prestação de Contas`, `${entityName} — Exercício ${year}`);
   const fy = mockFiscalYears.find((f) => f.entityName.includes(entityName.split(",")[0])) || mockFiscalYears[0];
-  const indexTable1 = autoTable(indexPdf, {
+  autoTable(indexPdf, {
     startY: 40,
     head: [["Item", "Valor"]],
     body: [
