@@ -1,13 +1,20 @@
+import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatCard, StatusBadge } from "@/components/ui-custom/PageElements";
 import { mockFiscalYears, mockValidations, mockAuditLog, mockClarifications, formatKz } from "@/data/mockData";
-import { AlertTriangle, CheckCircle, FileBarChart, Building2, XCircle, Clock, Send, Calendar, MessageSquare, TrendingUp } from "lucide-react";
+import { AlertTriangle, CheckCircle, FileBarChart, Building2, XCircle, Clock, Send, Calendar, MessageSquare, TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { STATUS_LABELS, VALIDATION_LEVEL_LABELS, ValidationResult } from "@/types";
 import { cn } from "@/lib/utils";
 
+const ITEMS_PER_PAGE = 10;
+
 const Dashboard = () => {
+  const [currentPage, setCurrentPage] = useState(1);
   const activeFy = mockFiscalYears[0];
+  const totalPages = Math.ceil(mockFiscalYears.length / ITEMS_PER_PAGE);
+  const paginatedFiscalYears = mockFiscalYears.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
   const errors = mockValidations.filter((v) => v.type === "error" && !v.resolved);
   const warnings = mockValidations.filter((v) => v.type === "warning" && !v.resolved);
 
