@@ -60,8 +60,9 @@ export function PortalLayout({ children }: PortalLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pageTitle = routeTitles[location.pathname] || "Portal";
   const { entity, setEntityId, userRole, setUserRole } = usePortalEntity();
-
-  // Short name for display
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useSubmissions();
+  const entityNotifications = notifications.filter((n) => n.entityId === entity.id);
+  const entityUnread = unreadCount(entity.id);
   const shortName = entity.name.split(" - ")[1] || entity.name.split(" — ")[0] || entity.name;
 
   return (
