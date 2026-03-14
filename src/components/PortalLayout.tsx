@@ -12,6 +12,7 @@ import {
   LogOut,
   Building2,
   ChevronDown,
+  UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
