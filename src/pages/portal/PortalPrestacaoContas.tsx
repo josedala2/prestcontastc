@@ -1260,7 +1260,7 @@ function EntidadeView({
                     variant="outline"
                     onClick={() => fileInputRef.current?.click()}
                     className="gap-2"
-                    disabled={isSubmitted}
+                    disabled={isSubmitted && !canResubmit}
                   >
                     <FileSpreadsheet className="h-4 w-4" />
                     Carregar Balancete
