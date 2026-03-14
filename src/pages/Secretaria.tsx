@@ -29,7 +29,9 @@ const Secretaria = () => {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [actasGeradas, setActasGeradas] = useState<string[]>([]);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
-  const { recepcionar } = useSubmissions();
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [motivoRejeicao, setMotivoRejeicao] = useState("");
+  const { recepcionar, rejeitar } = useSubmissions();
 
   const selectedFy = submetidos.find((fy) => fy.id === selectedId);
   const selectedEntity = selectedFy ? mockEntities.find((e) => e.id === selectedFy.entityId) : null;
