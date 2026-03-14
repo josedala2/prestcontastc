@@ -172,7 +172,7 @@ export function exportDrePdf(
   proveitos.forEach((l) => tableData.push([l.accountCode, l.description, formatKz(Math.abs(l.balance))]));
   tableData.push([{ content: "RESULTADO LÍQUIDO", colSpan: 2, styles: { fontStyle: "bold", fillColor: [40, 38, 72], textColor: [255, 255, 255] } }, { content: formatKz(resultado), styles: { fontStyle: "bold", fillColor: [40, 38, 72], textColor: [255, 255, 255], halign: "right" } }]);
 
-  (doc as any).autoTable({
+  autoTable(doc, {
     startY: 40,
     head: [["Conta", "Descrição", "Valor (Kz)"]],
     body: tableData,
