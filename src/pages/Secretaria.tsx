@@ -198,10 +198,7 @@ const Secretaria = () => {
           </Button>
           <Button
             variant="secondary"
-            onClick={() => {
-              const data = buildActaData();
-              if (data) exportActaRecepcaoPdf(data, true);
-            }}
+            onClick={handlePreviewPdf}
             className="gap-2"
           >
             <Eye className="h-4 w-4" />
