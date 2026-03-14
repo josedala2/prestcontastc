@@ -567,18 +567,18 @@ export const mockAttachments: Attachment[] = [
 ];
 
 export const mockAuditLog: AuditLogEntry[] = [
-  { id: "al1", action: "Importação de Balancete", user: "João Silva", timestamp: "2025-03-15 10:30", detail: "37 linhas importadas — Modelo CC-2", actionType: "importacao" },
-  { id: "al2", action: "Validação executada", user: "João Silva", timestamp: "2025-03-15 10:35", detail: "5 erros, 3 avisos encontrados (3 níveis)", actionType: "validacao" },
-  { id: "al3", action: "Upload de Anexo", user: "Maria Santos", timestamp: "2025-03-18 14:20", detail: "Reconciliação Bancária - BFA.xlsx (v1)", actionType: "upload" },
-  { id: "al4", action: "Edição de Entidade", user: "Admin", timestamp: "2025-03-20 09:00", detail: "ENDE, E.P. — Atualização de contacto e tipologia", actionType: "edicao" },
-  { id: "al5", action: "Submissão de Exercício", user: "Dr. António (Dirigente)", timestamp: "2025-04-15 16:00", detail: "INEA 2024 — Submetido ao Tribunal de Contas", actionType: "submissao" },
-  { id: "al6", action: "Aprovação de Exercício", user: "Técnico Validador TCA", timestamp: "2025-04-20 09:30", detail: "ENDE 2023 — Marcado como Conforme", actionType: "aprovacao" },
-  { id: "al7", action: "Pedido de Esclarecimento", user: "Técnico Validador TCA", timestamp: "2025-04-22 11:00", detail: "FSDEA 2024 — Solicitada justificação de variação em custos", actionType: "validacao" },
-  { id: "al8", action: "Exportação de Dossiê", user: "Maria Santos", timestamp: "2025-04-25 15:45", detail: "Pacote ZIP — INEA 2024 (12 ficheiros)", actionType: "exportacao" },
-  { id: "al9", action: "Importação de Balancete", user: "Ana Ferreira", timestamp: "2025-03-22 09:15", detail: "EPAL — 42 linhas importadas — Modelo CC-3", actionType: "importacao" },
-  { id: "al10", action: "Submissão de Exercício", user: "Dr. Manuel Costa", timestamp: "2025-04-10 14:30", detail: "FADA 2024 — Submetido ao Tribunal de Contas", actionType: "submissao" },
-  { id: "al11", action: "Validação executada", user: "Sistema", timestamp: "2025-03-25 08:00", detail: "ENSA 2024 — 0 erros, 1 aviso encontrado", actionType: "validacao" },
-  { id: "al12", action: "Upload de Anexo", user: "Pedro Neto", timestamp: "2025-04-01 11:00", detail: "IGAPE — Relatório de Gestão 2024 (v1)", actionType: "upload" },
+  { id: "al1", action: "Importação de Balancete", user: "Carlos Mendes", timestamp: "2025-03-15 10:30", detail: `37 linhas importadas — Modelo CC-2 (${entityShort("1")})`, actionType: "importacao" },
+  { id: "al2", action: "Validação executada", user: "Carlos Mendes", timestamp: "2025-03-15 10:35", detail: "5 erros, 3 avisos encontrados (3 níveis)", actionType: "validacao" },
+  { id: "al3", action: "Upload de Anexo", user: "Maria Costa", timestamp: "2025-03-18 14:20", detail: `Reconciliação Bancária - BFA.xlsx (v1) — ${entityShort("1")}`, actionType: "upload" },
+  { id: "al4", action: "Edição de Entidade", user: "Carlos Mendes", timestamp: "2025-03-20 09:00", detail: `${entityShort("1")} — Atualização de contacto e tipologia`, actionType: "edicao" },
+  { id: "al5", action: "Submissão de Exercício", user: "Maria Costa", timestamp: "2025-04-15 16:00", detail: `${entityShort("2")} 2024 — Submetido ao Tribunal de Contas`, actionType: "submissao" },
+  { id: "al6", action: "Aprovação de Exercício", user: "Ana Ferreira (Técnico Validador)", timestamp: "2025-04-20 09:30", detail: `${entityShort("1")} 2023 — Marcado como Conforme`, actionType: "aprovacao" },
+  { id: "al7", action: "Pedido de Esclarecimento", user: "Ana Ferreira (Técnico Validador)", timestamp: "2025-04-22 11:00", detail: `${entityShort("3")} 2024 — Solicitada justificação de variação em custos`, actionType: "validacao" },
+  { id: "al8", action: "Exportação de Dossiê", user: "Maria Costa", timestamp: "2025-04-25 15:45", detail: `Pacote ZIP — ${entityShort("2")} 2024 (12 ficheiros)`, actionType: "exportacao" },
+  { id: "al9", action: "Importação de Balancete", user: "Carlos Mendes", timestamp: "2025-03-22 09:15", detail: `${entityShort("4")} — 42 linhas importadas — Modelo CC-3`, actionType: "importacao" },
+  { id: "al10", action: "Submissão de Exercício", user: "Maria Costa", timestamp: "2025-04-10 14:30", detail: `${entityShort("6")} 2024 — Submetido ao Tribunal de Contas`, actionType: "submissao" },
+  { id: "al11", action: "Validação executada", user: "Sistema", timestamp: "2025-03-25 08:00", detail: `${entityShort("9")} 2024 — 0 erros, 1 aviso encontrado`, actionType: "validacao" },
+  { id: "al12", action: "Upload de Anexo", user: "Maria Costa", timestamp: "2025-04-01 11:00", detail: `${entityShort("10")} — Relatório de Gestão 2024 (v1)`, actionType: "upload" },
 ];
 
 export const mockClarifications: ClarificationRequest[] = [
