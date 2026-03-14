@@ -702,7 +702,7 @@ export const mockDocumentosTribunal: DocumentoTribunal[] = [
     estado: "emitido",
     versao: 1,
     imutavel: false,
-    criadoPor: "Dr. Carlos Mendes (Técnico Validador)",
+    criadoPor: "Ana Ferreira (Técnico Validador)",
     emitidoAt: "2025-05-02",
     prazoResposta: "2025-05-16",
     createdAt: "2025-05-01",
