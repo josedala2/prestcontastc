@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
-import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X, Download } from "lucide-react";
+import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X, Download, AlertTriangle, Send } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { generateCC2Template } from "@/lib/cc2TemplateGenerator";
@@ -1034,19 +1036,72 @@ const PortalPrestacaoContas = () => {
                   <Save className="h-4 w-4" />
                   Guardar Rascunho
                 </Button>
-                <Button
-                  onClick={() => {
-                    if (Math.abs(totalActivo - totalCapPassivo) > 0.01 && totalActivo > 0) {
-                      toast.error("A equação patrimonial não está equilibrada. Corrija antes de submeter.");
-                      return;
-                    }
-                    toast.success("Prestação de contas submetida com sucesso ao Tribunal de Contas!");
-                  }}
-                  className="gap-2"
-                >
-                  <CheckCircle className="h-4 w-4" />
-                  Submeter ao Tribunal
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      onClick={(e) => {
+                        if (Math.abs(totalActivo - totalCapPassivo) > 0.01 && totalActivo > 0) {
+                          e.preventDefault();
+                          toast.error("A equação patrimonial não está equilibrada. Corrija antes de submeter.");
+                        }
+                      }}
+                      className="gap-2"
+                    >
+                      <Send className="h-4 w-4" />
+                      Submeter ao Tribunal
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="max-w-lg">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-warning" />
+                        Confirmar Submissão
+                      </AlertDialogTitle>
+                      <AlertDialogDescription asChild>
+                        <div className="space-y-4">
+                          <p>
+                            Está prestes a submeter a prestação de contas ao Tribunal de Contas de Angola.
+                            Esta acção é <strong className="text-foreground">irreversível</strong>.
+                          </p>
+                          <div className="bg-muted/50 rounded-lg p-3 space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Entidade</span>
+                              <span className="font-medium text-foreground">{entity.name}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Período</span>
+                              <span className="font-medium text-foreground">{periodo}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Activo Total</span>
+                              <span className="font-medium text-foreground">{formatKz(totalActivo)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Resultado</span>
+                              <span className={`font-medium ${resultadoExercicio >= 0 ? "text-green-600" : "text-red-600"}`}>{formatKz(resultadoExercicio)}</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Ao confirmar, declara que todos os dados apresentados são verdadeiros e completos,
+                            nos termos da Resolução nº 1/17 do Tribunal de Contas.
+                          </p>
+                        </div>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          toast.success("Prestação de contas submetida com sucesso ao Tribunal de Contas!");
+                        }}
+                        className="gap-2"
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                        Confirmar Submissão
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </CardContent>
           </Card>
