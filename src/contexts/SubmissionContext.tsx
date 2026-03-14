@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export type SubmissionStatus = "rascunho" | "pendente" | "recepcionado" | "rejeitado";
 
@@ -21,6 +22,7 @@ export interface PortalNotification {
   detail?: string;
   createdAt: string;
   read: boolean;
+  emailSent?: boolean;
 }
 
 interface SubmissionContextType {
@@ -31,8 +33,10 @@ interface SubmissionContextType {
   markAllAsRead: (entityId: string) => void;
   getStatus: (entityId: string, fiscalYearId?: string) => SubmissionStatus;
   submit: (entityId: string, fiscalYearId: string) => void;
-  recepcionar: (entityId: string, fiscalYearId: string) => void;
-  rejeitar: (entityId: string, fiscalYearId: string, motivo: string) => void;
+  recepcionar: (entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => void;
+  rejeitar: (entityId: string, fiscalYearId: string, motivo: string, entityName?: string, entityEmail?: string) => void;
+  loadingNotifications: boolean;
+  refreshNotifications: () => void;
 }
 
 const SubmissionContext = createContext<SubmissionContextType | null>(null);
@@ -40,6 +44,47 @@ const SubmissionContext = createContext<SubmissionContextType | null>(null);
 export function SubmissionProvider({ children }: { children: ReactNode }) {
   const [submissions, setSubmissions] = useState<SubmissionEntry[]>([]);
   const [notifications, setNotifications] = useState<PortalNotification[]>([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+
+  // Load notifications from DB on mount
+  const refreshNotifications = useCallback(async () => {
+    setLoadingNotifications(true);
+    try {
+      const { data, error } = await supabase
+        .from("submission_notifications")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error loading notifications:", error);
+        return;
+      }
+
+      if (data) {
+        setNotifications(
+          data.map((n: any) => ({
+            id: n.id,
+            entityId: n.entity_id,
+            fiscalYearId: n.fiscal_year_id,
+            type: n.type as "recepcionado" | "rejeitado",
+            message: n.message,
+            detail: n.detail,
+            createdAt: n.created_at,
+            read: n.read,
+            emailSent: n.email_sent,
+          }))
+        );
+      }
+    } catch (err) {
+      console.error("Error loading notifications:", err);
+    } finally {
+      setLoadingNotifications(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshNotifications();
+  }, [refreshNotifications]);
 
   const getStatus = useCallback(
     (entityId: string, fiscalYearId?: string): SubmissionStatus => {
@@ -71,27 +116,56 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const addNotification = useCallback((
+  const sendNotification = useCallback(async (
     entityId: string,
     fiscalYearId: string,
     type: "recepcionado" | "rejeitado",
     message: string,
-    detail?: string
+    detail?: string,
+    entityName?: string,
+    entityEmail?: string
   ) => {
-    const notification: PortalNotification = {
-      id: `notif-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      entityId,
-      fiscalYearId,
-      type,
-      message,
-      detail,
-      createdAt: new Date().toISOString(),
-      read: false,
-    };
-    setNotifications((prev) => [notification, ...prev]);
-  }, []);
+    const year = fiscalYearId.split("-").pop() || fiscalYearId;
 
-  const recepcionar = useCallback((entityId: string, fiscalYearId: string) => {
+    try {
+      // Call edge function to persist notification and send email
+      const { data, error } = await supabase.functions.invoke("send-notification-email", {
+        body: {
+          entityId,
+          entityName: entityName || entityId,
+          entityEmail: entityEmail || null,
+          fiscalYearId,
+          fiscalYear: year,
+          type,
+          message,
+          detail,
+        },
+      });
+
+      if (error) {
+        console.error("Edge function error:", error);
+      }
+
+      // Refresh notifications from DB
+      await refreshNotifications();
+    } catch (err) {
+      console.error("Error sending notification:", err);
+      // Fallback: add notification locally
+      const notification: PortalNotification = {
+        id: `notif-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        entityId,
+        fiscalYearId,
+        type,
+        message,
+        detail,
+        createdAt: new Date().toISOString(),
+        read: false,
+      };
+      setNotifications((prev) => [notification, ...prev]);
+    }
+  }, [refreshNotifications]);
+
+  const recepcionar = useCallback((entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => {
     setSubmissions((prev) =>
       prev.map((s) =>
         s.entityId === entityId && s.fiscalYearId === fiscalYearId
@@ -100,16 +174,18 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
       )
     );
     const year = fiscalYearId.split("-").pop() || fiscalYearId;
-    addNotification(
+    sendNotification(
       entityId,
       fiscalYearId,
       "recepcionado",
       `Prestação de contas do exercício ${year} foi recepcionada`,
-      "A Secretaria do Tribunal verificou a documentação e emitiu a Acta de Recepção. O processo transitou para análise técnica."
+      "A Secretaria do Tribunal verificou a documentação e emitiu a Acta de Recepção. O processo transitou para análise técnica.",
+      entityName,
+      entityEmail
     );
-  }, [addNotification]);
+  }, [sendNotification]);
 
-  const rejeitar = useCallback((entityId: string, fiscalYearId: string, motivo: string) => {
+  const rejeitar = useCallback((entityId: string, fiscalYearId: string, motivo: string, entityName?: string, entityEmail?: string) => {
     setSubmissions((prev) =>
       prev.map((s) =>
         s.entityId === entityId && s.fiscalYearId === fiscalYearId
@@ -118,35 +194,61 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
       )
     );
     const year = fiscalYearId.split("-").pop() || fiscalYearId;
-    addNotification(
+    sendNotification(
       entityId,
       fiscalYearId,
       "rejeitado",
       `Prestação de contas do exercício ${year} foi devolvida`,
-      motivo
+      motivo,
+      entityName,
+      entityEmail
     );
-  }, [addNotification]);
+  }, [sendNotification]);
 
   const unreadCount = useCallback(
     (entityId: string) => notifications.filter((n) => n.entityId === entityId && !n.read).length,
     [notifications]
   );
 
-  const markAsRead = useCallback((notificationId: string) => {
+  const markAsRead = useCallback(async (notificationId: string) => {
+    // Optimistic update
     setNotifications((prev) =>
       prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
     );
+    // Persist to DB
+    await supabase
+      .from("submission_notifications")
+      .update({ read: true })
+      .eq("id", notificationId);
   }, []);
 
-  const markAllAsRead = useCallback((entityId: string) => {
+  const markAllAsRead = useCallback(async (entityId: string) => {
+    // Optimistic update
     setNotifications((prev) =>
       prev.map((n) => (n.entityId === entityId ? { ...n, read: true } : n))
     );
+    // Persist to DB
+    await supabase
+      .from("submission_notifications")
+      .update({ read: true })
+      .eq("entity_id", entityId);
   }, []);
 
   return (
     <SubmissionContext.Provider
-      value={{ submissions, notifications, unreadCount, markAsRead, markAllAsRead, getStatus, submit, recepcionar, rejeitar }}
+      value={{
+        submissions,
+        notifications,
+        unreadCount,
+        markAsRead,
+        markAllAsRead,
+        getStatus,
+        submit,
+        recepcionar,
+        rejeitar,
+        loadingNotifications,
+        refreshNotifications,
+      }}
     >
       {children}
     </SubmissionContext.Provider>
