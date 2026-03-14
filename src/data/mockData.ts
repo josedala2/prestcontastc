@@ -708,7 +708,7 @@ export const mockDocumentosTribunal: DocumentoTribunal[] = [
     createdAt: "2025-05-01",
     updatedAt: "2025-05-02",
     historico: [
-      { versao: 1, alteradoPor: "Dr. Carlos Mendes", alteradoAt: "2025-05-01", resumoAlteracao: "Rascunho inicial", hashSha256: "b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2" },
+      { versao: 1, alteradoPor: "Ana Ferreira", alteradoAt: "2025-05-01", resumoAlteracao: "Rascunho inicial", hashSha256: "b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2" },
     ],
   },
   {
