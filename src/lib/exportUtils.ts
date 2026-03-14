@@ -751,7 +751,7 @@ export function exportActaRecepcaoPdf(data: ActaRecepcaoData) {
     },
   });
 
-  y = (doc as any).lastAutoTable.finalY + 8;
+  y = (docsTable as any).finalY + 8;
 
   // ── Resumo ──
   doc.setFillColor(240, 248, 240);
