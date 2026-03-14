@@ -805,7 +805,25 @@ export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false) {
     { align: "center" }
   );
 
+  // ── Marca de água RASCUNHO (apenas na pré-visualização) ──
   if (preview) {
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      const pageH = doc.internal.pageSize.getHeight();
+      doc.saveGraphicsState();
+      // @ts-ignore – setGState available in jsPDF
+      doc.setGState(new (doc as any).GState({ opacity: 0.12 }));
+      doc.setTextColor(220, 50, 50);
+      doc.setFontSize(72);
+      doc.setFont("helvetica", "bold");
+      doc.text("RASCUNHO", centerX, pageH / 2, {
+        align: "center",
+        angle: 45,
+      });
+      doc.restoreGraphicsState();
+    }
+
     const pdfBlob = doc.output("blob");
     const url = URL.createObjectURL(pdfBlob);
     window.open(url, "_blank");
