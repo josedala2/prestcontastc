@@ -323,7 +323,7 @@ export async function generateDossierZip(entityName = "ENDE, E.P.", year = 2024)
   // 3. Validações PDF
   const validPdf = new jsPDF();
   addPdfHeader(validPdf, `Relatório de Validações — ${entityName}`, `Exercício Fiscal ${year}`);
-  (validPdf as any).autoTable({
+  autoTable(validPdf, {
     startY: 40,
     head: [["Código", "Nível", "Tipo", "Mensagem", "Estado"]],
     body: mockValidations.map((v) => [
