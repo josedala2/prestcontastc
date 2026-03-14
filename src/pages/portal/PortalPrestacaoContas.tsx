@@ -1163,11 +1163,18 @@ function EntidadeView({
   const submissionStatus = getStatus(entityId, fiscalYearId);
 
   const isSubmitted = submissionStatus !== "rascunho";
+  const canResubmit = submissionStatus === "rejeitado";
   const StatusIcon = STATUS_CONFIG[submissionStatus].icon;
 
   const handleSubmit = () => {
     submit(entityId, fiscalYearId);
     toast.success("Prestação de contas submetida com sucesso! Aguarda recepção pela Secretaria.");
+  };
+
+  const statusMessages: Record<string, string> = {
+    pendente: "A Secretaria do Tribunal irá verificar a documentação e emitir a Acta de Recepção.",
+    recepcionado: "A Secretaria validou a documentação e emitiu a Acta de Recepção.",
+    rejeitado: "A Secretaria devolveu a submissão. Corrija os documentos indicados e resubmeta.",
   };
 
   return (
@@ -1176,14 +1183,18 @@ function EntidadeView({
       {isSubmitted && (
         <div className={`flex items-center gap-3 p-4 rounded-lg ${STATUS_CONFIG[submissionStatus].color}`}>
           <StatusIcon className="h-5 w-5 shrink-0" />
-          <div>
+          <div className="flex-1">
             <p className="text-sm font-semibold">{STATUS_CONFIG[submissionStatus].label}</p>
-            <p className="text-xs opacity-80">
-              {submissionStatus === "pendente"
-                ? "A Secretaria do Tribunal irá verificar a documentação e emitir a Acta de Recepção."
-                : "A Secretaria validou a documentação e emitiu a Acta de Recepção."}
-            </p>
+            <p className="text-xs opacity-80">{statusMessages[submissionStatus] || ""}</p>
           </div>
+          {canResubmit && (
+            <button
+              onClick={() => submit(entityId, fiscalYearId)}
+              className="shrink-0 text-xs font-medium px-3 py-1.5 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              Resubmeter
+            </button>
+          )}
         </div>
       )}
 
