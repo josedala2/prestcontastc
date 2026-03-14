@@ -32,6 +32,7 @@ const demoUsers = [
     email: "secretaria@tca.gov.ao",
     password: "secretaria123",
     role: "Secretaria",
+    displayName: "Rosa Tavares",
     icon: Stamp,
     description: "Recepção e emissão de actas",
     color: "bg-warning/10 text-warning border-warning/20",
