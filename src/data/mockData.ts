@@ -728,8 +728,8 @@ export const mockDocumentosTribunal: DocumentoTribunal[] = [
     createdAt: "2025-05-20",
     updatedAt: "2025-05-25",
     historico: [
-      { versao: 1, alteradoPor: "Dr. Carlos Mendes", alteradoAt: "2025-05-20", resumoAlteracao: "Versão inicial do relatório", hashSha256: "c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3" },
-      { versao: 2, alteradoPor: "Dr. Carlos Mendes", alteradoAt: "2025-05-25", resumoAlteracao: "Revisão com indicadores financeiros actualizados", hashSha256: "d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4" },
+      { versao: 1, alteradoPor: "Ana Ferreira", alteradoAt: "2025-05-20", resumoAlteracao: "Versão inicial do relatório", hashSha256: "c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3" },
+      { versao: 2, alteradoPor: "Ana Ferreira", alteradoAt: "2025-05-25", resumoAlteracao: "Revisão com indicadores financeiros actualizados", hashSha256: "d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4" },
     ],
   },
   {
