@@ -10,6 +10,9 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { mockFiscalYears, mockEntities, submissionChecklist, formatKz } from "@/data/mockData";
 import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck, Eye } from "lucide-react";
 import { toast } from "sonner";
