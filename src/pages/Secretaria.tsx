@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
-import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
+import { PageHeader, StatCard, StatusBadge } from "@/components/ui-custom/PageElements";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { mockFiscalYears, mockEntities, submissionChecklist, formatKz } from "@/data/mockData";
-import { CheckCircle, XCircle, FileCheck, Eye, Stamp, Clock, AlertTriangle, Building2, FileText } from "lucide-react";
+import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck } from "lucide-react";
 import { toast } from "sonner";
 
 // Exercícios com status "submetido" → pendentes de recepção pela Secretaria
@@ -54,12 +54,55 @@ const Secretaria = () => {
     ? `AR-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(submetidos.indexOf(selectedFy) + 1).padStart(3, "0")}`
     : "";
 
+  // Dashboard stats
+  const pendentesCount = submetidos.length - actasGeradas.length;
+  const emAnalise = mockFiscalYears.filter((fy) => fy.status === "em_analise").length;
+  const totalSubmetidos = mockFiscalYears.filter((fy) => ["submetido", "em_analise", "com_pedidos", "conforme", "nao_conforme"].includes(fy.status)).length;
+  const hoje = new Date();
+  const submetidosEsteMes = submetidos.filter((fy) => {
+    if (!fy.submittedAt) return false;
+    const d = new Date(fy.submittedAt);
+    return d.getMonth() === hoje.getMonth() && d.getFullYear() === hoje.getFullYear();
+  }).length;
+
   return (
     <AppLayout>
       <PageHeader
         title="Secretaria — Recepção de Contas"
         description="Valide a documentação das prestações de contas submetidas e emita a acta de recepção."
       />
+
+      {/* ── KPI Cards ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <StatCard
+          title="Pendentes de Recepção"
+          value={pendentesCount}
+          subtitle="aguardam validação documental"
+          icon={<Inbox className="h-5 w-5" />}
+          variant={pendentesCount > 0 ? "warning" : "success"}
+        />
+        <StatCard
+          title="Actas Emitidas"
+          value={actasGeradas.length}
+          subtitle="nesta sessão"
+          icon={<Stamp className="h-5 w-5" />}
+          variant="success"
+        />
+        <StatCard
+          title="Em Análise (TCA)"
+          value={emAnalise}
+          subtitle="transitaram para análise"
+          icon={<BarChart3 className="h-5 w-5" />}
+          variant="primary"
+        />
+        <StatCard
+          title="Recebidos Este Mês"
+          value={submetidosEsteMes}
+          subtitle={`de ${totalSubmetidos} total`}
+          icon={<CalendarCheck className="h-5 w-5" />}
+          variant="default"
+        />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ── Lista de Exercícios Submetidos ── */}
