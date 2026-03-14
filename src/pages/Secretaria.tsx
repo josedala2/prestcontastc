@@ -217,6 +217,14 @@ const Secretaria = () => {
             Cancelar
           </Button>
           <Button
+            variant="destructive"
+            onClick={() => setRejectDialogOpen(true)}
+            className="gap-2"
+          >
+            <Undo2 className="h-4 w-4" />
+            Devolver
+          </Button>
+          <Button
             variant="secondary"
             onClick={handlePreviewPdf}
             className="gap-2"
