@@ -52,7 +52,7 @@ export function PortalLayout({ children }: PortalLayoutProps) {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pageTitle = routeTitles[location.pathname] || "Portal";
-  const { entity, setEntityId } = usePortalEntity();
+  const { entity, setEntityId, userRole, setUserRole } = usePortalEntity();
 
   // Short name for display
   const shortName = entity.name.split(" - ")[1] || entity.name.split(" — ")[0] || entity.name;
