@@ -14,7 +14,7 @@ import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, 
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { generateCC2Template } from "@/lib/cc2TemplateGenerator";
-import { EntidadeDocumentUpload } from "@/components/portal/EntidadeDocumentUpload";
+
 
 // ─── Helpers ───
 const formatKz = (v: number) =>
