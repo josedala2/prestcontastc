@@ -12,7 +12,7 @@ import {
   LogOut,
   Building2,
   ChevronDown,
-  UserCog,
+  
   Bell,
   CheckCircle,
   XCircle,
@@ -59,7 +59,7 @@ export function PortalLayout({ children }: PortalLayoutProps) {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pageTitle = routeTitles[location.pathname] || "Portal";
-  const { entity, setEntityId, userRole, setUserRole } = usePortalEntity();
+  const { entity, setEntityId } = usePortalEntity();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useSubmissions();
   const entityNotifications = notifications.filter((n) => n.entityId === entity.id);
   const entityUnread = unreadCount(entity.id);
@@ -106,31 +106,6 @@ export function PortalLayout({ children }: PortalLayoutProps) {
                   </DropdownMenuItem>
                 );
               })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 px-3 py-1 rounded bg-header-foreground/10 hover:bg-header-foreground/20 transition-colors">
-                <UserCog className="h-3.5 w-3.5 text-header-foreground/70" />
-                <span className="text-[11px] text-header-foreground/90 font-medium">
-                  {userRole === "entidade" ? "Entidade" : "Técnico"}
-                </span>
-                <ChevronDown className="h-3 w-3 text-header-foreground/60" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => setUserRole("entidade")}
-                className={cn(userRole === "entidade" && "bg-primary/10")}
-              >
-                Conta da Entidade
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => setUserRole("tecnico")}
-                className={cn(userRole === "tecnico" && "bg-primary/10")}
-              >
-                Técnico do Tribunal
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           {/* Notification Bell */}

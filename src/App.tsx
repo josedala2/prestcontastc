@@ -31,6 +31,8 @@ import PortalEsclarecimentos from "./pages/portal/PortalEsclarecimentos";
 import PortalValidacoes from "./pages/portal/PortalValidacoes";
 import PortalMapas from "./pages/portal/PortalMapas";
 import PortalPrestacaoContas from "./pages/portal/PortalPrestacaoContas";
+import TecnicoDashboard from "./pages/tecnico/TecnicoDashboard";
+import TecnicoPrestacaoContas from "./pages/tecnico/TecnicoPrestacaoContas";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -73,6 +75,20 @@ const App = () => (
                 <Route path="validacoes" element={<PortalValidacoes />} />
                 <Route path="mapas" element={<PortalMapas />} />
                 <Route path="prestacao-contas" element={<PortalPrestacaoContas />} />
+              </Routes>
+            </PortalEntityProvider>
+          } />
+          <Route path="/tecnico/*" element={
+            <PortalEntityProvider>
+              <Routes>
+                <Route index element={<TecnicoDashboard />} />
+                <Route path="prestacao-contas" element={<TecnicoPrestacaoContas />} />
+                <Route path="exercicios" element={<PortalExercicios />} />
+                <Route path="exercicios/:id" element={<PortalExercicioDetalhe />} />
+                <Route path="documentos" element={<PortalDocumentos />} />
+                <Route path="esclarecimentos" element={<PortalEsclarecimentos />} />
+                <Route path="validacoes" element={<PortalValidacoes />} />
+                <Route path="mapas" element={<PortalMapas />} />
               </Routes>
             </PortalEntityProvider>
           } />

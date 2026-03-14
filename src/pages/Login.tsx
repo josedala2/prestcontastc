@@ -65,7 +65,6 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
 
-    // Find which demo user matches (or default to admin path)
     const matched = demoUsers.find((u) => u.email === email);
     setTimeout(() => {
       setLoading(false);
@@ -73,6 +72,8 @@ export default function Login() {
         navigate("/portal");
       } else if (matched?.role === "Secretaria") {
         navigate("/secretaria");
+      } else if (matched?.role === "Técnico Validador") {
+        navigate("/tecnico");
       } else {
         navigate("/dashboard");
       }
