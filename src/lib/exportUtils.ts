@@ -290,7 +290,7 @@ export async function generateDossierZip(entityName = "ENDE, E.P.", year = 2024)
   // 1. Balancete PDF
   const balancetePdf = new jsPDF();
   addPdfHeader(balancetePdf, `Balancete — ${entityName}`, `Exercício Fiscal ${year}`);
-  (balancetePdf as any).autoTable({
+  autoTable(balancetePdf, {
     startY: 40,
     head: [["Conta", "Descrição", "Débito (Kz)", "Crédito (Kz)", "Saldo (Kz)"]],
     body: mockTrialBalance.map((l) => [
