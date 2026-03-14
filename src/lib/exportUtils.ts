@@ -1,5 +1,5 @@
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -84,7 +84,7 @@ export function exportBalancetePdf(data: TrialBalanceLine[], entityName = "ENDE,
     formatKz(data.reduce((s, l) => s + l.balance, 0)),
   ]);
 
-  (doc as any).autoTable({
+  autoTable(doc, {
     startY: 40,
     head: [["Conta", "Descrição", "Débito (Kz)", "Crédito (Kz)", "Saldo (Kz)"]],
     body: tableData,
@@ -134,7 +134,7 @@ export function exportBalancoPdf(
   tableData.push([{ content: "CAPITAL PRÓPRIO", colSpan: 2, styles: { fontStyle: "bold", fillColor: [40, 38, 72], textColor: [255, 255, 255] } }, { content: formatKz(totalCapital), styles: { fontStyle: "bold", fillColor: [40, 38, 72], textColor: [255, 255, 255], halign: "right" } }]);
   capitalLines.forEach((l) => tableData.push([l.accountCode, l.description, formatKz(Math.abs(l.balance))]));
 
-  (doc as any).autoTable({
+  autoTable(doc, {
     startY: 40,
     head: [["Conta", "Descrição", "Valor (Kz)"]],
     body: tableData,
@@ -172,7 +172,7 @@ export function exportDrePdf(
   proveitos.forEach((l) => tableData.push([l.accountCode, l.description, formatKz(Math.abs(l.balance))]));
   tableData.push([{ content: "RESULTADO LÍQUIDO", colSpan: 2, styles: { fontStyle: "bold", fillColor: [40, 38, 72], textColor: [255, 255, 255] } }, { content: formatKz(resultado), styles: { fontStyle: "bold", fillColor: [40, 38, 72], textColor: [255, 255, 255], halign: "right" } }]);
 
-  (doc as any).autoTable({
+  autoTable(doc, {
     startY: 40,
     head: [["Conta", "Descrição", "Valor (Kz)"]],
     body: tableData,
@@ -290,7 +290,7 @@ export async function generateDossierZip(entityName = "ENDE, E.P.", year = 2024)
   // 1. Balancete PDF
   const balancetePdf = new jsPDF();
   addPdfHeader(balancetePdf, `Balancete — ${entityName}`, `Exercício Fiscal ${year}`);
-  (balancetePdf as any).autoTable({
+  autoTable(balancetePdf, {
     startY: 40,
     head: [["Conta", "Descrição", "Débito (Kz)", "Crédito (Kz)", "Saldo (Kz)"]],
     body: mockTrialBalance.map((l) => [
@@ -323,7 +323,7 @@ export async function generateDossierZip(entityName = "ENDE, E.P.", year = 2024)
   // 3. Validações PDF
   const validPdf = new jsPDF();
   addPdfHeader(validPdf, `Relatório de Validações — ${entityName}`, `Exercício Fiscal ${year}`);
-  (validPdf as any).autoTable({
+  autoTable(validPdf, {
     startY: 40,
     head: [["Código", "Nível", "Tipo", "Mensagem", "Estado"]],
     body: mockValidations.map((v) => [
@@ -344,7 +344,7 @@ export async function generateDossierZip(entityName = "ENDE, E.P.", year = 2024)
   // 4. Auditoria PDF
   const auditPdf = new jsPDF();
   addPdfHeader(auditPdf, `Trilha de Auditoria — ${entityName}`, `Exercício Fiscal ${year}`);
-  (auditPdf as any).autoTable({
+  autoTable(auditPdf, {
     startY: 40,
     head: [["Data/Hora", "Acção", "Utilizador", "Detalhes"]],
     body: mockAuditLog.map((l) => [l.timestamp, l.action, l.user, l.detail]),
@@ -359,7 +359,7 @@ export async function generateDossierZip(entityName = "ENDE, E.P.", year = 2024)
   const indexPdf = new jsPDF();
   addPdfHeader(indexPdf, `Dossiê de Prestação de Contas`, `${entityName} — Exercício ${year}`);
   const fy = mockFiscalYears.find((f) => f.entityName.includes(entityName.split(",")[0])) || mockFiscalYears[0];
-  (indexPdf as any).autoTable({
+  autoTable(indexPdf, {
     startY: 40,
     head: [["Item", "Valor"]],
     body: [
@@ -382,7 +382,7 @@ export async function generateDossierZip(entityName = "ENDE, E.P.", year = 2024)
   });
 
   // Checklist
-  (indexPdf as any).autoTable({
+  autoTable(indexPdf, {
     startY: (indexPdf as any).lastAutoTable.finalY + 10,
     head: [["Documento", "Estado"]],
     body: [
@@ -480,7 +480,7 @@ export function exportDocumentoTribunalPdf(doc: DocumentoTribunal, entityName = 
     metaRows.push(["Resultado / Deliberação", resultLabels[doc.resultadoAcordao]]);
   }
 
-  (pdf as any).autoTable({
+  autoTable(pdf, {
     startY: y,
     body: metaRows.map(([label, value]) => [label, value]),
     theme: "plain",
@@ -714,7 +714,7 @@ export function exportActaRecepcaoPdf(data: ActaRecepcaoData) {
   const docsChecked = data.documentosVerificados.filter(d => d.checked);
   const docsTotal = data.documentosVerificados.length;
 
-  (doc as any).autoTable({
+  autoTable(doc, {
     startY: y,
     margin: { left: 14, right: 14 },
     head: [["Nº", "Documento", "Obrigatório", "Estado"]],
