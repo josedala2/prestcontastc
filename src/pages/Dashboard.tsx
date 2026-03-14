@@ -1,13 +1,20 @@
+import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatCard, StatusBadge } from "@/components/ui-custom/PageElements";
 import { mockFiscalYears, mockValidations, mockAuditLog, mockClarifications, formatKz } from "@/data/mockData";
-import { AlertTriangle, CheckCircle, FileBarChart, Building2, XCircle, Clock, Send, Calendar, MessageSquare, TrendingUp } from "lucide-react";
+import { AlertTriangle, CheckCircle, FileBarChart, Building2, XCircle, Clock, Send, Calendar, MessageSquare, TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { STATUS_LABELS, VALIDATION_LEVEL_LABELS, ValidationResult } from "@/types";
 import { cn } from "@/lib/utils";
 
+const ITEMS_PER_PAGE = 10;
+
 const Dashboard = () => {
+  const [currentPage, setCurrentPage] = useState(1);
   const activeFy = mockFiscalYears[0];
+  const totalPages = Math.ceil(mockFiscalYears.length / ITEMS_PER_PAGE);
+  const paginatedFiscalYears = mockFiscalYears.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
   const errors = mockValidations.filter((v) => v.type === "error" && !v.resolved);
   const warnings = mockValidations.filter((v) => v.type === "warning" && !v.resolved);
 
@@ -68,7 +75,7 @@ const Dashboard = () => {
             <FileBarChart className="h-4 w-4 text-primary" /> Fila de Processos — Exercício 2024
           </h2>
           <div className="space-y-3">
-            {mockFiscalYears.map((fy) => {
+            {paginatedFiscalYears.map((fy) => {
               const daysLeft = Math.ceil((new Date(fy.deadline).getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
               const isOverdue = daysLeft < 0 && !fy.submittedAt;
               return (
@@ -110,6 +117,21 @@ const Dashboard = () => {
               );
             })}
           </div>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
+              <span className="text-xs text-muted-foreground">
+                Página {currentPage} de {totalPages} ({mockFiscalYears.length} processos)
+              </span>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-7 w-7" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Motor de Validação — Resumo por nível */}
