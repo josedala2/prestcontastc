@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
-import { PageHeader, StatCard, StatusBadge } from "@/components/ui-custom/PageElements";
+import { PageHeader, StatCard } from "@/components/ui-custom/PageElements";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,11 +11,11 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { mockFiscalYears, mockEntities, submissionChecklist, formatKz } from "@/data/mockData";
-import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck, Download, Eye } from "lucide-react";
+import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
+import { EntityProfilePanel } from "@/components/secretaria/EntityProfilePanel";
 
-// Exercícios com status "submetido" → pendentes de recepção pela Secretaria
 const Secretaria = () => {
   const submetidos = mockFiscalYears.filter((fy) => fy.status === "submetido");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -39,11 +39,14 @@ const Secretaria = () => {
     setCheckedDocs((prev) => ({ ...prev, [docId]: !prev[docId] }));
   };
 
-  const handleConfirmRecepcao = () => {
-    if (!selectedFy || !selectedEntity) return;
+  const now = new Date();
+  const actaNumero = selectedFy
+    ? `AR-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(submetidos.indexOf(selectedFy) + 1).padStart(3, "0")}`
+    : "";
 
-    // Generate PDF
-    exportActaRecepcaoPdf({
+  const buildActaData = () => {
+    if (!selectedFy || !selectedEntity) return null;
+    return {
       actaNumero,
       entityName: selectedEntity.name,
       entityNif: selectedEntity.nif,
@@ -60,21 +63,19 @@ const Secretaria = () => {
         required: item.required,
         checked: !!checkedDocs[item.id],
       })),
-    });
+    };
+  };
 
+  const handleConfirmRecepcao = () => {
+    const data = buildActaData();
+    if (!data || !selectedFy) return;
+    exportActaRecepcaoPdf(data);
     setActasGeradas((prev) => [...prev, selectedFy.id]);
     setConfirmDialogOpen(false);
     setSelectedId(null);
     setCheckedDocs({});
-    toast.success(
-      `Acta de recepção gerada e descarregada — ${selectedFy.entityName} — ${selectedFy.year}`,
-    );
+    toast.success(`Acta de recepção gerada — ${selectedFy.entityName} — ${selectedFy.year}`);
   };
-
-  const now = new Date();
-  const actaNumero = selectedFy
-    ? `AR-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(submetidos.indexOf(selectedFy) + 1).padStart(3, "0")}`
-    : "";
 
   // Dashboard stats
   const pendentesCount = submetidos.length - actasGeradas.length;
@@ -87,6 +88,132 @@ const Secretaria = () => {
     return d.getMonth() === hoje.getMonth() && d.getFullYear() === hoje.getFullYear();
   }).length;
 
+  // ── Verificação Documental content (passed as children to tabs) ──
+  const verificacaoContent = selectedFy && selectedEntity ? (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Verificação Documental (Resolução 1/17)
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-xs"
+                onClick={() => {
+                  const data = buildActaData();
+                  if (data) exportActaRecepcaoPdf(data, true);
+                }}
+              >
+                <Eye className="h-3.5 w-3.5" />
+                Visualizar PDF
+              </Button>
+              <Badge variant={allRequiredChecked ? "default" : "secondary"}>
+                {checkedCount}/{submissionChecklist.length} verificados
+              </Badge>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">Confirme a existência de cada documento antes de emitir a acta de recepção.</p>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-10">✓</TableHead>
+                <TableHead>Documento</TableHead>
+                <TableHead className="text-center">Obrigatório</TableHead>
+                <TableHead className="text-center">Estado</TableHead>
+                <TableHead className="text-center w-24">Acções</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {submissionChecklist.map((item) => {
+                const isChecked = !!checkedDocs[item.id];
+                return (
+                  <TableRow key={item.id} className={isChecked ? "bg-success/5" : ""}>
+                    <TableCell>
+                      <Checkbox checked={isChecked} onCheckedChange={() => handleToggleDoc(item.id)} />
+                    </TableCell>
+                    <TableCell className="text-sm">{item.label}</TableCell>
+                    <TableCell className="text-center">
+                      {item.required ? (
+                        <Badge variant="destructive" className="text-[10px]">Obrigatório</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px]">Opcional</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {isChecked ? (
+                        <span className="flex items-center justify-center gap-1 text-success text-xs">
+                          <CheckCircle className="h-3.5 w-3.5" /> Verificado
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-center gap-1 text-muted-foreground text-xs">
+                          <XCircle className="h-3.5 w-3.5" /> Pendente
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        title={`Visualizar ${item.label}`}
+                        onClick={() => {
+                          const data = buildActaData();
+                          if (data) exportActaRecepcaoPdf(data, true);
+                        }}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Acções */}
+      <div className="flex items-center justify-between">
+        {!allRequiredChecked ? (
+          <p className="text-xs text-warning flex items-center gap-1">
+            <AlertTriangle className="h-3.5 w-3.5" />
+            Todos os documentos obrigatórios devem ser verificados para emitir a acta.
+          </p>
+        ) : <div />}
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={() => { setSelectedId(null); setCheckedDocs({}); }}>
+            Cancelar
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              const data = buildActaData();
+              if (data) exportActaRecepcaoPdf(data, true);
+            }}
+            className="gap-2"
+          >
+            <Eye className="h-4 w-4" />
+            Visualizar PDF
+          </Button>
+          <Button
+            disabled={!allRequiredChecked}
+            onClick={() => setConfirmDialogOpen(true)}
+            className="gap-2"
+          >
+            <Stamp className="h-4 w-4" />
+            Confirmar e Gerar Acta
+          </Button>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
   return (
     <AppLayout>
       <PageHeader
@@ -96,34 +223,10 @@ const Secretaria = () => {
 
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard
-          title="Pendentes de Recepção"
-          value={pendentesCount}
-          subtitle="aguardam validação documental"
-          icon={<Inbox className="h-5 w-5" />}
-          variant={pendentesCount > 0 ? "warning" : "success"}
-        />
-        <StatCard
-          title="Actas Emitidas"
-          value={actasGeradas.length}
-          subtitle="nesta sessão"
-          icon={<Stamp className="h-5 w-5" />}
-          variant="success"
-        />
-        <StatCard
-          title="Em Análise (TCA)"
-          value={emAnalise}
-          subtitle="transitaram para análise"
-          icon={<BarChart3 className="h-5 w-5" />}
-          variant="primary"
-        />
-        <StatCard
-          title="Recebidos Este Mês"
-          value={submetidosEsteMes}
-          subtitle={`de ${totalSubmetidos} total`}
-          icon={<CalendarCheck className="h-5 w-5" />}
-          variant="default"
-        />
+        <StatCard title="Pendentes de Recepção" value={pendentesCount} subtitle="aguardam validação documental" icon={<Inbox className="h-5 w-5" />} variant={pendentesCount > 0 ? "warning" : "success"} />
+        <StatCard title="Actas Emitidas" value={actasGeradas.length} subtitle="nesta sessão" icon={<Stamp className="h-5 w-5" />} variant="success" />
+        <StatCard title="Em Análise (TCA)" value={emAnalise} subtitle="transitaram para análise" icon={<BarChart3 className="h-5 w-5" />} variant="primary" />
+        <StatCard title="Recebidos Este Mês" value={submetidosEsteMes} subtitle={`de ${totalSubmetidos} total`} icon={<CalendarCheck className="h-5 w-5" />} variant="default" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -144,44 +247,39 @@ const Secretaria = () => {
                   <p className="text-sm">Nenhuma conta pendente de recepção.</p>
                 </div>
               ) : (
-                submetidos
-                  .filter((fy) => !actasGeradas.includes(fy.id))
-                  .map((fy) => {
-                    const entity = mockEntities.find((e) => e.id === fy.entityId);
-                    return (
-                      <button
-                        key={fy.id}
-                        onClick={() => handleSelectExercicio(fy.id)}
-                        className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                          selectedId === fy.id
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/40 hover:bg-muted/30"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <p className="text-sm font-semibold">{fy.entityName}</p>
-                            <p className="text-xs text-muted-foreground">Exercício {fy.year}</p>
-                          </div>
-                          <Badge variant="secondary" className="text-[10px]">
-                            Submetido
-                          </Badge>
+                submetidos.filter((fy) => !actasGeradas.includes(fy.id)).map((fy) => {
+                  const entity = mockEntities.find((e) => e.id === fy.entityId);
+                  return (
+                    <button
+                      key={fy.id}
+                      onClick={() => handleSelectExercicio(fy.id)}
+                      className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                        selectedId === fy.id
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/40 hover:bg-muted/30"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-sm font-semibold">{fy.entityName}</p>
+                          <p className="text-xs text-muted-foreground">Exercício {fy.year}</p>
                         </div>
-                        <div className="flex items-center gap-3 mt-2 text-[11px] text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Building2 className="h-3 w-3" />
-                            {entity?.tipologia === "empresa_publica" ? "Empresa Pública" : entity?.tipologia === "instituto_publico" ? "Instituto" : "Fundo"}
-                          </span>
-                          <span>Subm. {fy.submittedAt}</span>
-                        </div>
-                      </button>
-                    );
-                  })
+                        <Badge variant="secondary" className="text-[10px]">Submetido</Badge>
+                      </div>
+                      <div className="flex items-center gap-3 mt-2 text-[11px] text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Building2 className="h-3 w-3" />
+                          {entity?.tipologia === "empresa_publica" ? "Empresa Pública" : entity?.tipologia === "instituto_publico" ? "Instituto" : "Fundo"}
+                        </span>
+                        <span>Subm. {fy.submittedAt}</span>
+                      </div>
+                    </button>
+                  );
+                })
               )}
             </CardContent>
           </Card>
 
-          {/* Actas já geradas */}
           {actasGeradas.length > 0 && (
             <Card>
               <CardHeader className="pb-3">
@@ -209,233 +307,20 @@ const Secretaria = () => {
           )}
         </div>
 
-        {/* ── Painel de Validação Documental ── */}
+        {/* ── Painel de Perfil da Entidade (com abas) ── */}
         <div className="lg:col-span-2">
-          {!selectedFy ? (
+          {!selectedFy || !selectedEntity ? (
             <Card>
               <CardContent className="py-16 text-center text-muted-foreground">
                 <FileCheck className="h-10 w-10 mx-auto mb-3 opacity-30" />
                 <p className="text-base font-medium">Seleccione um exercício</p>
-                <p className="text-sm">Escolha um exercício da lista para validar a documentação e emitir a acta de recepção.</p>
+                <p className="text-sm">Escolha um exercício da lista para ver o perfil da entidade e validar a documentação.</p>
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-4">
-              {/* Cabeçalho */}
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h2 className="text-lg font-bold">{selectedFy.entityName}</h2>
-                      <p className="text-sm text-muted-foreground">
-                        Exercício {selectedFy.year} · Período: {selectedFy.startDate} a {selectedFy.endDate}
-                      </p>
-                      {selectedEntity && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          NIF: {selectedEntity.nif} · Tutela: {selectedEntity.tutela}
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right text-sm">
-                      <p className="text-muted-foreground">Submetido em</p>
-                      <p className="font-semibold">{selectedFy.submittedAt}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4 mt-4">
-                    <div className="bg-muted/30 rounded-lg p-3 text-center">
-                      <p className="text-[10px] uppercase text-muted-foreground">Total Débito</p>
-                      <p className="text-sm font-bold font-mono">{formatKz(selectedFy.totalDebito)} Kz</p>
-                    </div>
-                    <div className="bg-muted/30 rounded-lg p-3 text-center">
-                      <p className="text-[10px] uppercase text-muted-foreground">Total Crédito</p>
-                      <p className="text-sm font-bold font-mono">{formatKz(selectedFy.totalCredito)} Kz</p>
-                    </div>
-                    <div className="bg-muted/30 rounded-lg p-3 text-center">
-                      <p className="text-[10px] uppercase text-muted-foreground">Progresso Checklist</p>
-                      <p className="text-sm font-bold">{selectedFy.checklistProgress}%</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Checklist de Documentos */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      Verificação Documental (Resolução 1/17)
-                    </CardTitle>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1.5 text-xs"
-                        onClick={() => {
-                          if (!selectedFy || !selectedEntity) return;
-                          exportActaRecepcaoPdf({
-                            actaNumero,
-                            entityName: selectedEntity.name,
-                            entityNif: selectedEntity.nif,
-                            entityTutela: selectedEntity.tutela,
-                            entityMorada: selectedEntity.morada,
-                            exercicioYear: selectedFy.year,
-                            periodoInicio: selectedFy.startDate,
-                            periodoFim: selectedFy.endDate,
-                            submittedAt: selectedFy.submittedAt || "",
-                            totalDebito: selectedFy.totalDebito,
-                            totalCredito: selectedFy.totalCredito,
-                            documentosVerificados: submissionChecklist.map((item) => ({
-                              label: item.label,
-                              required: item.required,
-                              checked: !!checkedDocs[item.id],
-                            })),
-                          }, true);
-                        }}
-                      >
-                        <Eye className="h-3.5 w-3.5" />
-                        Visualizar PDF
-                      </Button>
-                      <Badge variant={allRequiredChecked ? "default" : "secondary"}>
-                        {checkedCount}/{submissionChecklist.length} verificados
-                      </Badge>
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Confirme a existência de cada documento antes de emitir a acta de recepção.</p>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-10">✓</TableHead>
-                        <TableHead>Documento</TableHead>
-                        <TableHead className="text-center">Obrigatório</TableHead>
-                        <TableHead className="text-center">Estado</TableHead>
-                        <TableHead className="text-center w-24">Acções</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {submissionChecklist.map((item) => {
-                        const isChecked = !!checkedDocs[item.id];
-                        return (
-                          <TableRow key={item.id} className={isChecked ? "bg-success/5" : ""}>
-                            <TableCell>
-                              <Checkbox
-                                checked={isChecked}
-                                onCheckedChange={() => handleToggleDoc(item.id)}
-                              />
-                            </TableCell>
-                            <TableCell className="text-sm">{item.label}</TableCell>
-                            <TableCell className="text-center">
-                              {item.required ? (
-                                <Badge variant="destructive" className="text-[10px]">Obrigatório</Badge>
-                              ) : (
-                                <Badge variant="outline" className="text-[10px]">Opcional</Badge>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-center">
-                              {isChecked ? (
-                                <span className="flex items-center justify-center gap-1 text-success text-xs">
-                                  <CheckCircle className="h-3.5 w-3.5" /> Verificado
-                                </span>
-                              ) : (
-                                <span className="flex items-center justify-center gap-1 text-muted-foreground text-xs">
-                                  <XCircle className="h-3.5 w-3.5" /> Pendente
-                                </span>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0"
-                                title={`Visualizar ${item.label}`}
-                                onClick={() => {
-                                  if (!selectedFy || !selectedEntity) return;
-                                  exportActaRecepcaoPdf({
-                                    actaNumero,
-                                    entityName: selectedEntity.name,
-                                    entityNif: selectedEntity.nif,
-                                    entityTutela: selectedEntity.tutela,
-                                    entityMorada: selectedEntity.morada,
-                                    exercicioYear: selectedFy.year,
-                                    periodoInicio: selectedFy.startDate,
-                                    periodoFim: selectedFy.endDate,
-                                    submittedAt: selectedFy.submittedAt || "",
-                                    totalDebito: selectedFy.totalDebito,
-                                    totalCredito: selectedFy.totalCredito,
-                                    documentosVerificados: submissionChecklist.map((c) => ({
-                                      label: c.label,
-                                      required: c.required,
-                                      checked: !!checkedDocs[c.id],
-                                    })),
-                                  }, true);
-                                }}
-                              >
-                                <Eye className="h-3.5 w-3.5" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-
-              {/* Acções */}
-              <div className="flex items-center justify-between">
-                {!allRequiredChecked && (
-                  <p className="text-xs text-warning flex items-center gap-1">
-                    <AlertTriangle className="h-3.5 w-3.5" />
-                    Todos os documentos obrigatórios devem ser verificados para emitir a acta.
-                  </p>
-                )}
-                {allRequiredChecked && <div />}
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => { setSelectedId(null); setCheckedDocs({}); }}>
-                    Cancelar
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      if (!selectedFy || !selectedEntity) return;
-                      exportActaRecepcaoPdf({
-                        actaNumero,
-                        entityName: selectedEntity.name,
-                        entityNif: selectedEntity.nif,
-                        entityTutela: selectedEntity.tutela,
-                        entityMorada: selectedEntity.morada,
-                        exercicioYear: selectedFy.year,
-                        periodoInicio: selectedFy.startDate,
-                        periodoFim: selectedFy.endDate,
-                        submittedAt: selectedFy.submittedAt || "",
-                        totalDebito: selectedFy.totalDebito,
-                        totalCredito: selectedFy.totalCredito,
-                        documentosVerificados: submissionChecklist.map((item) => ({
-                          label: item.label,
-                          required: item.required,
-                          checked: !!checkedDocs[item.id],
-                        })),
-                      }, true);
-                    }}
-                    className="gap-2"
-                  >
-                    <Eye className="h-4 w-4" />
-                    Visualizar PDF
-                  </Button>
-                  <Button
-                    disabled={!allRequiredChecked}
-                    onClick={() => setConfirmDialogOpen(true)}
-                    className="gap-2"
-                  >
-                    <Stamp className="h-4 w-4" />
-                    Confirmar e Gerar Acta
-                  </Button>
-                </div>
-              </div>
-            </div>
+            <EntityProfilePanel entity={selectedEntity} fiscalYear={selectedFy}>
+              {verificacaoContent}
+            </EntityProfilePanel>
           )}
         </div>
       </div>
@@ -450,40 +335,18 @@ const Secretaria = () => {
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-4">
-                <p>
-                  Está prestes a confirmar a recepção formal da prestação de contas e gerar a respectiva acta.
-                </p>
+                <p>Está prestes a confirmar a recepção formal da prestação de contas e gerar a respectiva acta.</p>
                 {selectedFy && selectedEntity && (
                   <div className="bg-muted/50 rounded-lg p-3 space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Acta Nº</span>
-                      <span className="font-bold text-foreground font-mono">{actaNumero}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Entidade</span>
-                      <span className="font-medium text-foreground">{selectedEntity.name}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">NIF</span>
-                      <span className="font-medium text-foreground font-mono">{selectedEntity.nif}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Exercício</span>
-                      <span className="font-medium text-foreground">{selectedFy.year}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Documentos verificados</span>
-                      <span className="font-medium text-foreground">{checkedCount}/{submissionChecklist.length}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Data de recepção</span>
-                      <span className="font-medium text-foreground">{now.toLocaleDateString("pt-AO")}</span>
-                    </div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Acta Nº</span><span className="font-bold text-foreground font-mono">{actaNumero}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Entidade</span><span className="font-medium text-foreground">{selectedEntity.name}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">NIF</span><span className="font-medium text-foreground font-mono">{selectedEntity.nif}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Exercício</span><span className="font-medium text-foreground">{selectedFy.year}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Documentos verificados</span><span className="font-medium text-foreground">{checkedCount}/{submissionChecklist.length}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Data de recepção</span><span className="font-medium text-foreground">{now.toLocaleDateString("pt-AO")}</span></div>
                   </div>
                 )}
-                <p className="text-xs text-muted-foreground">
-                  A acta de recepção será registada na trilha de auditoria e o exercício transitará para o estado "Em Análise".
-                </p>
+                <p className="text-xs text-muted-foreground">A acta de recepção será registada na trilha de auditoria e o exercício transitará para o estado "Em Análise".</p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
