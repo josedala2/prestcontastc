@@ -402,9 +402,9 @@ function FinancialTable({
 
 // ─── Main Component ───
 const PortalPrestacaoContas = () => {
-  const { entity } = usePortalEntity();
+  const { entity, userRole } = usePortalEntity();
   const [periodo, setPeriodo] = useState("2024");
-  const [activeTab, setActiveTab] = useState("balanco");
+  const [activeTab, setActiveTab] = useState("balancete");
 
   // Values state for all sections
   const [ativNaoCorr, setAtivNaoCorr] = useState<Record<string, number>>({});
@@ -621,7 +621,8 @@ const PortalPrestacaoContas = () => {
         </CardContent>
       </Card>
 
-      {/* Upload Section */}
+      {/* Upload Section - only for tecnico */}
+      {userRole === "tecnico" && (
       <Card className="mb-6 border-dashed border-2 border-primary/30">
         <CardContent className="pt-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -687,7 +688,100 @@ const PortalPrestacaoContas = () => {
           </div>
         </CardContent>
       </Card>
+      )}
 
+      {userRole === "entidade" ? (
+        /* ─── VISTA DA ENTIDADE: Apenas carregar balancete ─── */
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileSpreadsheet className="h-5 w-5 text-primary" />
+              Carregar Balancete
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+              <p className="text-sm text-muted-foreground">
+                Carregue o ficheiro Excel do balancete da entidade para o exercício seleccionado.
+                O Tribunal de Contas irá analisar e preencher as demonstrações financeiras com base nos dados fornecidos.
+              </p>
+            </div>
+
+            <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center">
+              <Upload className="h-10 w-10 text-primary/40 mx-auto mb-3" />
+              <p className="text-sm font-medium mb-1">Arraste o ficheiro ou clique para carregar</p>
+              <p className="text-xs text-muted-foreground mb-4">Formatos aceites: .xlsx, .xls, .csv</p>
+              
+              {uploadedFile && (
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <Badge variant="secondary" className="text-xs gap-1">
+                    <FileUp className="h-3 w-3" />
+                    {uploadedFile}
+                  </Badge>
+                  <button onClick={() => setUploadedFile(null)} className="text-muted-foreground hover:text-foreground">
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+
+              <div className="flex justify-center gap-3">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="gap-2"
+                >
+                  <FileSpreadsheet className="h-4 w-4" />
+                  Carregar Ficheiro
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={generateCC2Template}
+                  className="gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Descarregar Template
+                </Button>
+              </div>
+            </div>
+
+            {uploadedFile && (
+              <div className="flex justify-end">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button className="gap-2">
+                      <Send className="h-4 w-4" />
+                      Submeter Balancete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirmar Submissão do Balancete</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Está prestes a submeter o balancete "{uploadedFile}" para o exercício {periodo} ao Tribunal de Contas. Deseja continuar?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => toast.success("Balancete submetido com sucesso!")}>
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Confirmar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        /* ─── VISTA DO TÉCNICO: Todas as tabs ─── */
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
           <TabsTrigger value="balanco" className="text-xs gap-1">
@@ -1107,6 +1201,7 @@ const PortalPrestacaoContas = () => {
           </Card>
         </TabsContent>
       </Tabs>
+      )}
     </PortalLayout>
   );
 };
