@@ -22,6 +22,7 @@ const demoUsers = [
     email: "tecnico@tca.gov.ao",
     password: "tecnico123",
     role: "Técnico Validador",
+    displayName: "Ana Ferreira",
     icon: UserCheck,
     description: "Validação e análise de contas",
     color: "bg-accent/10 text-accent border-accent/20",
