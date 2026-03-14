@@ -405,9 +405,8 @@ function FinancialTable({
 
 // ─── Main Component ───
 const PortalPrestacaoContas = () => {
-  const { entity, userRole } = usePortalEntity();
+  const { entity } = usePortalEntity();
   const [periodo, setPeriodo] = useState("2024");
-  const [activeTab, setActiveTab] = useState("balancete");
 
   // Values state for all sections
   const [ativNaoCorr, setAtivNaoCorr] = useState<Record<string, number>>({});
