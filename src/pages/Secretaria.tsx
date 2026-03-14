@@ -70,6 +70,14 @@ const Secretaria = () => {
     };
   };
 
+  const handlePreviewPdf = () => {
+    const data = buildActaData();
+    if (!data) return;
+    if (pdfPreviewUrl) URL.revokeObjectURL(pdfPreviewUrl);
+    const url = exportActaRecepcaoPdf(data, true);
+    setPdfPreviewUrl(url);
+  };
+
   const handleConfirmRecepcao = () => {
     const data = buildActaData();
     if (!data || !selectedFy) return;
