@@ -493,7 +493,7 @@ export function exportDocumentoTribunalPdf(doc: DocumentoTribunal, entityName = 
     margin: { left: 14 },
   });
 
-  y = (metaTable as any).finalY + 6;
+  y = (pdf as any).lastAutoTable.finalY + 6;
 
   // ── Divider ──
   pdf.setDrawColor(202, 148, 62);
