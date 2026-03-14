@@ -618,7 +618,9 @@ export interface ActaRecepcaoData {
   totalCredito: number;
 }
 
-export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false) {
+export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview?: false): void;
+export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview: true): string;
+export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false): string | void {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const centerX = pageWidth / 2;
