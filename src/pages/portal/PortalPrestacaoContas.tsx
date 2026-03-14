@@ -1199,6 +1199,7 @@ const PortalPrestacaoContas = () => {
           </Card>
         </TabsContent>
       </Tabs>
+      )}
     </PortalLayout>
   );
 };
