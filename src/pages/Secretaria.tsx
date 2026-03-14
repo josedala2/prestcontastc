@@ -97,6 +97,18 @@ const Secretaria = () => {
     toast.success(`Acta de recepção gerada — ${selectedFy.entityName} — ${selectedFy.year}`);
   };
 
+  const handleConfirmRejeicao = () => {
+    if (!selectedFy || !motivoRejeicao.trim()) return;
+    const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
+    rejeitar(selectedFy.entityId, fiscalYearId, motivoRejeicao.trim());
+    setActasGeradas((prev) => [...prev, selectedFy.id]);
+    setRejectDialogOpen(false);
+    setMotivoRejeicao("");
+    setSelectedId(null);
+    setCheckedDocs({});
+    toast.warning(`Submissão devolvida — ${selectedFy.entityName} — ${selectedFy.year}`);
+  };
+
   // Dashboard stats
   const pendentesCount = submetidos.length - actasGeradas.length;
   const emAnalise = mockFiscalYears.filter((fy) => fy.status === "em_analise").length;
