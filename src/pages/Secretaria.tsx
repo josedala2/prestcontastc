@@ -11,8 +11,9 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { mockFiscalYears, mockEntities, submissionChecklist, formatKz } from "@/data/mockData";
-import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck } from "lucide-react";
+import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck, Download } from "lucide-react";
 import { toast } from "sonner";
+import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 
 // Exercícios com status "submetido" → pendentes de recepção pela Secretaria
 const Secretaria = () => {
@@ -39,13 +40,34 @@ const Secretaria = () => {
   };
 
   const handleConfirmRecepcao = () => {
-    if (!selectedFy) return;
+    if (!selectedFy || !selectedEntity) return;
+
+    // Generate PDF
+    exportActaRecepcaoPdf({
+      actaNumero,
+      entityName: selectedEntity.name,
+      entityNif: selectedEntity.nif,
+      entityTutela: selectedEntity.tutela,
+      entityMorada: selectedEntity.morada,
+      exercicioYear: selectedFy.year,
+      periodoInicio: selectedFy.startDate,
+      periodoFim: selectedFy.endDate,
+      submittedAt: selectedFy.submittedAt || "",
+      totalDebito: selectedFy.totalDebito,
+      totalCredito: selectedFy.totalCredito,
+      documentosVerificados: submissionChecklist.map((item) => ({
+        label: item.label,
+        required: item.required,
+        checked: !!checkedDocs[item.id],
+      })),
+    });
+
     setActasGeradas((prev) => [...prev, selectedFy.id]);
     setConfirmDialogOpen(false);
     setSelectedId(null);
     setCheckedDocs({});
     toast.success(
-      `Acta de recepção gerada com sucesso para ${selectedFy.entityName} — ${selectedFy.year}`,
+      `Acta de recepção gerada e descarregada — ${selectedFy.entityName} — ${selectedFy.year}`,
     );
   };
 
