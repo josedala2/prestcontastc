@@ -32,10 +32,7 @@ const PortalEsclarecimentos = () => {
   const { entity } = usePortalEntity();
   
   // Filter clarifications for current entity
-  const entityClarifications = mockClarifications.filter((cr) => {
-    const entityShort = entity.name.split(" - ")[1]?.split(",")[0] || entity.name.split(" ")[0];
-    return cr.entityName.includes(entityShort);
-  });
+  const entityClarifications = mockClarifications.filter((cr) => cr.entityId === entity.id);
 
   const [requests, setRequests] = useState<ClarificationRequest[]>(entityClarifications);
   const [selectedRequest, setSelectedRequest] = useState<ClarificationRequest | null>(null);
