@@ -308,35 +308,7 @@ function EntidadeView({
   );
 }
 
-// ─── Small sub-components ───
-function IndicadorRow({ label, value, desc }: { label: string; value: string; desc?: string }) {
-  return (
-    <div className="flex justify-between items-start border-b border-border/50 pb-2">
-      <div>
-        <span className="text-sm font-medium">{label}</span>
-        {desc && <p className="text-[10px] text-muted-foreground">{desc}</p>}
-      </div>
-      <span className="text-sm font-semibold tabular-nums">{value}</span>
-    </div>
-  );
-}
 
-function ResumoRow({ label, value, bold, color }: { label: string; value: number; bold?: boolean; color?: string }) {
-  return (
-    <tr>
-      <td className={`py-1 ${bold ? "font-semibold" : ""}`}>{label}</td>
-      <td className={`py-1 text-right tabular-nums ${bold ? "font-semibold" : ""} ${color || ""}`}>{formatKz(value)}</td>
-    </tr>
-  );
-}
 
-function SummaryCard({ label, value, color }: { label: string; value: string; color?: string }) {
-  return (
-    <div className="bg-muted/30 rounded-lg p-3 text-center">
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
-      <p className={`text-sm font-bold mt-1 ${color || ""}`}>{value}</p>
-    </div>
-  );
-}
 
 export default PortalPrestacaoContas;
