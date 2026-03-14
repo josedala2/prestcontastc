@@ -312,6 +312,7 @@ const Secretaria = () => {
                         <TableHead>Documento</TableHead>
                         <TableHead className="text-center">Obrigatório</TableHead>
                         <TableHead className="text-center">Estado</TableHead>
+                        <TableHead className="text-center w-24">Acções</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -343,6 +344,37 @@ const Secretaria = () => {
                                   <XCircle className="h-3.5 w-3.5" /> Pendente
                                 </span>
                               )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 w-7 p-0"
+                                title={`Visualizar ${item.label}`}
+                                onClick={() => {
+                                  if (!selectedFy || !selectedEntity) return;
+                                  exportActaRecepcaoPdf({
+                                    actaNumero,
+                                    entityName: selectedEntity.name,
+                                    entityNif: selectedEntity.nif,
+                                    entityTutela: selectedEntity.tutela,
+                                    entityMorada: selectedEntity.morada,
+                                    exercicioYear: selectedFy.year,
+                                    periodoInicio: selectedFy.startDate,
+                                    periodoFim: selectedFy.endDate,
+                                    submittedAt: selectedFy.submittedAt || "",
+                                    totalDebito: selectedFy.totalDebito,
+                                    totalCredito: selectedFy.totalCredito,
+                                    documentosVerificados: submissionChecklist.map((c) => ({
+                                      label: c.label,
+                                      required: c.required,
+                                      checked: !!checkedDocs[c.id],
+                                    })),
+                                  }, true);
+                                }}
+                              >
+                                <Eye className="h-3.5 w-3.5" />
+                              </Button>
                             </TableCell>
                           </TableRow>
                         );
