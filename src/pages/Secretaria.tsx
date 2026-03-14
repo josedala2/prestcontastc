@@ -10,8 +10,11 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { mockFiscalYears, mockEntities, submissionChecklist, formatKz } from "@/data/mockData";
-import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck, Eye } from "lucide-react";
+import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck, Eye, X } from "lucide-react";
 import { toast } from "sonner";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 import { EntityProfilePanel } from "@/components/secretaria/EntityProfilePanel";
@@ -22,6 +25,7 @@ const Secretaria = () => {
   const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [actasGeradas, setActasGeradas] = useState<string[]>([]);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
 
   const selectedFy = submetidos.find((fy) => fy.id === selectedId);
   const selectedEntity = selectedFy ? mockEntities.find((e) => e.id === selectedFy.entityId) : null;
@@ -66,6 +70,14 @@ const Secretaria = () => {
     };
   };
 
+  const handlePreviewPdf = () => {
+    const data = buildActaData();
+    if (!data) return;
+    if (pdfPreviewUrl) URL.revokeObjectURL(pdfPreviewUrl);
+    const url = exportActaRecepcaoPdf(data, true);
+    setPdfPreviewUrl(url);
+  };
+
   const handleConfirmRecepcao = () => {
     const data = buildActaData();
     if (!data || !selectedFy) return;
@@ -103,10 +115,7 @@ const Secretaria = () => {
                 variant="outline"
                 size="sm"
                 className="gap-1.5 text-xs"
-                onClick={() => {
-                  const data = buildActaData();
-                  if (data) exportActaRecepcaoPdf(data, true);
-                }}
+                onClick={handlePreviewPdf}
               >
                 <Eye className="h-3.5 w-3.5" />
                 Visualizar PDF
@@ -162,10 +171,7 @@ const Secretaria = () => {
                         size="sm"
                         className="h-7 w-7 p-0"
                         title={`Visualizar ${item.label}`}
-                        onClick={() => {
-                          const data = buildActaData();
-                          if (data) exportActaRecepcaoPdf(data, true);
-                        }}
+                        onClick={handlePreviewPdf}
                       >
                         <Eye className="h-3.5 w-3.5" />
                       </Button>
@@ -192,10 +198,7 @@ const Secretaria = () => {
           </Button>
           <Button
             variant="secondary"
-            onClick={() => {
-              const data = buildActaData();
-              if (data) exportActaRecepcaoPdf(data, true);
-            }}
+            onClick={handlePreviewPdf}
             className="gap-2"
           >
             <Eye className="h-4 w-4" />
@@ -359,6 +362,35 @@ const Secretaria = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Dialog de Pré-visualização PDF inline */}
+      <Dialog
+        open={!!pdfPreviewUrl}
+        onOpenChange={(open) => {
+          if (!open) {
+            if (pdfPreviewUrl) URL.revokeObjectURL(pdfPreviewUrl);
+            setPdfPreviewUrl(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 gap-0">
+          <DialogHeader className="px-6 py-4 border-b shrink-0">
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <Eye className="h-4 w-4 text-primary" />
+              Pré-visualização — Acta de Recepção (Rascunho)
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0">
+            {pdfPreviewUrl && (
+              <iframe
+                src={pdfPreviewUrl}
+                className="w-full h-full border-0"
+                title="Pré-visualização da Acta de Recepção"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };

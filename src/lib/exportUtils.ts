@@ -618,7 +618,9 @@ export interface ActaRecepcaoData {
   totalCredito: number;
 }
 
-export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false) {
+export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview?: false): void;
+export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview: true): string;
+export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false): string | void {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const centerX = pageWidth / 2;
@@ -824,7 +826,8 @@ export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false) {
       doc.restoreGraphicsState();
     }
 
-    doc.save(`RASCUNHO_Acta_Recepcao_${data.actaNumero.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
+    const pdfBlob = doc.output("blob");
+    return URL.createObjectURL(pdfBlob);
   } else {
     doc.save(`Acta_Recepcao_${data.actaNumero.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
   }
