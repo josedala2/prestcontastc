@@ -805,5 +805,11 @@ export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false) {
     { align: "center" }
   );
 
-  doc.save(`Acta_Recepcao_${data.actaNumero.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
+  if (preview) {
+    const pdfBlob = doc.output("blob");
+    const url = URL.createObjectURL(pdfBlob);
+    window.open(url, "_blank");
+  } else {
+    doc.save(`Acta_Recepcao_${data.actaNumero.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
+  }
 }
