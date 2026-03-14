@@ -19,6 +19,7 @@ import DocumentosObrigatorios from "./pages/DocumentosObrigatorios";
 import Auditoria from "./pages/Auditoria";
 import Esclarecimentos from "./pages/Esclarecimentos";
 import Configuracoes from "./pages/Configuracoes";
+import Secretaria from "./pages/Secretaria";
 import PortalDashboard from "./pages/portal/PortalDashboard";
 import PortalExercicios from "./pages/portal/PortalExercicios";
 import PortalExercicioDetalhe from "./pages/portal/PortalExercicioDetalhe";
