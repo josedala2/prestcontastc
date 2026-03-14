@@ -98,9 +98,9 @@ const Secretaria = () => {
   };
 
   const handleConfirmRejeicao = () => {
-    if (!selectedFy || !motivoRejeicao.trim()) return;
+    if (!selectedFy || !selectedEntity || !motivoRejeicao.trim()) return;
     const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
-    rejeitar(selectedFy.entityId, fiscalYearId, motivoRejeicao.trim());
+    rejeitar(selectedFy.entityId, fiscalYearId, motivoRejeicao.trim(), selectedEntity.name, `entidade@${selectedEntity.nif}.ao`);
     setActasGeradas((prev) => [...prev, selectedFy.id]);
     setRejectDialogOpen(false);
     setMotivoRejeicao("");
