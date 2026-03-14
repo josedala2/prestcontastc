@@ -26,6 +26,15 @@ const demoUsers = [
     color: "bg-accent/10 text-accent border-accent/20",
   },
   {
+    label: "Secretaria",
+    email: "secretaria@tca.gov.ao",
+    password: "secretaria123",
+    role: "Secretaria",
+    icon: Stamp,
+    description: "Recepção e emissão de actas",
+    color: "bg-warning/10 text-warning border-warning/20",
+  },
+  {
     label: "Entidade (Portal)",
     email: "entidade@ende.co.ao",
     password: "entidade123",
