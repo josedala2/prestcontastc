@@ -416,6 +416,55 @@ const Secretaria = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog de Rejeição / Devolução */}
+      <AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <AlertDialogContent className="max-w-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Devolver Submissão
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4">
+                <p>A submissão será devolvida à entidade para correção. Indique o motivo da devolução.</p>
+                {selectedFy && selectedEntity && (
+                  <div className="bg-muted/50 rounded-lg p-3 space-y-2 text-sm">
+                    <div className="flex justify-between"><span className="text-muted-foreground">Entidade</span><span className="font-medium text-foreground">{selectedEntity.name}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Exercício</span><span className="font-medium text-foreground">{selectedFy.year}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Documentos verificados</span><span className="font-medium text-foreground">{checkedCount}/{submissionChecklist.length}</span></div>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="motivo-rejeicao" className="text-sm font-medium text-foreground">
+                    Motivo da devolução <span className="text-destructive">*</span>
+                  </Label>
+                  <Textarea
+                    id="motivo-rejeicao"
+                    placeholder="Ex: Faltam os modelos de prestação de contas nº 1 a 10 e o inventário de bens patrimoniais..."
+                    value={motivoRejeicao}
+                    onChange={(e) => setMotivoRejeicao(e.target.value)}
+                    className="min-h-[100px]"
+                    maxLength={500}
+                  />
+                  <p className="text-[10px] text-muted-foreground text-right">{motivoRejeicao.length}/500</p>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setMotivoRejeicao("")}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmRejeicao}
+              disabled={!motivoRejeicao.trim()}
+              className="gap-2 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              <Undo2 className="h-4 w-4" />
+              Confirmar Devolução
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 };
