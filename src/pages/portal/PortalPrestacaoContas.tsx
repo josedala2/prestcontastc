@@ -14,6 +14,7 @@ import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, 
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { generateCC2Template } from "@/lib/cc2TemplateGenerator";
+import { EntidadeDocumentUpload } from "@/components/portal/EntidadeDocumentUpload";
 
 // ─── Helpers ───
 const formatKz = (v: number) =>
@@ -691,95 +692,16 @@ const PortalPrestacaoContas = () => {
       )}
 
       {userRole === "entidade" ? (
-        /* ─── VISTA DA ENTIDADE: Apenas carregar balancete ─── */
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <FileSpreadsheet className="h-5 w-5 text-primary" />
-              Carregar Balancete
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-              <p className="text-sm text-muted-foreground">
-                Carregue o ficheiro Excel do balancete da entidade para o exercício seleccionado.
-                O Tribunal de Contas irá analisar e preencher as demonstrações financeiras com base nos dados fornecidos.
-              </p>
-            </div>
-
-            <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center">
-              <Upload className="h-10 w-10 text-primary/40 mx-auto mb-3" />
-              <p className="text-sm font-medium mb-1">Arraste o ficheiro ou clique para carregar</p>
-              <p className="text-xs text-muted-foreground mb-4">Formatos aceites: .xlsx, .xls, .csv</p>
-              
-              {uploadedFile && (
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <Badge variant="secondary" className="text-xs gap-1">
-                    <FileUp className="h-3 w-3" />
-                    {uploadedFile}
-                  </Badge>
-                  <button onClick={() => setUploadedFile(null)} className="text-muted-foreground hover:text-foreground">
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              )}
-
-              <div className="flex justify-center gap-3">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".xlsx,.xls,.csv"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                <Button
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="gap-2"
-                >
-                  <FileSpreadsheet className="h-4 w-4" />
-                  Carregar Ficheiro
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={generateCC2Template}
-                  className="gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  Descarregar Template
-                </Button>
-              </div>
-            </div>
-
-            {uploadedFile && (
-              <div className="flex justify-end">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button className="gap-2">
-                      <Send className="h-4 w-4" />
-                      Submeter Balancete
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Confirmar Submissão do Balancete</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Está prestes a submeter o balancete "{uploadedFile}" para o exercício {periodo} ao Tribunal de Contas. Deseja continuar?
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => toast.success("Balancete submetido com sucesso!")}>
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Confirmar
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        /* ─── VISTA DA ENTIDADE: Carregar documentos obrigatórios ─── */
+        <EntidadeDocumentUpload
+          periodo={periodo}
+          entity={entity}
+          uploadedFile={uploadedFile}
+          setUploadedFile={setUploadedFile}
+          fileInputRef={fileInputRef}
+          handleFileUpload={handleFileUpload}
+        />
+      
       ) : (
         /* ─── VISTA DO TÉCNICO: Todas as tabs ─── */
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
