@@ -14,7 +14,9 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { mockFiscalYears, mockEntities, submissionChecklist, formatKz } from "@/data/mockData";
-import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck, Eye, X } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck, Eye, X, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 import { EntityProfilePanel } from "@/components/secretaria/EntityProfilePanel";
@@ -27,7 +29,9 @@ const Secretaria = () => {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [actasGeradas, setActasGeradas] = useState<string[]>([]);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
-  const { recepcionar } = useSubmissions();
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [motivoRejeicao, setMotivoRejeicao] = useState("");
+  const { recepcionar, rejeitar } = useSubmissions();
 
   const selectedFy = submetidos.find((fy) => fy.id === selectedId);
   const selectedEntity = selectedFy ? mockEntities.find((e) => e.id === selectedFy.entityId) : null;
@@ -91,6 +95,18 @@ const Secretaria = () => {
     setSelectedId(null);
     setCheckedDocs({});
     toast.success(`Acta de recepção gerada — ${selectedFy.entityName} — ${selectedFy.year}`);
+  };
+
+  const handleConfirmRejeicao = () => {
+    if (!selectedFy || !motivoRejeicao.trim()) return;
+    const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
+    rejeitar(selectedFy.entityId, fiscalYearId, motivoRejeicao.trim());
+    setActasGeradas((prev) => [...prev, selectedFy.id]);
+    setRejectDialogOpen(false);
+    setMotivoRejeicao("");
+    setSelectedId(null);
+    setCheckedDocs({});
+    toast.warning(`Submissão devolvida — ${selectedFy.entityName} — ${selectedFy.year}`);
   };
 
   // Dashboard stats
@@ -199,6 +215,14 @@ const Secretaria = () => {
         <div className="flex gap-3">
           <Button variant="outline" onClick={() => { setSelectedId(null); setCheckedDocs({}); }}>
             Cancelar
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => setRejectDialogOpen(true)}
+            className="gap-2"
+          >
+            <Undo2 className="h-4 w-4" />
+            Devolver
           </Button>
           <Button
             variant="secondary"
@@ -392,6 +416,55 @@ const Secretaria = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog de Rejeição / Devolução */}
+      <AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <AlertDialogContent className="max-w-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Devolver Submissão
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4">
+                <p>A submissão será devolvida à entidade para correção. Indique o motivo da devolução.</p>
+                {selectedFy && selectedEntity && (
+                  <div className="bg-muted/50 rounded-lg p-3 space-y-2 text-sm">
+                    <div className="flex justify-between"><span className="text-muted-foreground">Entidade</span><span className="font-medium text-foreground">{selectedEntity.name}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Exercício</span><span className="font-medium text-foreground">{selectedFy.year}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Documentos verificados</span><span className="font-medium text-foreground">{checkedCount}/{submissionChecklist.length}</span></div>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="motivo-rejeicao" className="text-sm font-medium text-foreground">
+                    Motivo da devolução <span className="text-destructive">*</span>
+                  </Label>
+                  <Textarea
+                    id="motivo-rejeicao"
+                    placeholder="Ex: Faltam os modelos de prestação de contas nº 1 a 10 e o inventário de bens patrimoniais..."
+                    value={motivoRejeicao}
+                    onChange={(e) => setMotivoRejeicao(e.target.value)}
+                    className="min-h-[100px]"
+                    maxLength={500}
+                  />
+                  <p className="text-[10px] text-muted-foreground text-right">{motivoRejeicao.length}/500</p>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setMotivoRejeicao("")}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmRejeicao}
+              disabled={!motivoRejeicao.trim()}
+              className="gap-2 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              <Undo2 className="h-4 w-4" />
+              Confirmar Devolução
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 };
