@@ -1254,7 +1254,7 @@ function EntidadeView({
                     accept=".xlsx,.xls,.csv"
                     onChange={handleFileUpload}
                     className="hidden"
-                    disabled={isSubmitted}
+                    disabled={isSubmitted && !canResubmit}
                   />
                   <Button
                     variant="outline"
