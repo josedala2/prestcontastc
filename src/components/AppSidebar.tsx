@@ -16,6 +16,7 @@ import {
   MessageSquare,
   ExternalLink,
   Settings,
+  Stamp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,7 @@ const navSections = [
       { title: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
       { title: "Entidades", icon: Building2, path: "/entidades" },
       { title: "Exercícios", icon: Calendar, path: "/exercicios" },
+      { title: "Secretaria", icon: Stamp, path: "/secretaria" },
     ],
   },
   {
