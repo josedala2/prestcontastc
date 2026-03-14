@@ -3,6 +3,7 @@ import { PortalLayout } from "@/components/PortalLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
 import { mockClarifications } from "@/data/mockData";
 import { ClarificationRequest } from "@/types";
+import { getEntityShortName } from "@/data/mockData";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,10 +33,7 @@ const PortalEsclarecimentos = () => {
   const { entity } = usePortalEntity();
   
   // Filter clarifications for current entity
-  const entityClarifications = mockClarifications.filter((cr) => {
-    const entityShort = entity.name.split(" - ")[1]?.split(",")[0] || entity.name.split(" ")[0];
-    return cr.entityName.includes(entityShort);
-  });
+  const entityClarifications = mockClarifications.filter((cr) => cr.entityId === entity.id);
 
   const [requests, setRequests] = useState<ClarificationRequest[]>(entityClarifications);
   const [selectedRequest, setSelectedRequest] = useState<ClarificationRequest | null>(null);
@@ -57,7 +55,7 @@ const PortalEsclarecimentos = () => {
           responses: [
             ...(r.responses || []),
             {
-              user: `Contabilista ${entity.name.split(" - ")[1]?.split(",")[0] || entity.name.split(" ")[0]}`,
+              user: `Contabilista ${getEntityShortName(entity)}`,
               message: newMessage.trim(),
               date: new Date().toISOString().split("T")[0],
             },

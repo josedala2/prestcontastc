@@ -77,7 +77,7 @@ const Esclarecimentos = () => {
           responses: [
             ...(r.responses || []),
             {
-              user: "João Silva (Técnico TCA)",
+              user: "Carlos Mendes (Administrador TCA)",
               message: newMessage.trim(),
               date: new Date().toISOString().split("T")[0],
             },
@@ -113,16 +113,17 @@ const Esclarecimentos = () => {
   const handleCreateRequest = () => {
     if (!newSubject.trim() || !newBody.trim() || !newEntity) return;
 
-    const entity = mockFiscalYears.find((fy) => fy.id === newEntity);
-    if (!entity) return;
+    const fy = mockFiscalYears.find((f) => f.id === newEntity);
+    if (!fy) return;
 
     const deadline = new Date();
     deadline.setDate(deadline.getDate() + parseInt(newDeadlineDays));
 
     const newReq: ClarificationRequest = {
       id: `cr${Date.now()}`,
-      exercicioId: entity.id,
-      entityName: entity.entityName,
+      exercicioId: fy.id,
+      entityId: fy.entityId,
+      entityName: fy.entityName,
       subject: newSubject.trim(),
       message: newBody.trim(),
       status: "pendente",

@@ -114,39 +114,50 @@ export const mockEntities: Entity[] = [
   },
 ];
 
+// Helper: extract short name from entity full name
+export const getEntityShortName = (entity: Entity): string => {
+  const parts = entity.name.split(" - ");
+  return parts.length > 1 ? parts[1].trim() : entity.name;
+};
+
+// Short-name lookup map
+const entityShort = (id: string) => {
+  const e = mockEntities.find((ent) => ent.id === id);
+  return e ? getEntityShortName(e) : "Desconhecida";
+};
+
 // ─── Exercícios Fiscais (2023 e 2024 para cada entidade) ───
 export const mockFiscalYears: FiscalYear[] = [
   // ENDE
-  // ENDE
-  { id: "fy1", entityId: "1", entityName: "ENDE, E.P.", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "rascunho", totalDebito: 15834567890, totalCredito: 15834567890, errorsCount: 5, warningsCount: 3, checklistProgress: 45, deadline: "2025-06-30" },
-  { id: "fy1b", entityId: "1", entityName: "ENDE, E.P.", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 14200000000, totalCredito: 14200000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-10" },
+  { id: "fy1", entityId: "1", entityName: entityShort("1"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "rascunho", totalDebito: 15834567890, totalCredito: 15834567890, errorsCount: 5, warningsCount: 3, checklistProgress: 45, deadline: "2025-06-30" },
+  { id: "fy1b", entityId: "1", entityName: entityShort("1"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 14200000000, totalCredito: 14200000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-10" },
   // INEA
-  { id: "fy2", entityId: "2", entityName: "INEA", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 8921345000, totalCredito: 8921345000, errorsCount: 0, warningsCount: 2, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-15" },
-  { id: "fy2b", entityId: "2", entityName: "INEA", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 7850000000, totalCredito: 7850000000, errorsCount: 0, warningsCount: 1, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-03-28" },
+  { id: "fy2", entityId: "2", entityName: entityShort("2"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 8921345000, totalCredito: 8921345000, errorsCount: 0, warningsCount: 2, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-15" },
+  { id: "fy2b", entityId: "2", entityName: entityShort("2"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 7850000000, totalCredito: 7850000000, errorsCount: 0, warningsCount: 1, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-03-28" },
   // FSDEA
-  { id: "fy3", entityId: "3", entityName: "FSDEA", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_analise", totalDebito: 45230000000, totalCredito: 45230000000, errorsCount: 1, warningsCount: 0, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-03-28" },
-  { id: "fy3b", entityId: "3", entityName: "FSDEA", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 42100000000, totalCredito: 42100000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-05" },
+  { id: "fy3", entityId: "3", entityName: entityShort("3"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_analise", totalDebito: 45230000000, totalCredito: 45230000000, errorsCount: 1, warningsCount: 0, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-03-28" },
+  { id: "fy3b", entityId: "3", entityName: entityShort("3"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 42100000000, totalCredito: 42100000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-05" },
   // EPAL
-  { id: "fy4", entityId: "4", entityName: "EPAL, E.P.", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_validacao", totalDebito: 12450000000, totalCredito: 12450000000, errorsCount: 3, warningsCount: 4, checklistProgress: 78, deadline: "2025-06-30" },
-  { id: "fy4b", entityId: "4", entityName: "EPAL, E.P.", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "nao_conforme", totalDebito: 11200000000, totalCredito: 11200000000, errorsCount: 7, warningsCount: 5, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-05-12" },
+  { id: "fy4", entityId: "4", entityName: entityShort("4"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_validacao", totalDebito: 12450000000, totalCredito: 12450000000, errorsCount: 3, warningsCount: 4, checklistProgress: 78, deadline: "2025-06-30" },
+  { id: "fy4b", entityId: "4", entityName: entityShort("4"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "nao_conforme", totalDebito: 11200000000, totalCredito: 11200000000, errorsCount: 7, warningsCount: 5, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-05-12" },
   // INAVIC
-  { id: "fy5", entityId: "5", entityName: "INAVIC", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "com_pedidos", totalDebito: 3280000000, totalCredito: 3280000000, errorsCount: 2, warningsCount: 1, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-20" },
-  { id: "fy5b", entityId: "5", entityName: "INAVIC", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 2950000000, totalCredito: 2950000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-12" },
+  { id: "fy5", entityId: "5", entityName: entityShort("5"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "com_pedidos", totalDebito: 3280000000, totalCredito: 3280000000, errorsCount: 2, warningsCount: 1, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-20" },
+  { id: "fy5b", entityId: "5", entityName: entityShort("5"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 2950000000, totalCredito: 2950000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-12" },
   // FADA
-  { id: "fy6", entityId: "6", entityName: "FADA", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 5670000000, totalCredito: 5670000000, errorsCount: 0, warningsCount: 3, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-10" },
-  { id: "fy6b", entityId: "6", entityName: "FADA", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 4890000000, totalCredito: 4890000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-08" },
+  { id: "fy6", entityId: "6", entityName: entityShort("6"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 5670000000, totalCredito: 5670000000, errorsCount: 0, warningsCount: 3, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-10" },
+  { id: "fy6b", entityId: "6", entityName: entityShort("6"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 4890000000, totalCredito: 4890000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-08" },
   // EPL
-  { id: "fy7", entityId: "7", entityName: "EPL, E.P.", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "rascunho", totalDebito: 7890000000, totalCredito: 7890000000, errorsCount: 8, warningsCount: 6, checklistProgress: 25, deadline: "2025-06-30" },
-  { id: "fy7b", entityId: "7", entityName: "EPL, E.P.", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "nao_conforme", totalDebito: 7120000000, totalCredito: 7120000000, errorsCount: 4, warningsCount: 3, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-05-20" },
+  { id: "fy7", entityId: "7", entityName: entityShort("7"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "rascunho", totalDebito: 7890000000, totalCredito: 7890000000, errorsCount: 8, warningsCount: 6, checklistProgress: 25, deadline: "2025-06-30" },
+  { id: "fy7b", entityId: "7", entityName: entityShort("7"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "nao_conforme", totalDebito: 7120000000, totalCredito: 7120000000, errorsCount: 4, warningsCount: 3, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-05-20" },
   // INAMET
-  { id: "fy8", entityId: "8", entityName: "INAMET", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_validacao", totalDebito: 1560000000, totalCredito: 1560000000, errorsCount: 1, warningsCount: 2, checklistProgress: 92, deadline: "2025-06-30" },
-  { id: "fy8b", entityId: "8", entityName: "INAMET", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 1420000000, totalCredito: 1420000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-15" },
+  { id: "fy8", entityId: "8", entityName: entityShort("8"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_validacao", totalDebito: 1560000000, totalCredito: 1560000000, errorsCount: 1, warningsCount: 2, checklistProgress: 92, deadline: "2025-06-30" },
+  { id: "fy8b", entityId: "8", entityName: entityShort("8"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 1420000000, totalCredito: 1420000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-15" },
   // ENSA
-  { id: "fy9", entityId: "9", entityName: "ENSA, E.P.", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_analise", totalDebito: 28900000000, totalCredito: 28900000000, errorsCount: 0, warningsCount: 1, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-03-20" },
-  { id: "fy9b", entityId: "9", entityName: "ENSA, E.P.", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 26500000000, totalCredito: 26500000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-02" },
+  { id: "fy9", entityId: "9", entityName: entityShort("9"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_analise", totalDebito: 28900000000, totalCredito: 28900000000, errorsCount: 0, warningsCount: 1, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-03-20" },
+  { id: "fy9b", entityId: "9", entityName: entityShort("9"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 26500000000, totalCredito: 26500000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-02" },
   // IGAPE
-  { id: "fy10", entityId: "10", entityName: "IGAPE", year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 95400000000, totalCredito: 95400000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-01" },
-  { id: "fy10b", entityId: "10", entityName: "IGAPE", year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 89200000000, totalCredito: 89200000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-03-25" },
+  { id: "fy10", entityId: "10", entityName: entityShort("10"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 95400000000, totalCredito: 95400000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-01" },
+  { id: "fy10b", entityId: "10", entityName: entityShort("10"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 89200000000, totalCredito: 89200000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-03-25" },
 ];
 
 // ─── Plano de Contas PGC (Decreto nº 82/2001, actualizado pelo DP nº 180/19) ───
@@ -556,25 +567,26 @@ export const mockAttachments: Attachment[] = [
 ];
 
 export const mockAuditLog: AuditLogEntry[] = [
-  { id: "al1", action: "Importação de Balancete", user: "João Silva", timestamp: "2025-03-15 10:30", detail: "37 linhas importadas — Modelo CC-2", actionType: "importacao" },
-  { id: "al2", action: "Validação executada", user: "João Silva", timestamp: "2025-03-15 10:35", detail: "5 erros, 3 avisos encontrados (3 níveis)", actionType: "validacao" },
-  { id: "al3", action: "Upload de Anexo", user: "Maria Santos", timestamp: "2025-03-18 14:20", detail: "Reconciliação Bancária - BFA.xlsx (v1)", actionType: "upload" },
-  { id: "al4", action: "Edição de Entidade", user: "Admin", timestamp: "2025-03-20 09:00", detail: "ENDE, E.P. — Atualização de contacto e tipologia", actionType: "edicao" },
-  { id: "al5", action: "Submissão de Exercício", user: "Dr. António (Dirigente)", timestamp: "2025-04-15 16:00", detail: "INEA 2024 — Submetido ao Tribunal de Contas", actionType: "submissao" },
-  { id: "al6", action: "Aprovação de Exercício", user: "Técnico Validador TCA", timestamp: "2025-04-20 09:30", detail: "ENDE 2023 — Marcado como Conforme", actionType: "aprovacao" },
-  { id: "al7", action: "Pedido de Esclarecimento", user: "Técnico Validador TCA", timestamp: "2025-04-22 11:00", detail: "FSDEA 2024 — Solicitada justificação de variação em custos", actionType: "validacao" },
-  { id: "al8", action: "Exportação de Dossiê", user: "Maria Santos", timestamp: "2025-04-25 15:45", detail: "Pacote ZIP — INEA 2024 (12 ficheiros)", actionType: "exportacao" },
-  { id: "al9", action: "Importação de Balancete", user: "Ana Ferreira", timestamp: "2025-03-22 09:15", detail: "EPAL — 42 linhas importadas — Modelo CC-3", actionType: "importacao" },
-  { id: "al10", action: "Submissão de Exercício", user: "Dr. Manuel Costa", timestamp: "2025-04-10 14:30", detail: "FADA 2024 — Submetido ao Tribunal de Contas", actionType: "submissao" },
-  { id: "al11", action: "Validação executada", user: "Sistema", timestamp: "2025-03-25 08:00", detail: "ENSA 2024 — 0 erros, 1 aviso encontrado", actionType: "validacao" },
-  { id: "al12", action: "Upload de Anexo", user: "Pedro Neto", timestamp: "2025-04-01 11:00", detail: "IGAPE — Relatório de Gestão 2024 (v1)", actionType: "upload" },
+  { id: "al1", action: "Importação de Balancete", user: "Carlos Mendes", timestamp: "2025-03-15 10:30", detail: `37 linhas importadas — Modelo CC-2 (${entityShort("1")})`, actionType: "importacao" },
+  { id: "al2", action: "Validação executada", user: "Carlos Mendes", timestamp: "2025-03-15 10:35", detail: "5 erros, 3 avisos encontrados (3 níveis)", actionType: "validacao" },
+  { id: "al3", action: "Upload de Anexo", user: "Maria Costa", timestamp: "2025-03-18 14:20", detail: `Reconciliação Bancária - BFA.xlsx (v1) — ${entityShort("1")}`, actionType: "upload" },
+  { id: "al4", action: "Edição de Entidade", user: "Carlos Mendes", timestamp: "2025-03-20 09:00", detail: `${entityShort("1")} — Atualização de contacto e tipologia`, actionType: "edicao" },
+  { id: "al5", action: "Submissão de Exercício", user: "Maria Costa", timestamp: "2025-04-15 16:00", detail: `${entityShort("2")} 2024 — Submetido ao Tribunal de Contas`, actionType: "submissao" },
+  { id: "al6", action: "Aprovação de Exercício", user: "Ana Ferreira (Técnico Validador)", timestamp: "2025-04-20 09:30", detail: `${entityShort("1")} 2023 — Marcado como Conforme`, actionType: "aprovacao" },
+  { id: "al7", action: "Pedido de Esclarecimento", user: "Ana Ferreira (Técnico Validador)", timestamp: "2025-04-22 11:00", detail: `${entityShort("3")} 2024 — Solicitada justificação de variação em custos`, actionType: "validacao" },
+  { id: "al8", action: "Exportação de Dossiê", user: "Maria Costa", timestamp: "2025-04-25 15:45", detail: `Pacote ZIP — ${entityShort("2")} 2024 (12 ficheiros)`, actionType: "exportacao" },
+  { id: "al9", action: "Importação de Balancete", user: "Carlos Mendes", timestamp: "2025-03-22 09:15", detail: `${entityShort("4")} — 42 linhas importadas — Modelo CC-3`, actionType: "importacao" },
+  { id: "al10", action: "Submissão de Exercício", user: "Maria Costa", timestamp: "2025-04-10 14:30", detail: `${entityShort("6")} 2024 — Submetido ao Tribunal de Contas`, actionType: "submissao" },
+  { id: "al11", action: "Validação executada", user: "Sistema", timestamp: "2025-03-25 08:00", detail: `${entityShort("9")} 2024 — 0 erros, 1 aviso encontrado`, actionType: "validacao" },
+  { id: "al12", action: "Upload de Anexo", user: "Maria Costa", timestamp: "2025-04-01 11:00", detail: `${entityShort("10")} — Relatório de Gestão 2024 (v1)`, actionType: "upload" },
 ];
 
 export const mockClarifications: ClarificationRequest[] = [
   {
     id: "cr1",
     exercicioId: "fy3",
-    entityName: "FSDEA",
+    entityId: "3",
+    entityName: entityShort("3"),
     subject: "Justificação de variação em custos com pessoal",
     message: "Solicita-se justificação para o aumento de 28.5% nos custos com pessoal face ao exercício anterior, conforme regra TCA-001.",
     status: "pendente",
@@ -584,20 +596,22 @@ export const mockClarifications: ClarificationRequest[] = [
   {
     id: "cr2",
     exercicioId: "fy2",
-    entityName: "INEA",
+    entityId: "2",
+    entityName: entityShort("2"),
     subject: "Clarificação sobre investimentos em curso",
     message: "Favor especificar a fonte de financiamento das obras em curso registadas na conta 14.1.",
     status: "respondido",
     createdAt: "2025-04-18",
     deadline: "2025-05-02",
     responses: [
-      { user: "Contabilista INEA", message: "As obras são financiadas pelo OGE 2024, rubrica 04.03.02.", date: "2025-04-25" },
+      { user: `Contabilista ${entityShort("2")}`, message: "As obras são financiadas pelo OGE 2024, rubrica 04.03.02.", date: "2025-04-25" },
     ],
   },
   {
     id: "cr3",
     exercicioId: "fy5",
-    entityName: "INAVIC",
+    entityId: "5",
+    entityName: entityShort("5"),
     subject: "Esclarecimento sobre contratos sem visto do TCA",
     message: "Foram identificados 3 contratos executados sem visto prévio do Tribunal de Contas. Solicita-se justificação e cópia dos contratos.",
     status: "pendente",
@@ -607,7 +621,8 @@ export const mockClarifications: ClarificationRequest[] = [
   {
     id: "cr4",
     exercicioId: "fy4",
-    entityName: "EPAL, E.P.",
+    entityId: "4",
+    entityName: entityShort("4"),
     subject: "Inconsistência no Balanço Patrimonial",
     message: "Detectou-se uma diferença de Kz 109.560.280,86 entre o Activo e o Capital Próprio + Passivo. Solicita-se correcção ou justificação.",
     status: "pendente",
@@ -617,7 +632,8 @@ export const mockClarifications: ClarificationRequest[] = [
   {
     id: "cr5",
     exercicioId: "fy7",
-    entityName: "EPL, E.P.",
+    entityId: "7",
+    entityName: entityShort("7"),
     subject: "Falta de documentos obrigatórios",
     message: "A entidade não submeteu o Relatório de Gestão, Demonstração de Fluxos de Caixa e Parecer do Auditor Externo. Prazo para entrega: 10 dias.",
     status: "pendente",
@@ -660,18 +676,18 @@ export const mockDocumentosTribunal: DocumentoTribunal[] = [
     entidadeId: "1",
     tipo: "notificacao",
     numeroDocumento: "NOT/TCA/2025/001",
-    assunto: "Notificação de Recepção da Prestação de Contas — ENDE 2024",
+    assunto: `Notificação de Recepção da Prestação de Contas — ${entityShort("1")} 2024`,
     conteudo: "Serve a presente para notificar V. Exa. de que a prestação de contas relativa ao exercício de 2024 foi recebida e se encontra em fase de triagem.",
     estado: "emitido",
     versao: 1,
     imutavel: true,
     hashSha256: "a3f2b8c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1",
-    criadoPor: "Secretaria TCA",
+    criadoPor: "Rosa Tavares (Secretaria TCA)",
     emitidoAt: "2025-04-20",
     createdAt: "2025-04-20",
     updatedAt: "2025-04-20",
     historico: [
-      { versao: 1, alteradoPor: "Secretaria TCA", alteradoAt: "2025-04-20", resumoAlteracao: "Emissão inicial", hashSha256: "a3f2b8c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1" },
+      { versao: 1, alteradoPor: "Rosa Tavares (Secretaria TCA)", alteradoAt: "2025-04-20", resumoAlteracao: "Emissão inicial", hashSha256: "a3f2b8c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1" },
     ],
   },
   {
@@ -686,13 +702,13 @@ export const mockDocumentosTribunal: DocumentoTribunal[] = [
     estado: "emitido",
     versao: 1,
     imutavel: false,
-    criadoPor: "Dr. Carlos Mendes (Técnico Validador)",
+    criadoPor: "Ana Ferreira (Técnico Validador)",
     emitidoAt: "2025-05-02",
     prazoResposta: "2025-05-16",
     createdAt: "2025-05-01",
     updatedAt: "2025-05-02",
     historico: [
-      { versao: 1, alteradoPor: "Dr. Carlos Mendes", alteradoAt: "2025-05-01", resumoAlteracao: "Rascunho inicial", hashSha256: "b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2" },
+      { versao: 1, alteradoPor: "Ana Ferreira", alteradoAt: "2025-05-01", resumoAlteracao: "Rascunho inicial", hashSha256: "b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2" },
     ],
   },
   {
@@ -702,18 +718,18 @@ export const mockDocumentosTribunal: DocumentoTribunal[] = [
     entidadeId: "1",
     tipo: "relatorio_analise",
     numeroDocumento: "REL/TCA/2025/001",
-    assunto: "Relatório de Análise e Verificação — ENDE 2024",
-    conteudo: "Após análise detalhada da prestação de contas da ENDE, E.P. relativa ao exercício de 2024, com base na avaliação das 27 questões de conformidade do Modelo CC-3, conclui-se que a conta apresenta nível 2 (Em Termos com Recomendações).",
+    assunto: `Relatório de Análise e Verificação — ${entityShort("1")} 2024`,
+    conteudo: `Após análise detalhada da prestação de contas da ${entityShort("1")} relativa ao exercício de 2024, com base na avaliação das 27 questões de conformidade do Modelo CC-3, conclui-se que a conta apresenta nível 2 (Em Termos com Recomendações).`,
     estado: "em_revisao",
     versao: 2,
     imutavel: false,
-    criadoPor: "Dr. Carlos Mendes (Técnico Validador)",
+    criadoPor: "Ana Ferreira (Técnico Validador)",
     aprovadoPor: undefined,
     createdAt: "2025-05-20",
     updatedAt: "2025-05-25",
     historico: [
-      { versao: 1, alteradoPor: "Dr. Carlos Mendes", alteradoAt: "2025-05-20", resumoAlteracao: "Versão inicial do relatório", hashSha256: "c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3" },
-      { versao: 2, alteradoPor: "Dr. Carlos Mendes", alteradoAt: "2025-05-25", resumoAlteracao: "Revisão com indicadores financeiros actualizados", hashSha256: "d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4" },
+      { versao: 1, alteradoPor: "Ana Ferreira", alteradoAt: "2025-05-20", resumoAlteracao: "Versão inicial do relatório", hashSha256: "c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3" },
+      { versao: 2, alteradoPor: "Ana Ferreira", alteradoAt: "2025-05-25", resumoAlteracao: "Revisão com indicadores financeiros actualizados", hashSha256: "d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4" },
     ],
   },
   {
@@ -723,8 +739,8 @@ export const mockDocumentosTribunal: DocumentoTribunal[] = [
     entidadeId: "1",
     tipo: "acordao",
     numeroDocumento: "ACO/TCA/2025/001",
-    assunto: "Acórdão — Prestação de Contas ENDE 2024",
-    conteudo: "O Tribunal de Contas, reunido em Plenário, delibera que a conta da Empresa Nacional de Distribuição de Electricidade (ENDE, E.P.) relativa ao exercício de 2024 é considerada EM TERMOS COM RECOMENDAÇÕES.",
+    assunto: `Acórdão — Prestação de Contas ${entityShort("1")} 2024`,
+    conteudo: `O Tribunal de Contas, reunido em Plenário, delibera que a conta da ${mockEntities[0].name} relativa ao exercício de 2024 é considerada EM TERMOS COM RECOMENDAÇÕES.`,
     estado: "rascunho",
     versao: 1,
     imutavel: false,
@@ -745,13 +761,13 @@ export const mockDocumentosTribunal: DocumentoTribunal[] = [
     entidadeId: "2",
     tipo: "notificacao",
     numeroDocumento: "NOT/TCA/2025/002",
-    assunto: "Notificação de Recepção — INEA 2024",
-    conteudo: "Notificação de recepção da prestação de contas do INEA relativa ao exercício de 2024.",
+    assunto: `Notificação de Recepção — ${entityShort("2")} 2024`,
+    conteudo: `Notificação de recepção da prestação de contas do ${entityShort("2")} relativa ao exercício de 2024.`,
     estado: "emitido",
     versao: 1,
     imutavel: true,
     hashSha256: "f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6",
-    criadoPor: "Secretaria TCA",
+    criadoPor: "Rosa Tavares (Secretaria TCA)",
     emitidoAt: "2025-04-18",
     createdAt: "2025-04-18",
     updatedAt: "2025-04-18",
@@ -765,8 +781,8 @@ export const mockDocumentosTribunal: DocumentoTribunal[] = [
     entidadeId: "3",
     tipo: "acordao",
     numeroDocumento: "ACO/TCA/2025/002",
-    assunto: "Acórdão — Prestação de Contas FSDEA 2024",
-    conteudo: "O Tribunal de Contas delibera que a conta do Fundo Soberano de Angola (FSDEA) relativa ao exercício de 2024 é considerada EM TERMOS.",
+    assunto: `Acórdão — Prestação de Contas ${entityShort("3")} 2024`,
+    conteudo: `O Tribunal de Contas delibera que a conta do ${mockEntities[2].name} relativa ao exercício de 2024 é considerada EM TERMOS.`,
     estado: "emitido",
     versao: 1,
     imutavel: true,

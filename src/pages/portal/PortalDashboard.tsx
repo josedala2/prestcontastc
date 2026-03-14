@@ -23,7 +23,7 @@ const PortalDashboard = () => {
   const entityExercicios = mockFiscalYears.filter((fy) => fy.entityId === entityId);
   const activeExercicio = entityExercicios.find((fy) => fy.year === 2024);
   const pendingClarifications = mockClarifications.filter(
-    (cr) => cr.entityName.includes(entity.name.split(" - ")[1]?.split(",")[0] || entity.name.split(" ")[0]) && cr.status === "pendente"
+    (cr) => cr.entityId === entityId && cr.status === "pendente"
   );
 
   const today = new Date();
