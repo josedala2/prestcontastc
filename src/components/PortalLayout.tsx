@@ -12,7 +12,7 @@ import {
   LogOut,
   Building2,
   ChevronDown,
-  UserCog,
+  
   Bell,
   CheckCircle,
   XCircle,
