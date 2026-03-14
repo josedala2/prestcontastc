@@ -632,6 +632,8 @@ const PortalPrestacaoContas = () => {
         entityName={entity.name}
         entityId={entity.id}
       />
+    </PortalLayout>
+  );
 };
 
 // ─── Entidade View (tabs: Balancete + Documentos + Estado) ───
