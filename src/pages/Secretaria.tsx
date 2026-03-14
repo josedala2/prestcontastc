@@ -115,10 +115,7 @@ const Secretaria = () => {
                 variant="outline"
                 size="sm"
                 className="gap-1.5 text-xs"
-                onClick={() => {
-                  const data = buildActaData();
-                  if (data) exportActaRecepcaoPdf(data, true);
-                }}
+                onClick={handlePreviewPdf}
               >
                 <Eye className="h-3.5 w-3.5" />
                 Visualizar PDF
