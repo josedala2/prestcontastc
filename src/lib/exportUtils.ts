@@ -824,14 +824,9 @@ export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false) {
       doc.restoreGraphicsState();
     }
 
-    const pdfDataUri = doc.output("datauristring");
-    const newTab = window.open();
-    if (newTab) {
-      newTab.document.write(
-        `<html><head><title>Acta de Recepção — Rascunho</title></head><body style="margin:0"><iframe src="${pdfDataUri}" style="width:100%;height:100%;border:none"></iframe></body></html>`
-      );
-      newTab.document.close();
-    }
+    const pdfBlob = doc.output("blob");
+    const blobUrl = URL.createObjectURL(pdfBlob);
+    window.open(blobUrl, "_blank");
   } else {
     doc.save(`Acta_Recepcao_${data.actaNumero.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
   }
