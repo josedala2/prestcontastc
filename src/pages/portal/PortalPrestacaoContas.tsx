@@ -10,10 +10,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
-import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X, Download, AlertTriangle, Send } from "lucide-react";
+import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X, Download, AlertTriangle, Send, Clock, FileText, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { generateCC2Template } from "@/lib/cc2TemplateGenerator";
+import { EntidadeDocumentosTab } from "@/components/portal/EntidadeDocumentosTab";
 
 
 // ─── Helpers ───
