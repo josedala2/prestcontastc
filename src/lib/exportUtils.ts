@@ -134,7 +134,7 @@ export function exportBalancoPdf(
   tableData.push([{ content: "CAPITAL PRÓPRIO", colSpan: 2, styles: { fontStyle: "bold", fillColor: [40, 38, 72], textColor: [255, 255, 255] } }, { content: formatKz(totalCapital), styles: { fontStyle: "bold", fillColor: [40, 38, 72], textColor: [255, 255, 255], halign: "right" } }]);
   capitalLines.forEach((l) => tableData.push([l.accountCode, l.description, formatKz(Math.abs(l.balance))]));
 
-  (doc as any).autoTable({
+  autoTable(doc, {
     startY: 40,
     head: [["Conta", "Descrição", "Valor (Kz)"]],
     body: tableData,
