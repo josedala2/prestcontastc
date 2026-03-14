@@ -63,6 +63,7 @@ export function PortalLayout({ children }: PortalLayoutProps) {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useSubmissions();
   const entityNotifications = notifications.filter((n) => n.entityId === entity.id);
   const entityUnread = unreadCount(entity.id);
+  // Short name for display
   const shortName = entity.name.split(" - ")[1] || entity.name.split(" — ")[0] || entity.name;
 
   return (
