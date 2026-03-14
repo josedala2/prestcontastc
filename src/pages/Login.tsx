@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Lock, Mail, Shield, Building2, UserCheck, Eye, EyeOff } from "lucide-react";
+import { Lock, Mail, Shield, Building2, UserCheck, Eye, EyeOff, Stamp } from "lucide-react";
 
 const demoUsers = [
   {
