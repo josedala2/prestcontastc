@@ -700,6 +700,7 @@ const PortalPrestacaoContas = () => {
           handleFileUpload={handleFileUpload}
           periodo={periodo}
           entityName={entity.name}
+          entityId={entity.id}
         />
       
       ) : (
