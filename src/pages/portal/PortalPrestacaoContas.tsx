@@ -1146,6 +1146,7 @@ function EntidadeView({
   handleFileUpload,
   periodo,
   entityName,
+  entityId,
 }: {
   uploadedFile: string | null;
   setUploadedFile: (f: string | null) => void;
@@ -1153,15 +1154,18 @@ function EntidadeView({
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   periodo: string;
   entityName: string;
+  entityId: string;
 }) {
   const [entidadeTab, setEntidadeTab] = useState("balancete");
-  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>("rascunho");
+  const { getStatus, submit } = useSubmissions();
+  const fiscalYearId = `${entityId}-${periodo}`;
+  const submissionStatus = getStatus(entityId, fiscalYearId);
 
   const isSubmitted = submissionStatus !== "rascunho";
   const StatusIcon = STATUS_CONFIG[submissionStatus].icon;
 
   const handleSubmit = () => {
-    setSubmissionStatus("pendente");
+    submit(entityId, fiscalYearId);
     toast.success("Prestação de contas submetida com sucesso! Aguarda recepção pela Secretaria.");
   };
 
