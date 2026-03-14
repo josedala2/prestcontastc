@@ -676,7 +676,7 @@ export const mockDocumentosTribunal: DocumentoTribunal[] = [
     entidadeId: "1",
     tipo: "notificacao",
     numeroDocumento: "NOT/TCA/2025/001",
-    assunto: "Notificação de Recepção da Prestação de Contas — ENDE 2024",
+    assunto: `Notificação de Recepção da Prestação de Contas — ${entityShort("1")} 2024`,
     conteudo: "Serve a presente para notificar V. Exa. de que a prestação de contas relativa ao exercício de 2024 foi recebida e se encontra em fase de triagem.",
     estado: "emitido",
     versao: 1,
