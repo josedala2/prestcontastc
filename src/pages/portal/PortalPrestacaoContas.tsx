@@ -407,122 +407,8 @@ function FinancialTable({
 const PortalPrestacaoContas = () => {
   const { entity } = usePortalEntity();
   const [periodo, setPeriodo] = useState("2024");
-
-  // Values state for all sections
-  const [ativNaoCorr, setAtivNaoCorr] = useState<Record<string, number>>({});
-  const [ativCorr, setAtivCorr] = useState<Record<string, number>>({});
-  const [capProprio, setCapProprio] = useState<Record<string, number>>({});
-  const [passNaoCorr, setPassNaoCorr] = useState<Record<string, number>>({});
-  const [passCorr, setPassCorr] = useState<Record<string, number>>({});
-  const [proveitos, setProveitos] = useState<Record<string, number>>({});
-  const [custos, setCustos] = useState<Record<string, number>>({});
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Prior year (empty/disabled for now)
-  const emptyPrior: Record<string, number> = {};
-
-  // ─── Excel parsing ───
-  const parseKzValue = (val: unknown): number => {
-    if (typeof val === "number") return val;
-    if (typeof val !== "string") return 0;
-    const cleaned = val.replace(/[Kz\s,R\$]/g, "").replace(/\(/g, "-").replace(/\)/g, "").trim();
-    const num = parseFloat(cleaned);
-    return isNaN(num) ? 0 : num;
-  };
-
-  const mapExcelToForm = useCallback((workbook: XLSX.WorkBook) => {
-    // Map from all form line definitions
-    const allSections = [
-      { lines: activoNaoCorrente, setter: setAtivNaoCorr },
-      { lines: activoCorrentes, setter: setAtivCorr },
-      { lines: capitalProprio, setter: setCapProprio },
-      { lines: passivoNaoCorrente, setter: setPassNaoCorr },
-      { lines: passivoCorrente, setter: setPassCorr },
-      { lines: proveitosLines, setter: setProveitos },
-      { lines: custosLines, setter: setCustos },
-    ];
-
-    // Build a label-to-code map for fuzzy matching
-    const labelMap = new Map<string, { code: string; section: number }>();
-    allSections.forEach((sec, idx) => {
-      sec.lines.filter((l) => l.editable).forEach((l) => {
-        labelMap.set(l.label.toLowerCase().trim(), { code: l.code, section: idx });
-      });
-    });
-
-    // Parse all sheets looking for financial data
-    const sectionValues: Record<string, number>[] = allSections.map(() => ({}));
-    let matchCount = 0;
-
-    workbook.SheetNames.forEach((sheetName) => {
-      const sheet = workbook.Sheets[sheetName];
-      const data = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { header: 1 });
-
-      data.forEach((row: unknown) => {
-        if (!Array.isArray(row) || row.length < 3) return;
-
-        // Try to find a label cell and a value cell
-        for (let i = 0; i < row.length - 1; i++) {
-          const cellText = String(row[i] || "").toLowerCase().trim();
-          if (cellText.length < 3) continue;
-
-          // Try exact match
-          const match = labelMap.get(cellText);
-          if (match) {
-            // Find the next numeric value in the row
-            for (let j = i + 1; j < row.length; j++) {
-              const val = parseKzValue(row[j]);
-              if (val !== 0 || String(row[j]).includes("0")) {
-                sectionValues[match.section][match.code] = val;
-                matchCount++;
-                break;
-              }
-            }
-          }
-        }
-      });
-    });
-
-    // Also try matching by code patterns (e.g. "1.1.1.1" in first column)
-    workbook.SheetNames.forEach((sheetName) => {
-      const sheet = workbook.Sheets[sheetName];
-      const data = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { header: 1 });
-
-      data.forEach((row: unknown) => {
-        if (!Array.isArray(row) || row.length < 3) return;
-        const codeCell = String(row[0] || "").trim();
-        // Also check second column for code
-        const codeCell2 = String(row[1] || "").trim();
-
-        [codeCell, codeCell2].forEach((code) => {
-          allSections.forEach((sec, idx) => {
-            const line = sec.lines.find((l) => l.editable && l.code === code);
-            if (line && !sectionValues[idx][line.code]) {
-              // Find value in remaining columns
-              for (let j = 2; j < (row as unknown[]).length; j++) {
-                const val = parseKzValue((row as unknown[])[j]);
-                if (val !== 0) {
-                  sectionValues[idx][line.code] = val;
-                  matchCount++;
-                  break;
-                }
-              }
-            }
-          });
-        });
-      });
-    });
-
-    // Apply values
-    allSections.forEach((sec, idx) => {
-      if (Object.keys(sectionValues[idx]).length > 0) {
-        sec.setter((prev) => ({ ...prev, ...sectionValues[idx] }));
-      }
-    });
-
-    return matchCount;
-  }, []);
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -533,69 +419,21 @@ const PortalPrestacaoContas = () => {
       try {
         const data = new Uint8Array(evt.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: "array" });
-        const matchCount = mapExcelToForm(workbook);
         setUploadedFile(file.name);
-
-        if (matchCount > 0) {
-          toast.success(`Ficheiro carregado com sucesso! ${matchCount} campo(s) preenchido(s) automaticamente.`);
-        } else {
-          toast.warning("Ficheiro carregado, mas não foi possível mapear valores automaticamente. Verifique o formato.");
-        }
+        toast.success("Ficheiro carregado com sucesso!");
       } catch {
         toast.error("Erro ao processar o ficheiro. Verifique se é um ficheiro Excel válido.");
       }
     };
     reader.readAsArrayBuffer(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [mapExcelToForm]);
-
-  const handleClearData = () => {
-    setAtivNaoCorr({});
-    setAtivCorr({});
-    setCapProprio({});
-    setPassNaoCorr({});
-    setPassCorr({});
-    setProveitos({});
-    setCustos({});
-    setUploadedFile(null);
-    toast.info("Todos os campos foram limpos.");
-  };
-
-  // Computed totals
-  const sumEditable = (lines: BalancoLine[], vals: Record<string, number>) =>
-    lines.filter((l) => l.editable).reduce((s, l) => s + (vals[l.code] || 0), 0);
-
-  const totalAtivoNaoCorrente = sumEditable(activoNaoCorrente, ativNaoCorr);
-  const totalAtivoCorrentes = sumEditable(activoCorrentes, ativCorr);
-  const totalActivo = totalAtivoNaoCorrente + totalAtivoCorrentes;
-  const totalCapProprio = sumEditable(capitalProprio, capProprio);
-  const totalPassNaoCorrente = sumEditable(passivoNaoCorrente, passNaoCorr);
-  const totalPassCorrente = sumEditable(passivoCorrente, passCorr);
-  const totalPassivo = totalPassNaoCorrente + totalPassCorrente;
-  const totalCapPassivo = totalCapProprio + totalPassivo;
-  const totalProveitos = sumEditable(proveitosLines, proveitos);
-  const totalCustos = sumEditable(custosLines, custos);
-  const resultadoExercicio = totalProveitos - totalCustos;
-
-  // Indicadores
-  const liquidezCorrente = totalPassCorrente > 0 ? totalAtivoCorrentes / totalPassCorrente : 0;
-  const liquidezGeral = (totalPassCorrente + totalPassNaoCorrente) > 0 ? (totalAtivoCorrentes + totalAtivoNaoCorrente) / (totalPassCorrente + totalPassNaoCorrente) : 0;
-  const roe = totalCapProprio > 0 ? (resultadoExercicio / totalCapProprio) * 100 : 0;
-  const roa = totalActivo > 0 ? (resultadoExercicio / totalActivo) * 100 : 0;
-  const margemLiquida = totalProveitos > 0 ? (resultadoExercicio / totalProveitos) * 100 : 0;
-  const giroActivo = totalActivo > 0 ? totalProveitos / totalActivo : 0;
-  const endividamentoGeral = totalCapProprio > 0 ? totalPassivo / totalCapProprio : 0;
-  const composicaoEndividamento = totalPassivo > 0 ? (totalPassCorrente / totalPassivo) * 100 : 0;
-
-  const handleSave = () => {
-    toast.success("Prestação de contas guardada com sucesso!");
-  };
+  }, []);
 
   return (
     <PortalLayout>
       <PageHeader
-        title="Prestação de Contas — Modelo CC-2"
-        description="Resolução Nº 1/17 — PGC (Decreto nº 82/2001)"
+        title="Prestação de Contas"
+        description="Submissão de documentos — Resolução Nº 1/17"
       />
 
       {/* Header Info */}
