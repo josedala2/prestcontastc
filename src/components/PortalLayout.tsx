@@ -13,16 +13,22 @@ import {
   Building2,
   ChevronDown,
   UserCog,
+  Bell,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
+import { useSubmissions } from "@/contexts/SubmissionContext";
 import { mockEntities } from "@/data/mockData";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 interface PortalLayoutProps {
   children: ReactNode;
@@ -54,7 +60,9 @@ export function PortalLayout({ children }: PortalLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pageTitle = routeTitles[location.pathname] || "Portal";
   const { entity, setEntityId, userRole, setUserRole } = usePortalEntity();
-
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useSubmissions();
+  const entityNotifications = notifications.filter((n) => n.entityId === entity.id);
+  const entityUnread = unreadCount(entity.id);
   // Short name for display
   const shortName = entity.name.split(" - ")[1] || entity.name.split(" — ")[0] || entity.name;
 
@@ -123,6 +131,72 @@ export function PortalLayout({ children }: PortalLayoutProps) {
               >
                 Técnico do Tribunal
               </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {/* Notification Bell */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="relative flex items-center justify-center w-8 h-8 rounded hover:bg-header-foreground/10 transition-colors">
+                <Bell className="h-4 w-4 text-header-foreground/70" />
+                {entityUnread > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center w-4 h-4 rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
+                    {entityUnread}
+                  </span>
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-96 max-h-[420px] overflow-auto">
+              <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+                <span className="text-sm font-semibold">Notificações</span>
+                {entityUnread > 0 && (
+                  <button
+                    onClick={() => markAllAsRead(entity.id)}
+                    className="text-[11px] text-primary hover:underline"
+                  >
+                    Marcar todas como lidas
+                  </button>
+                )}
+              </div>
+              {entityNotifications.length === 0 ? (
+                <div className="py-8 text-center text-muted-foreground">
+                  <Bell className="h-6 w-6 mx-auto mb-2 opacity-30" />
+                  <p className="text-xs">Sem notificações</p>
+                </div>
+              ) : (
+                entityNotifications.map((notif) => (
+                  <DropdownMenuItem
+                    key={notif.id}
+                    className={cn(
+                      "flex items-start gap-3 py-3 px-3 cursor-pointer",
+                      !notif.read && "bg-primary/5"
+                    )}
+                    onClick={() => markAsRead(notif.id)}
+                  >
+                    <div className={cn(
+                      "mt-0.5 shrink-0 rounded-full p-1",
+                      notif.type === "recepcionado" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-destructive/10 text-destructive"
+                    )}>
+                      {notif.type === "recepcionado" ? (
+                        <CheckCircle className="h-3.5 w-3.5" />
+                      ) : (
+                        <XCircle className="h-3.5 w-3.5" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("text-xs", !notif.read && "font-semibold")}>{notif.message}</p>
+                      {notif.detail && (
+                        <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{notif.detail}</p>
+                      )}
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        {new Date(notif.createdAt).toLocaleString("pt-AO", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
+                    {!notif.read && (
+                      <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1" />
+                    )}
+                  </DropdownMenuItem>
+                ))
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           <button
