@@ -73,9 +73,8 @@ const Secretaria = () => {
   const handlePreviewPdf = () => {
     const data = buildActaData();
     if (!data) return;
-    if (pdfPreviewUrl) URL.revokeObjectURL(pdfPreviewUrl);
-    const url = exportActaRecepcaoPdf(data, true);
-    setPdfPreviewUrl(url);
+    const dataUri = exportActaRecepcaoPdf(data, true);
+    setPdfPreviewUrl(dataUri);
   };
 
   const handleConfirmRecepcao = () => {
@@ -367,10 +366,7 @@ const Secretaria = () => {
       <Dialog
         open={!!pdfPreviewUrl}
         onOpenChange={(open) => {
-          if (!open) {
-            if (pdfPreviewUrl) URL.revokeObjectURL(pdfPreviewUrl);
-            setPdfPreviewUrl(null);
-          }
+          if (!open) setPdfPreviewUrl(null);
         }}
       >
         <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 gap-0">

@@ -826,8 +826,7 @@ export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false): 
       doc.restoreGraphicsState();
     }
 
-    const pdfBlob = doc.output("blob");
-    return URL.createObjectURL(pdfBlob);
+    return doc.output("datauristring");
   } else {
     doc.save(`Acta_Recepcao_${data.actaNumero.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
   }
