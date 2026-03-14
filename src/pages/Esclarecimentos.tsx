@@ -77,7 +77,7 @@ const Esclarecimentos = () => {
           responses: [
             ...(r.responses || []),
             {
-              user: "João Silva (Técnico TCA)",
+              user: "Carlos Mendes (Administrador TCA)",
               message: newMessage.trim(),
               date: new Date().toISOString().split("T")[0],
             },

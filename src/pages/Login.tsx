@@ -42,6 +42,7 @@ const demoUsers = [
     email: "entidade@ende.co.ao",
     password: "entidade123",
     role: "Preparador / Contabilista",
+    displayName: "Maria Costa",
     icon: Building2,
     description: "Portal de prestação de contas",
     color: "bg-info/10 text-info border-info/20",
