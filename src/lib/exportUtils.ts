@@ -84,7 +84,7 @@ export function exportBalancetePdf(data: TrialBalanceLine[], entityName = "ENDE,
     formatKz(data.reduce((s, l) => s + l.balance, 0)),
   ]);
 
-  (doc as any).autoTable({
+  autoTable(doc, {
     startY: 40,
     head: [["Conta", "Descrição", "Débito (Kz)", "Crédito (Kz)", "Saldo (Kz)"]],
     body: tableData,
