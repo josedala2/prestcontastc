@@ -57,14 +57,14 @@ const App = () => (
           <Route path="/portal/*" element={
             <PortalEntityProvider>
               <Routes>
-                <Route path="/" element={<PortalDashboard />} />
-                <Route path="/exercicios" element={<PortalExercicios />} />
-                <Route path="/exercicios/:id" element={<PortalExercicioDetalhe />} />
-                <Route path="/documentos" element={<PortalDocumentos />} />
-                <Route path="/esclarecimentos" element={<PortalEsclarecimentos />} />
-                <Route path="/validacoes" element={<PortalValidacoes />} />
-                <Route path="/mapas" element={<PortalMapas />} />
-                <Route path="/prestacao-contas" element={<PortalPrestacaoContas />} />
+                <Route index element={<PortalDashboard />} />
+                <Route path="exercicios" element={<PortalExercicios />} />
+                <Route path="exercicios/:id" element={<PortalExercicioDetalhe />} />
+                <Route path="documentos" element={<PortalDocumentos />} />
+                <Route path="esclarecimentos" element={<PortalEsclarecimentos />} />
+                <Route path="validacoes" element={<PortalValidacoes />} />
+                <Route path="mapas" element={<PortalMapas />} />
+                <Route path="prestacao-contas" element={<PortalPrestacaoContas />} />
               </Routes>
             </PortalEntityProvider>
           } />
