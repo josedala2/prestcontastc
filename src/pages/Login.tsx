@@ -12,6 +12,7 @@ const demoUsers = [
     email: "admin@tca.gov.ao",
     password: "admin123",
     role: "Administrador",
+    displayName: "Carlos Mendes",
     icon: Shield,
     description: "Acesso total ao sistema",
     color: "bg-primary/10 text-primary border-primary/20",
