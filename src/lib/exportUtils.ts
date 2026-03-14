@@ -344,7 +344,7 @@ export async function generateDossierZip(entityName = "ENDE, E.P.", year = 2024)
   // 4. Auditoria PDF
   const auditPdf = new jsPDF();
   addPdfHeader(auditPdf, `Trilha de Auditoria — ${entityName}`, `Exercício Fiscal ${year}`);
-  (auditPdf as any).autoTable({
+  autoTable(auditPdf, {
     startY: 40,
     head: [["Data/Hora", "Acção", "Utilizador", "Detalhes"]],
     body: mockAuditLog.map((l) => [l.timestamp, l.action, l.user, l.detail]),
