@@ -1281,7 +1281,7 @@ function EntidadeView({
 
         {/* ─── TAB 2: DOCUMENTOS ─── */}
         <TabsContent value="documentos" className="space-y-4">
-          <EntidadeDocumentosTab disabled={isSubmitted} />
+          <EntidadeDocumentosTab disabled={isSubmitted && !canResubmit} />
         </TabsContent>
       </Tabs>
 
