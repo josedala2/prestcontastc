@@ -145,12 +145,12 @@ export function AppSidebar() {
       <div className="p-3 border-t border-sidebar-border">
         <div className={cn("flex items-center gap-2.5", collapsed && "justify-center")}>
           <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[11px] font-bold text-secondary-foreground shrink-0">
-            JS
+            CM
           </div>
           {!collapsed && (
             <div className="min-w-0 animate-fade-in">
-              <p className="text-xs font-medium text-sidebar-foreground truncate">João Silva</p>
-              <p className="text-[10px] text-sidebar-foreground/40">Técnico</p>
+              <p className="text-xs font-medium text-sidebar-foreground truncate">Carlos Mendes</p>
+              <p className="text-[10px] text-sidebar-foreground/40">Administrador TCA</p>
             </div>
           )}
         </div>

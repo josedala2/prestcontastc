@@ -137,9 +137,9 @@ export function PortalLayout({ children }: PortalLayoutProps) {
           })}
           <div className="ml-auto flex items-center gap-2">
             <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-secondary-foreground">
-              AC
+              MC
             </div>
-            <span className="text-xs text-muted-foreground">Ana Costa</span>
+            <span className="text-xs text-muted-foreground">Maria Costa</span>
           </div>
         </div>
 

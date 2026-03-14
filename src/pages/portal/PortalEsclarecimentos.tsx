@@ -55,7 +55,7 @@ const PortalEsclarecimentos = () => {
           responses: [
             ...(r.responses || []),
             {
-              user: `Contabilista ${entity.name.split(" - ")[1]?.split(",")[0] || entity.name.split(" ")[0]}`,
+              user: `Contabilista ${getEntityShortName(entity)}`,
               message: newMessage.trim(),
               date: new Date().toISOString().split("T")[0],
             },
