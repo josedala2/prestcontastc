@@ -13,16 +13,22 @@ import {
   Building2,
   ChevronDown,
   UserCog,
+  Bell,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
+import { useSubmissions } from "@/contexts/SubmissionContext";
 import { mockEntities } from "@/data/mockData";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 interface PortalLayoutProps {
   children: ReactNode;
