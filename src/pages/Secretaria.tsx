@@ -335,12 +335,40 @@ const Secretaria = () => {
                     Cancelar
                   </Button>
                   <Button
+                    variant="secondary"
+                    onClick={() => {
+                      if (!selectedFy || !selectedEntity) return;
+                      exportActaRecepcaoPdf({
+                        actaNumero,
+                        entityName: selectedEntity.name,
+                        entityNif: selectedEntity.nif,
+                        entityTutela: selectedEntity.tutela,
+                        entityMorada: selectedEntity.morada,
+                        exercicioYear: selectedFy.year,
+                        periodoInicio: selectedFy.startDate,
+                        periodoFim: selectedFy.endDate,
+                        submittedAt: selectedFy.submittedAt || "",
+                        totalDebito: selectedFy.totalDebito,
+                        totalCredito: selectedFy.totalCredito,
+                        documentosVerificados: submissionChecklist.map((item) => ({
+                          label: item.label,
+                          required: item.required,
+                          checked: !!checkedDocs[item.id],
+                        })),
+                      }, true);
+                    }}
+                    className="gap-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                    Visualizar PDF
+                  </Button>
+                  <Button
                     disabled={!allRequiredChecked}
                     onClick={() => setConfirmDialogOpen(true)}
                     className="gap-2"
                   >
                     <Stamp className="h-4 w-4" />
-                    Confirmar e Gerar Acta de Recepção
+                    Confirmar e Gerar Acta
                   </Button>
                 </div>
               </div>
