@@ -11,7 +11,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { mockFiscalYears, mockEntities, submissionChecklist, formatKz } from "@/data/mockData";
-import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck, Download } from "lucide-react";
+import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck, Download, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 
