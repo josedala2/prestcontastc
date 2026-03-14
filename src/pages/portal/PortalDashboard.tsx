@@ -241,6 +241,11 @@ const PortalDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Notifications Panel */}
+      <div className="mt-6">
+        <NotificacoesPanel />
+      </div>
     </PortalLayout>
   );
 };
