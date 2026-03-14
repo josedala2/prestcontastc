@@ -53,7 +53,7 @@ const TecnicoDashboard = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary" className="text-[10px]">
-                        {STATUS_LABELS[fy.status] || fy.status}
+                        {(STATUS_LABELS[fy.status] as { label: string; color: string })?.label || fy.status}
                       </Badge>
                       <Link to="/tecnico/prestacao-contas">
                         <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
