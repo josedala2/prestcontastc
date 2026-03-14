@@ -10,10 +10,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
-import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X, Download, AlertTriangle, Send } from "lucide-react";
+import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X, Download, AlertTriangle, Send, Clock, FileText, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { generateCC2Template } from "@/lib/cc2TemplateGenerator";
+import { EntidadeDocumentosTab } from "@/components/portal/EntidadeDocumentosTab";
 
 
 // ─── Helpers ───
@@ -692,96 +693,15 @@ const PortalPrestacaoContas = () => {
       )}
 
       {userRole === "entidade" ? (
-        /* ─── VISTA DA ENTIDADE: Apenas carregar balancete ─── */
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <FileSpreadsheet className="h-5 w-5 text-primary" />
-              Carregar Balancete
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-              <p className="text-sm text-muted-foreground">
-                Carregue o ficheiro Excel do balancete conforme o modelo CC-2/CC-3 da Resolução 1/17.
-                O sistema irá calcular automaticamente o Balanço Patrimonial, a Demonstração de Resultados
-                e os Indicadores Financeiros com base nos dados fornecidos.
-              </p>
-            </div>
-
-            <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center">
-              <Upload className="h-10 w-10 text-primary/40 mx-auto mb-3" />
-              <p className="text-sm font-medium mb-1">Arraste o ficheiro ou clique para carregar</p>
-              <p className="text-xs text-muted-foreground mb-4">Formatos aceites: .xlsx, .xls, .csv</p>
-              
-              {uploadedFile && (
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <Badge variant="secondary" className="text-xs gap-1">
-                    <FileUp className="h-3 w-3" />
-                    {uploadedFile}
-                  </Badge>
-                  <button onClick={() => setUploadedFile(null)} className="text-muted-foreground hover:text-foreground">
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              )}
-
-              <div className="flex justify-center gap-3">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".xlsx,.xls,.csv"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                <Button
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="gap-2"
-                >
-                  <FileSpreadsheet className="h-4 w-4" />
-                  Carregar Balancete
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={generateCC2Template}
-                  className="gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  Descarregar Template
-                </Button>
-              </div>
-            </div>
-
-            {uploadedFile && (
-              <div className="flex justify-end">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button className="gap-2">
-                      <Send className="h-4 w-4" />
-                      Submeter Balancete
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Confirmar Submissão do Balancete</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Está prestes a submeter o balancete "{uploadedFile}" para o exercício {periodo} ao Tribunal de Contas. Deseja continuar?
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => toast.success("Balancete submetido com sucesso!")}>
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Confirmar
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <EntidadeView
+          uploadedFile={uploadedFile}
+          setUploadedFile={setUploadedFile}
+          fileInputRef={fileInputRef}
+          handleFileUpload={handleFileUpload}
+          periodo={periodo}
+          entityName={entity.name}
+        />
+      
       ) : (
         /* ─── VISTA DO TÉCNICO: Todas as tabs ─── */
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -1207,6 +1127,208 @@ const PortalPrestacaoContas = () => {
     </PortalLayout>
   );
 };
+
+// ─── Entidade View (tabs: Balancete + Documentos + Estado) ───
+type SubmissionStatus = "rascunho" | "pendente" | "recepcionado";
+
+const STATUS_CONFIG: Record<SubmissionStatus, { label: string; color: string; icon: typeof Clock }> = {
+  rascunho: { label: "Rascunho", color: "bg-muted text-muted-foreground", icon: FileText },
+  pendente: { label: "Pendente — Aguarda Recepção pela Secretaria", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400", icon: Clock },
+  recepcionado: { label: "Recepcionado — Acta de Recepção Emitida", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400", icon: CheckCircle },
+};
+
+function EntidadeView({
+  uploadedFile,
+  setUploadedFile,
+  fileInputRef,
+  handleFileUpload,
+  periodo,
+  entityName,
+}: {
+  uploadedFile: string | null;
+  setUploadedFile: (f: string | null) => void;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
+  handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  periodo: string;
+  entityName: string;
+}) {
+  const [entidadeTab, setEntidadeTab] = useState("balancete");
+  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>("rascunho");
+
+  const isSubmitted = submissionStatus !== "rascunho";
+  const StatusIcon = STATUS_CONFIG[submissionStatus].icon;
+
+  const handleSubmit = () => {
+    setSubmissionStatus("pendente");
+    toast.success("Prestação de contas submetida com sucesso! Aguarda recepção pela Secretaria.");
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Status Banner */}
+      {isSubmitted && (
+        <div className={`flex items-center gap-3 p-4 rounded-lg ${STATUS_CONFIG[submissionStatus].color}`}>
+          <StatusIcon className="h-5 w-5 shrink-0" />
+          <div>
+            <p className="text-sm font-semibold">{STATUS_CONFIG[submissionStatus].label}</p>
+            <p className="text-xs opacity-80">
+              {submissionStatus === "pendente"
+                ? "A Secretaria do Tribunal irá verificar a documentação e emitir a Acta de Recepção."
+                : "A Secretaria validou a documentação e emitiu a Acta de Recepção."}
+            </p>
+          </div>
+        </div>
+      )}
+
+      <Tabs value={entidadeTab} onValueChange={setEntidadeTab} className="space-y-4">
+        <TabsList className="grid grid-cols-2 w-full">
+          <TabsTrigger value="balancete" className="text-xs gap-1.5">
+            <FileSpreadsheet className="h-3.5 w-3.5" />
+            Balancete
+          </TabsTrigger>
+          <TabsTrigger value="documentos" className="text-xs gap-1.5">
+            <Paperclip className="h-3.5 w-3.5" />
+            Documentos
+          </TabsTrigger>
+        </TabsList>
+
+        {/* ─── TAB 1: BALANCETE ─── */}
+        <TabsContent value="balancete" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <FileSpreadsheet className="h-5 w-5 text-primary" />
+                Carregar Balancete
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                <p className="text-sm text-muted-foreground">
+                  Carregue o ficheiro Excel do balancete conforme o modelo CC-2/CC-3 da Resolução 1/17.
+                  O sistema irá calcular automaticamente o Balanço Patrimonial, a Demonstração de Resultados
+                  e os Indicadores Financeiros com base nos dados fornecidos.
+                </p>
+              </div>
+
+              <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center">
+                <Upload className="h-10 w-10 text-primary/40 mx-auto mb-3" />
+                <p className="text-sm font-medium mb-1">Arraste o ficheiro ou clique para carregar</p>
+                <p className="text-xs text-muted-foreground mb-4">Formatos aceites: .xlsx, .xls, .csv</p>
+                
+                {uploadedFile && (
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <Badge variant="secondary" className="text-xs gap-1">
+                      <FileUp className="h-3 w-3" />
+                      {uploadedFile}
+                    </Badge>
+                    {!isSubmitted && (
+                      <button onClick={() => setUploadedFile(null)} className="text-muted-foreground hover:text-foreground">
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex justify-center gap-3">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    disabled={isSubmitted}
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="gap-2"
+                    disabled={isSubmitted}
+                  >
+                    <FileSpreadsheet className="h-4 w-4" />
+                    Carregar Balancete
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={generateCC2Template}
+                    className="gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Descarregar Template
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ─── TAB 2: DOCUMENTOS ─── */}
+        <TabsContent value="documentos" className="space-y-4">
+          <EntidadeDocumentosTab disabled={isSubmitted} />
+        </TabsContent>
+      </Tabs>
+
+      {/* Submit button */}
+      {!isSubmitted && (
+        <div className="flex justify-end">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                size="lg"
+                className="gap-2"
+                disabled={!uploadedFile}
+              >
+                <Send className="h-4 w-4" />
+                Submeter Prestação de Contas
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-amber-500" />
+                  Confirmar Submissão
+                </AlertDialogTitle>
+                <AlertDialogDescription asChild>
+                  <div className="space-y-3">
+                    <p>
+                      Está prestes a submeter a prestação de contas ao Tribunal de Contas de Angola.
+                      Após a submissão, o processo ficará <strong className="text-foreground">pendente</strong> até
+                      a Secretaria do Tribunal verificar a documentação e emitir a Acta de Recepção.
+                    </p>
+                    <div className="bg-muted/50 rounded-lg p-3 space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Entidade</span>
+                        <span className="font-medium text-foreground">{entityName}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Período</span>
+                        <span className="font-medium text-foreground">{periodo}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Balancete</span>
+                        <span className="font-medium text-foreground">{uploadedFile || "—"}</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Ao confirmar, declara que todos os dados e documentos apresentados são verdadeiros e completos,
+                      nos termos da Resolução nº 1/17 do Tribunal de Contas.
+                    </p>
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleSubmit} className="gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  Confirmar Submissão
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── Small sub-components ───
 function IndicadorRow({ label, value, desc }: { label: string; value: string; desc?: string }) {
