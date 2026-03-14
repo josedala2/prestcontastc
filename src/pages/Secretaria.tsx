@@ -18,6 +18,7 @@ import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2
 import { toast } from "sonner";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 import { EntityProfilePanel } from "@/components/secretaria/EntityProfilePanel";
+import { useSubmissions } from "@/contexts/SubmissionContext";
 
 const Secretaria = () => {
   const submetidos = mockFiscalYears.filter((fy) => fy.status === "submetido");
