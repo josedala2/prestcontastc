@@ -84,6 +84,9 @@ const Secretaria = () => {
     if (!data || !selectedFy) return;
     exportActaRecepcaoPdf(data);
     setActasGeradas((prev) => [...prev, selectedFy.id]);
+    // Update shared submission status to "recepcionado"
+    const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
+    recepcionar(selectedFy.entityId, fiscalYearId);
     setConfirmDialogOpen(false);
     setSelectedId(null);
     setCheckedDocs({});
