@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Lock, Mail, Shield, Building2, UserCheck, Eye, EyeOff } from "lucide-react";
+import { Lock, Mail, Shield, Building2, UserCheck, Eye, EyeOff, Stamp } from "lucide-react";
 
 const demoUsers = [
   {
@@ -24,6 +24,15 @@ const demoUsers = [
     icon: UserCheck,
     description: "Validação e análise de contas",
     color: "bg-accent/10 text-accent border-accent/20",
+  },
+  {
+    label: "Secretaria",
+    email: "secretaria@tca.gov.ao",
+    password: "secretaria123",
+    role: "Secretaria",
+    icon: Stamp,
+    description: "Recepção e emissão de actas",
+    color: "bg-warning/10 text-warning border-warning/20",
   },
   {
     label: "Entidade (Portal)",
@@ -58,6 +67,8 @@ export default function Login() {
       setLoading(false);
       if (matched?.role === "Preparador / Contabilista") {
         navigate("/portal");
+      } else if (matched?.role === "Secretaria") {
+        navigate("/secretaria");
       } else {
         navigate("/dashboard");
       }
