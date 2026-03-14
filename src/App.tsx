@@ -80,6 +80,7 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
+    </SubmissionProvider>
   </QueryClientProvider>
 );
 
