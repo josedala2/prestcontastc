@@ -31,6 +31,8 @@ import PortalEsclarecimentos from "./pages/portal/PortalEsclarecimentos";
 import PortalValidacoes from "./pages/portal/PortalValidacoes";
 import PortalMapas from "./pages/portal/PortalMapas";
 import PortalPrestacaoContas from "./pages/portal/PortalPrestacaoContas";
+import TecnicoDashboard from "./pages/tecnico/TecnicoDashboard";
+import TecnicoPrestacaoContas from "./pages/tecnico/TecnicoPrestacaoContas";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
