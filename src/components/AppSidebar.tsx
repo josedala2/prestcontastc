@@ -30,6 +30,7 @@ const navSections = [
       { title: "Entidades", icon: Building2, path: "/entidades" },
       { title: "Exercícios", icon: Calendar, path: "/exercicios" },
       { title: "Secretaria", icon: Stamp, path: "/secretaria" },
+      { title: "Submissões", icon: Send, path: "/submissoes" },
     ],
   },
   {
