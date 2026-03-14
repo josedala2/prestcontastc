@@ -480,7 +480,7 @@ export function exportDocumentoTribunalPdf(doc: DocumentoTribunal, entityName = 
     metaRows.push(["Resultado / Deliberação", resultLabels[doc.resultadoAcordao]]);
   }
 
-  (pdf as any).autoTable({
+  const metaTable = autoTable(pdf, {
     startY: y,
     body: metaRows.map(([label, value]) => [label, value]),
     theme: "plain",
