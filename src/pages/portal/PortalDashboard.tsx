@@ -83,7 +83,7 @@ const PortalDashboard = () => {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <StatCard
           title="Exercício Activo"
           value={activeExercicio?.year || "—"}
@@ -111,6 +111,13 @@ const PortalDashboard = () => {
           subtitle="pendentes de resposta"
           icon={<MessageSquare className="h-5 w-5" />}
           variant={pendingClarifications.length > 0 ? "warning" : "success"}
+        />
+        <StatCard
+          title="Notificações"
+          value={entityUnread}
+          subtitle="não lidas"
+          icon={<Bell className="h-5 w-5" />}
+          variant={entityUnread > 0 ? "warning" : "success"}
         />
       </div>
 
