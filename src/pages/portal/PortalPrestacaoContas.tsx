@@ -621,7 +621,8 @@ const PortalPrestacaoContas = () => {
         </CardContent>
       </Card>
 
-      {/* Upload Section */}
+      {/* Upload Section - only for tecnico */}
+      {userRole === "tecnico" && (
       <Card className="mb-6 border-dashed border-2 border-primary/30">
         <CardContent className="pt-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -687,6 +688,7 @@ const PortalPrestacaoContas = () => {
           </div>
         </CardContent>
       </Card>
+      )}
 
       {userRole === "entidade" ? (
         /* ─── VISTA DA ENTIDADE: Apenas carregar balancete ─── */
