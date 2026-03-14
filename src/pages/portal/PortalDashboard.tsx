@@ -23,11 +23,13 @@ import {
 
 const PortalDashboard = () => {
   const { entity, entityId } = usePortalEntity();
+  const { unreadCount } = useSubmissions();
   const entityExercicios = mockFiscalYears.filter((fy) => fy.entityId === entityId);
   const activeExercicio = entityExercicios.find((fy) => fy.year === 2024);
   const pendingClarifications = mockClarifications.filter(
     (cr) => cr.entityId === entityId && cr.status === "pendente"
   );
+  const entityUnread = unreadCount(entityId);
 
   const today = new Date();
   const daysToDeadline = activeExercicio
