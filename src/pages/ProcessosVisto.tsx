@@ -670,7 +670,7 @@ export default function ProcessosVisto() {
                     Todos os documentos obrigatórios devem ser verificados para emitir a acta.
                   </p>
                 ) : <div />}
-                <div className="flex gap-3">
+                <div className="flex gap-3 flex-wrap">
                   <Button variant="outline" onClick={() => { setSelectedVisto(null); setCheckedDocs({}); }}>
                     Cancelar
                   </Button>
@@ -681,6 +681,14 @@ export default function ProcessosVisto() {
                   >
                     <Undo2 className="h-4 w-4" />
                     Devolver
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => handlePreviewPdf()}
+                    className="gap-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                    Visualizar PDF
                   </Button>
                   <Button
                     disabled={!allRequiredChecked}
