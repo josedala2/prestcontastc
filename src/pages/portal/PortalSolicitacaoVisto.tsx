@@ -202,7 +202,7 @@ export default function PortalSolicitacaoVisto() {
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <p className="text-[11px] text-muted-foreground mb-0.5">Tipo</p>
                     <p className="text-sm font-medium">{detailDialog.tipo}</p>
