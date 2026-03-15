@@ -16,6 +16,7 @@ import {
   Bell,
   CheckCircle,
   XCircle,
+  FileQuestion,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
