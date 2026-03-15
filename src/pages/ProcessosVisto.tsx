@@ -186,6 +186,10 @@ export default function ProcessosVisto() {
   const [actasGeradas, setActasGeradas] = useState<string[]>([]);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [editingActaVisto, setEditingActaVisto] = useState<SolicitacaoVisto | null>(null);
+  const [representanteNome, setRepresentanteNome] = useState("");
+  const [representanteTelefone, setRepresentanteTelefone] = useState("");
+  const [representanteCargo, setRepresentanteCargo] = useState("");
+  const [oficioNumero, setOficioNumero] = useState("");
   const previewObjectUrlRef = useRef<string | null>(null);
 
   const filtered = vistos.filter((v) => {
