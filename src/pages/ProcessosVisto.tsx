@@ -26,7 +26,7 @@ import {
   FileCheck, Undo2, Inbox, Download, Printer, ExternalLink, Pencil, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { exportActaRecepcaoPdf, type ActaRecepcaoData } from "@/lib/exportUtils";
+import { exportActaRecepcaoVistoPdf, type ActaRecepcaoVistoData } from "@/lib/actaVistoGenerator";
 
 // ── Types ──
 interface SolicitacaoVisto {
