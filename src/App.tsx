@@ -81,6 +81,7 @@ const App = () => (
                 <Route path="validacoes" element={<PortalValidacoes />} />
                 <Route path="mapas" element={<PortalMapas />} />
                 <Route path="prestacao-contas" element={<PortalPrestacaoContas />} />
+                <Route path="solicitacao-visto" element={<PortalSolicitacaoVisto />} />
                 <Route path="solicitacoes" element={<PortalSolicitacoes />} />
               </Routes>
             </PortalEntityProvider>
