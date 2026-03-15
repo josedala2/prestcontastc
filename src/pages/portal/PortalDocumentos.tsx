@@ -43,6 +43,7 @@ const initialAttachments: Attachment[] = [
 ];
 
 const PortalDocumentos = () => {
+  const { entity } = usePortalEntity();
   const [attachments, setAttachments] = useState<Attachment[]>(initialAttachments);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
