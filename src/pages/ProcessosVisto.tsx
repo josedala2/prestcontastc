@@ -851,6 +851,55 @@ export default function ProcessosVisto() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ── Preview PDF da Acta ── */}
+      <Dialog open={!!pdfPreviewUrl} onOpenChange={() => setPdfPreviewUrl(null)}>
+        <DialogContent className="max-w-4xl w-[95vw] h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Stamp className="h-5 w-5 text-primary" />
+              Acta de Recepção — Pré-visualização
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0">
+            {pdfPreviewUrl && (
+              <iframe
+                src={pdfPreviewUrl}
+                className="w-full h-full border rounded-md"
+                title="Pré-visualização da Acta de Recepção"
+              />
+            )}
+          </div>
+          <DialogFooter className="flex-row justify-end gap-2 pt-2 border-t">
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => {
+                if (pdfPreviewUrl) {
+                  window.open(pdfPreviewUrl, "_blank");
+                }
+              }}
+            >
+              <ExternalLink className="h-3.5 w-3.5" /> Abrir em Nova Aba
+            </Button>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => {
+                if (pdfPreviewUrl) {
+                  const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="Pré-visualização da Acta de Recepção"]');
+                  iframe?.contentWindow?.print();
+                }
+              }}
+            >
+              <Printer className="h-3.5 w-3.5" /> Imprimir
+            </Button>
+            <Button variant="outline" onClick={() => setPdfPreviewUrl(null)}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
