@@ -186,6 +186,7 @@ export default function ProcessosVisto() {
   const [actasGeradas, setActasGeradas] = useState<string[]>([]);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [editingActaVisto, setEditingActaVisto] = useState<SolicitacaoVisto | null>(null);
+  const previewObjectUrlRef = useRef<string | null>(null);
 
   const filtered = vistos.filter((v) => {
     const matchEstado = filtroEstado === "todos" || v.estado === filtroEstado;
@@ -227,6 +228,31 @@ export default function ProcessosVisto() {
     setCheckedDocs((prev) => ({ ...prev, [docId]: !prev[docId] }));
   };
 
+  const closePdfPreview = () => {
+    if (previewObjectUrlRef.current) {
+      URL.revokeObjectURL(previewObjectUrlRef.current);
+      previewObjectUrlRef.current = null;
+    }
+    setPdfPreviewUrl(null);
+  };
+
+  const setPdfPreviewFromBlob = (blob: Blob) => {
+    if (previewObjectUrlRef.current) {
+      URL.revokeObjectURL(previewObjectUrlRef.current);
+    }
+    const objectUrl = URL.createObjectURL(blob);
+    previewObjectUrlRef.current = objectUrl;
+    setPdfPreviewUrl(objectUrl);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (previewObjectUrlRef.current) {
+        URL.revokeObjectURL(previewObjectUrlRef.current);
+      }
+    };
+  }, []);
+
   const now = new Date();
   const actaNumero = selectedVisto
     ? `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(selectedVisto) + 1).padStart(3, "0")}`
@@ -258,8 +284,8 @@ export default function ProcessosVisto() {
     if (!target) return;
     const numero = `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(target) + 1).padStart(3, "0")}`;
     const data = buildActaData(target, numero);
-    const dataUri = exportActaRecepcaoVistoPdf(data, true);
-    setPdfPreviewUrl(dataUri);
+    const { blob } = exportActaRecepcaoVistoPdf(data);
+    setPdfPreviewFromBlob(blob);
   };
 
   const handleDownloadPdf = (visto: SolicitacaoVisto) => {
