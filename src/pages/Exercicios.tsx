@@ -60,24 +60,6 @@ const Exercicios = () => {
         )
       );
       toast.success("Exercício actualizado com sucesso.");
-    } else {
-      const newFy: FiscalYear = {
-        id: `fy_${Date.now()}`,
-        entityId: form.entityId,
-        entityName: entity.name,
-        year: form.year,
-        startDate: form.startDate,
-        endDate: form.endDate,
-        status: form.status,
-        totalDebito: 0,
-        totalCredito: 0,
-        errorsCount: 0,
-        warningsCount: 0,
-        checklistProgress: 0,
-        deadline: `${form.year + 1}-06-30`,
-      };
-      setFiscalYears((prev) => [newFy, ...prev]);
-      toast.success("Exercício criado com sucesso.");
     }
     setDialogOpen(false);
   };
