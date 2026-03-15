@@ -38,6 +38,7 @@ const portalNav = [
   { title: "Painel", icon: LayoutDashboard, path: "/portal" },
   { title: "Exercícios", icon: FileBarChart, path: "/portal/exercicios" },
   { title: "Prestação de Contas", icon: FileBarChart, path: "/portal/prestacao-contas" },
+  { title: "Solicitações", icon: MessageSquare, path: "/portal/solicitacoes" },
   { title: "Mapas/Modelos", icon: Map, path: "/portal/mapas" },
   { title: "Esclarecimentos", icon: MessageSquare, path: "/portal/esclarecimentos" },
   { title: "Validações", icon: ShieldCheck, path: "/portal/validacoes" },
