@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
-import { PageHeader } from "@/components/ui-custom/PageElements";
+import { PageHeader, StatCard } from "@/components/ui-custom/PageElements";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { mockEntities } from "@/data/mockData";
-import { Eye, Search, Building2, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { mockEntities, mockFiscalYears } from "@/data/mockData";
+import { Eye, Search, Building2, Calendar, ChevronLeft, ChevronRight, Inbox, Stamp, BarChart3, CalendarCheck } from "lucide-react";
 
 // Mock submission data
 const mockSubmissoes = mockEntities.map((e, i) => ({
@@ -59,12 +59,55 @@ const Submissoes = () => {
     currentPage * ITEMS_PER_PAGE
   );
 
+  // KPI stats
+  const pendentesCount = mockSubmissoes.filter((s) => s.estado === "submetido").length;
+  const emAnaliseCount = mockSubmissoes.filter((s) => s.estado === "em_analise").length;
+  const aprovadosCount = mockSubmissoes.filter((s) => s.estado === "aprovado").length;
+  const hoje = new Date();
+  const submetidosEsteMes = mockFiscalYears.filter((fy) => {
+    if (!fy.submittedAt) return false;
+    const d = new Date(fy.submittedAt);
+    return d.getMonth() === hoje.getMonth() && d.getFullYear() === hoje.getFullYear();
+  }).length;
+
   return (
     <AppLayout>
       <PageHeader
         title="Submissões"
-        description="Entidades que submeteram relatórios de prestação de contas"
+        description="Gestão de prestações de contas submetidas — Verificação documental e emissão de actas"
       />
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <StatCard
+          title="Pendentes de Recepção"
+          value={pendentesCount}
+          subtitle="aguardam verificação documental"
+          icon={<Inbox className="h-5 w-5" />}
+          variant={pendentesCount > 0 ? "warning" : "success"}
+        />
+        <StatCard
+          title="Em Análise"
+          value={emAnaliseCount}
+          subtitle="transitaram para análise técnica"
+          icon={<BarChart3 className="h-5 w-5" />}
+          variant="primary"
+        />
+        <StatCard
+          title="Aprovados"
+          value={aprovadosCount}
+          subtitle="concluídos com sucesso"
+          icon={<Stamp className="h-5 w-5" />}
+          variant="success"
+        />
+        <StatCard
+          title="Recebidos Este Mês"
+          value={submetidosEsteMes}
+          subtitle={`de ${mockSubmissoes.length} total`}
+          icon={<CalendarCheck className="h-5 w-5" />}
+          variant="default"
+        />
+      </div>
 
       {/* Filters */}
       <Card className="mb-6">
@@ -94,23 +137,6 @@ const Submissoes = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Summary cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {[
-          { label: "Total", count: mockSubmissoes.length, color: "text-foreground" },
-          { label: "Submetidos", count: mockSubmissoes.filter((s) => s.estado === "submetido").length, color: "text-muted-foreground" },
-          { label: "Em Análise", count: mockSubmissoes.filter((s) => s.estado === "em_analise").length, color: "text-yellow-600" },
-          { label: "Aprovados", count: mockSubmissoes.filter((s) => s.estado === "aprovado").length, color: "text-green-600" },
-        ].map((c) => (
-          <Card key={c.label}>
-            <CardContent className="pt-4 text-center">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{c.label}</p>
-              <p className={`text-2xl font-bold mt-1 ${c.color}`}>{c.count}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
 
       {/* Table */}
       <Card>
