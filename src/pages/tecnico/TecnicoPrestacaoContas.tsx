@@ -438,6 +438,7 @@ const TecnicoPrestacaoContas = () => {
   const [solicitarOpen, setSolicitarOpen] = useState(false);
   const [solicitarDocs, setSolicitarDocs] = useState<string[]>([]);
   const [solicitarMsg, setSolicitarMsg] = useState("");
+  const [solicitarPrazo, setSolicitarPrazo] = useState(15);
 
   const documentosDisponiveis = [
     "Balancete Analítico",
