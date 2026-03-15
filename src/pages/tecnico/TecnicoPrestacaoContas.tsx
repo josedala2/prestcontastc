@@ -2,7 +2,9 @@ import { useState, useRef, useCallback } from "react";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { generateParecerDocx } from "@/lib/parecerGenerator";
 import { ParecerPreview } from "@/components/ParecerPreview";
+import { ParecerHistorico } from "@/components/ParecerHistorico";
 import { TecnicoLayout } from "@/components/TecnicoLayout";
+import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -437,8 +439,9 @@ const TecnicoPrestacaoContas = () => {
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Preview state
+  // Preview & history state
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [parecerRefreshKey, setParecerRefreshKey] = useState(0);
 
   // Solicitar Elementos state
   const [solicitarOpen, setSolicitarOpen] = useState(false);
@@ -637,6 +640,81 @@ const TecnicoPrestacaoContas = () => {
 
   const handleSave = () => {
     toast.success("Prestação de contas guardada com sucesso!");
+  };
+
+  const emitirParecer = async () => {
+    try {
+      const parecerData = {
+        entityName: entity.name,
+        exercicio: periodo,
+        nif: entity.nif,
+        totalActivo,
+        totalPassivo,
+        totalCapProprio,
+        resultadoExercicio,
+        totalProveitos,
+        totalCustos,
+        comentarios,
+        tipoParecerIndex,
+        parecerFinal,
+        tecnicoNome: "Maria Costa",
+      };
+
+      // Generate DOCX
+      const { blob, fileName } = await generateParecerDocx(parecerData);
+
+      // Compute SHA-256 hash
+      const arrayBuffer = await blob.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const integrityHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+
+      // Get next version
+      const { data: existing } = await supabase
+        .from("pareceres")
+        .select("version")
+        .eq("entity_id", entity.id)
+        .eq("fiscal_year", periodo)
+        .order("version", { ascending: false })
+        .limit(1);
+
+      const nextVersion = (existing && existing.length > 0 ? (existing[0] as { version: number }).version : 0) + 1;
+
+      // Upload DOCX to storage
+      const filePath = `${entity.id}/${periodo}/v${nextVersion}_${fileName}`;
+      const { error: uploadError } = await supabase.storage.from("pareceres").upload(filePath, blob, {
+        contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
+      if (uploadError) throw uploadError;
+
+      // Persist record
+      const { error: insertError } = await supabase.from("pareceres").insert({
+        entity_id: entity.id,
+        entity_name: entity.name,
+        fiscal_year: periodo,
+        version: nextVersion,
+        tipo_parecer_index: tipoParecerIndex,
+        parecer_final: parecerFinal,
+        total_activo: totalActivo,
+        total_passivo: totalPassivo,
+        total_cap_proprio: totalCapProprio,
+        resultado_exercicio: resultadoExercicio,
+        total_proveitos: totalProveitos,
+        total_custos: totalCustos,
+        comentarios,
+        tecnico_nome: "Maria Costa",
+        file_path: filePath,
+        file_name: fileName,
+        integrity_hash: integrityHash,
+      } as any);
+      if (insertError) throw insertError;
+
+      setParecerRefreshKey((k) => k + 1);
+      toast.success(`Parecer v${nextVersion} emitido, guardado e descarregado com sucesso!`);
+    } catch (err) {
+      console.error("Error generating parecer:", err);
+      toast.error("Erro ao gerar ou guardar o parecer.");
+    }
   };
 
   return (
@@ -1122,6 +1200,13 @@ const TecnicoPrestacaoContas = () => {
             </CardContent>
           </Card>
 
+          {/* Histórico de Pareceres */}
+          <ParecerHistorico
+            entityId={entity.id}
+            fiscalYear={periodo}
+            refreshKey={parecerRefreshKey}
+          />
+
           {/* Acções */}
           <div className="flex flex-wrap justify-end gap-3 pt-2">
             <Dialog open={solicitarOpen} onOpenChange={setSolicitarOpen}>
@@ -1251,29 +1336,7 @@ const TecnicoPrestacaoContas = () => {
                 parecerFinal,
                 tecnicoNome: "Maria Costa",
               }}
-              onConfirm={async () => {
-                try {
-                  await generateParecerDocx({
-                    entityName: entity.name,
-                    exercicio: periodo,
-                    nif: entity.nif,
-                    totalActivo,
-                    totalPassivo,
-                    totalCapProprio,
-                    resultadoExercicio,
-                    totalProveitos,
-                    totalCustos,
-                    comentarios,
-                    tipoParecerIndex,
-                    parecerFinal,
-                    tecnicoNome: "Maria Costa",
-                  });
-                  toast.success("Parecer técnico emitido e descarregado com sucesso!");
-                } catch (err) {
-                  console.error("Error generating parecer:", err);
-                  toast.error("Erro ao gerar o documento do parecer.");
-                }
-              }}
+              onConfirm={emitirParecer}
             />
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -1323,29 +1386,7 @@ const TecnicoPrestacaoContas = () => {
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={async () => {
-                      try {
-                        await generateParecerDocx({
-                          entityName: entity.name,
-                          exercicio: periodo,
-                          nif: entity.nif,
-                          totalActivo,
-                          totalPassivo,
-                          totalCapProprio,
-                          resultadoExercicio,
-                          totalProveitos,
-                          totalCustos,
-                          comentarios,
-                          tipoParecerIndex,
-                          parecerFinal,
-                          tecnicoNome: "Maria Costa",
-                        });
-                        toast.success("Parecer técnico emitido e descarregado com sucesso!");
-                      } catch (err) {
-                        console.error("Error generating parecer:", err);
-                        toast.error("Erro ao gerar o documento do parecer.");
-                      }
-                    }}
+                    onClick={emitirParecer}
                     className="gap-2"
                   >
                     <CheckCircle className="h-4 w-4" />
