@@ -30,7 +30,7 @@ interface TecnicoLayoutProps {
 
 const tecnicoNav = [
   { title: "Painel", icon: LayoutDashboard, path: "/tecnico" },
-  { title: "Análise de Contas", icon: FileBarChart, path: "/tecnico/prestacao-contas" },
+  { title: "Prestação de Contas", icon: FileBarChart, path: "/tecnico/prestacao-contas" },
   { title: "Exercícios", icon: FileBarChart, path: "/tecnico/exercicios" },
   { title: "Documentos", icon: Paperclip, path: "/tecnico/documentos" },
   { title: "Mapas/Modelos", icon: Map, path: "/tecnico/mapas" },
@@ -40,7 +40,7 @@ const tecnicoNav = [
 
 const routeTitles: Record<string, string> = {
   "/tecnico": "Painel do Técnico",
-  "/tecnico/prestacao-contas": "Análise de Contas — Modelo CC-2",
+  "/tecnico/prestacao-contas": "Prestação de Contas — Modelo CC-2",
   "/tecnico/exercicios": "Exercícios Fiscais",
   "/tecnico/documentos": "Documentos & Anexos",
   "/tecnico/mapas": "Mapas e Modelos",
