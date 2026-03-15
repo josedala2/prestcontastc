@@ -420,6 +420,7 @@ function SummaryCard({ label, value, color }: { label: string; value: string; co
 // ─── Main Component ───
 const TecnicoPrestacaoContas = () => {
   const { entity } = usePortalEntity();
+  const { solicitarElementos } = useSubmissions();
   const [periodo, setPeriodo] = useState("2024");
   const [activeTab, setActiveTab] = useState("balanco");
 
@@ -432,6 +433,51 @@ const TecnicoPrestacaoContas = () => {
   const [custos, setCustos] = useState<Record<string, number>>({});
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Solicitar Elementos state
+  const [solicitarOpen, setSolicitarOpen] = useState(false);
+  const [solicitarDocs, setSolicitarDocs] = useState<string[]>([]);
+  const [solicitarMsg, setSolicitarMsg] = useState("");
+
+  const documentosDisponiveis = [
+    "Balancete Analítico",
+    "Extractos Bancários",
+    "Reconciliação Bancária",
+    "Inventário Patrimonial",
+    "Relação de Abates",
+    "Acta de Apreciação de Contas",
+    "Comprovativos de Entrega",
+    "Relatório de Gestão",
+    "Demonstração de Fluxos de Caixa",
+    "Notas às Demonstrações Financeiras",
+    "Mapa de Execução Orçamental",
+    "Certidão de Não Dívida Fiscal",
+  ];
+
+  const toggleDoc = (doc: string) => {
+    setSolicitarDocs((prev) =>
+      prev.includes(doc) ? prev.filter((d) => d !== doc) : [...prev, doc]
+    );
+  };
+
+  const handleSolicitarElementos = () => {
+    if (solicitarDocs.length === 0) {
+      toast.error("Seleccione pelo menos um documento.");
+      return;
+    }
+    solicitarElementos(
+      entity.id,
+      `fy-${periodo}`,
+      solicitarDocs,
+      solicitarMsg || "O Técnico solicita os seguintes elementos adicionais para análise.",
+      entity.name,
+      entity.email
+    );
+    toast.success("Pedido de elementos enviado com sucesso à entidade.");
+    setSolicitarOpen(false);
+    setSolicitarDocs([]);
+    setSolicitarMsg("");
+  };
 
   const emptyPrior: Record<string, number> = {};
 
