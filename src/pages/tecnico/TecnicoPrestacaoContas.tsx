@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { useSubmissions } from "@/contexts/SubmissionContext";
 import { TecnicoLayout } from "@/components/TecnicoLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
