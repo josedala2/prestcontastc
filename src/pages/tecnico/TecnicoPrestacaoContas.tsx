@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { generateParecerDocx } from "@/lib/parecerGenerator";
+import { ParecerPreview } from "@/components/ParecerPreview";
 import { TecnicoLayout } from "@/components/TecnicoLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,7 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
-import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X, Download, AlertTriangle, Send, MessageSquare } from "lucide-react";
+import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X, Download, AlertTriangle, Send, MessageSquare, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import * as XLSX from "xlsx";
@@ -435,6 +436,9 @@ const TecnicoPrestacaoContas = () => {
   const [custos, setCustos] = useState<Record<string, number>>({});
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Preview state
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   // Solicitar Elementos state
   const [solicitarOpen, setSolicitarOpen] = useState(false);
@@ -1225,10 +1229,52 @@ const TecnicoPrestacaoContas = () => {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-            <Button variant="outline" onClick={handleSave} className="gap-2">
-              <Save className="h-4 w-4" />
-              Guardar Rascunho
+            <Button variant="outline" onClick={() => setPreviewOpen(true)} className="gap-2">
+              <Eye className="h-4 w-4" />
+              Pré-visualizar
             </Button>
+            <ParecerPreview
+              open={previewOpen}
+              onOpenChange={setPreviewOpen}
+              data={{
+                entityName: entity.name,
+                exercicio: periodo,
+                nif: entity.nif,
+                totalActivo,
+                totalPassivo,
+                totalCapProprio,
+                resultadoExercicio,
+                totalProveitos,
+                totalCustos,
+                comentarios,
+                tipoParecerIndex,
+                parecerFinal,
+                tecnicoNome: "Maria Costa",
+              }}
+              onConfirm={async () => {
+                try {
+                  await generateParecerDocx({
+                    entityName: entity.name,
+                    exercicio: periodo,
+                    nif: entity.nif,
+                    totalActivo,
+                    totalPassivo,
+                    totalCapProprio,
+                    resultadoExercicio,
+                    totalProveitos,
+                    totalCustos,
+                    comentarios,
+                    tipoParecerIndex,
+                    parecerFinal,
+                    tecnicoNome: "Maria Costa",
+                  });
+                  toast.success("Parecer técnico emitido e descarregado com sucesso!");
+                } catch (err) {
+                  console.error("Error generating parecer:", err);
+                  toast.error("Erro ao gerar o documento do parecer.");
+                }
+              }}
+            />
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
