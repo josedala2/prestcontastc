@@ -7,19 +7,23 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
   Stamp, Clock, CheckCircle, XCircle, Eye, Building2, FileText,
-  AlertTriangle, ShieldCheck, Search, TrendingUp, BarChart3,
-  CalendarCheck, Filter, ArrowUpDown, Banknote, Briefcase,
+  AlertTriangle, ShieldCheck, Search, TrendingUp, Banknote,
+  FileCheck, Undo2, Inbox,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -34,16 +38,27 @@ interface SolicitacaoVisto {
   valor: string;
   valorNum: number;
   dataSubmissao: string;
-  estado: "pendente" | "em_analise" | "aprovado" | "recusado";
+  estado: "pendente" | "recepcionado" | "devolvido";
   fonte: string;
   entidadeContratada: string;
   nif: string;
   documentos: string[];
   observacoes?: string;
-  dataDecisao?: string;
 }
 
-// ── Mock data (simula submissões do Portal da Entidade) ──
+// ── Checklist documental para processos de visto ──
+const vistoChecklist = [
+  { id: "oficio", label: "Ofício de Solicitação de Visto", required: true },
+  { id: "minuta", label: "Minuta do Contrato", required: true },
+  { id: "cabimento", label: "Cabimento Orçamental", required: true },
+  { id: "adjudicacao", label: "Proposta / Despacho de Adjudicação", required: false },
+  { id: "concurso", label: "Programa de Concurso / Caderno de Encargos", required: false },
+  { id: "habilitacao", label: "Documentos de Habilitação da Empresa", required: false },
+  { id: "certidao", label: "Certidão Negativa de Dívidas Fiscais", required: false },
+  { id: "seguranca_social", label: "Declaração de Regularidade com Segurança Social", required: false },
+];
+
+// ── Mock data ──
 const mockVistos: SolicitacaoVisto[] = [
   {
     id: "SV-2025-001",
@@ -71,7 +86,7 @@ const mockVistos: SolicitacaoVisto[] = [
     valor: "120.000.000,00 Kz",
     valorNum: 120000000,
     dataSubmissao: "2025-01-05",
-    estado: "em_analise",
+    estado: "pendente",
     fonte: "Orçamento Geral do Estado (OGE)",
     entidadeContratada: "Construções Modernas, S.A.",
     nif: "987654321",
@@ -87,13 +102,12 @@ const mockVistos: SolicitacaoVisto[] = [
     valor: "45.000.000,00 Kz",
     valorNum: 45000000,
     dataSubmissao: "2024-11-15",
-    estado: "aprovado",
+    estado: "recepcionado",
     fonte: "Fundos Autónomos",
     entidadeContratada: "TechSolutions Angola, Lda.",
     nif: "111222333",
     documentos: ["Ofício de Solicitação", "Minuta do Contrato", "Cabimento Orçamental"],
-    observacoes: "Visto concedido. Processo regular e documentação completa.",
-    dataDecisao: "2024-11-20",
+    observacoes: "Acta de recepção emitida em 20/11/2024. Processo encaminhado para análise.",
   },
   {
     id: "SV-2024-002",
@@ -105,13 +119,12 @@ const mockVistos: SolicitacaoVisto[] = [
     valor: "85.000.000,00 Kz",
     valorNum: 85000000,
     dataSubmissao: "2024-09-20",
-    estado: "recusado",
+    estado: "devolvido",
     fonte: "Orçamento Geral do Estado (OGE)",
     entidadeContratada: "AutoAngola, S.A.",
     nif: "444555666",
     documentos: ["Ofício de Solicitação", "Minuta do Contrato"],
     observacoes: "Documentação incompleta. Falta cabimento orçamental e caderno de encargos.",
-    dataDecisao: "2024-09-25",
   },
   {
     id: "SV-2025-003",
@@ -139,7 +152,7 @@ const mockVistos: SolicitacaoVisto[] = [
     valor: "32.000.000,00 Kz",
     valorNum: 32000000,
     dataSubmissao: "2025-02-10",
-    estado: "em_analise",
+    estado: "pendente",
     fonte: "Receitas Próprias",
     entidadeContratada: "IT Services Angola, S.A.",
     nif: "555666777",
@@ -149,9 +162,8 @@ const mockVistos: SolicitacaoVisto[] = [
 
 const estadoConfig: Record<string, { label: string; color: string; icon: typeof Clock }> = {
   pendente: { label: "Pendente", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400", icon: Clock },
-  em_analise: { label: "Em Análise", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400", icon: Eye },
-  aprovado: { label: "Visto Concedido", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400", icon: CheckCircle },
-  recusado: { label: "Recusado", color: "bg-destructive/10 text-destructive", icon: XCircle },
+  recepcionado: { label: "Recepcionado", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400", icon: CheckCircle },
+  devolvido: { label: "Devolvido", color: "bg-destructive/10 text-destructive", icon: XCircle },
 };
 
 const formatCurrency = (value: number) =>
@@ -162,9 +174,15 @@ export default function ProcessosVisto() {
   const [filtroEstado, setFiltroEstado] = useState("todos");
   const [filtroTipo, setFiltroTipo] = useState("todos");
   const [pesquisa, setPesquisa] = useState("");
+
+  // Verificação documental
   const [selectedVisto, setSelectedVisto] = useState<SolicitacaoVisto | null>(null);
-  const [actionDialog, setActionDialog] = useState<{ visto: SolicitacaoVisto; action: "aprovar" | "recusar" } | null>(null);
-  const [observacoesDecisao, setObservacoesDecisao] = useState("");
+  const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [motivoDevolucao, setMotivoDevolucao] = useState("");
+  const [detailDialog, setDetailDialog] = useState<SolicitacaoVisto | null>(null);
+  const [actasGeradas, setActasGeradas] = useState<string[]>([]);
 
   const filtered = vistos.filter((v) => {
     const matchEstado = filtroEstado === "todos" || v.estado === filtroEstado;
@@ -178,88 +196,115 @@ export default function ProcessosVisto() {
     return matchEstado && matchTipo && matchPesquisa;
   });
 
+  const pendentes = vistos.filter((v) => v.estado === "pendente");
+
   // ── Estatísticas ──
   const resumo = {
     total: vistos.length,
-    pendentes: vistos.filter((v) => v.estado === "pendente").length,
-    emAnalise: vistos.filter((v) => v.estado === "em_analise").length,
-    aprovados: vistos.filter((v) => v.estado === "aprovado").length,
-    recusados: vistos.filter((v) => v.estado === "recusado").length,
+    pendentes: pendentes.length,
+    recepcionados: vistos.filter((v) => v.estado === "recepcionado").length,
+    devolvidos: vistos.filter((v) => v.estado === "devolvido").length,
   };
 
   const valorTotal = vistos.reduce((acc, v) => acc + v.valorNum, 0);
-  const valorPendente = vistos
-    .filter((v) => v.estado === "pendente" || v.estado === "em_analise")
-    .reduce((acc, v) => acc + v.valorNum, 0);
+  const valorPendente = pendentes.reduce((acc, v) => acc + v.valorNum, 0);
   const entidadesUnicas = new Set(vistos.map((v) => v.entidade)).size;
 
-  const handleAction = () => {
-    if (!actionDialog) return;
-    if (actionDialog.action === "recusar" && !observacoesDecisao.trim()) {
-      toast.error("Indique o motivo da recusa");
-      return;
-    }
+  // ── Checklist logic ──
+  const requiredItems = vistoChecklist.filter((c) => c.required);
+  const allRequiredChecked = requiredItems.every((item) => checkedDocs[item.id]);
+  const checkedCount = vistoChecklist.filter((item) => checkedDocs[item.id]).length;
 
+  const handleSelectProcesso = (visto: SolicitacaoVisto) => {
+    setSelectedVisto(visto);
+    setCheckedDocs({});
+  };
+
+  const handleToggleDoc = (docId: string) => {
+    setCheckedDocs((prev) => ({ ...prev, [docId]: !prev[docId] }));
+  };
+
+  const now = new Date();
+  const actaNumero = selectedVisto
+    ? `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(selectedVisto) + 1).padStart(3, "0")}`
+    : "";
+
+  const handleConfirmRecepcao = () => {
+    if (!selectedVisto) return;
     setVistos((prev) =>
       prev.map((v) =>
-        v.id === actionDialog.visto.id
-          ? {
-              ...v,
-              estado: actionDialog.action === "aprovar" ? "aprovado" as const : "recusado" as const,
-              observacoes: observacoesDecisao || (actionDialog.action === "aprovar" ? "Visto concedido." : undefined),
-              dataDecisao: new Date().toISOString().split("T")[0],
-            }
+        v.id === selectedVisto.id
+          ? { ...v, estado: "recepcionado" as const, observacoes: `Acta de recepção ${actaNumero} emitida em ${now.toLocaleDateString("pt-AO")}. Processo encaminhado para análise técnica.` }
           : v
       )
     );
+    setActasGeradas((prev) => [...prev, selectedVisto.id]);
+    setConfirmDialogOpen(false);
+    toast.success(`Acta de recepção gerada — ${selectedVisto.id} — ${selectedVisto.entidade}`);
+    setSelectedVisto(null);
+    setCheckedDocs({});
+  };
 
-    const label = actionDialog.action === "aprovar" ? "Visto concedido" : "Visto recusado";
-    toast.success(`${label} — ${actionDialog.visto.id}`);
-    setActionDialog(null);
-    setObservacoesDecisao("");
+  const handleConfirmDevolucao = () => {
+    if (!selectedVisto || !motivoDevolucao.trim()) {
+      toast.error("Indique o motivo da devolução");
+      return;
+    }
+    setVistos((prev) =>
+      prev.map((v) =>
+        v.id === selectedVisto.id
+          ? { ...v, estado: "devolvido" as const, observacoes: motivoDevolucao.trim() }
+          : v
+      )
+    );
+    setRejectDialogOpen(false);
+    setMotivoDevolucao("");
+    toast.warning(`Processo devolvido — ${selectedVisto.id} — ${selectedVisto.entidade}`);
+    setSelectedVisto(null);
+    setCheckedDocs({});
   };
 
   return (
     <AppLayout>
       <PageHeader
-        title="Processos de Visto"
-        description="Dashboard de gestão das solicitações de visto submetidas pelas entidades"
+        title="Processos de Visto — Recepção"
+        description="Recepção e verificação documental das solicitações de visto submetidas pelas entidades"
       />
 
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard
-          title="Processos Pendentes"
+          title="Pendentes de Recepção"
           value={resumo.pendentes}
-          subtitle="aguardam análise"
-          icon={<Clock className="h-5 w-5" />}
+          subtitle="aguardam verificação"
+          icon={<Inbox className="h-5 w-5" />}
           variant={resumo.pendentes > 0 ? "warning" : "success"}
         />
         <StatCard
-          title="Em Análise"
-          value={resumo.emAnalise}
-          subtitle="em fase de instrução"
-          icon={<Eye className="h-5 w-5" />}
-          variant="primary"
-        />
-        <StatCard
-          title="Vistos Concedidos"
-          value={resumo.aprovados}
-          subtitle={`de ${resumo.total} total`}
-          icon={<CheckCircle className="h-5 w-5" />}
+          title="Actas Emitidas"
+          value={resumo.recepcionados}
+          subtitle="processos recepcionados"
+          icon={<Stamp className="h-5 w-5" />}
           variant="success"
         />
         <StatCard
-          title="Recusados"
-          value={resumo.recusados}
+          title="Devolvidos"
+          value={resumo.devolvidos}
           subtitle="documentação incompleta"
-          icon={<XCircle className="h-5 w-5" />}
-          variant={resumo.recusados > 0 ? "warning" : "default"}
+          icon={<Undo2 className="h-5 w-5" />}
+          variant={resumo.devolvidos > 0 ? "warning" : "default"}
+        />
+        <StatCard
+          title="Total de Processos"
+          value={resumo.total}
+          subtitle={`${entidadesUnicas} entidades`}
+          icon={<ShieldCheck className="h-5 w-5" />}
+          variant="default"
         />
       </div>
 
       {/* ── Cards financeiros ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2.5">
@@ -277,370 +322,428 @@ export default function ProcessosVisto() {
               <TrendingUp className="h-5 w-5 text-amber-600" />
             </div>
             <div>
-              <p className="text-[11px] text-muted-foreground">Valor Pendente de Decisão</p>
+              <p className="text-[11px] text-muted-foreground">Valor Pendente de Recepção</p>
               <p className="text-lg font-bold">{formatCurrency(valorPendente)}</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="rounded-lg bg-secondary p-2.5">
-              <Building2 className="h-5 w-5 text-secondary-foreground" />
-            </div>
-            <div>
-              <p className="text-[11px] text-muted-foreground">Entidades Requerentes</p>
-              <p className="text-lg font-bold">{entidadesUnicas}</p>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
-      {/* ── Filtros ── */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Pesquisar por nº, entidade, objecto ou contratada..."
-            value={pesquisa}
-            onChange={(e) => setPesquisa(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        <Select value={filtroEstado} onValueChange={setFiltroEstado}>
-          <SelectTrigger className="w-full sm:w-44">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todos os estados</SelectItem>
-            <SelectItem value="pendente">Pendentes</SelectItem>
-            <SelectItem value="em_analise">Em Análise</SelectItem>
-            <SelectItem value="aprovado">Aprovados</SelectItem>
-            <SelectItem value="recusado">Recusados</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-          <SelectTrigger className="w-full sm:w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todos os tipos</SelectItem>
-            <SelectItem value="previo">Visto Prévio</SelectItem>
-            <SelectItem value="sucessivo">Visto Sucessivo</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* ── Coluna 1: Lista de processos pendentes ── */}
+        <div className="lg:col-span-1 space-y-4">
+          {/* Filtros */}
+          <div className="space-y-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Pesquisar..."
+                value={pesquisa}
+                onChange={(e) => setPesquisa(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Select value={filtroEstado} onValueChange={setFiltroEstado}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="pendente">Pendentes</SelectItem>
+                  <SelectItem value="recepcionado">Recepcionados</SelectItem>
+                  <SelectItem value="devolvido">Devolvidos</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={filtroTipo} onValueChange={setFiltroTipo}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="previo">Prévio</SelectItem>
+                  <SelectItem value="sucessivo">Sucessivo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
-      {/* ── Tabela de Processos ── */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-primary" />
-            Solicitações de Visto ({filtered.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nº Processo</TableHead>
-                <TableHead>Entidade Requerente</TableHead>
-                <TableHead className="hidden md:table-cell">Objecto</TableHead>
-                <TableHead className="hidden lg:table-cell">Contratada</TableHead>
-                <TableHead className="hidden lg:table-cell text-right">Valor</TableHead>
-                <TableHead className="hidden md:table-cell">Tipo</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead className="text-center">Acções</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          {/* Lista de processos */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Clock className="h-4 w-4 text-primary" />
+                Processos Recebidos ({filtered.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 max-h-[50vh] overflow-y-auto">
               {filtered.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
-                    <Stamp className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                    <p className="text-sm">Nenhum processo de visto encontrado.</p>
-                  </TableCell>
-                </TableRow>
+                <div className="text-center py-8 text-muted-foreground">
+                  <CheckCircle className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                  <p className="text-sm">Nenhum processo encontrado.</p>
+                </div>
               ) : (
                 filtered.map((v) => {
                   const config = estadoConfig[v.estado];
+                  const isSelected = selectedVisto?.id === v.id;
                   return (
-                    <TableRow
+                    <button
                       key={v.id}
-                      className="cursor-pointer hover:bg-muted/30"
-                      onClick={() => setSelectedVisto(v)}
+                      onClick={() => v.estado === "pendente" ? handleSelectProcesso(v) : setDetailDialog(v)}
+                      className={cn(
+                        "w-full text-left p-3 rounded-lg border transition-colors",
+                        isSelected
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/40 hover:bg-muted/30"
+                      )}
                     >
-                      <TableCell className="font-mono text-xs font-semibold">{v.id}</TableCell>
-                      <TableCell>
-                        <p className="text-sm font-medium line-clamp-1">{v.entidade}</p>
-                        <p className="text-[10px] text-muted-foreground">
-                          {new Date(v.dataSubmissao).toLocaleDateString("pt-AO")}
-                        </p>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <p className="text-xs text-muted-foreground line-clamp-1 max-w-[200px]">{v.objecto}</p>
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        <p className="text-xs line-clamp-1">{v.entidadeContratada}</p>
-                        <p className="text-[10px] text-muted-foreground font-mono">NIF: {v.nif}</p>
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell text-right text-sm font-medium">
-                        {v.valor}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <Badge variant="outline" className="text-[10px]">
-                          {v.tipo === "previo" ? "Prévio" : "Sucessivo"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={cn("text-[10px]", config.color)} variant="secondary">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-xs font-mono font-semibold">{v.id}</p>
+                          <p className="text-sm font-medium line-clamp-1">{v.entidade}</p>
+                          <p className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">{v.objecto}</p>
+                        </div>
+                        <Badge className={cn("text-[9px] shrink-0", config.color)} variant="secondary">
                           {config.label}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 w-7 p-0"
-                            onClick={(e) => { e.stopPropagation(); setSelectedVisto(v); }}
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                          </Button>
-                          {(v.estado === "pendente" || v.estado === "em_analise") && (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0 text-green-600 hover:text-green-700"
-                                onClick={(e) => { e.stopPropagation(); setActionDialog({ visto: v, action: "aprovar" }); }}
-                              >
-                                <CheckCircle className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0 text-destructive hover:text-destructive/80"
-                                onClick={(e) => { e.stopPropagation(); setActionDialog({ visto: v, action: "recusar" }); }}
-                              >
-                                <XCircle className="h-3.5 w-3.5" />
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                      </div>
+                      <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Building2 className="h-3 w-3" />
+                          {v.tipo === "previo" ? "Prévio" : "Sucessivo"}
+                        </span>
+                        <span>{v.valor}</span>
+                        <span>{new Date(v.dataSubmissao).toLocaleDateString("pt-AO")}</span>
+                      </div>
+                    </button>
                   );
                 })
               )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
 
-      {/* ── Dialog Detalhe ── */}
-      <Dialog open={!!selectedVisto} onOpenChange={() => setSelectedVisto(null)}>
-        <DialogContent className="max-w-2xl w-[95vw]">
-          {selectedVisto && (
+          {/* Actas geradas nesta sessão */}
+          {actasGeradas.length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2 text-green-700 dark:text-green-400">
+                  <Stamp className="h-4 w-4" />
+                  Actas Emitidas ({actasGeradas.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {actasGeradas.map((id) => {
+                  const v = vistos.find((x) => x.id === id);
+                  if (!v) return null;
+                  return (
+                    <div key={id} className="flex items-center justify-between p-2.5 rounded-lg bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800">
+                      <div>
+                        <p className="text-sm font-medium">{v.id} — {v.entidade}</p>
+                        <p className="text-[10px] text-muted-foreground">Acta emitida em {now.toLocaleDateString("pt-AO")}</p>
+                      </div>
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* ── Coluna 2: Painel de verificação documental ── */}
+        <div className="lg:col-span-2">
+          {!selectedVisto ? (
+            <Card>
+              <CardContent className="py-16 text-center text-muted-foreground">
+                <FileCheck className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <p className="text-base font-medium">Seleccione um processo pendente</p>
+                <p className="text-sm">Escolha um processo da lista para verificar a conformidade documental e emitir a acta de recepção.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {/* Resumo do processo */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-primary" />
+                    {selectedVisto.id} — {selectedVisto.entidade}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+                    <div>
+                      <p className="text-[11px] text-muted-foreground">Tipo</p>
+                      <p className="font-medium">{selectedVisto.tipo === "previo" ? "Visto Prévio" : "Visto Sucessivo"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] text-muted-foreground">Natureza</p>
+                      <p className="font-medium">{selectedVisto.natureza}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] text-muted-foreground">Valor</p>
+                      <p className="font-bold">{selectedVisto.valor}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] text-muted-foreground">Contratada</p>
+                      <p className="font-medium">{selectedVisto.entidadeContratada}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] text-muted-foreground">NIF</p>
+                      <p className="font-mono">{selectedVisto.nif}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] text-muted-foreground">Fonte</p>
+                      <p>{selectedVisto.fonte}</p>
+                    </div>
+                    <div className="col-span-2 sm:col-span-3">
+                      <p className="text-[11px] text-muted-foreground">Objecto do Contrato</p>
+                      <p>{selectedVisto.objecto}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Verificação documental */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Verificação Documental
+                    </CardTitle>
+                    <Badge variant={allRequiredChecked ? "default" : "secondary"}>
+                      {checkedCount}/{vistoChecklist.length} verificados
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Confirme a existência de cada documento antes de emitir a acta de recepção.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-10">✓</TableHead>
+                        <TableHead>Documento</TableHead>
+                        <TableHead className="text-center">Obrigatório</TableHead>
+                        <TableHead className="text-center">Estado</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {vistoChecklist.map((item) => {
+                        const isChecked = !!checkedDocs[item.id];
+                        return (
+                          <TableRow key={item.id} className={isChecked ? "bg-green-50/50 dark:bg-green-900/5" : ""}>
+                            <TableCell>
+                              <Checkbox checked={isChecked} onCheckedChange={() => handleToggleDoc(item.id)} />
+                            </TableCell>
+                            <TableCell className="text-sm">{item.label}</TableCell>
+                            <TableCell className="text-center">
+                              {item.required ? (
+                                <Badge variant="destructive" className="text-[10px]">Obrigatório</Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-[10px]">Opcional</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {isChecked ? (
+                                <span className="flex items-center justify-center gap-1 text-green-600 text-xs">
+                                  <CheckCircle className="h-3.5 w-3.5" /> Verificado
+                                </span>
+                              ) : (
+                                <span className="flex items-center justify-center gap-1 text-muted-foreground text-xs">
+                                  <XCircle className="h-3.5 w-3.5" /> Pendente
+                                </span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+
+              {/* Acções */}
+              <div className="flex items-center justify-between">
+                {!allRequiredChecked ? (
+                  <p className="text-xs text-amber-600 flex items-center gap-1">
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                    Todos os documentos obrigatórios devem ser verificados para emitir a acta.
+                  </p>
+                ) : <div />}
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => { setSelectedVisto(null); setCheckedDocs({}); }}>
+                    Cancelar
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => setRejectDialogOpen(true)}
+                    className="gap-2"
+                  >
+                    <Undo2 className="h-4 w-4" />
+                    Devolver
+                  </Button>
+                  <Button
+                    disabled={!allRequiredChecked}
+                    onClick={() => setConfirmDialogOpen(true)}
+                    className="gap-2"
+                  >
+                    <Stamp className="h-4 w-4" />
+                    Confirmar e Gerar Acta
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Dialog Detalhe (processos já tratados) ── */}
+      <Dialog open={!!detailDialog} onOpenChange={() => setDetailDialog(null)}>
+        <DialogContent className="max-w-lg w-[95vw]">
+          {detailDialog && (
             <>
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Stamp className="h-5 w-5 text-primary" />
-                  Processo {selectedVisto.id}
+                  {detailDialog.id}
                 </DialogTitle>
               </DialogHeader>
-
-              <div className="space-y-5 max-h-[65vh] overflow-y-auto pr-1">
-                {/* Status banner */}
-                <div className={cn(
-                  "flex items-center gap-2 rounded-lg px-4 py-2.5",
-                  estadoConfig[selectedVisto.estado].color
-                )}>
-                  {(() => { const Icon = estadoConfig[selectedVisto.estado].icon; return <Icon className="h-4 w-4" />; })()}
-                  <span className="text-sm font-semibold">{estadoConfig[selectedVisto.estado].label}</span>
-                  {selectedVisto.dataDecisao && (
-                    <span className="text-xs ml-auto opacity-75">
-                      Decisão em {new Date(selectedVisto.dataDecisao).toLocaleDateString("pt-AO")}
-                    </span>
-                  )}
+              <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+                <div className={cn("flex items-center gap-2 rounded-lg px-4 py-2.5", estadoConfig[detailDialog.estado].color)}>
+                  {(() => { const Icon = estadoConfig[detailDialog.estado].icon; return <Icon className="h-4 w-4" />; })()}
+                  <span className="text-sm font-semibold">{estadoConfig[detailDialog.estado].label}</span>
                 </div>
 
-                {/* Info grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+                <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <p className="text-[11px] text-muted-foreground mb-0.5">Entidade Requerente</p>
-                    <p className="text-sm font-medium">{selectedVisto.entidade}</p>
+                    <p className="text-[11px] text-muted-foreground">Entidade</p>
+                    <p className="font-medium">{detailDialog.entidade}</p>
                   </div>
                   <div>
-                    <p className="text-[11px] text-muted-foreground mb-0.5">Órgão de Soberania</p>
-                    <p className="text-sm">{selectedVisto.orgao}</p>
+                    <p className="text-[11px] text-muted-foreground">Tipo</p>
+                    <p>{detailDialog.tipo === "previo" ? "Visto Prévio" : "Visto Sucessivo"}</p>
                   </div>
                   <div>
-                    <p className="text-[11px] text-muted-foreground mb-0.5">Tipo de Visto</p>
-                    <p className="text-sm">{selectedVisto.tipo === "previo" ? "Visto Prévio" : "Visto Sucessivo"}</p>
+                    <p className="text-[11px] text-muted-foreground">Contratada</p>
+                    <p>{detailDialog.entidadeContratada}</p>
                   </div>
                   <div>
-                    <p className="text-[11px] text-muted-foreground mb-0.5">Natureza</p>
-                    <p className="text-sm">{selectedVisto.natureza}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-muted-foreground mb-0.5">Entidade Contratada</p>
-                    <p className="text-sm">{selectedVisto.entidadeContratada}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-muted-foreground mb-0.5">NIF da Contratada</p>
-                    <p className="text-sm font-mono">{selectedVisto.nif}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-muted-foreground mb-0.5">Valor do Contrato</p>
-                    <p className="text-sm font-bold">{selectedVisto.valor}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-muted-foreground mb-0.5">Fonte de Financiamento</p>
-                    <p className="text-sm">{selectedVisto.fonte}</p>
-                  </div>
-                  <div className="sm:col-span-2">
-                    <p className="text-[11px] text-muted-foreground mb-0.5">Data de Submissão</p>
-                    <p className="text-sm">{new Date(selectedVisto.dataSubmissao).toLocaleDateString("pt-AO")}</p>
+                    <p className="text-[11px] text-muted-foreground">Valor</p>
+                    <p className="font-bold">{detailDialog.valor}</p>
                   </div>
                 </div>
 
-                {/* Objecto */}
                 <div>
-                  <p className="text-[11px] text-muted-foreground mb-0.5">Objecto do Contrato</p>
-                  <p className="text-sm bg-muted/30 rounded-md p-3">{selectedVisto.objecto}</p>
+                  <p className="text-[11px] text-muted-foreground mb-0.5">Objecto</p>
+                  <p className="text-sm">{detailDialog.objecto}</p>
                 </div>
 
-                {/* Observações / Decisão */}
-                {selectedVisto.observacoes && (
+                {detailDialog.observacoes && (
                   <div className={cn(
                     "rounded-md p-3 text-sm border",
-                    selectedVisto.estado === "recusado"
+                    detailDialog.estado === "devolvido"
                       ? "bg-destructive/5 border-destructive/20"
                       : "bg-green-50 border-green-200 dark:bg-green-900/10 dark:border-green-800"
                   )}>
                     <div className="flex items-center gap-1.5 mb-1">
-                      {selectedVisto.estado === "recusado" ? (
+                      {detailDialog.estado === "devolvido" ? (
                         <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
                       ) : (
                         <CheckCircle className="h-3.5 w-3.5 text-green-600" />
                       )}
                       <span className="text-xs font-semibold">
-                        {selectedVisto.estado === "recusado" ? "Motivo da Recusa" : "Observações da Decisão"}
+                        {detailDialog.estado === "devolvido" ? "Motivo da Devolução" : "Observações"}
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground">{selectedVisto.observacoes}</p>
+                    <p className="text-xs text-muted-foreground">{detailDialog.observacoes}</p>
                   </div>
                 )}
 
-                {/* Documentos */}
                 <div>
-                  <p className="text-[11px] text-muted-foreground mb-1.5">Documentos Anexados ({selectedVisto.documentos.length})</p>
+                  <p className="text-[11px] text-muted-foreground mb-1.5">Documentos Anexados</p>
                   <div className="space-y-1">
-                    {selectedVisto.documentos.map((doc) => (
+                    {detailDialog.documentos.map((doc) => (
                       <div key={doc} className="flex items-center gap-2 text-xs bg-muted/50 px-3 py-2 rounded">
                         <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="flex-1">{doc}</span>
-                        <Button variant="ghost" size="sm" className="h-6 px-2 text-[10px]">
-                          <Eye className="h-3 w-3 mr-1" /> Ver
-                        </Button>
+                        <span>{doc}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
-
-              {/* Acções no detalhe */}
-              {(selectedVisto.estado === "pendente" || selectedVisto.estado === "em_analise") && (
-                <DialogFooter className="flex-col sm:flex-row gap-2 pt-3 border-t">
-                  <Button
-                    variant="destructive"
-                    className="gap-2 w-full sm:w-auto"
-                    onClick={() => { setSelectedVisto(null); setActionDialog({ visto: selectedVisto, action: "recusar" }); }}
-                  >
-                    <XCircle className="h-3.5 w-3.5" /> Recusar Visto
-                  </Button>
-                  <Button
-                    className="gap-2 w-full sm:w-auto"
-                    onClick={() => { setSelectedVisto(null); setActionDialog({ visto: selectedVisto, action: "aprovar" }); }}
-                  >
-                    <CheckCircle className="h-3.5 w-3.5" /> Conceder Visto
-                  </Button>
-                </DialogFooter>
-              )}
             </>
           )}
         </DialogContent>
       </Dialog>
 
-      {/* ── Dialog Decisão ── */}
-      <Dialog open={!!actionDialog} onOpenChange={() => { setActionDialog(null); setObservacoesDecisao(""); }}>
+      {/* ── Confirmação de Recepção ── */}
+      <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Stamp className="h-5 w-5 text-primary" />
+              Confirmar Recepção
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Confirma a recepção do processo <strong>{selectedVisto?.id}</strong> da entidade{" "}
+                <strong>{selectedVisto?.entidade}</strong>?
+              </p>
+              <p className="text-xs">
+                Será gerada a acta de recepção <strong>{actaNumero}</strong> e o processo será
+                encaminhado para análise técnica.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmRecepcao} className="gap-2">
+              <Stamp className="h-3.5 w-3.5" />
+              Confirmar e Gerar Acta
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ── Devolução com motivo ── */}
+      <Dialog open={rejectDialogOpen} onOpenChange={(open) => { setRejectDialogOpen(open); if (!open) setMotivoDevolucao(""); }}>
         <DialogContent className="max-w-md w-[95vw]">
-          {actionDialog && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  {actionDialog.action === "aprovar" ? (
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                  ) : (
-                    <XCircle className="h-5 w-5 text-destructive" />
-                  )}
-                  {actionDialog.action === "aprovar" ? "Conceder Visto" : "Recusar Visto"}
-                </DialogTitle>
-              </DialogHeader>
-
-              <div className="space-y-4">
-                <div className="rounded-md bg-muted/50 p-3">
-                  <p className="text-xs text-muted-foreground mb-0.5">Processo</p>
-                  <p className="text-sm font-semibold">{actionDialog.visto.id}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{actionDialog.visto.entidade}</p>
-                  <p className="text-xs text-muted-foreground">{actionDialog.visto.objecto}</p>
-                  <p className="text-sm font-bold mt-1">{actionDialog.visto.valor}</p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label>
-                    {actionDialog.action === "aprovar" ? "Observações (opcional)" : "Motivo da Recusa *"}
-                  </Label>
-                  <Textarea
-                    value={observacoesDecisao}
-                    onChange={(e) => setObservacoesDecisao(e.target.value)}
-                    placeholder={
-                      actionDialog.action === "aprovar"
-                        ? "Observações sobre a decisão..."
-                        : "Indique o motivo da recusa..."
-                    }
-                    rows={4}
-                  />
-                  {actionDialog.action === "recusar" && (
-                    <p className="text-[10px] text-muted-foreground">
-                      A fundamentação da recusa é obrigatória e será comunicada à entidade requerente.
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <DialogFooter className="gap-2 pt-2">
-                <Button variant="outline" onClick={() => { setActionDialog(null); setObservacoesDecisao(""); }}>
-                  Cancelar
-                </Button>
-                <Button
-                  variant={actionDialog.action === "aprovar" ? "default" : "destructive"}
-                  onClick={handleAction}
-                  className="gap-2"
-                >
-                  {actionDialog.action === "aprovar" ? (
-                    <>
-                      <CheckCircle className="h-3.5 w-3.5" /> Conceder Visto
-                    </>
-                  ) : (
-                    <>
-                      <XCircle className="h-3.5 w-3.5" /> Confirmar Recusa
-                    </>
-                  )}
-                </Button>
-              </DialogFooter>
-            </>
-          )}
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Undo2 className="h-5 w-5 text-destructive" />
+              Devolver Processo
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="rounded-md bg-muted/50 p-3">
+              <p className="text-xs text-muted-foreground">Processo</p>
+              <p className="text-sm font-semibold">{selectedVisto?.id}</p>
+              <p className="text-xs text-muted-foreground mt-1">{selectedVisto?.entidade}</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Motivo da Devolução *</Label>
+              <Textarea
+                value={motivoDevolucao}
+                onChange={(e) => setMotivoDevolucao(e.target.value)}
+                placeholder="Indique os documentos em falta ou irregularidades encontradas..."
+                rows={4}
+              />
+              <p className="text-[10px] text-muted-foreground">
+                O motivo será comunicado à entidade requerente para correcção e nova submissão.
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setRejectDialogOpen(false); setMotivoDevolucao(""); }}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDevolucao} className="gap-2">
+              <Undo2 className="h-3.5 w-3.5" /> Confirmar Devolução
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </AppLayout>
