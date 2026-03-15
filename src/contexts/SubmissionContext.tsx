@@ -121,7 +121,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
   const sendNotification = useCallback(async (
     entityId: string,
     fiscalYearId: string,
-    type: "recepcionado" | "rejeitado",
+    type: NotificationType,
     message: string,
     detail?: string,
     entityName?: string,
