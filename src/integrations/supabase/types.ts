@@ -14,6 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
+      element_request_files: {
+        Row: {
+          content_type: string | null
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number
+          id: string
+          response_id: string
+        }
+        Insert: {
+          content_type?: string | null
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size?: number
+          id?: string
+          response_id: string
+        }
+        Update: {
+          content_type?: string | null
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          id?: string
+          response_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "element_request_files_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "element_request_responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      element_request_responses: {
+        Row: {
+          created_at: string
+          entity_id: string
+          fiscal_year_id: string
+          id: string
+          notification_id: string
+          response_message: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          fiscal_year_id: string
+          id?: string
+          notification_id: string
+          response_message?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          fiscal_year_id?: string
+          id?: string
+          notification_id?: string
+          response_message?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       submission_notifications: {
         Row: {
           created_at: string
