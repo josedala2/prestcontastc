@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X, Download, AlertTriangle, Send, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import * as XLSX from "xlsx";
 import { generateCC2Template } from "@/lib/cc2TemplateGenerator";
 
