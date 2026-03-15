@@ -471,6 +471,7 @@ const TecnicoPrestacaoContas = () => {
       `fy-${periodo}`,
       solicitarDocs,
       solicitarMsg || "O Técnico solicita os seguintes elementos adicionais para análise.",
+      solicitarPrazo,
       entity.name,
       entity.contacto
     );
@@ -478,6 +479,7 @@ const TecnicoPrestacaoContas = () => {
     setSolicitarOpen(false);
     setSolicitarDocs([]);
     setSolicitarMsg("");
+    setSolicitarPrazo(15);
   };
 
   const emptyPrior: Record<string, number> = {};
