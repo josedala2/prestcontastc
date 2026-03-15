@@ -232,8 +232,45 @@ export default function ProcessosVisto() {
     ? `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(selectedVisto) + 1).padStart(3, "0")}`
     : "";
 
+  const buildActaData = (visto: SolicitacaoVisto, numero: string): ActaRecepcaoData => ({
+    actaNumero: numero,
+    entityName: visto.entidade,
+    entityNif: visto.nif,
+    entityTutela: visto.orgao,
+    entityMorada: "—",
+    exercicioYear: new Date(visto.dataSubmissao).getFullYear(),
+    periodoInicio: visto.dataSubmissao,
+    periodoFim: visto.dataSubmissao,
+    submittedAt: new Date(visto.dataSubmissao).toLocaleDateString("pt-AO"),
+    documentosVerificados: vistoChecklist.map((item) => ({
+      label: item.label,
+      required: item.required,
+      checked: !!checkedDocs[item.id],
+    })),
+    totalDebito: visto.valorNum,
+    totalCredito: 0,
+  });
+
+  const handlePreviewPdf = (visto?: SolicitacaoVisto) => {
+    const target = visto || selectedVisto;
+    if (!target) return;
+    const numero = `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(target) + 1).padStart(3, "0")}`;
+    const data = buildActaData(target, numero);
+    const dataUri = exportActaRecepcaoPdf(data, true);
+    setPdfPreviewUrl(dataUri);
+  };
+
+  const handleDownloadPdf = (visto: SolicitacaoVisto) => {
+    const numero = `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(visto) + 1).padStart(3, "0")}`;
+    const data = buildActaData(visto, numero);
+    exportActaRecepcaoPdf(data);
+  };
+
   const handleConfirmRecepcao = () => {
     if (!selectedVisto) return;
+    const data = buildActaData(selectedVisto, actaNumero);
+    const dataUri = exportActaRecepcaoPdf(data, true);
+
     setVistos((prev) =>
       prev.map((v) =>
         v.id === selectedVisto.id
@@ -243,6 +280,7 @@ export default function ProcessosVisto() {
     );
     setActasGeradas((prev) => [...prev, selectedVisto.id]);
     setConfirmDialogOpen(false);
+    setPdfPreviewUrl(dataUri);
     toast.success(`Acta de recepção gerada — ${selectedVisto.id} — ${selectedVisto.entidade}`);
     setSelectedVisto(null);
     setCheckedDocs({});
