@@ -107,7 +107,7 @@ export default function PortalSolicitacaoVisto() {
       />
 
       {/* Resumo */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-6">
         {[
           { label: "Total", value: resumo.total, icon: Stamp, color: "text-foreground" },
           { label: "Pendentes", value: resumo.pendentes, icon: Clock, color: "text-amber-600" },
@@ -116,11 +116,11 @@ export default function PortalSolicitacaoVisto() {
           { label: "Recusados", value: resumo.recusados, icon: XCircle, color: "text-destructive" },
         ].map((item) => (
           <Card key={item.label} className="border">
-            <CardContent className="p-4 flex items-center gap-3">
-              <item.icon className={cn("h-5 w-5 shrink-0", item.color)} />
+            <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+              <item.icon className={cn("h-4 w-4 sm:h-5 sm:w-5 shrink-0", item.color)} />
               <div>
-                <p className="text-2xl font-bold">{item.value}</p>
-                <p className="text-[11px] text-muted-foreground">{item.label}</p>
+                <p className="text-xl sm:text-2xl font-bold">{item.value}</p>
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground">{item.label}</p>
               </div>
             </CardContent>
           </Card>
@@ -129,9 +129,9 @@ export default function PortalSolicitacaoVisto() {
 
       {/* Acção */}
       <div className="flex justify-end mb-4">
-        <Button onClick={() => setShowNovaDialog(true)} className="gap-2">
+        <Button onClick={() => setShowNovaDialog(true)} className="gap-2 w-full sm:w-auto">
           <Plus className="h-4 w-4" />
-          Nova Solicitação de Visto
+          <span className="sm:inline">Nova Solicitação de Visto</span>
         </Button>
       </div>
 
