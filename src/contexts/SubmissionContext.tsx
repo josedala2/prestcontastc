@@ -207,6 +207,27 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     );
   }, [sendNotification]);
 
+  const solicitarElementos = useCallback((
+    entityId: string,
+    fiscalYearId: string,
+    documentos: string[],
+    mensagem: string,
+    entityName?: string,
+    entityEmail?: string
+  ) => {
+    const year = fiscalYearId.split("-").pop() || fiscalYearId;
+    const docList = documentos.map((d) => `• ${d}`).join("\n");
+    sendNotification(
+      entityId,
+      fiscalYearId,
+      "solicitacao_elementos",
+      `Solicitação de elementos adicionais — Exercício ${year}`,
+      `${mensagem}\n\nDocumentos solicitados:\n${docList}`,
+      entityName,
+      entityEmail
+    );
+  }, [sendNotification]);
+
   const unreadCount = useCallback(
     (entityId: string) => notifications.filter((n) => n.entityId === entityId && !n.read).length,
     [notifications]
