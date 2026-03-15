@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 import { PortalLayout } from "@/components/PortalLayout";
+import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
+import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { submissionChecklist } from "@/data/mockData";
 import { Attachment } from "@/types";

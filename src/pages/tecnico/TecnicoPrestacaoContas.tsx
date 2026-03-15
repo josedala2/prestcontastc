@@ -1068,7 +1068,10 @@ const TecnicoPrestacaoContas = () => {
                 </table>
               </CardContent>
             </Card>
-          </div>
+           </div>
+
+          {/* Actas de Recepção */}
+          <ActasRecepcaoList entityId={entity.id} fiscalYear={periodo} />
         </TabsContent>
 
         {/* PARECER */}
