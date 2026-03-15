@@ -234,23 +234,6 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
         </Card>
       )}
 
-      {/* PDF Preview Dialog */}
-      <Dialog open={!!previewUrl} onOpenChange={handleClosePreview}>
-        <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Acta de Recepção — {previewTitle}</DialogTitle>
-          </DialogHeader>
-          {previewUrl && (
-            <embed
-              src={previewUrl}
-              type="application/pdf"
-              className="w-full flex-1 min-h-0 rounded-lg border"
-              style={{ height: "calc(85vh - 80px)" }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
