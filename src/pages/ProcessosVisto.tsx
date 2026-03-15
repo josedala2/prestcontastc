@@ -184,6 +184,8 @@ export default function ProcessosVisto() {
   const [motivoDevolucao, setMotivoDevolucao] = useState("");
   const [detailDialog, setDetailDialog] = useState<SolicitacaoVisto | null>(null);
   const [actasGeradas, setActasGeradas] = useState<string[]>([]);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [editingActaVisto, setEditingActaVisto] = useState<SolicitacaoVisto | null>(null);
 
   const filtered = vistos.filter((v) => {
     const matchEstado = filtroEstado === "todos" || v.estado === filtroEstado;
