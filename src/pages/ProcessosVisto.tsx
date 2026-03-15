@@ -232,23 +232,25 @@ export default function ProcessosVisto() {
     ? `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(selectedVisto) + 1).padStart(3, "0")}`
     : "";
 
-  const buildActaData = (visto: SolicitacaoVisto, numero: string): ActaRecepcaoData => ({
+  const buildActaData = (visto: SolicitacaoVisto, numero: string): ActaRecepcaoVistoData => ({
     actaNumero: numero,
-    entityName: visto.entidade,
-    entityNif: visto.nif,
-    entityTutela: visto.orgao,
-    entityMorada: "—",
-    exercicioYear: new Date(visto.dataSubmissao).getFullYear(),
-    periodoInicio: visto.dataSubmissao,
-    periodoFim: visto.dataSubmissao,
-    submittedAt: new Date(visto.dataSubmissao).toLocaleDateString("pt-AO"),
-    documentosVerificados: vistoChecklist.map((item) => ({
-      label: item.label,
-      required: item.required,
-      checked: !!checkedDocs[item.id],
-    })),
-    totalDebito: visto.valorNum,
-    totalCredito: 0,
+    representanteNome: "Representante",
+    representanteTelefone: "---",
+    representanteCargo: "t\u00E9cnico",
+    entidadeNome: visto.entidade,
+    oficioNumero: `${visto.id}/GMF/${now.getFullYear()}`,
+    oficioData: new Date(visto.dataSubmissao).toLocaleDateString("pt-AO"),
+    objecto: visto.objecto,
+    entidadeContratada: visto.entidadeContratada,
+    tipoFiscalizacao: visto.tipo === "previo" ? "Fiscaliza\u00E7\u00E3o Preventiva" : "Fiscaliza\u00E7\u00E3o Sucessiva",
+    dataActa: now,
+    documentosAcompanham: vistoChecklist.filter((item) => checkedDocs[item.id]).map((item) => item.label),
+    documentosHabilitacao: [
+      "Declara\u00E7\u00E3o de Identifica\u00E7\u00E3o",
+      "Identifica\u00E7\u00E3o dos S\u00F3cios",
+      "Pacto Social, Publicado em Di\u00E1rio da Rep\u00FAblica",
+      "Alvar\u00E1 Comercial",
+    ],
   });
 
   const handlePreviewPdf = (visto?: SolicitacaoVisto) => {
@@ -256,14 +258,20 @@ export default function ProcessosVisto() {
     if (!target) return;
     const numero = `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(target) + 1).padStart(3, "0")}`;
     const data = buildActaData(target, numero);
-    const dataUri = exportActaRecepcaoPdf(data, true);
+    const dataUri = exportActaRecepcaoVistoPdf(data, true);
     setPdfPreviewUrl(dataUri);
   };
 
   const handleDownloadPdf = (visto: SolicitacaoVisto) => {
     const numero = `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(visto) + 1).padStart(3, "0")}`;
     const data = buildActaData(visto, numero);
-    exportActaRecepcaoPdf(data);
+    const { blob, fileName } = exportActaRecepcaoVistoPdf(data);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleConfirmRecepcao = () => {
