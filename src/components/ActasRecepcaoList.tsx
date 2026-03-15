@@ -142,7 +142,7 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
         variant="ghost"
         size="sm"
         className="gap-1.5 text-xs"
-        onClick={() => handlePreview(acta.file_path)}
+        onClick={() => handlePreview(acta)}
         title="Visualizar"
       >
         <Eye className="h-3.5 w-3.5" />
