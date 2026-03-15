@@ -14,6 +14,7 @@ interface Parecer {
   entity_name: string;
   fiscal_year: string;
   version: number;
+  tipo_parecer_index: number;
   parecer_final: string;
   tecnico_nome: string;
   file_path: string | null;
@@ -22,7 +23,11 @@ interface Parecer {
   created_at: string;
   total_activo: number;
   total_passivo: number;
+  total_cap_proprio: number;
   resultado_exercicio: number;
+  total_proveitos: number;
+  total_custos: number;
+  comentarios: string | null;
 }
 
 const formatKz = (v: number) =>
