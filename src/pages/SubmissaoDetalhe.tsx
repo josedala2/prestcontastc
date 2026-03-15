@@ -20,7 +20,7 @@ import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 import {
-  ArrowLeft, CheckCircle, XCircle, FileText, Eye, Stamp,
+  ArrowLeft, CheckCircle, XCircle, FileText, Eye, Stamp, Pencil,
   AlertTriangle, Undo2, Building2, X,
 } from "lucide-react";
 import { toast } from "sonner";
