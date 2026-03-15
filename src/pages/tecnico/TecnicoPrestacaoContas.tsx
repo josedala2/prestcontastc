@@ -642,6 +642,81 @@ const TecnicoPrestacaoContas = () => {
     toast.success("Prestação de contas guardada com sucesso!");
   };
 
+  const emitirParecer = async () => {
+    try {
+      const parecerData = {
+        entityName: entity.name,
+        exercicio: periodo,
+        nif: entity.nif,
+        totalActivo,
+        totalPassivo,
+        totalCapProprio,
+        resultadoExercicio,
+        totalProveitos,
+        totalCustos,
+        comentarios,
+        tipoParecerIndex,
+        parecerFinal,
+        tecnicoNome: "Maria Costa",
+      };
+
+      // Generate DOCX
+      const { blob, fileName } = await generateParecerDocx(parecerData);
+
+      // Compute SHA-256 hash
+      const arrayBuffer = await blob.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const integrityHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+
+      // Get next version
+      const { data: existing } = await supabase
+        .from("pareceres")
+        .select("version")
+        .eq("entity_id", entity.id)
+        .eq("fiscal_year", periodo)
+        .order("version", { ascending: false })
+        .limit(1);
+
+      const nextVersion = (existing && existing.length > 0 ? (existing[0] as { version: number }).version : 0) + 1;
+
+      // Upload DOCX to storage
+      const filePath = `${entity.id}/${periodo}/v${nextVersion}_${fileName}`;
+      const { error: uploadError } = await supabase.storage.from("pareceres").upload(filePath, blob, {
+        contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
+      if (uploadError) throw uploadError;
+
+      // Persist record
+      const { error: insertError } = await supabase.from("pareceres").insert({
+        entity_id: entity.id,
+        entity_name: entity.name,
+        fiscal_year: periodo,
+        version: nextVersion,
+        tipo_parecer_index: tipoParecerIndex,
+        parecer_final: parecerFinal,
+        total_activo: totalActivo,
+        total_passivo: totalPassivo,
+        total_cap_proprio: totalCapProprio,
+        resultado_exercicio: resultadoExercicio,
+        total_proveitos: totalProveitos,
+        total_custos: totalCustos,
+        comentarios,
+        tecnico_nome: "Maria Costa",
+        file_path: filePath,
+        file_name: fileName,
+        integrity_hash: integrityHash,
+      } as Record<string, unknown>);
+      if (insertError) throw insertError;
+
+      setParecerRefreshKey((k) => k + 1);
+      toast.success(`Parecer v${nextVersion} emitido, guardado e descarregado com sucesso!`);
+    } catch (err) {
+      console.error("Error generating parecer:", err);
+      toast.error("Erro ao gerar ou guardar o parecer.");
+    }
+  };
+
   return (
     <TecnicoLayout>
       <PageHeader
