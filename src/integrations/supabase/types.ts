@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      actas_recepcao: {
+        Row: {
+          acta_numero: string
+          created_at: string
+          created_by: string
+          entity_id: string
+          entity_name: string
+          file_name: string
+          file_path: string
+          fiscal_year: string
+          fiscal_year_id: string
+          id: string
+        }
+        Insert: {
+          acta_numero: string
+          created_at?: string
+          created_by?: string
+          entity_id: string
+          entity_name: string
+          file_name: string
+          file_path: string
+          fiscal_year: string
+          fiscal_year_id: string
+          id?: string
+        }
+        Update: {
+          acta_numero?: string
+          created_at?: string
+          created_by?: string
+          entity_id?: string
+          entity_name?: string
+          file_name?: string
+          file_path?: string
+          fiscal_year?: string
+          fiscal_year_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
       element_request_files: {
         Row: {
           content_type: string | null

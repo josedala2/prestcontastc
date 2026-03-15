@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 import { PortalLayout } from "@/components/PortalLayout";
+import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
+import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { submissionChecklist } from "@/data/mockData";
 import { Attachment } from "@/types";
@@ -41,6 +43,7 @@ const initialAttachments: Attachment[] = [
 ];
 
 const PortalDocumentos = () => {
+  const { entity } = usePortalEntity();
   const [attachments, setAttachments] = useState<Attachment[]>(initialAttachments);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -306,6 +309,11 @@ const PortalDocumentos = () => {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Actas de Recepção emitidas pela Secretaria */}
+      <div className="mt-6">
+        <ActasRecepcaoList entityId={entity.id} />
       </div>
 
       {/* Submit button */}
