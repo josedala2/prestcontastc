@@ -38,7 +38,6 @@ const portalNav = [
   { title: "Painel", icon: LayoutDashboard, path: "/portal" },
   { title: "Exercícios", icon: FileBarChart, path: "/portal/exercicios" },
   { title: "Prestação de Contas", icon: FileBarChart, path: "/portal/prestacao-contas" },
-  { title: "Documentos", icon: Paperclip, path: "/portal/documentos" },
   { title: "Mapas/Modelos", icon: Map, path: "/portal/mapas" },
   { title: "Esclarecimentos", icon: MessageSquare, path: "/portal/esclarecimentos" },
   { title: "Validações", icon: ShieldCheck, path: "/portal/validacoes" },
@@ -47,7 +46,6 @@ const portalNav = [
 const routeTitles: Record<string, string> = {
   "/portal": "Painel da Entidade",
   "/portal/exercicios": "Exercícios Fiscais",
-  "/portal/documentos": "Documentos & Anexos",
   "/portal/prestacao-contas": "Prestação de Contas",
   "/portal/mapas": "Mapas e Modelos",
   "/portal/esclarecimentos": "Pedidos de Esclarecimento",
