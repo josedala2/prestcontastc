@@ -437,6 +437,9 @@ const TecnicoPrestacaoContas = () => {
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Preview state
+  const [previewOpen, setPreviewOpen] = useState(false);
+
   // Solicitar Elementos state
   const [solicitarOpen, setSolicitarOpen] = useState(false);
   const [solicitarDocs, setSolicitarDocs] = useState<string[]>([]);
