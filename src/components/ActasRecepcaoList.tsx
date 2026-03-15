@@ -35,6 +35,7 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
   const [actas, setActas] = useState<Acta[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [previewActa, setPreviewActa] = useState<Acta | null>(null);
 
   const fetchActas = async () => {
     setLoading(true);
