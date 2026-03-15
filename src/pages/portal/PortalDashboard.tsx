@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { NotificacoesPanel } from "@/components/portal/NotificacoesPanel";
+import { ProcessoTimeline } from "@/components/portal/ProcessoTimeline";
 import {
   Calendar,
   Clock,
@@ -119,6 +120,10 @@ const PortalDashboard = () => {
           icon={<Bell className="h-5 w-5" />}
           variant={entityUnread > 0 ? "warning" : "success"}
         />
+      </div>
+      {/* Process Timeline */}
+      <div className="mb-6">
+        <ProcessoTimeline fiscalYear="2024" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
