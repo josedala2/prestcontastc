@@ -14,14 +14,16 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockFiscalYears, mockEntities, submissionChecklist, formatKz } from "@/data/mockData";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck, Eye, X, Undo2 } from "lucide-react";
+import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck, Eye, X, Undo2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 import { EntityProfilePanel } from "@/components/secretaria/EntityProfilePanel";
 import { useSubmissions } from "@/contexts/SubmissionContext";
+import { SecretariaVistoTab } from "@/components/secretaria/SecretariaVistoTab";
 
 const Secretaria = () => {
   const submetidos = mockFiscalYears.filter((fy) => fy.status === "submetido");
@@ -274,10 +276,23 @@ const Secretaria = () => {
   return (
     <AppLayout>
       <PageHeader
-        title="Secretaria — Recepção de Contas"
-        description="Valide a documentação das prestações de contas submetidas e emita a acta de recepção."
+        title="Secretaria"
+        description="Gestão de recepção de contas e processos de visto."
       />
 
+      <Tabs defaultValue="contas" className="mb-6">
+        <TabsList>
+          <TabsTrigger value="contas" className="gap-2">
+            <Inbox className="h-4 w-4" />
+            Recepção de Contas
+          </TabsTrigger>
+          <TabsTrigger value="vistos" className="gap-2">
+            <ShieldCheck className="h-4 w-4" />
+            Processos de Visto
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="contas" className="mt-6">
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard title="Pendentes de Recepção" value={pendentesCount} subtitle="aguardam validação documental" icon={<Inbox className="h-5 w-5" />} variant={pendentesCount > 0 ? "warning" : "success"} />
@@ -491,6 +506,12 @@ const Secretaria = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+        </TabsContent>
+
+        <TabsContent value="vistos" className="mt-6">
+          <SecretariaVistoTab />
+        </TabsContent>
+      </Tabs>
     </AppLayout>
   );
 };
