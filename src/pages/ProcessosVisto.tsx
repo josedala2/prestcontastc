@@ -749,6 +749,9 @@ export default function ProcessosVisto() {
                   <Stamp className="h-5 w-5 text-primary" />
                   {detailDialog.id}
                 </DialogTitle>
+                <DialogDescription className="sr-only">
+                  Detalhes do processo de visto e documentos anexados.
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 max-h-[60vh] overflow-y-auto">
                 <div className={cn("flex items-center gap-2 rounded-lg px-4 py-2.5", estadoConfig[detailDialog.estado].color)}>
