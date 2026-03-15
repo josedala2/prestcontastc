@@ -85,6 +85,72 @@ export type Database = {
         }
         Relationships: []
       }
+      pareceres: {
+        Row: {
+          comentarios: string | null
+          created_at: string
+          entity_id: string
+          entity_name: string
+          file_name: string | null
+          file_path: string | null
+          fiscal_year: string
+          id: string
+          integrity_hash: string | null
+          parecer_final: string
+          resultado_exercicio: number
+          tecnico_nome: string
+          tipo_parecer_index: number
+          total_activo: number
+          total_cap_proprio: number
+          total_custos: number
+          total_passivo: number
+          total_proveitos: number
+          version: number
+        }
+        Insert: {
+          comentarios?: string | null
+          created_at?: string
+          entity_id: string
+          entity_name: string
+          file_name?: string | null
+          file_path?: string | null
+          fiscal_year: string
+          id?: string
+          integrity_hash?: string | null
+          parecer_final: string
+          resultado_exercicio?: number
+          tecnico_nome: string
+          tipo_parecer_index?: number
+          total_activo?: number
+          total_cap_proprio?: number
+          total_custos?: number
+          total_passivo?: number
+          total_proveitos?: number
+          version?: number
+        }
+        Update: {
+          comentarios?: string | null
+          created_at?: string
+          entity_id?: string
+          entity_name?: string
+          file_name?: string | null
+          file_path?: string | null
+          fiscal_year?: string
+          id?: string
+          integrity_hash?: string | null
+          parecer_final?: string
+          resultado_exercicio?: number
+          tecnico_nome?: string
+          tipo_parecer_index?: number
+          total_activo?: number
+          total_cap_proprio?: number
+          total_custos?: number
+          total_passivo?: number
+          total_proveitos?: number
+          version?: number
+        }
+        Relationships: []
+      }
       submission_notifications: {
         Row: {
           created_at: string
