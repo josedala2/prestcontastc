@@ -70,15 +70,15 @@ const SubmissaoDetalhe = () => {
     })),
   });
 
-  const handlePreviewPdf = () => {
+  const handlePreviewPdf = async () => {
     const data = buildActaData();
-    const dataUri = exportActaRecepcaoPdf(data, true);
+    const dataUri = await exportActaRecepcaoPdf(data, true);
     setPdfPreviewUrl(dataUri);
   };
 
   const handleConfirmRecepcao = async () => {
     const data = buildActaData();
-    const { blob, fileName } = exportActaRecepcaoPdf(data);
+    const { blob, fileName } = await exportActaRecepcaoPdf(data);
     setActaGerada(true);
 
     const filePath = `${entity.id}/${periodo}/${fileName}`;

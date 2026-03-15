@@ -79,17 +79,17 @@ const Secretaria = () => {
     };
   };
 
-  const handlePreviewPdf = () => {
+  const handlePreviewPdf = async () => {
     const data = buildActaData();
     if (!data) return;
-    const dataUri = exportActaRecepcaoPdf(data, true);
+    const dataUri = await exportActaRecepcaoPdf(data, true);
     setPdfPreviewUrl(dataUri);
   };
 
   const handleConfirmRecepcao = async () => {
     const data = buildActaData();
     if (!data || !selectedFy || !selectedEntity) return;
-    const { blob, fileName } = exportActaRecepcaoPdf(data);
+    const { blob, fileName } = await exportActaRecepcaoPdf(data);
     setActasGeradas((prev) => [...prev, selectedFy.id]);
 
     // Upload acta PDF to storage

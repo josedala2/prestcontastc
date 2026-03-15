@@ -1,28 +1,20 @@
 import jsPDF from "jspdf";
+import { loadBrasaoBase64, drawOfficialHeader } from "./brasaoLoader";
 
 // ── Interface for Visto Acta data ──
 export interface ActaRecepcaoVistoData {
   actaNumero: string;
-  // Quem compareceu
   representanteNome: string;
   representanteTelefone: string;
   representanteCargo: string;
-  // Entidade requerente
   entidadeNome: string;
-  // Ofício
   oficioNumero: string;
   oficioData: string;
-  // Objecto do contrato
   objecto: string;
-  // Entidade contratada
   entidadeContratada: string;
-  // Tipo de fiscalização
-  tipoFiscalizacao: string; // "Fiscalização Preventiva" / "Fiscalização Sucessiva"
-  // Data da acta
+  tipoFiscalizacao: string;
   dataActa: Date;
-  // Documentos que acompanham
   documentosAcompanham: string[];
-  // Documentos de habilitação
   documentosHabilitacao: string[];
 }
 
@@ -80,87 +72,100 @@ function hoursToPortuguese(h: number, m: number): string {
   return result;
 }
 
-export function exportActaRecepcaoVistoPdf(data: ActaRecepcaoVistoData, preview?: false): { blob: Blob; fileName: string };
-export function exportActaRecepcaoVistoPdf(data: ActaRecepcaoVistoData, preview: true): string;
-export function exportActaRecepcaoVistoPdf(data: ActaRecepcaoVistoData, preview = false): string | { blob: Blob; fileName: string } {
+/**
+ * Renders mixed bold/normal text segments with word wrapping using jsPDF.
+ */
+function renderMixedText(
+  doc: jsPDF,
+  segments: { text: string; bold: boolean }[],
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+): number {
+  const fontSize = 10;
+  doc.setFontSize(fontSize);
+
+  // Build full text and bold ranges
+  let fullText = "";
+  const boldRanges: { start: number; end: number }[] = [];
+  for (const seg of segments) {
+    const start = fullText.length;
+    fullText += seg.text;
+    if (seg.bold) {
+      boldRanges.push({ start, end: fullText.length });
+    }
+  }
+
+  // Split into words with positions
+  const words: { word: string; start: number; end: number }[] = [];
+  const regex = /\S+/g;
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(fullText)) !== null) {
+    words.push({ word: match[0], start: match.index, end: match.index + match[0].length });
+  }
+
+  let currentX = x;
+  let currentY = y;
+
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i];
+    const isBold = boldRanges.some((r) => w.start >= r.start && w.end <= r.end);
+    const font = isBold ? "bold" : "normal";
+    doc.setFont("helvetica", font);
+
+    const wordText = w.word + (i < words.length - 1 ? " " : "");
+    const wordWidth = doc.getTextWidth(wordText);
+
+    if (currentX + wordWidth > x + maxWidth && currentX > x) {
+      currentX = x;
+      currentY += lineHeight;
+    }
+
+    doc.text(wordText, currentX, currentY);
+    currentX += wordWidth;
+  }
+
+  return currentY + lineHeight;
+}
+
+export async function exportActaRecepcaoVistoPdf(data: ActaRecepcaoVistoData, preview?: false): Promise<{ blob: Blob; fileName: string }>;
+export async function exportActaRecepcaoVistoPdf(data: ActaRecepcaoVistoData, preview: true): Promise<string>;
+export async function exportActaRecepcaoVistoPdf(data: ActaRecepcaoVistoData, preview = false): Promise<string | { blob: Blob; fileName: string }> {
+  const brasaoBase64 = await loadBrasaoBase64();
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const centerX = pageWidth / 2;
   const marginLeft = 20;
   const marginRight = 20;
   const textWidth = pageWidth - marginLeft - marginRight;
 
-  // ── Brasão placeholder ──
-  doc.setFillColor(60, 60, 60);
-  doc.circle(centerX, 18, 10, "F");
-  doc.setFillColor(80, 80, 80);
-  doc.circle(centerX, 18, 8, "F");
-  doc.setTextColor(200, 170, 80);
-  doc.setFontSize(6);
-  doc.setFont("helvetica", "bold");
-  doc.text("ANGOLA", centerX, 20, { align: "center" });
+  // ── Official header with brasão ──
+  let y = drawOfficialHeader(doc, brasaoBase64, pageWidth, `ACTA DE RECEP\u00C7\u00C3O N.\u00BA ${data.actaNumero}`);
 
-  // ── Header institucional ──
-  let y = 34;
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.text("TRIBUNAL DE CONTAS", centerX, y, { align: "center" });
-
-  y += 6;
-  doc.setFontSize(11);
-  doc.text("DIREC\u00C7\u00C3O DOS SERVI\u00C7OS ADMINISTRATIVOS", centerX, y, { align: "center" });
-
-  y += 5;
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text("SECRETARIA GERAL", centerX, y, { align: "center" });
-
-  // ── Titulo da Acta ──
-  y += 10;
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.text(`ACTA DE RECEP\u00C7\u00C3O N.\u00BA ${data.actaNumero}`, centerX, y, { align: "center" });
-
-  // ── Linha separadora ──
-  y += 4;
-  doc.setDrawColor(0, 0, 0);
-  doc.setLineWidth(0.3);
-  doc.line(marginLeft, y, pageWidth - marginRight, y);
-
-  // ── Parágrafo narrativo ──
-  y += 8;
-
+  // ── Narrative paragraph with bold segments ──
   const d = data.dataActa;
   const dia = numberToPortuguese(d.getDate());
   const mes = monthName(d.getMonth());
   const ano = yearToPortuguese(d.getFullYear());
   const horas = hoursToPortuguese(d.getHours(), d.getMinutes());
 
-  const narrativa = `Aos ${dia} dias do m\u00EAs de ${mes} do ano de ${ano}, pelas ${horas}, compareceu nesta Secretaria do Tribunal de Contas, o Senhor `;
-  const narrativa2 = `${data.representanteNome}`;
-  const narrativa3 = `, cujo contacto telef\u00F3nico \u00E9 o n.\u00BA `;
-  const narrativa4 = `${data.representanteTelefone}`;
-  const narrativa5 = `, na qualidade de ${data.representanteCargo} do `;
-  const narrativa6 = `${data.entidadeNome}`;
-  const narrativa7 = `, a fim de dar entrada do Of\u00EDcio n.\u00BA ${data.oficioNumero}, datado de ${data.oficioData}, que remete o `;
-  const narrativa8 = `${data.objecto}`;
-  const narrativa9 = `, celebrado entre a Rep\u00FAblica de Angola, representada pelo Minist\u00E9rio Supracitado, e a `;
-  const narrativa10 = `${data.entidadeContratada}`;
-  const narrativa11 = `, em sede de ${data.tipoFiscalizacao}.`;
+  const segments: { text: string; bold: boolean }[] = [
+    { text: `Aos ${dia} dias do m\u00EAs de ${mes} do ano de ${ano}, pelas ${horas}, compareceu nesta Secretaria do Tribunal de Contas, o Senhor `, bold: false },
+    { text: data.representanteNome, bold: true },
+    { text: `, cujo contacto telef\u00F3nico \u00E9 o n.\u00BA `, bold: false },
+    { text: data.representanteTelefone, bold: true },
+    { text: `, na qualidade de ${data.representanteCargo} do `, bold: false },
+    { text: data.entidadeNome, bold: true },
+    { text: `, a fim de dar entrada do Of\u00EDcio n.\u00BA ${data.oficioNumero}, datado de ${data.oficioData}, que remete o `, bold: false },
+    { text: data.objecto, bold: true },
+    { text: `, celebrado entre a Rep\u00FAblica de Angola, representada pelo Minist\u00E9rio Supracitado, e a `, bold: false },
+    { text: data.entidadeContratada, bold: true },
+    { text: `, em sede de ${data.tipoFiscalizacao}.`, bold: false },
+  ];
 
-  // Build the full narrative as a single string with bold markers
-  const fullText = narrativa + narrativa2 + narrativa3 + narrativa4 + narrativa5 + narrativa6 + narrativa7 + narrativa8 + narrativa9 + narrativa10 + narrativa11;
-
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
   doc.setTextColor(0, 0, 0);
-
-  // Use splitTextToSize for word wrapping
-  const lines = doc.splitTextToSize(fullText, textWidth);
-  doc.text(lines, marginLeft, y, { align: "justify", lineHeightFactor: 1.5 });
-  y += lines.length * 5;
+  y = renderMixedText(doc, segments, marginLeft, y, textWidth, 5);
 
   // ── Documentos que acompanham ──
   y += 6;
@@ -173,12 +178,10 @@ export function exportActaRecepcaoVistoPdf(data: ActaRecepcaoVistoData, preview 
   doc.setFontSize(9);
 
   data.documentosAcompanham.forEach((docItem) => {
-    // Check page break
     if (y > pageHeight - 40) {
       doc.addPage();
       y = 20;
     }
-    // Bullet point
     doc.circle(marginLeft + 4, y - 1, 1, "F");
     const itemLines = doc.splitTextToSize(docItem + ";", textWidth - 12);
     doc.text(itemLines, marginLeft + 10, y);
@@ -242,12 +245,12 @@ export function exportActaRecepcaoVistoPdf(data: ActaRecepcaoVistoData, preview 
   doc.setTextColor(150, 150, 150);
   doc.text(
     `Documento gerado automaticamente em ${new Date().toLocaleDateString("pt-AO")} ${new Date().toLocaleTimeString("pt-AO")}`,
-    centerX,
+    pageWidth / 2,
     currentPageHeight - 8,
     { align: "center" }
   );
 
-  // ── Marca de água RASCUNHO (preview) ──
+  // ── Watermark for preview ──
   if (preview) {
     const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
@@ -256,17 +259,15 @@ export function exportActaRecepcaoVistoPdf(data: ActaRecepcaoVistoData, preview 
       doc.setTextColor(220, 50, 50);
       doc.setFontSize(60);
       doc.setFont("helvetica", "bold");
-      // Use low opacity via GState if available
       try {
         doc.saveGraphicsState();
         // @ts-ignore
         doc.setGState(new (doc as any).GState({ opacity: 0.08 }));
-        doc.text("RASCUNHO", centerX, ph / 2, { align: "center", angle: 45 });
+        doc.text("RASCUNHO", pageWidth / 2, ph / 2, { align: "center", angle: 45 });
         doc.restoreGraphicsState();
       } catch {
-        // Fallback: just use light color
         doc.setTextColor(245, 220, 220);
-        doc.text("RASCUNHO", centerX, ph / 2, { align: "center", angle: 45 });
+        doc.text("RASCUNHO", pageWidth / 2, ph / 2, { align: "center", angle: 45 });
       }
     }
 

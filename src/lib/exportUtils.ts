@@ -5,6 +5,7 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { TrialBalanceLine, ValidationResult, DocumentoTribunal, DOCUMENTO_TIPO_LABELS, DOCUMENTO_ESTADO_LABELS } from "@/types";
 import { formatKz, mockTrialBalance, mockValidations, mockAttachments, mockFiscalYears, mockAuditLog } from "@/data/mockData";
+import { loadBrasaoBase64, drawOfficialHeader } from "./brasaoLoader";
 
 // ─── PDF Header helper ───
 function addPdfHeader(doc: jsPDF, title: string, subtitle?: string) {
@@ -618,99 +619,78 @@ export interface ActaRecepcaoData {
   totalCredito: number;
 }
 
-export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview?: false): { blob: Blob; fileName: string };
-export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview: true): string;
-export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false): string | { blob: Blob; fileName: string } {
+export async function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview?: false): Promise<{ blob: Blob; fileName: string }>;
+export async function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview: true): Promise<string>;
+export async function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false): Promise<string | { blob: Blob; fileName: string }> {
+  const brasaoBase64 = await loadBrasaoBase64();
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const centerX = pageWidth / 2;
+  const marginLeft = 20;
+  const marginRight = 20;
+  const textWidth = pageWidth - marginLeft - marginRight;
 
-  // ── Brasão / Header Oficial ──
-  doc.setFillColor(40, 38, 72);
-  doc.rect(0, 0, pageWidth, 22, "F");
-  doc.setFillColor(202, 148, 62);
-  doc.rect(0, 22, pageWidth, 2, "F");
+  // ── Official header with brasão ──
+  let y = drawOfficialHeader(doc, brasaoBase64, pageWidth, `ACTA DE RECEP\u00C7\u00C3O N.\u00BA ${data.actaNumero}`);
 
-  // Brasão placeholder (escudo estilizado)
-  doc.setFillColor(202, 148, 62);
-  doc.circle(centerX, 10, 7, "F");
-  doc.setFillColor(40, 38, 72);
-  doc.circle(centerX, 10, 5.5, "F");
-  doc.setTextColor(202, 148, 62);
-  doc.setFontSize(7);
-  doc.setFont("helvetica", "bold");
-  doc.text("TCA", centerX, 12, { align: "center" });
-
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(7);
-  doc.setFont("helvetica", "normal");
-  doc.text("REPÚBLICA DE ANGOLA", centerX, 5, { align: "center" });
-  doc.text("TRIBUNAL DE CONTAS", centerX, 18, { align: "center" });
-
-  // ── Título ──
-  let y = 34;
-  doc.setTextColor(40, 38, 72);
-  doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text("ACTA DE RECEPÇÃO", centerX, y, { align: "center" });
-  y += 7;
-  doc.setFontSize(10);
+  // ── Subtitle ──
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100, 100, 100);
-  doc.text(`Nº ${data.actaNumero}`, centerX, y, { align: "center" });
-  y += 4;
-  doc.setFontSize(8);
-  doc.text("Prestação de Contas — Resolução nº 1/17 de 5 de Janeiro", centerX, y, { align: "center" });
-
-  // ── Linha separadora dourada ──
+  doc.text("Presta\u00E7\u00E3o de Contas \u2014 Resolu\u00E7\u00E3o n\u00BA 1/17 de 5 de Janeiro", centerX, y - 2, { align: "center" });
   y += 6;
-  doc.setDrawColor(202, 148, 62);
-  doc.setLineWidth(0.5);
-  doc.line(14, y, pageWidth - 14, y);
 
-  // ── Dados da Entidade ──
-  y += 8;
-  doc.setFontSize(11);
+  // ── Narrative paragraph ──
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+
+  const narrativeText = `Aos ${new Date(data.submittedAt).toLocaleDateString("pt-AO")}, foi recepcionada nesta Secretaria do Tribunal de Contas a documenta\u00E7\u00E3o referente \u00E0 Presta\u00E7\u00E3o de Contas do exerc\u00EDcio financeiro de ${data.exercicioYear}, submetida pela entidade abaixo identificada, nos termos da Resolu\u00E7\u00E3o n.\u00BA 1/17, de 5 de Janeiro.`;
+  const narrativeLines = doc.splitTextToSize(narrativeText, textWidth);
+  doc.text(narrativeLines, marginLeft, y, { lineHeightFactor: 1.5 });
+  y += narrativeLines.length * 5 + 4;
+
+  // ── 1. Identificação da Entidade ──
+  doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(40, 38, 72);
-  doc.text("1. IDENTIFICAÇÃO DA ENTIDADE", 14, y);
-  y += 7;
+  doc.setTextColor(0, 0, 0);
+  doc.text("1. IDENTIFICA\u00C7\u00C3O DA ENTIDADE", marginLeft, y);
+  y += 6;
 
   const addField = (label: string, value: string, yPos: number) => {
-    doc.setFontSize(8);
+    doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(100, 100, 100);
-    doc.text(label, 18, yPos);
+    doc.setTextColor(80, 80, 80);
+    doc.text(label, marginLeft + 4, yPos);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(40, 38, 72);
-    doc.text(value, 65, yPos);
-    return yPos + 6;
+    doc.setTextColor(0, 0, 0);
+    doc.text(value, 70, yPos);
+    return yPos + 5.5;
   };
 
   y = addField("Entidade:", data.entityName, y);
   y = addField("NIF:", data.entityNif, y);
   y = addField("Tutela:", data.entityTutela, y);
   y = addField("Morada:", data.entityMorada, y);
-  y = addField("Exercício:", String(data.exercicioYear), y);
-  y = addField("Período:", `${data.periodoInicio} a ${data.periodoFim}`, y);
-  y = addField("Data de Submissão:", data.submittedAt, y);
+  y = addField("Exerc\u00EDcio:", String(data.exercicioYear), y);
+  y = addField("Per\u00EDodo:", `${data.periodoInicio} a ${data.periodoFim}`, y);
 
-  // ── Dados Financeiros ──
+  // ── 2. Dados Financeiros ──
   y += 4;
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(40, 38, 72);
-  doc.text("2. DADOS FINANCEIROS", 14, y);
-  y += 7;
-  y = addField("Total Débito:", `${formatKz(data.totalDebito)} Kz`, y);
-  y = addField("Total Crédito:", `${formatKz(data.totalCredito)} Kz`, y);
+  doc.setTextColor(0, 0, 0);
+  doc.text("2. DADOS FINANCEIROS", marginLeft, y);
+  y += 6;
+  y = addField("Total D\u00E9bito:", `${formatKz(data.totalDebito)} Kz`, y);
+  y = addField("Total Cr\u00E9dito:", `${formatKz(data.totalCredito)} Kz`, y);
 
-  // ── Documentos Verificados ──
+  // ── 3. Documentação Verificada ──
   y += 4;
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(40, 38, 72);
-  doc.text("3. DOCUMENTAÇÃO VERIFICADA", 14, y);
+  doc.setTextColor(0, 0, 0);
+  doc.text("3. DOCUMENTA\u00C7\u00C3O VERIFICADA", marginLeft, y);
   y += 3;
 
   const docsChecked = data.documentosVerificados.filter(d => d.checked);
@@ -718,22 +698,22 @@ export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false): 
 
   autoTable(doc, {
     startY: y,
-    margin: { left: 14, right: 14 },
-    head: [["Nº", "Documento", "Obrigatório", "Estado"]],
+    margin: { left: marginLeft, right: marginRight },
+    head: [["N\u00BA", "Documento", "Obrigat\u00F3rio", "Estado"]],
     body: data.documentosVerificados.map((d, i) => [
       String(i + 1),
       d.label,
-      d.required ? "Sim" : "Não",
-      d.checked ? "✓ Verificado" : "✗ Em falta",
+      d.required ? "Sim" : "N\u00E3o",
+      d.checked ? "\u2713 Verificado" : "\u2717 Em falta",
     ]),
     headStyles: {
-      fillColor: [40, 38, 72],
+      fillColor: [60, 60, 60],
       textColor: [255, 255, 255],
       fontSize: 7,
       fontStyle: "bold",
     },
     bodyStyles: { fontSize: 7, textColor: [40, 40, 40] },
-    alternateRowStyles: { fillColor: [245, 245, 250] },
+    alternateRowStyles: { fillColor: [245, 245, 248] },
     columnStyles: {
       0: { cellWidth: 10, halign: "center" },
       2: { cellWidth: 22, halign: "center" },
@@ -742,7 +722,7 @@ export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false): 
     didParseCell: (hookData: any) => {
       if (hookData.column.index === 3 && hookData.section === "body") {
         const val = hookData.cell.raw as string;
-        if (val.startsWith("✓")) {
+        if (val.startsWith("\u2713")) {
           hookData.cell.styles.textColor = [39, 174, 96];
           hookData.cell.styles.fontStyle = "bold";
         } else {
@@ -756,65 +736,59 @@ export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false): 
   y = (doc as any).lastAutoTable.finalY + 8;
 
   // ── Resumo ──
-  doc.setFillColor(240, 248, 240);
-  doc.roundedRect(14, y, pageWidth - 28, 14, 2, 2, "F");
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(39, 174, 96);
-  doc.text(`Documentos verificados: ${docsChecked.length}/${docsTotal}`, 20, y + 6);
-  doc.setTextColor(40, 38, 72);
+  doc.setTextColor(0, 0, 0);
+  doc.text(`Documentos verificados: ${docsChecked.length}/${docsTotal}`, marginLeft, y);
+  y += 5;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
-  doc.text(`Recepção confirmada em ${new Date().toLocaleDateString("pt-AO")} às ${new Date().toLocaleTimeString("pt-AO")}`, 20, y + 11);
+  doc.setTextColor(80, 80, 80);
+  doc.text(`Recep\u00E7\u00E3o confirmada em ${new Date().toLocaleDateString("pt-AO")} \u00E0s ${new Date().toLocaleTimeString("pt-AO")}`, marginLeft, y);
 
   // ── Assinaturas ──
-  y += 24;
-  doc.setDrawColor(180, 180, 180);
+  y += 20;
+  const pageHeight = doc.internal.pageSize.getHeight();
+  if (y > pageHeight - 50) {
+    doc.addPage();
+    y = 30;
+  }
+
+  doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.3);
 
-  const sig1x = 14;
+  const sig1x = marginLeft;
   const sig2x = pageWidth / 2 + 10;
-  const sigWidth = pageWidth / 2 - 24;
+  const sigWidth = pageWidth / 2 - marginRight - 10;
 
-  doc.line(sig1x, y + 12, sig1x + sigWidth, y + 12);
-  doc.line(sig2x, y + 12, sig2x + sigWidth, y + 12);
+  doc.line(sig1x, y, sig1x + sigWidth, y);
+  doc.line(sig2x, y, sig2x + sigWidth, y);
 
+  y += 5;
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(100, 100, 100);
-  doc.text("Funcionário da Secretaria", sig1x + sigWidth / 2, y + 17, { align: "center" });
-  doc.text("Representante da Entidade", sig2x + sigWidth / 2, y + 17, { align: "center" });
+  doc.setTextColor(80, 80, 80);
+  doc.text("Funcion\u00E1rio da Secretaria", sig1x + sigWidth / 2, y, { align: "center" });
+  doc.text("Representante da Entidade", sig2x + sigWidth / 2, y, { align: "center" });
 
-  // ── Footer oficial ──
-  const pageHeight = doc.internal.pageSize.getHeight();
-  doc.setFillColor(40, 38, 72);
-  doc.rect(0, pageHeight - 12, pageWidth, 12, "F");
-  doc.setFillColor(202, 148, 62);
-  doc.rect(0, pageHeight - 12, pageWidth, 1, "F");
-  doc.setTextColor(255, 255, 255);
+  // ── Footer ──
   doc.setFontSize(6);
-  doc.text(
-    "© Tribunal de Contas de Angola — Sistema de Prestação de Contas — Resolução nº 1/17",
-    centerX,
-    pageHeight - 6,
-    { align: "center" }
-  );
-  doc.setFontSize(5.5);
+  doc.setTextColor(150, 150, 150);
   doc.text(
     `Documento gerado automaticamente em ${new Date().toLocaleDateString("pt-AO")} ${new Date().toLocaleTimeString("pt-AO")}`,
     centerX,
-    pageHeight - 3,
+    pageHeight - 8,
     { align: "center" }
   );
 
-  // ── Marca de água RASCUNHO (apenas na pré-visualização) ──
+  // ── Watermark for preview ──
   if (preview) {
     const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
       const pageH = doc.internal.pageSize.getHeight();
       doc.saveGraphicsState();
-      // @ts-ignore – setGState available in jsPDF
+      // @ts-ignore
       doc.setGState(new (doc as any).GState({ opacity: 0.12 }));
       doc.setTextColor(220, 50, 50);
       doc.setFontSize(72);
@@ -829,7 +803,6 @@ export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false): 
     return doc.output("datauristring");
   } else {
     const fileName = `Acta_Recepcao_${data.actaNumero.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
-    doc.save(fileName);
     const blob = doc.output("blob");
     return { blob, fileName };
   }
