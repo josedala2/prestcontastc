@@ -60,11 +60,25 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
     fetchActas();
   }, [entityId, fiscalYear]);
 
-  const handlePreview = (filePath: string) => {
-    const { data } = supabase.storage
-      .from("actas-recepcao")
-      .getPublicUrl(filePath);
-    window.open(data.publicUrl, "_blank", "noopener,noreferrer");
+  const getPublicUrl = (filePath: string) => {
+    const { data } = supabase.storage.from("actas-recepcao").getPublicUrl(filePath);
+    return data.publicUrl;
+  };
+
+  const handlePreview = (acta: Acta) => {
+    setPreviewActa(acta);
+  };
+
+  const handlePrint = (filePath: string) => {
+    const url = getPublicUrl(filePath);
+    const printWindow = window.open(url, "_blank");
+    printWindow?.addEventListener("load", () => {
+      printWindow.print();
+    });
+  };
+
+  const handleOpenNewTab = (filePath: string) => {
+    window.open(getPublicUrl(filePath), "_blank", "noopener,noreferrer");
   };
 
   const handleDownload = async (filePath: string, fileName: string) => {
