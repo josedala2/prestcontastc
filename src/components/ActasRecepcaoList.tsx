@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
 import { FileCheck, Download, Calendar, Eye, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -34,8 +34,6 @@ interface ActasRecepcaoListProps {
 export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, onEdit }: ActasRecepcaoListProps) {
   const [actas, setActas] = useState<Acta[]>([]);
   const [loading, setLoading] = useState(true);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [previewTitle, setPreviewTitle] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const fetchActas = async () => {
@@ -61,24 +59,11 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
     fetchActas();
   }, [entityId, fiscalYear]);
 
-  const handlePreview = async (filePath: string, actaNumero: string) => {
-    try {
-      const { data, error } = await supabase.storage
-        .from("actas-recepcao")
-        .download(filePath);
-      if (error) throw error;
-      const url = URL.createObjectURL(data);
-      setPreviewUrl(url);
-      setPreviewTitle(actaNumero);
-    } catch {
-      toast.error("Erro ao carregar a pré-visualização.");
-    }
-  };
-
-  const handleClosePreview = () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(null);
-    setPreviewTitle("");
+  const handlePreview = (filePath: string) => {
+    const { data } = supabase.storage
+      .from("actas-recepcao")
+      .getPublicUrl(filePath);
+    window.open(data.publicUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleDownload = async (filePath: string, fileName: string) => {
@@ -142,7 +127,7 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
         variant="ghost"
         size="sm"
         className="gap-1.5 text-xs"
-        onClick={() => handlePreview(acta.file_path, acta.acta_numero)}
+        onClick={() => handlePreview(acta.file_path)}
         title="Visualizar"
       >
         <Eye className="h-3.5 w-3.5" />
@@ -247,23 +232,6 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
           </CardContent>
         </Card>
       )}
-
-      {/* PDF Preview Dialog */}
-      <Dialog open={!!previewUrl} onOpenChange={handleClosePreview}>
-        <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Acta de Recepção — {previewTitle}</DialogTitle>
-          </DialogHeader>
-          {previewUrl && (
-            <iframe
-              src={previewUrl}
-              className="w-full flex-1 min-h-0 rounded-lg border"
-              title="PDF Preview"
-              style={{ height: "calc(85vh - 80px)" }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
