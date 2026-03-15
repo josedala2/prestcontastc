@@ -67,9 +67,12 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
         .from("actas-recepcao")
         .download(filePath);
       if (error) throw error;
-      const url = URL.createObjectURL(data);
-      setPreviewUrl(url);
-      setPreviewTitle(actaNumero);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+        setPreviewTitle(actaNumero);
+      };
+      reader.readAsDataURL(data);
     } catch {
       toast.error("Erro ao carregar a pré-visualização.");
     }
