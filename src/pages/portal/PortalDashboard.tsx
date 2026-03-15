@@ -20,7 +20,12 @@ import {
   ArrowRight,
   Send,
   Bell,
+  Stamp,
+  Eye,
+  XCircle,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const PortalDashboard = () => {
   const { entity, entityId } = usePortalEntity();
