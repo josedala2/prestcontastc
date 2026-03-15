@@ -357,10 +357,9 @@ export async function generateParecerDocx(data: ParecerData) {
   });
 
   const blob = await Packer.toBlob(doc);
-  saveAs(
-    blob,
-    `Parecer_${data.entityName.replace(/\s+/g, "_")}_${data.exercicio}.docx`
-  );
+  const fileName = `Parecer_${data.entityName.replace(/\s+/g, "_")}_${data.exercicio}.docx`;
+  saveAs(blob, fileName);
+  return { blob, fileName };
 }
 
 // ─── Helpers ───
