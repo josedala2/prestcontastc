@@ -689,6 +689,13 @@ const TecnicoPrestacaoContas = () => {
       });
       if (uploadError) throw uploadError;
 
+      // Also generate official PDF with hash in footer
+      await generateParecerPdf({
+        ...parecerData,
+        integrityHash,
+        version: nextVersion,
+      });
+
       // Persist record
       const { error: insertError } = await supabase.from("pareceres").insert({
         entity_id: entity.id,
@@ -712,7 +719,7 @@ const TecnicoPrestacaoContas = () => {
       if (insertError) throw insertError;
 
       setParecerRefreshKey((k) => k + 1);
-      toast.success(`Parecer v${nextVersion} emitido, guardado e descarregado com sucesso!`);
+      toast.success(`Parecer v${nextVersion} emitido! DOCX e PDF oficial descarregados.`);
     } catch (err) {
       console.error("Error generating parecer:", err);
       toast.error("Erro ao gerar ou guardar o parecer.");
