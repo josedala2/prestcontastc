@@ -18,6 +18,8 @@ import {
   X,
   Inbox,
   Loader2,
+  AlertTriangle,
+  Timer,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -170,6 +172,18 @@ const PortalSolicitacoes = () => {
       minute: "2-digit",
     });
 
+  const getDeadlineInfo = (deadline?: string) => {
+    if (!deadline) return null;
+    const now = new Date();
+    const dl = new Date(deadline);
+    const diffMs = dl.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    const isExpired = diffDays < 0;
+    const isUrgent = diffDays >= 0 && diffDays <= 3;
+    const isWarning = diffDays > 3 && diffDays <= 7;
+    return { diffDays, isExpired, isUrgent, isWarning, date: dl };
+  };
+
   const pendingSolicitacoes = solicitacoes.filter((s) => !submittedIds.has(s.id));
   const respondedSolicitacoes = solicitacoes.filter((s) => submittedIds.has(s.id));
 
@@ -212,13 +226,28 @@ const PortalSolicitacoes = () => {
         ) : (
           pendingSolicitacoes.map((notif) => {
             const state = getResponse(notif.id);
+            const dlInfo = getDeadlineInfo(notif.deadline);
             return (
-              <Card key={notif.id} className="border-amber-200 dark:border-amber-800/50">
+              <Card
+                key={notif.id}
+                className={cn(
+                  dlInfo?.isExpired
+                    ? "border-destructive/50"
+                    : dlInfo?.isUrgent
+                    ? "border-destructive/30"
+                    : "border-amber-200 dark:border-amber-800/50"
+                )}
+              >
                 <CardHeader className="py-3 px-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
-                      <div className="mt-0.5 shrink-0 rounded-full p-1.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                        <FileQuestion className="h-4 w-4" />
+                      <div className={cn(
+                        "mt-0.5 shrink-0 rounded-full p-1.5",
+                        dlInfo?.isExpired
+                          ? "bg-destructive/10 text-destructive"
+                          : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                      )}>
+                        {dlInfo?.isExpired ? <AlertTriangle className="h-4 w-4" /> : <FileQuestion className="h-4 w-4" />}
                       </div>
                       <div>
                         <CardTitle className="text-sm">{notif.message}</CardTitle>
@@ -227,13 +256,52 @@ const PortalSolicitacoes = () => {
                         </p>
                       </div>
                     </div>
-                    <Badge
-                      variant="outline"
-                      className="border-amber-200 text-amber-700 dark:border-amber-800 dark:text-amber-400 text-[10px] shrink-0"
-                    >
-                      Pendente
-                    </Badge>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "text-[10px] shrink-0",
+                          dlInfo?.isExpired
+                            ? "border-destructive/30 text-destructive"
+                            : "border-amber-200 text-amber-700 dark:border-amber-800 dark:text-amber-400"
+                        )}
+                      >
+                        {dlInfo?.isExpired ? "Expirado" : "Pendente"}
+                      </Badge>
+                    </div>
                   </div>
+
+                  {/* Deadline alert */}
+                  {dlInfo && (
+                    <div className={cn(
+                      "mt-3 flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium",
+                      dlInfo.isExpired
+                        ? "bg-destructive/10 text-destructive"
+                        : dlInfo.isUrgent
+                        ? "bg-destructive/5 text-destructive"
+                        : dlInfo.isWarning
+                        ? "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400"
+                        : "bg-muted/50 text-muted-foreground"
+                    )}>
+                      {dlInfo.isExpired ? (
+                        <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                      ) : dlInfo.isUrgent ? (
+                        <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                      ) : (
+                        <Timer className="h-3.5 w-3.5 shrink-0" />
+                      )}
+                      <span>
+                        {dlInfo.isExpired
+                          ? `Prazo expirado há ${Math.abs(dlInfo.diffDays)} dia${Math.abs(dlInfo.diffDays) !== 1 ? "s" : ""}!`
+                          : dlInfo.diffDays === 0
+                          ? "Prazo expira hoje!"
+                          : `${dlInfo.diffDays} dia${dlInfo.diffDays !== 1 ? "s" : ""} restante${dlInfo.diffDays !== 1 ? "s" : ""}`}
+                      </span>
+                      <span className="ml-auto text-[10px] opacity-70">
+                        Limite: {dlInfo.date.toLocaleDateString("pt-AO", { day: "2-digit", month: "long", year: "numeric" })}
+                      </span>
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Detail / requested documents */}

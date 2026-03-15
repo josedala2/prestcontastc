@@ -21,6 +21,7 @@ export interface PortalNotification {
   type: NotificationType;
   message: string;
   detail?: string;
+  deadline?: string;
   createdAt: string;
   read: boolean;
   emailSent?: boolean;
@@ -36,7 +37,7 @@ interface SubmissionContextType {
   submit: (entityId: string, fiscalYearId: string) => void;
   recepcionar: (entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => void;
   rejeitar: (entityId: string, fiscalYearId: string, motivo: string, entityName?: string, entityEmail?: string) => void;
-  solicitarElementos: (entityId: string, fiscalYearId: string, documentos: string[], mensagem: string, entityName?: string, entityEmail?: string) => void;
+  solicitarElementos: (entityId: string, fiscalYearId: string, documentos: string[], mensagem: string, prazo: number, entityName?: string, entityEmail?: string) => void;
   loadingNotifications: boolean;
   refreshNotifications: () => void;
 }
@@ -71,6 +72,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
             type: n.type as NotificationType,
             message: n.message,
             detail: n.detail,
+            deadline: n.deadline,
             createdAt: n.created_at,
             read: n.read,
             emailSent: n.email_sent,
@@ -125,7 +127,8 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     message: string,
     detail?: string,
     entityName?: string,
-    entityEmail?: string
+    entityEmail?: string,
+    deadline?: string
   ) => {
     const year = fiscalYearId.split("-").pop() || fiscalYearId;
 
@@ -141,6 +144,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
           type,
           message,
           detail,
+          deadline,
         },
       });
 
@@ -212,11 +216,14 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     fiscalYearId: string,
     documentos: string[],
     mensagem: string,
+    prazo: number,
     entityName?: string,
     entityEmail?: string
   ) => {
     const year = fiscalYearId.split("-").pop() || fiscalYearId;
     const docList = documentos.map((d) => `• ${d}`).join("\n");
+    const deadlineDate = new Date();
+    deadlineDate.setDate(deadlineDate.getDate() + prazo);
     sendNotification(
       entityId,
       fiscalYearId,
@@ -224,7 +231,8 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
       `Solicitação de elementos adicionais — Exercício ${year}`,
       `${mensagem}\n\nDocumentos solicitados:\n${docList}`,
       entityName,
-      entityEmail
+      entityEmail,
+      deadlineDate.toISOString()
     );
   }, [sendNotification]);
 

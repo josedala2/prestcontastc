@@ -12,9 +12,10 @@ interface NotificationPayload {
   entityEmail?: string;
   fiscalYearId: string;
   fiscalYear: string;
-  type: "recepcionado" | "rejeitado";
+  type: "recepcionado" | "rejeitado" | "solicitacao_elementos";
   message: string;
   detail?: string;
+  deadline?: string;
 }
 
 Deno.serve(async (req) => {
@@ -41,6 +42,7 @@ Deno.serve(async (req) => {
         type: payload.type,
         message: payload.message,
         detail: payload.detail || null,
+        deadline: payload.deadline || null,
         read: false,
         email_sent: false,
       })
