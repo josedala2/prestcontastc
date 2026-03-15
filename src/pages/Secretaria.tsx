@@ -84,18 +84,43 @@ const Secretaria = () => {
     setPdfPreviewUrl(dataUri);
   };
 
-  const handleConfirmRecepcao = () => {
+  const handleConfirmRecepcao = async () => {
     const data = buildActaData();
     if (!data || !selectedFy || !selectedEntity) return;
-    exportActaRecepcaoPdf(data);
+    const { blob, fileName } = exportActaRecepcaoPdf(data);
     setActasGeradas((prev) => [...prev, selectedFy.id]);
+
+    // Upload acta PDF to storage
+    const safeEntityName = selectedEntity.name.replace(/[^a-zA-Z0-9_-]/g, "_").substring(0, 50);
+    const filePath = `${selectedEntity.id}/${selectedFy.year}/${fileName}`;
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from("actas-recepcao")
+        .upload(filePath, blob, { contentType: "application/pdf" });
+      if (uploadError) console.error("Upload acta error:", uploadError);
+
+      // Persist record
+      const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
+      await supabase.from("actas_recepcao").insert({
+        entity_id: selectedEntity.id,
+        entity_name: selectedEntity.name,
+        fiscal_year: String(selectedFy.year),
+        fiscal_year_id: fiscalYearId,
+        acta_numero: data.actaNumero,
+        file_path: filePath,
+        file_name: fileName,
+      } as any);
+    } catch (err) {
+      console.error("Error persisting acta:", err);
+    }
+
     // Update shared submission status to "recepcionado" with entity info for email
     const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
     recepcionar(selectedFy.entityId, fiscalYearId, selectedEntity.name, `entidade@${selectedEntity.nif}.ao`);
     setConfirmDialogOpen(false);
     setSelectedId(null);
     setCheckedDocs({});
-    toast.success(`Acta de recepção gerada — ${selectedFy.entityName} — ${selectedFy.year}`);
+    toast.success(`Acta de recepção gerada e guardada — ${selectedFy.entityName} — ${selectedFy.year}`);
   };
 
   const handleConfirmRejeicao = () => {
