@@ -346,11 +346,11 @@ export function NovaSolicitacaoVistoForm({ onClose }: NovaSolicitacaoVistoFormPr
                   className="mt-0.5"
                 />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-medium">
+                  <div className="flex flex-col xs:flex-row xs:items-center gap-0.5 xs:gap-1.5">
+                    <span className="text-[11px] sm:text-xs font-medium">
                       {doc.label} {doc.obrigatorio && <span className="text-destructive">*</span>}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-[9px] sm:text-[10px] text-muted-foreground">
                       ({doc.obrigatorio ? "obrigatório" : "opcional"})
                     </span>
                   </div>
