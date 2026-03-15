@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { useSubmissions } from "@/contexts/SubmissionContext";
+import { generateParecerDocx } from "@/lib/parecerGenerator";
 import { TecnicoLayout } from "@/components/TecnicoLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -440,6 +441,9 @@ const TecnicoPrestacaoContas = () => {
   const [solicitarDocs, setSolicitarDocs] = useState<string[]>([]);
   const [solicitarMsg, setSolicitarMsg] = useState("");
   const [solicitarPrazo, setSolicitarPrazo] = useState(15);
+  const [comentarios, setComentarios] = useState("");
+  const [tipoParecerIndex, setTipoParecerIndex] = useState(0);
+  const [parecerFinal, setParecerFinal] = useState<"favorável" | "favorável com reservas" | "desfavorável">("favorável");
 
   const documentosDisponiveis = [
     "Balancete Analítico",
@@ -1030,10 +1034,87 @@ const TecnicoPrestacaoContas = () => {
               <textarea
                 className="w-full min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-y"
                 placeholder="Insira aqui os comentários, observações ou notas relevantes sobre a prestação de contas desta entidade..."
+                value={comentarios}
+                onChange={(e) => setComentarios(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Os comentários ficam registados internamente e não são visíveis para a entidade.
+                Os comentários ficam registados internamente e são incluídos na secção 3.4 do parecer.
               </p>
+            </CardContent>
+          </Card>
+
+          {/* Tipo de Parecer */}
+          <Card>
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-primary" />
+                Classificação do Parecer
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+                  Conclusão sobre as contas
+                </Label>
+                <div className="space-y-2">
+                  {[
+                    { idx: 0, label: "Regularidade e conformidade com as normas aplicáveis" },
+                    { idx: 1, label: "Algumas irregularidades que não comprometem globalmente a fiabilidade das contas" },
+                    { idx: 2, label: "Irregularidades relevantes que comprometem a regularidade da prestação de contas" },
+                  ].map((opt) => (
+                    <label
+                      key={opt.idx}
+                      className={cn(
+                        "flex items-start gap-2.5 cursor-pointer rounded-lg border p-3 transition-colors",
+                        tipoParecerIndex === opt.idx
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:bg-muted/30"
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="tipoParecer"
+                        checked={tipoParecerIndex === opt.idx}
+                        onChange={() => {
+                          setTipoParecerIndex(opt.idx);
+                          if (opt.idx === 0) setParecerFinal("favorável");
+                          else if (opt.idx === 1) setParecerFinal("favorável com reservas");
+                          else setParecerFinal("desfavorável");
+                        }}
+                        className="mt-0.5"
+                      />
+                      <span className="text-sm">{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+                  Parecer final
+                </Label>
+                <div className="flex gap-2">
+                  {(["favorável", "favorável com reservas", "desfavorável"] as const).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setParecerFinal(p)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-md text-xs font-medium transition-colors border capitalize",
+                        parecerFinal === p
+                          ? p === "desfavorável"
+                            ? "bg-destructive text-destructive-foreground border-destructive"
+                            : p === "favorável com reservas"
+                            ? "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700"
+                            : "bg-primary text-primary-foreground border-primary"
+                          : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                      )}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -1196,7 +1277,29 @@ const TecnicoPrestacaoContas = () => {
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={() => toast.success("Parecer técnico emitido com sucesso!")}
+                    onClick={async () => {
+                      try {
+                        await generateParecerDocx({
+                          entityName: entity.name,
+                          exercicio: periodo,
+                          nif: entity.nif,
+                          totalActivo,
+                          totalPassivo,
+                          totalCapProprio,
+                          resultadoExercicio,
+                          totalProveitos,
+                          totalCustos,
+                          comentarios,
+                          tipoParecerIndex,
+                          parecerFinal,
+                          tecnicoNome: "Maria Costa",
+                        });
+                        toast.success("Parecer técnico emitido e descarregado com sucesso!");
+                      } catch (err) {
+                        console.error("Error generating parecer:", err);
+                        toast.error("Erro ao gerar o documento do parecer.");
+                      }
+                    }}
                     className="gap-2"
                   >
                     <CheckCircle className="h-4 w-4" />
