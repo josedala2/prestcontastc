@@ -11,24 +11,52 @@ import {
   LayoutDashboard,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   FileText,
   History,
   MessageSquare,
   ExternalLink,
   Settings,
   Send,
+  Inbox,
+  FilePlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+type NavItem = {
+  title: string;
+  icon: typeof LayoutDashboard;
+  path: string;
+};
 
-const navSections = [
+type NavItemWithChildren = {
+  title: string;
+  icon: typeof LayoutDashboard;
+  path?: string;
+  children: NavItem[];
+};
+
+type NavEntry = NavItem | NavItemWithChildren;
+
+function hasChildren(item: NavEntry): item is NavItemWithChildren {
+  return "children" in item && Array.isArray(item.children);
+}
+
+const navSections: { label: string; items: NavEntry[] }[] = [
   {
     label: "Principal",
     items: [
       { title: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
       { title: "Entidades", icon: Building2, path: "/entidades" },
       { title: "Exercícios", icon: Calendar, path: "/exercicios" },
-      { title: "Submissões", icon: Send, path: "/submissoes" },
+      {
+        title: "Submissões",
+        icon: Send,
+        children: [
+          { title: "Recepção", icon: Inbox, path: "/submissoes" },
+          { title: "Submeter por Entidade", icon: FilePlus, path: "/submissoes/manual" },
+        ],
+      },
     ],
   },
   {
@@ -72,6 +100,19 @@ const navSections = [
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+
+  const isActive = (path: string) => location.pathname === path;
+
+  const isChildActive = (item: NavItemWithChildren) =>
+    item.children.some((c) => location.pathname === c.path || location.pathname.startsWith(c.path + "/"));
+
+  const toggleMenu = (title: string) => {
+    setOpenMenus((prev) => ({ ...prev, [title]: !prev[title] }));
+  };
+
+  const isMenuOpen = (item: NavItemWithChildren) =>
+    openMenus[item.title] ?? isChildActive(item);
 
   return (
     <aside
@@ -104,23 +145,83 @@ export function AppSidebar() {
             )}
             <div className="space-y-0.5">
               {section.items.map((item) => {
-                const isActive = location.pathname === item.path;
+                if (hasChildren(item)) {
+                  const open = isMenuOpen(item);
+                  const childActive = isChildActive(item);
+
+                  return (
+                    <div key={item.title}>
+                      <button
+                        onClick={() => toggleMenu(item.title)}
+                        className={cn(
+                          "w-full flex items-center gap-2.5 px-3 py-2 rounded text-[13px] transition-all duration-150 group relative",
+                          childActive
+                            ? "bg-sidebar-accent/60 text-sidebar-accent-foreground font-semibold"
+                            : "text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent/40"
+                        )}
+                        title={collapsed ? item.title : undefined}
+                      >
+                        {childActive && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r gold-gradient" />
+                        )}
+                        <item.icon className={cn("h-[18px] w-[18px] shrink-0", childActive && "text-sidebar-primary")} />
+                        {!collapsed && (
+                          <>
+                            <span className="truncate flex-1 text-left">{item.title}</span>
+                            <ChevronDown
+                              className={cn(
+                                "h-3.5 w-3.5 shrink-0 transition-transform duration-200",
+                                open && "rotate-180"
+                              )}
+                            />
+                          </>
+                        )}
+                      </button>
+
+                      {/* Submenu */}
+                      {!collapsed && open && (
+                        <div className="ml-4 mt-0.5 space-y-0.5 border-l border-sidebar-border/50 pl-2">
+                          {item.children.map((child) => {
+                            const active = isActive(child.path);
+                            return (
+                              <Link
+                                key={child.path}
+                                to={child.path}
+                                className={cn(
+                                  "flex items-center gap-2 px-2.5 py-1.5 rounded text-[12px] transition-all duration-150",
+                                  active
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+                                    : "text-sidebar-foreground/55 hover:text-sidebar-foreground hover:bg-sidebar-accent/30"
+                                )}
+                              >
+                                <child.icon className={cn("h-[15px] w-[15px] shrink-0", active && "text-sidebar-primary")} />
+                                <span className="truncate">{child.title}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                const active = isActive(item.path);
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
                     className={cn(
                       "flex items-center gap-2.5 px-3 py-2 rounded text-[13px] transition-all duration-150 group relative",
-                      isActive
+                      active
                         ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
                         : "text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent/40"
                     )}
                     title={collapsed ? item.title : undefined}
                   >
-                    {isActive && (
+                    {active && (
                       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r gold-gradient" />
                     )}
-                    <item.icon className={cn("h-[18px] w-[18px] shrink-0", isActive && "text-sidebar-primary")} />
+                    <item.icon className={cn("h-[18px] w-[18px] shrink-0", active && "text-sidebar-primary")} />
                     {!collapsed && <span className="truncate">{item.title}</span>}
                   </Link>
                 );

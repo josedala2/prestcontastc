@@ -23,6 +23,7 @@ import Configuracoes from "./pages/Configuracoes";
 
 import Submissoes from "./pages/Submissoes";
 import SubmissaoDetalhe from "./pages/SubmissaoDetalhe";
+import SubmissaoManual from "./pages/SubmissaoManual";
 import PortalDashboard from "./pages/portal/PortalDashboard";
 import PortalExercicios from "./pages/portal/PortalExercicios";
 import PortalExercicioDetalhe from "./pages/portal/PortalExercicioDetalhe";
@@ -64,6 +65,7 @@ const App = () => (
           <Route path="/configuracoes" element={<Configuracoes />} />
           <Route path="/secretaria" element={<Navigate to="/submissoes" replace />} />
           <Route path="/submissoes" element={<Submissoes />} />
+          <Route path="/submissoes/manual" element={<SubmissaoManual />} />
           <Route path="/submissoes/:id" element={<SubmissaoDetalhe />} />
           <Route path="/portal/*" element={
             <PortalEntityProvider>
