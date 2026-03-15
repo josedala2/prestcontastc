@@ -147,13 +147,13 @@ export function NovaSolicitacaoVistoForm({ onClose }: NovaSolicitacaoVistoFormPr
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="flex items-center gap-2">
-          <Stamp className="h-5 w-5 text-primary" />
+        <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <Stamp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           Nova Solicitação de Visto
         </DialogTitle>
       </DialogHeader>
 
-      <div className="space-y-6 max-h-[65vh] overflow-y-auto pr-1">
+      <div className="space-y-5 sm:space-y-6 max-h-[60vh] sm:max-h-[65vh] overflow-y-auto pr-1 -mr-1">
         {/* ── Tipo e Natureza ── */}
         <fieldset className="space-y-3">
           <legend className="text-sm font-semibold text-foreground border-b pb-1 mb-2 w-full">
