@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { useSubmissions } from "@/contexts/SubmissionContext";
 import { TecnicoLayout } from "@/components/TecnicoLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X, Download, AlertTriangle, Send, MessageSquare } from "lucide-react";
@@ -417,6 +420,7 @@ function SummaryCard({ label, value, color }: { label: string; value: string; co
 // ─── Main Component ───
 const TecnicoPrestacaoContas = () => {
   const { entity } = usePortalEntity();
+  const { solicitarElementos } = useSubmissions();
   const [periodo, setPeriodo] = useState("2024");
   const [activeTab, setActiveTab] = useState("balanco");
 
@@ -429,6 +433,51 @@ const TecnicoPrestacaoContas = () => {
   const [custos, setCustos] = useState<Record<string, number>>({});
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Solicitar Elementos state
+  const [solicitarOpen, setSolicitarOpen] = useState(false);
+  const [solicitarDocs, setSolicitarDocs] = useState<string[]>([]);
+  const [solicitarMsg, setSolicitarMsg] = useState("");
+
+  const documentosDisponiveis = [
+    "Balancete Analítico",
+    "Extractos Bancários",
+    "Reconciliação Bancária",
+    "Inventário Patrimonial",
+    "Relação de Abates",
+    "Acta de Apreciação de Contas",
+    "Comprovativos de Entrega",
+    "Relatório de Gestão",
+    "Demonstração de Fluxos de Caixa",
+    "Notas às Demonstrações Financeiras",
+    "Mapa de Execução Orçamental",
+    "Certidão de Não Dívida Fiscal",
+  ];
+
+  const toggleDoc = (doc: string) => {
+    setSolicitarDocs((prev) =>
+      prev.includes(doc) ? prev.filter((d) => d !== doc) : [...prev, doc]
+    );
+  };
+
+  const handleSolicitarElementos = () => {
+    if (solicitarDocs.length === 0) {
+      toast.error("Seleccione pelo menos um documento.");
+      return;
+    }
+    solicitarElementos(
+      entity.id,
+      `fy-${periodo}`,
+      solicitarDocs,
+      solicitarMsg || "O Técnico solicita os seguintes elementos adicionais para análise.",
+      entity.name,
+      entity.contacto
+    );
+    toast.success("Pedido de elementos enviado com sucesso à entidade.");
+    setSolicitarOpen(false);
+    setSolicitarDocs([]);
+    setSolicitarMsg("");
+  };
 
   const emptyPrior: Record<string, number> = {};
 
@@ -986,14 +1035,72 @@ const TecnicoPrestacaoContas = () => {
 
           {/* Acções */}
           <div className="flex flex-wrap justify-end gap-3 pt-2">
-            <Button
-              variant="secondary"
-              onClick={() => toast.info("Pedido de elementos adicionais enviado à entidade.")}
-              className="gap-2"
-            >
-              <MessageSquare className="h-4 w-4" />
-              Solicitar Elementos
-            </Button>
+            <Dialog open={solicitarOpen} onOpenChange={setSolicitarOpen}>
+              <DialogTrigger asChild>
+                <Button variant="secondary" className="gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  Solicitar Elementos
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5 text-primary" />
+                    Solicitar Elementos Adicionais
+                  </DialogTitle>
+                  <DialogDescription>
+                    Seleccione os documentos a solicitar à entidade <strong>{entity.name}</strong> para o exercício <strong>{periodo}</strong>.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-4 py-2">
+                  {/* Document checklist */}
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Documentos a solicitar</Label>
+                    <div className="space-y-2 max-h-[240px] overflow-y-auto border border-border rounded-lg p-3">
+                      {documentosDisponiveis.map((doc) => (
+                        <label
+                          key={doc}
+                          className="flex items-center gap-2.5 cursor-pointer hover:bg-muted/50 rounded-md px-2 py-1.5 transition-colors"
+                        >
+                          <Checkbox
+                            checked={solicitarDocs.includes(doc)}
+                            onCheckedChange={() => toggleDoc(doc)}
+                          />
+                          <span className="text-sm">{doc}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {solicitarDocs.length > 0 && (
+                      <p className="text-xs text-muted-foreground mt-1.5">
+                        {solicitarDocs.length} documento{solicitarDocs.length !== 1 ? "s" : ""} seleccionado{solicitarDocs.length !== 1 ? "s" : ""}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Message */}
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Mensagem para a entidade (opcional)</Label>
+                    <textarea
+                      className="w-full min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-y"
+                      placeholder="Adicione observações ou instruções adicionais..."
+                      value={solicitarMsg}
+                      onChange={(e) => setSolicitarMsg(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setSolicitarOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleSolicitarElementos} className="gap-2">
+                    <Send className="h-4 w-4" />
+                    Enviar Pedido
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <Button variant="outline" onClick={handleSave} className="gap-2">
               <Save className="h-4 w-4" />
               Guardar Rascunho

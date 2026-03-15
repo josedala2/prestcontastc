@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect, ReactNode 
 import { supabase } from "@/integrations/supabase/client";
 
 export type SubmissionStatus = "rascunho" | "pendente" | "recepcionado" | "rejeitado";
+export type NotificationType = "recepcionado" | "rejeitado" | "solicitacao_elementos";
 
 interface SubmissionEntry {
   entityId: string;
@@ -17,7 +18,7 @@ export interface PortalNotification {
   id: string;
   entityId: string;
   fiscalYearId: string;
-  type: "recepcionado" | "rejeitado";
+  type: NotificationType;
   message: string;
   detail?: string;
   createdAt: string;
@@ -35,6 +36,7 @@ interface SubmissionContextType {
   submit: (entityId: string, fiscalYearId: string) => void;
   recepcionar: (entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => void;
   rejeitar: (entityId: string, fiscalYearId: string, motivo: string, entityName?: string, entityEmail?: string) => void;
+  solicitarElementos: (entityId: string, fiscalYearId: string, documentos: string[], mensagem: string, entityName?: string, entityEmail?: string) => void;
   loadingNotifications: boolean;
   refreshNotifications: () => void;
 }
@@ -66,7 +68,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
             id: n.id,
             entityId: n.entity_id,
             fiscalYearId: n.fiscal_year_id,
-            type: n.type as "recepcionado" | "rejeitado",
+            type: n.type as NotificationType,
             message: n.message,
             detail: n.detail,
             createdAt: n.created_at,
@@ -119,7 +121,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
   const sendNotification = useCallback(async (
     entityId: string,
     fiscalYearId: string,
-    type: "recepcionado" | "rejeitado",
+    type: NotificationType,
     message: string,
     detail?: string,
     entityName?: string,
@@ -205,6 +207,27 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     );
   }, [sendNotification]);
 
+  const solicitarElementos = useCallback((
+    entityId: string,
+    fiscalYearId: string,
+    documentos: string[],
+    mensagem: string,
+    entityName?: string,
+    entityEmail?: string
+  ) => {
+    const year = fiscalYearId.split("-").pop() || fiscalYearId;
+    const docList = documentos.map((d) => `• ${d}`).join("\n");
+    sendNotification(
+      entityId,
+      fiscalYearId,
+      "solicitacao_elementos",
+      `Solicitação de elementos adicionais — Exercício ${year}`,
+      `${mensagem}\n\nDocumentos solicitados:\n${docList}`,
+      entityName,
+      entityEmail
+    );
+  }, [sendNotification]);
+
   const unreadCount = useCallback(
     (entityId: string) => notifications.filter((n) => n.entityId === entityId && !n.read).length,
     [notifications]
@@ -246,6 +269,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
         submit,
         recepcionar,
         rejeitar,
+        solicitarElementos,
         loadingNotifications,
         refreshNotifications,
       }}
