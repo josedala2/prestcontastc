@@ -3,7 +3,6 @@ import { PageHeader } from "@/components/ui-custom/PageElements";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { useState } from "react";
 import {
   Stamp,
@@ -12,23 +11,14 @@ import {
   CheckCircle,
   XCircle,
   FileText,
-  Upload,
-  Send,
-  Calendar,
-  Building2,
   AlertTriangle,
   Eye,
-  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
 import { NovaSolicitacaoVistoForm } from "@/components/portal/NovaSolicitacaoVistoForm";
 
 interface SolicitacaoVisto {
