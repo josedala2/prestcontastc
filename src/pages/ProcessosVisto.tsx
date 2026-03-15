@@ -893,13 +893,21 @@ export default function ProcessosVisto() {
       </Dialog>
 
       {/* ── Preview PDF da Acta ── */}
-      <Dialog open={!!pdfPreviewUrl} onOpenChange={() => setPdfPreviewUrl(null)}>
+      <Dialog
+        open={!!pdfPreviewUrl}
+        onOpenChange={(open) => {
+          if (!open) closePdfPreview();
+        }}
+      >
         <DialogContent className="max-w-4xl w-[95vw] h-[85vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Stamp className="h-5 w-5 text-primary" />
               Acta de Recepção — Pré-visualização
             </DialogTitle>
+            <DialogDescription>
+              Pré-visualização do PDF da acta de recepção, com opções de abrir em nova aba e imprimir.
+            </DialogDescription>
           </DialogHeader>
           <div className="flex-1 min-h-0">
             {pdfPreviewUrl && (
@@ -916,7 +924,7 @@ export default function ProcessosVisto() {
               className="gap-2"
               onClick={() => {
                 if (pdfPreviewUrl) {
-                  window.open(pdfPreviewUrl, "_blank");
+                  window.open(pdfPreviewUrl, "_blank", "noopener,noreferrer");
                 }
               }}
             >
@@ -934,7 +942,7 @@ export default function ProcessosVisto() {
             >
               <Printer className="h-3.5 w-3.5" /> Imprimir
             </Button>
-            <Button variant="outline" onClick={() => setPdfPreviewUrl(null)}>
+            <Button variant="outline" onClick={closePdfPreview}>
               Fechar
             </Button>
           </DialogFooter>
