@@ -20,7 +20,7 @@ import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 import {
-  ArrowLeft, CheckCircle, XCircle, FileText, Eye, Stamp,
+  ArrowLeft, CheckCircle, XCircle, FileText, Eye, Stamp, Pencil,
   AlertTriangle, Undo2, Building2, X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -249,14 +249,22 @@ const SubmissaoDetalhe = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex items-center gap-3 p-4 rounded-lg bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-            <CheckCircle className="h-5 w-5 shrink-0" />
-            <div>
-              <p className="text-sm font-semibold">Acta de Recepção Emitida</p>
-              <p className="text-xs opacity-80">A documentação foi verificada e a acta de recepção foi gerada com sucesso.</p>
+          <div className="flex items-center gap-3 p-4 rounded-lg bg-success/10 border border-success/20">
+            <CheckCircle className="h-5 w-5 shrink-0 text-success" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground">Acta de Recepção Emitida</p>
+              <p className="text-xs text-muted-foreground">A documentação foi verificada e a acta de recepção foi gerada com sucesso.</p>
             </div>
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setActaGerada(false); setCheckedDocs({}); }}>
+              <Pencil className="h-3.5 w-3.5" /> Editar e Regenerar
+            </Button>
           </div>
-          <ActasRecepcaoList entityId={entity.id} fiscalYear={periodo} />
+          <ActasRecepcaoList
+            entityId={entity.id}
+            fiscalYear={periodo}
+            allowEdit
+            onEdit={() => { setActaGerada(false); setCheckedDocs({}); }}
+          />
         </div>
       )}
 
