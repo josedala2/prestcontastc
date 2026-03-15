@@ -506,6 +506,12 @@ const Secretaria = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+        </TabsContent>
+
+        <TabsContent value="vistos" className="mt-6">
+          <SecretariaVistoTab />
+        </TabsContent>
+      </Tabs>
     </AppLayout>
   );
 };
