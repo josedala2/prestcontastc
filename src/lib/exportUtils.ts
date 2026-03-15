@@ -828,6 +828,9 @@ export function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = false): 
 
     return doc.output("datauristring");
   } else {
-    doc.save(`Acta_Recepcao_${data.actaNumero.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
+    const fileName = `Acta_Recepcao_${data.actaNumero.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
+    doc.save(fileName);
+    const blob = doc.output("blob");
+    return { blob, fileName };
   }
 }
