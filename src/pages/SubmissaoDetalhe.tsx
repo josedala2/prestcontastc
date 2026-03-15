@@ -212,7 +212,13 @@ const SubmissaoDetalhe = () => {
                           )}
                         </TableCell>
                         <TableCell className="text-center">
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title={`Visualizar ${item.label}`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            title={`Visualizar ${item.label}`}
+                            onClick={() => setDocPreview({ label: item.label, category: item.category })}
+                          >
                             <Eye className="h-3.5 w-3.5" />
                           </Button>
                         </TableCell>
