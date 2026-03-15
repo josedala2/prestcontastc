@@ -718,8 +718,44 @@ const TecnicoPrestacaoContas = () => {
       } as any);
       if (insertError) throw insertError;
 
+      // Notificar a entidade automaticamente
+      const parecerLabel = parecerFinal === "favorável" ? "Favorável" : parecerFinal === "favorável com reservas" ? "Favorável com Reservas" : "Desfavorável";
+      const notifMessage = `O Tribunal de Contas emitiu parecer ${parecerLabel} sobre a prestação de contas do exercício ${periodo}.`;
+      const notifDetail = `Parecer v${nextVersion} emitido pelo técnico Maria Costa. Classificação: ${parecerLabel}. Resultado do exercício: ${resultadoExercicio.toLocaleString("pt-AO")} Kz.`;
+
+      const { error: notifError } = await supabase.from("submission_notifications").insert({
+        entity_id: entity.id,
+        entity_name: entity.name,
+        fiscal_year: periodo,
+        fiscal_year_id: entity.id + "_" + periodo,
+        type: "parecer_emitido",
+        message: notifMessage,
+        detail: notifDetail,
+        entity_email: entity.contacto || null,
+      } as any);
+
+      if (notifError) {
+        console.error("Erro ao criar notificação:", notifError);
+      }
+
+      // Tentar enviar email
+      try {
+        await supabase.functions.invoke("send-notification-email", {
+          body: {
+            entityName: entity.name,
+            entityEmail: entity.contacto,
+            type: "parecer_emitido",
+            message: notifMessage,
+            detail: notifDetail,
+            fiscalYear: periodo,
+          },
+        });
+      } catch (emailErr) {
+        console.warn("Email de notificação não enviado:", emailErr);
+      }
+
       setParecerRefreshKey((k) => k + 1);
-      toast.success(`Parecer v${nextVersion} emitido! DOCX e PDF oficial descarregados.`);
+      toast.success(`Parecer v${nextVersion} emitido! Entidade notificada.`);
     } catch (err) {
       console.error("Error generating parecer:", err);
       toast.error("Erro ao gerar ou guardar o parecer.");
