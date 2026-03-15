@@ -79,7 +79,6 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
   };
 
   const handleClosePreview = () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
     setPreviewTitle("");
   };
