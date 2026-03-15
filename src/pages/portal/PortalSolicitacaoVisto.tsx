@@ -185,7 +185,7 @@ export default function PortalSolicitacaoVisto() {
 
       {/* Dialog Nova Solicitação */}
       <Dialog open={showNovaDialog} onOpenChange={setShowNovaDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl w-[95vw] sm:w-full max-h-[90vh]">
           <NovaSolicitacaoVistoForm onClose={() => setShowNovaDialog(false)} />
         </DialogContent>
       </Dialog>
