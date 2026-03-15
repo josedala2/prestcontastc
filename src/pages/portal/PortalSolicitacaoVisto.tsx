@@ -107,7 +107,7 @@ export default function PortalSolicitacaoVisto() {
       />
 
       {/* Resumo */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-6">
         {[
           { label: "Total", value: resumo.total, icon: Stamp, color: "text-foreground" },
           { label: "Pendentes", value: resumo.pendentes, icon: Clock, color: "text-amber-600" },
@@ -116,11 +116,11 @@ export default function PortalSolicitacaoVisto() {
           { label: "Recusados", value: resumo.recusados, icon: XCircle, color: "text-destructive" },
         ].map((item) => (
           <Card key={item.label} className="border">
-            <CardContent className="p-4 flex items-center gap-3">
-              <item.icon className={cn("h-5 w-5 shrink-0", item.color)} />
+            <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+              <item.icon className={cn("h-4 w-4 sm:h-5 sm:w-5 shrink-0", item.color)} />
               <div>
-                <p className="text-2xl font-bold">{item.value}</p>
-                <p className="text-[11px] text-muted-foreground">{item.label}</p>
+                <p className="text-xl sm:text-2xl font-bold">{item.value}</p>
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground">{item.label}</p>
               </div>
             </CardContent>
           </Card>
@@ -129,9 +129,9 @@ export default function PortalSolicitacaoVisto() {
 
       {/* Acção */}
       <div className="flex justify-end mb-4">
-        <Button onClick={() => setShowNovaDialog(true)} className="gap-2">
+        <Button onClick={() => setShowNovaDialog(true)} className="gap-2 w-full sm:w-auto">
           <Plus className="h-4 w-4" />
-          Nova Solicitação de Visto
+          <span className="sm:inline">Nova Solicitação de Visto</span>
         </Button>
       </div>
 
@@ -148,32 +148,34 @@ export default function PortalSolicitacaoVisto() {
               return (
                 <div
                   key={sol.id}
-                  className="flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors cursor-pointer"
+                  className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 px-4 sm:px-5 py-3 sm:py-4 hover:bg-muted/30 transition-colors cursor-pointer"
                   onClick={() => setDetailDialog(sol)}
                 >
-                  <div className="shrink-0">
-                    <div className={cn("rounded-full p-2", config.color.split(" ")[0])}>
-                      <Icon className={cn("h-4 w-4", config.color.split(" ")[1])} />
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="shrink-0">
+                      <div className={cn("rounded-full p-1.5 sm:p-2", config.color.split(" ")[0])}>
+                        <Icon className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4", config.color.split(" ")[1])} />
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                        <span className="text-sm font-semibold">{sol.id}</span>
+                        <Badge variant="outline" className="text-[10px] hidden xs:inline-flex">{sol.tipo}</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-1">{sol.descricao}</p>
                     </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-sm font-semibold">{sol.id}</span>
-                      <Badge variant="outline" className="text-[10px]">{sol.tipo}</Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground line-clamp-1">{sol.descricao}</p>
-                  </div>
-                  {sol.valor && (
-                    <span className="text-sm font-medium text-foreground hidden sm:block">{sol.valor}</span>
-                  )}
-                  <div className="text-right shrink-0 hidden md:block">
-                    <p className="text-[11px] text-muted-foreground">
+                  <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 pl-9 sm:pl-0">
+                    {sol.valor && (
+                      <span className="text-xs sm:text-sm font-medium text-foreground">{sol.valor}</span>
+                    )}
+                    <span className="text-[11px] text-muted-foreground hidden md:block">
                       {new Date(sol.dataSubmissao).toLocaleDateString("pt-AO")}
-                    </p>
+                    </span>
+                    <Badge className={cn("text-[10px] sm:text-[11px] shrink-0", config.color)} variant="secondary">
+                      {config.label}
+                    </Badge>
                   </div>
-                  <Badge className={cn("text-[11px] shrink-0", config.color)} variant="secondary">
-                    {config.label}
-                  </Badge>
                 </div>
               );
             })}
@@ -183,14 +185,14 @@ export default function PortalSolicitacaoVisto() {
 
       {/* Dialog Nova Solicitação */}
       <Dialog open={showNovaDialog} onOpenChange={setShowNovaDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl w-[95vw] sm:w-full max-h-[90vh]">
           <NovaSolicitacaoVistoForm onClose={() => setShowNovaDialog(false)} />
         </DialogContent>
       </Dialog>
 
       {/* Dialog Detalhe */}
       <Dialog open={!!detailDialog} onOpenChange={() => setDetailDialog(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg w-[95vw] sm:w-full">
           {detailDialog && (
             <>
               <DialogHeader>
@@ -200,7 +202,7 @@ export default function PortalSolicitacaoVisto() {
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <p className="text-[11px] text-muted-foreground mb-0.5">Tipo</p>
                     <p className="text-sm font-medium">{detailDialog.tipo}</p>
