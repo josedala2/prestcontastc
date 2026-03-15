@@ -61,26 +61,11 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
     fetchActas();
   }, [entityId, fiscalYear]);
 
-  const handlePreview = async (filePath: string, actaNumero: string) => {
-    try {
-      const { data, error } = await supabase.storage
-        .from("actas-recepcao")
-        .download(filePath);
-      if (error) throw error;
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
-        setPreviewTitle(actaNumero);
-      };
-      reader.readAsDataURL(data);
-    } catch {
-      toast.error("Erro ao carregar a pré-visualização.");
-    }
-  };
-
-  const handleClosePreview = () => {
-    setPreviewUrl(null);
-    setPreviewTitle("");
+  const handlePreview = (filePath: string) => {
+    const { data } = supabase.storage
+      .from("actas-recepcao")
+      .getPublicUrl(filePath);
+    window.open(data.publicUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleDownload = async (filePath: string, fileName: string) => {
