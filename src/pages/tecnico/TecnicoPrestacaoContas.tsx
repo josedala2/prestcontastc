@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { generateParecerDocx } from "@/lib/parecerGenerator";
+import { generateParecerPdf } from "@/lib/parecerPdfGenerator";
 import { ParecerPreview } from "@/components/ParecerPreview";
 import { ParecerHistorico } from "@/components/ParecerHistorico";
 import { TecnicoLayout } from "@/components/TecnicoLayout";
