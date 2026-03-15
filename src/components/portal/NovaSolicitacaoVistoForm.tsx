@@ -147,13 +147,13 @@ export function NovaSolicitacaoVistoForm({ onClose }: NovaSolicitacaoVistoFormPr
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="flex items-center gap-2">
-          <Stamp className="h-5 w-5 text-primary" />
+        <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <Stamp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           Nova Solicitação de Visto
         </DialogTitle>
       </DialogHeader>
 
-      <div className="space-y-6 max-h-[65vh] overflow-y-auto pr-1">
+      <div className="space-y-5 sm:space-y-6 max-h-[60vh] sm:max-h-[65vh] overflow-y-auto pr-1 -mr-1">
         {/* ── Tipo e Natureza ── */}
         <fieldset className="space-y-3">
           <legend className="text-sm font-semibold text-foreground border-b pb-1 mb-2 w-full">
@@ -339,18 +339,18 @@ export function NovaSolicitacaoVistoForm({ onClose }: NovaSolicitacaoVistoFormPr
 
           <div className="space-y-2">
             {documentos.map((doc) => (
-              <div key={doc.id} className="flex items-start gap-3 rounded-md border p-3">
+              <div key={doc.id} className="flex items-start gap-2 sm:gap-3 rounded-md border p-2 sm:p-3">
                 <Checkbox
                   checked={doc.checked}
                   onCheckedChange={(checked) => toggleDocumento(doc.id, !!checked)}
                   className="mt-0.5"
                 />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-medium">
+                  <div className="flex flex-col xs:flex-row xs:items-center gap-0.5 xs:gap-1.5">
+                    <span className="text-[11px] sm:text-xs font-medium">
                       {doc.label} {doc.obrigatorio && <span className="text-destructive">*</span>}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-[9px] sm:text-[10px] text-muted-foreground">
                       ({doc.obrigatorio ? "obrigatório" : "opcional"})
                     </span>
                   </div>
@@ -419,9 +419,9 @@ export function NovaSolicitacaoVistoForm({ onClose }: NovaSolicitacaoVistoFormPr
         </fieldset>
       </div>
 
-      <DialogFooter className="pt-4">
-        <Button variant="outline" onClick={onClose}>Cancelar</Button>
-        <Button onClick={handleSubmit} className="gap-2">
+      <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
+        <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">Cancelar</Button>
+        <Button onClick={handleSubmit} className="gap-2 w-full sm:w-auto">
           <Send className="h-3.5 w-3.5" />
           Submeter Solicitação
         </Button>
