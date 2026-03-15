@@ -34,8 +34,7 @@ interface ActasRecepcaoListProps {
 export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, onEdit }: ActasRecepcaoListProps) {
   const [actas, setActas] = useState<Acta[]>([]);
   const [loading, setLoading] = useState(true);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [previewTitle, setPreviewTitle] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const fetchActas = async () => {
