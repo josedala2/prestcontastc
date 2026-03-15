@@ -643,6 +643,63 @@ export default function ProcessosVisto() {
                 </CardContent>
               </Card>
 
+              {/* Dados do Representante e Ofício */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    Dados do Representante e Ofício
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    Preencha os dados de quem entrega o processo para constar na acta de recepção.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="rep-nome">Nome do Representante *</Label>
+                      <Input
+                        id="rep-nome"
+                        placeholder="Nome completo do representante"
+                        value={representanteNome}
+                        onChange={(e) => setRepresentanteNome(e.target.value)}
+                        maxLength={120}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="rep-cargo">Cargo / Função</Label>
+                      <Input
+                        id="rep-cargo"
+                        placeholder="Ex: Director Administrativo"
+                        value={representanteCargo}
+                        onChange={(e) => setRepresentanteCargo(e.target.value)}
+                        maxLength={80}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="rep-telefone">Telefone de Contacto</Label>
+                      <Input
+                        id="rep-telefone"
+                        placeholder="Ex: 923 456 789"
+                        value={representanteTelefone}
+                        onChange={(e) => setRepresentanteTelefone(e.target.value)}
+                        maxLength={20}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="oficio-numero">N.º do Ofício</Label>
+                      <Input
+                        id="oficio-numero"
+                        placeholder="Número do ofício de solicitação"
+                        value={oficioNumero}
+                        onChange={(e) => setOficioNumero(e.target.value)}
+                        maxLength={60}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Verificação documental */}
               <Card>
                 <CardHeader>
