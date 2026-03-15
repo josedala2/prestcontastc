@@ -83,13 +83,6 @@ const mockSolicitacoes: SolicitacaoVisto[] = [
   },
 ];
 
-const tiposContrato = [
-  "Contrato de Fornecimento",
-  "Contrato de Empreitada",
-  "Contrato de Prestação de Serviços",
-  "Contrato de Locação",
-  "Outros Actos e Contratos",
-];
 
 const estadoConfig: Record<string, { label: string; color: string; icon: typeof Clock }> = {
   pendente: { label: "Pendente", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400", icon: Clock },
