@@ -1323,6 +1323,31 @@ const TecnicoPrestacaoContas = () => {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+            <Button variant="outline" onClick={async () => {
+              try {
+                await generateParecerPdf({
+                  entityName: entity.name,
+                  exercicio: periodo,
+                  nif: entity.nif,
+                  totalActivo,
+                  totalPassivo,
+                  totalCapProprio,
+                  resultadoExercicio,
+                  totalProveitos,
+                  totalCustos,
+                  comentarios,
+                  tipoParecerIndex,
+                  parecerFinal,
+                  tecnicoNome: "Maria Costa",
+                });
+                toast.success("PDF oficial gerado com sucesso!");
+              } catch {
+                toast.error("Erro ao gerar o PDF.");
+              }
+            }} className="gap-2">
+              <FileText className="h-4 w-4" />
+              Exportar PDF
+            </Button>
             <Button variant="outline" onClick={() => setPreviewOpen(true)} className="gap-2">
               <Eye className="h-4 w-4" />
               Pré-visualizar
