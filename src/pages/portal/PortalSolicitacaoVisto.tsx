@@ -96,8 +96,6 @@ export default function PortalSolicitacaoVisto() {
   const [solicitacoes] = useState<SolicitacaoVisto[]>(mockSolicitacoes);
   const [showNovaDialog, setShowNovaDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState<SolicitacaoVisto | null>(null);
-  const [novaForm, setNovaForm] = useState({ tipo: "", descricao: "", valor: "" });
-  const [ficheiros, setFicheiros] = useState<File[]>([]);
 
   const resumo = {
     total: solicitacoes.length,
