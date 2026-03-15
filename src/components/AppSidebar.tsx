@@ -62,7 +62,6 @@ const navSections: { label: string; items: NavEntry[] }[] = [
   {
     label: "Dados",
     items: [
-      { title: "Importação", icon: Upload, path: "/importacao" },
       { title: "Plano de Contas", icon: FileText, path: "/plano-contas" },
       { title: "Validações", icon: ShieldCheck, path: "/validacoes" },
     ],
