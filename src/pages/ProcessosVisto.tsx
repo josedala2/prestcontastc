@@ -226,6 +226,10 @@ export default function ProcessosVisto() {
   const handleSelectProcesso = (visto: SolicitacaoVisto) => {
     setSelectedVisto(visto);
     setCheckedDocs({});
+    setRepresentanteNome("");
+    setRepresentanteTelefone("");
+    setRepresentanteCargo("");
+    setOficioNumero(`${visto.id}/GMF/${now.getFullYear()}`);
   };
 
   const handleToggleDoc = (docId: string) => {
