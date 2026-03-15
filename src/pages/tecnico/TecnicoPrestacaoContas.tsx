@@ -922,74 +922,140 @@ const TecnicoPrestacaoContas = () => {
                 <SummaryCard label="Passivo Total" value={formatKz(totalPassivo)} />
                 <SummaryCard label="Resultado" value={formatKz(resultadoExercicio)} color={resultadoExercicio >= 0 ? "text-success" : "text-destructive"} />
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="flex justify-end gap-3 pt-4">
-                <Button variant="outline" onClick={handleSave} className="gap-2">
-                  <Save className="h-4 w-4" />
-                  Guardar Rascunho
+          {/* Carregar Parecer Consolidado */}
+          <Card>
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <FileUp className="h-4 w-4 text-primary" />
+                Parecer Consolidado
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+                <input
+                  type="file"
+                  id="parecer-upload"
+                  accept=".pdf,.doc,.docx"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      toast.success(`Ficheiro "${file.name}" carregado com sucesso.`);
+                    }
+                  }}
+                />
+                <Upload className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground mb-2">
+                  Arraste o ficheiro ou clique para carregar o parecer consolidado
+                </p>
+                <p className="text-xs text-muted-foreground/70 mb-3">PDF, DOC ou DOCX (máx. 10MB)</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.getElementById("parecer-upload")?.click()}
+                  className="gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  Seleccionar Ficheiro
                 </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      onClick={(e) => {
-                        if (Math.abs(totalActivo - totalCapPassivo) > 0.01 && totalActivo > 0) {
-                          e.preventDefault();
-                          toast.error("A equação patrimonial não está equilibrada. Corrija antes de submeter.");
-                        }
-                      }}
-                      className="gap-2"
-                    >
-                      <Send className="h-4 w-4" />
-                      Emitir Parecer
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent className="max-w-lg">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5 text-warning" />
-                        Confirmar Emissão de Parecer
-                      </AlertDialogTitle>
-                      <AlertDialogDescription asChild>
-                        <div className="space-y-4">
-                          <p>
-                            Está prestes a emitir o parecer técnico sobre a prestação de contas.
-                          </p>
-                          <div className="bg-muted/50 rounded-lg p-3 space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Entidade</span>
-                              <span className="font-medium text-foreground">{entity.name}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Período</span>
-                              <span className="font-medium text-foreground">{periodo}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Activo Total</span>
-                              <span className="font-medium text-foreground">{formatKz(totalActivo)}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Resultado</span>
-                              <span className={`font-medium ${resultadoExercicio >= 0 ? "text-success" : "text-destructive"}`}>{formatKz(resultadoExercicio)}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => toast.success("Parecer técnico emitido com sucesso!")}
-                        className="gap-2"
-                      >
-                        <CheckCircle className="h-4 w-4" />
-                        Confirmar Parecer
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
               </div>
             </CardContent>
           </Card>
+
+          {/* Comentários */}
+          <Card>
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-primary" />
+                Comentários e Observações
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <textarea
+                className="w-full min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-y"
+                placeholder="Insira aqui os comentários, observações ou notas relevantes sobre a prestação de contas desta entidade..."
+              />
+              <p className="text-xs text-muted-foreground">
+                Os comentários ficam registados internamente e não são visíveis para a entidade.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Acções */}
+          <div className="flex flex-wrap justify-end gap-3 pt-2">
+            <Button
+              variant="secondary"
+              onClick={() => toast.info("Pedido de elementos adicionais enviado à entidade.")}
+              className="gap-2"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Solicitar Elementos
+            </Button>
+            <Button variant="outline" onClick={handleSave} className="gap-2">
+              <Save className="h-4 w-4" />
+              Guardar Rascunho
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  onClick={(e) => {
+                    if (Math.abs(totalActivo - totalCapPassivo) > 0.01 && totalActivo > 0) {
+                      e.preventDefault();
+                      toast.error("A equação patrimonial não está equilibrada. Corrija antes de submeter.");
+                    }
+                  }}
+                  className="gap-2"
+                >
+                  <Send className="h-4 w-4" />
+                  Emitir Parecer
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="max-w-lg">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-warning" />
+                    Confirmar Emissão de Parecer
+                  </AlertDialogTitle>
+                  <AlertDialogDescription asChild>
+                    <div className="space-y-4">
+                      <p>Está prestes a emitir o parecer técnico sobre a prestação de contas.</p>
+                      <div className="bg-muted/50 rounded-lg p-3 space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Entidade</span>
+                          <span className="font-medium text-foreground">{entity.name}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Período</span>
+                          <span className="font-medium text-foreground">{periodo}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Activo Total</span>
+                          <span className="font-medium text-foreground">{formatKz(totalActivo)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Resultado</span>
+                          <span className={`font-medium ${resultadoExercicio >= 0 ? "text-success" : "text-destructive"}`}>{formatKz(resultadoExercicio)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => toast.success("Parecer técnico emitido com sucesso!")}
+                    className="gap-2"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    Confirmar Parecer
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </TabsContent>
       </Tabs>
     </TecnicoLayout>
