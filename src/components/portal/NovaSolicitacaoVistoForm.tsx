@@ -339,7 +339,7 @@ export function NovaSolicitacaoVistoForm({ onClose }: NovaSolicitacaoVistoFormPr
 
           <div className="space-y-2">
             {documentos.map((doc) => (
-              <div key={doc.id} className="flex items-start gap-3 rounded-md border p-3">
+              <div key={doc.id} className="flex items-start gap-2 sm:gap-3 rounded-md border p-2 sm:p-3">
                 <Checkbox
                   checked={doc.checked}
                   onCheckedChange={(checked) => toggleDocumento(doc.id, !!checked)}
