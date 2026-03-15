@@ -35,6 +35,7 @@ import PortalPrestacaoContas from "./pages/portal/PortalPrestacaoContas";
 import PortalSolicitacoes from "./pages/portal/PortalSolicitacoes";
 import TecnicoDashboard from "./pages/tecnico/TecnicoDashboard";
 import TecnicoPrestacaoContas from "./pages/tecnico/TecnicoPrestacaoContas";
+import ActasRecepcao from "./pages/ActasRecepcao";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -59,6 +60,7 @@ const App = () => (
           <Route path="/relatorios" element={<Relatorios />} />
           <Route path="/mapas" element={<Mapas />} />
           <Route path="/anexos" element={<Anexos />} />
+          <Route path="/actas-recepcao" element={<ActasRecepcao />} />
           <Route path="/documentos-obrigatorios" element={<DocumentosObrigatorios />} />
           <Route path="/auditoria" element={<Auditoria />} />
           <Route path="/esclarecimentos" element={<Esclarecimentos />} />

@@ -74,7 +74,7 @@ const navSections: { label: string; items: NavEntry[] }[] = [
   {
     label: "Dossiê",
     items: [
-      { title: "Anexos & Dossiê", icon: Paperclip, path: "/anexos" },
+      { title: "Actas de Recepção", icon: Paperclip, path: "/actas-recepcao" },
       { title: "Docs. Obrigatórios", icon: FileText, path: "/documentos-obrigatorios" },
       { title: "Esclarecimentos", icon: MessageSquare, path: "/esclarecimentos" },
       { title: "Auditoria", icon: History, path: "/auditoria" },
