@@ -721,7 +721,7 @@ const TecnicoPrestacaoContas = () => {
       // Notificar a entidade automaticamente
       const parecerLabel = parecerFinal === "favorável" ? "Favorável" : parecerFinal === "favorável com reservas" ? "Favorável com Reservas" : "Desfavorável";
       const notifMessage = `O Tribunal de Contas emitiu parecer ${parecerLabel} sobre a prestação de contas do exercício ${periodo}.`;
-      const notifDetail = `Parecer v${nextVersion} emitido pelo técnico ${tecnicoNome}. Classificação: ${parecerLabel}. Resultado do exercício: ${resultadoExercicio.toLocaleString("pt-AO")} Kz.`;
+      const notifDetail = `Parecer v${nextVersion} emitido pelo técnico Maria Costa. Classificação: ${parecerLabel}. Resultado do exercício: ${resultadoExercicio.toLocaleString("pt-AO")} Kz.`;
 
       const { error: notifError } = await supabase.from("submission_notifications").insert({
         entity_id: entity.id,
