@@ -88,6 +88,7 @@ export function NotificacoesPanel() {
     nao_lidas: entityUnread,
     recepcionado: entityNotifications.filter((n) => n.type === "recepcionado").length,
     rejeitado: entityNotifications.filter((n) => n.type === "rejeitado").length,
+    solicitacao_elementos: entityNotifications.filter((n) => n.type === "solicitacao_elementos").length,
   }), [entityNotifications, entityUnread]);
 
   return (
