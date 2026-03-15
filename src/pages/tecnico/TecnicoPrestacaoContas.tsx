@@ -1200,6 +1200,13 @@ const TecnicoPrestacaoContas = () => {
             </CardContent>
           </Card>
 
+          {/* Histórico de Pareceres */}
+          <ParecerHistorico
+            entityId={entity.id}
+            fiscalYear={periodo}
+            refreshKey={parecerRefreshKey}
+          />
+
           {/* Acções */}
           <div className="flex flex-wrap justify-end gap-3 pt-2">
             <Dialog open={solicitarOpen} onOpenChange={setSolicitarOpen}>
