@@ -311,6 +311,11 @@ const PortalDocumentos = () => {
         )}
       </div>
 
+      {/* Actas de Recepção emitidas pela Secretaria */}
+      <div className="mt-6">
+        <ActasRecepcaoList entityId={entity.id} />
+      </div>
+
       {/* Submit button */}
       <div className="mt-6 flex justify-end">
         <Button size="lg" disabled={!allRequiredDone} className="gap-2" onClick={() => toast.info("Submissão disponível após activação do backend.")}>
