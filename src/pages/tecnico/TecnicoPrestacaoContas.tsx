@@ -471,7 +471,7 @@ const TecnicoPrestacaoContas = () => {
       solicitarDocs,
       solicitarMsg || "O Técnico solicita os seguintes elementos adicionais para análise.",
       entity.name,
-      entity.email
+      entity.contacto
     );
     toast.success("Pedido de elementos enviado com sucesso à entidade.");
     setSolicitarOpen(false);
