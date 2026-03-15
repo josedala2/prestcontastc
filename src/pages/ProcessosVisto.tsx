@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatCard } from "@/components/ui-custom/PageElements";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -186,6 +186,7 @@ export default function ProcessosVisto() {
   const [actasGeradas, setActasGeradas] = useState<string[]>([]);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [editingActaVisto, setEditingActaVisto] = useState<SolicitacaoVisto | null>(null);
+  const previewObjectUrlRef = useRef<string | null>(null);
 
   const filtered = vistos.filter((v) => {
     const matchEstado = filtroEstado === "todos" || v.estado === filtroEstado;
@@ -227,6 +228,31 @@ export default function ProcessosVisto() {
     setCheckedDocs((prev) => ({ ...prev, [docId]: !prev[docId] }));
   };
 
+  const closePdfPreview = () => {
+    if (previewObjectUrlRef.current) {
+      URL.revokeObjectURL(previewObjectUrlRef.current);
+      previewObjectUrlRef.current = null;
+    }
+    setPdfPreviewUrl(null);
+  };
+
+  const setPdfPreviewFromBlob = (blob: Blob) => {
+    if (previewObjectUrlRef.current) {
+      URL.revokeObjectURL(previewObjectUrlRef.current);
+    }
+    const objectUrl = URL.createObjectURL(blob);
+    previewObjectUrlRef.current = objectUrl;
+    setPdfPreviewUrl(objectUrl);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (previewObjectUrlRef.current) {
+        URL.revokeObjectURL(previewObjectUrlRef.current);
+      }
+    };
+  }, []);
+
   const now = new Date();
   const actaNumero = selectedVisto
     ? `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(selectedVisto) + 1).padStart(3, "0")}`
@@ -258,8 +284,8 @@ export default function ProcessosVisto() {
     if (!target) return;
     const numero = `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(target) + 1).padStart(3, "0")}`;
     const data = buildActaData(target, numero);
-    const dataUri = exportActaRecepcaoVistoPdf(data, true);
-    setPdfPreviewUrl(dataUri);
+    const { blob } = exportActaRecepcaoVistoPdf(data);
+    setPdfPreviewFromBlob(blob);
   };
 
   const handleDownloadPdf = (visto: SolicitacaoVisto) => {
@@ -277,7 +303,7 @@ export default function ProcessosVisto() {
   const handleConfirmRecepcao = () => {
     if (!selectedVisto) return;
     const data = buildActaData(selectedVisto, actaNumero);
-    const dataUri = exportActaRecepcaoVistoPdf(data, true);
+    const { blob } = exportActaRecepcaoVistoPdf(data);
 
     setVistos((prev) =>
       prev.map((v) =>
@@ -288,7 +314,7 @@ export default function ProcessosVisto() {
     );
     setActasGeradas((prev) => [...prev, selectedVisto.id]);
     setConfirmDialogOpen(false);
-    setPdfPreviewUrl(dataUri);
+    setPdfPreviewFromBlob(blob);
     toast.success(`Acta de recepção gerada — ${selectedVisto.id} — ${selectedVisto.entidade}`);
     setSelectedVisto(null);
     setCheckedDocs({});
@@ -723,6 +749,9 @@ export default function ProcessosVisto() {
                   <Stamp className="h-5 w-5 text-primary" />
                   {detailDialog.id}
                 </DialogTitle>
+                <DialogDescription className="sr-only">
+                  Detalhes do processo de visto e documentos anexados.
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 max-h-[60vh] overflow-y-auto">
                 <div className={cn("flex items-center gap-2 rounded-lg px-4 py-2.5", estadoConfig[detailDialog.estado].color)}>
@@ -829,6 +858,9 @@ export default function ProcessosVisto() {
               <Undo2 className="h-5 w-5 text-destructive" />
               Devolver Processo
             </DialogTitle>
+            <DialogDescription>
+              Indique o motivo da devolução para comunicar à entidade requerente.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="rounded-md bg-muted/50 p-3">
@@ -861,21 +893,41 @@ export default function ProcessosVisto() {
       </Dialog>
 
       {/* ── Preview PDF da Acta ── */}
-      <Dialog open={!!pdfPreviewUrl} onOpenChange={() => setPdfPreviewUrl(null)}>
+      <Dialog
+        open={!!pdfPreviewUrl}
+        onOpenChange={(open) => {
+          if (!open) closePdfPreview();
+        }}
+      >
         <DialogContent className="max-w-4xl w-[95vw] h-[85vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Stamp className="h-5 w-5 text-primary" />
               Acta de Recepção — Pré-visualização
             </DialogTitle>
+            <DialogDescription>
+              Pré-visualização do PDF da acta de recepção, com opções de abrir em nova aba e imprimir.
+            </DialogDescription>
           </DialogHeader>
           <div className="flex-1 min-h-0">
             {pdfPreviewUrl && (
-              <iframe
-                src={pdfPreviewUrl}
+              <object
+                data={pdfPreviewUrl}
+                type="application/pdf"
                 className="w-full h-full border rounded-md"
-                title="Pré-visualização da Acta de Recepção"
-              />
+                aria-label="Pré-visualização da Acta de Recepção"
+              >
+                <div className="h-full w-full flex flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
+                  <p>Não foi possível carregar o PDF no visualizador interno.</p>
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => window.open(pdfPreviewUrl, "_blank", "noopener,noreferrer")}
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" /> Abrir PDF
+                  </Button>
+                </div>
+              </object>
             )}
           </div>
           <DialogFooter className="flex-row justify-end gap-2 pt-2 border-t">
@@ -884,7 +936,7 @@ export default function ProcessosVisto() {
               className="gap-2"
               onClick={() => {
                 if (pdfPreviewUrl) {
-                  window.open(pdfPreviewUrl, "_blank");
+                  window.open(pdfPreviewUrl, "_blank", "noopener,noreferrer");
                 }
               }}
             >
@@ -895,14 +947,14 @@ export default function ProcessosVisto() {
               className="gap-2"
               onClick={() => {
                 if (pdfPreviewUrl) {
-                  const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="Pré-visualização da Acta de Recepção"]');
-                  iframe?.contentWindow?.print();
+                  const printWindow = window.open(pdfPreviewUrl, "_blank", "noopener,noreferrer");
+                  printWindow?.addEventListener("load", () => printWindow.print(), { once: true });
                 }
               }}
             >
               <Printer className="h-3.5 w-3.5" /> Imprimir
             </Button>
-            <Button variant="outline" onClick={() => setPdfPreviewUrl(null)}>
+            <Button variant="outline" onClick={closePdfPreview}>
               Fechar
             </Button>
           </DialogFooter>
