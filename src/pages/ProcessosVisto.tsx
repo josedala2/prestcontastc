@@ -858,6 +858,9 @@ export default function ProcessosVisto() {
               <Undo2 className="h-5 w-5 text-destructive" />
               Devolver Processo
             </DialogTitle>
+            <DialogDescription>
+              Indique o motivo da devolução para comunicar à entidade requerente.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="rounded-md bg-muted/50 p-3">
