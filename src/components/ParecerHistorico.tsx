@@ -157,17 +157,50 @@ export function ParecerHistorico({ entityId, fiscalYear, refreshKey }: ParecerHi
                     </div>
                   )}
                 </div>
-                {p.file_path && p.file_name && (
+                <div className="flex flex-shrink-0 gap-1">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="flex-shrink-0 gap-1.5 text-xs"
-                    onClick={() => handleDownload(p.file_path!, p.file_name!)}
+                    className="gap-1.5 text-xs"
+                    onClick={async () => {
+                      try {
+                        await generateParecerPdf({
+                          entityName: p.entity_name,
+                          exercicio: p.fiscal_year,
+                          nif: "",
+                          totalActivo: p.total_activo,
+                          totalPassivo: p.total_passivo,
+                          totalCapProprio: p.total_cap_proprio,
+                          resultadoExercicio: p.resultado_exercicio,
+                          totalProveitos: p.total_proveitos,
+                          totalCustos: p.total_custos,
+                          comentarios: p.comentarios || "",
+                          tipoParecerIndex: p.tipo_parecer_index,
+                          parecerFinal: p.parecer_final as any,
+                          tecnicoNome: p.tecnico_nome,
+                          integrityHash: p.integrity_hash || undefined,
+                          version: p.version,
+                        });
+                      } catch {
+                        toast.error("Erro ao gerar PDF.");
+                      }
+                    }}
                   >
-                    <Download className="h-3.5 w-3.5" />
-                    DOCX
+                    <FileText className="h-3.5 w-3.5" />
+                    PDF
                   </Button>
-                )}
+                  {p.file_path && p.file_name && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-1.5 text-xs"
+                      onClick={() => handleDownload(p.file_path!, p.file_name!)}
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      DOCX
+                    </Button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
