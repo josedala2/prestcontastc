@@ -419,9 +419,9 @@ export function NovaSolicitacaoVistoForm({ onClose }: NovaSolicitacaoVistoFormPr
         </fieldset>
       </div>
 
-      <DialogFooter className="pt-4">
-        <Button variant="outline" onClick={onClose}>Cancelar</Button>
-        <Button onClick={handleSubmit} className="gap-2">
+      <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
+        <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">Cancelar</Button>
+        <Button onClick={handleSubmit} className="gap-2 w-full sm:w-auto">
           <Send className="h-3.5 w-3.5" />
           Submeter Solicitação
         </Button>
