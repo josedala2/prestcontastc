@@ -120,7 +120,7 @@ const Exercicios = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editing ? "Editar Exercício" : "Novo Exercício"}</DialogTitle>
+            <DialogTitle>Editar Exercício</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
