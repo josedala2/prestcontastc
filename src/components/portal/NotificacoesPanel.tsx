@@ -292,11 +292,15 @@ function NotificationItem({
           "mt-0.5 shrink-0 rounded-full p-1.5",
           isSuccess
             ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+            : isSolicitacao
+            ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
             : "bg-destructive/10 text-destructive"
         )}
       >
         {isSuccess ? (
           <CheckCircle className="h-4 w-4" />
+        ) : isSolicitacao ? (
+          <FileQuestion className="h-4 w-4" />
         ) : (
           <XCircle className="h-4 w-4" />
         )}
