@@ -16,7 +16,6 @@ import {
   MessageSquare,
   ExternalLink,
   Settings,
-  Stamp,
   Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
