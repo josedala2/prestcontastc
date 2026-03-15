@@ -105,26 +105,6 @@ export default function PortalSolicitacaoVisto() {
     recusados: solicitacoes.filter((s) => s.estado === "recusado").length,
   };
 
-  const handleSubmit = () => {
-    if (!novaForm.tipo || !novaForm.descricao) {
-      toast.error("Preencha todos os campos obrigatórios");
-      return;
-    }
-    toast.success("Solicitação de visto submetida com sucesso");
-    setShowNovaDialog(false);
-    setNovaForm({ tipo: "", descricao: "", valor: "" });
-    setFicheiros([]);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFicheiros((prev) => [...prev, ...Array.from(e.target.files!)]);
-    }
-  };
-
-  const removeFile = (index: number) => {
-    setFicheiros((prev) => prev.filter((_, i) => i !== index));
-  };
 
   return (
     <PortalLayout>
