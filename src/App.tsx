@@ -36,6 +36,7 @@ import PortalSolicitacoes from "./pages/portal/PortalSolicitacoes";
 import PortalSolicitacaoVisto from "./pages/portal/PortalSolicitacaoVisto";
 import TecnicoDashboard from "./pages/tecnico/TecnicoDashboard";
 import TecnicoPrestacaoContas from "./pages/tecnico/TecnicoPrestacaoContas";
+import ProcessosVisto from "./pages/ProcessosVisto";
 import ActasRecepcao from "./pages/ActasRecepcao";
 import NotFound from "./pages/NotFound";
 
