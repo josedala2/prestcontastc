@@ -277,7 +277,7 @@ export default function ProcessosVisto() {
   const handleConfirmRecepcao = () => {
     if (!selectedVisto) return;
     const data = buildActaData(selectedVisto, actaNumero);
-    const dataUri = exportActaRecepcaoPdf(data, true);
+    const dataUri = exportActaRecepcaoVistoPdf(data, true);
 
     setVistos((prev) =>
       prev.map((v) =>
