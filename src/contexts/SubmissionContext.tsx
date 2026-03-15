@@ -72,6 +72,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
             type: n.type as NotificationType,
             message: n.message,
             detail: n.detail,
+            deadline: n.deadline,
             createdAt: n.created_at,
             read: n.read,
             emailSent: n.email_sent,
