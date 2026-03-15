@@ -4,12 +4,14 @@ import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
 import { mockFiscalYears, mockEntities, formatKz } from "@/data/mockData";
 import { FiscalYear, STATUS_LABELS } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar, Pencil, Trash2, Eye, Clock, AlertTriangle, Send } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -215,86 +217,88 @@ const Exercicios = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {fiscalYears.map((fy) => {
-          const daysLeft = getDaysToDeadline(fy.deadline);
-          const isOverdue = daysLeft < 0 && !["conforme", "nao_conforme", "submetido", "em_analise", "com_pedidos"].includes(fy.status);
-          return (
-            <div key={fy.id} className="bg-card rounded-lg border border-border card-shadow p-6 animate-fade-in">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
-                    <Calendar className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground">{fy.entityName} — {fy.year}</h3>
-                    <p className="text-xs text-muted-foreground">{fy.startDate} a {fy.endDate}</p>
-                  </div>
-                </div>
-                <StatusBadge
-                  status={STATUS_LABELS[fy.status].label}
-                  variant={STATUS_LABELS[fy.status].color as any}
-                />
-              </div>
-
-              {/* Deadline indicator */}
-              <div className="flex items-center gap-2 mb-3">
-                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Prazo: {fy.deadline}</span>
-                {isOverdue && (
-                  <span className="flex items-center gap-1 text-xs text-destructive font-medium">
-                    <AlertTriangle className="h-3 w-3" /> {Math.abs(daysLeft)} dias em atraso
-                  </span>
-                )}
-                {!isOverdue && daysLeft > 0 && daysLeft <= 30 && !["conforme", "nao_conforme"].includes(fy.status) && (
-                  <span className="text-xs text-warning font-medium">{daysLeft} dias restantes</span>
-                )}
-                {fy.submittedAt && (
-                  <span className="text-xs text-success font-medium">Submetido: {fy.submittedAt}</span>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="p-3 bg-muted/40 rounded-lg">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total Débito</p>
-                  <p className="text-sm font-semibold text-foreground font-mono">{formatKz(fy.totalDebito)}</p>
-                </div>
-                <div className="p-3 bg-muted/40 rounded-lg">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total Crédito</p>
-                  <p className="text-sm font-semibold text-foreground font-mono">{formatKz(fy.totalCredito)}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 mb-3">
-                <span className="text-xs text-destructive font-medium">{fy.errorsCount} erros</span>
-                <span className="text-xs text-warning font-medium">{fy.warningsCount} avisos</span>
-              </div>
-
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs text-muted-foreground">Checklist</span>
-                  <span className="text-xs font-medium text-foreground">{fy.checklistProgress}%</span>
-                </div>
-                <Progress value={fy.checklistProgress} className="h-1.5" />
-              </div>
-
-              <div className="flex items-center gap-1 border-t border-border pt-3">
-                <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={() => navigate(`/exercicios/${fy.id}`)}>
-                  <Eye className="h-3.5 w-3.5" /> Ver
-                </Button>
-                <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={() => openEdit(fy)}>
-                  <Pencil className="h-3.5 w-3.5" /> Editar
-                </Button>
-                <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-destructive" onClick={() => handleDelete(fy.id)}>
-                  <Trash2 className="h-3.5 w-3.5" /> Remover
-                </Button>
-              </div>
-            </div>
-          );
-        })}
-        {fiscalYears.length === 0 && (
-          <div className="col-span-2 text-center py-12 text-muted-foreground">Nenhum exercício registado.</div>
-        )}
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              <TableHead className="text-xs font-semibold">Entidade / Ano</TableHead>
+              <TableHead className="text-xs font-semibold">Período</TableHead>
+              <TableHead className="text-xs font-semibold">Estado</TableHead>
+              <TableHead className="text-xs font-semibold">Prazo</TableHead>
+              <TableHead className="text-xs font-semibold text-right">Débito</TableHead>
+              <TableHead className="text-xs font-semibold text-right">Crédito</TableHead>
+              <TableHead className="text-xs font-semibold text-center">Checklist</TableHead>
+              <TableHead className="text-xs font-semibold text-right">Acções</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {fiscalYears.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  Nenhum exercício registado.
+                </TableCell>
+              </TableRow>
+            ) : (
+              fiscalYears.map((fy) => {
+                const daysLeft = getDaysToDeadline(fy.deadline);
+                const isOverdue = daysLeft < 0 && !["conforme", "nao_conforme", "submetido", "em_analise", "com_pedidos"].includes(fy.status);
+                return (
+                  <TableRow key={fy.id} className="hover:bg-muted/30">
+                    <TableCell>
+                      <div>
+                        <p className="text-sm font-medium">{fy.entityName}</p>
+                        <p className="text-xs text-muted-foreground">{fy.year}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {fy.startDate} a {fy.endDate}
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge
+                        status={STATUS_LABELS[fy.status].label}
+                        variant={STATUS_LABELS[fy.status].color as any}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-muted-foreground">{fy.deadline}</span>
+                        {isOverdue && (
+                          <span className="flex items-center gap-0.5 text-[10px] text-destructive font-medium">
+                            <AlertTriangle className="h-3 w-3" /> {Math.abs(daysLeft)}d
+                          </span>
+                        )}
+                        {!isOverdue && daysLeft > 0 && daysLeft <= 30 && !["conforme", "nao_conforme"].includes(fy.status) && (
+                          <span className="text-[10px] text-warning font-medium">{daysLeft}d</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm font-mono text-right">{formatKz(fy.totalDebito)}</TableCell>
+                    <TableCell className="text-sm font-mono text-right">{formatKz(fy.totalCredito)}</TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center gap-2 justify-center">
+                        <Progress value={fy.checklistProgress} className="h-1.5 w-16" />
+                        <span className="text-[10px] text-muted-foreground">{fy.checklistProgress}%</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-0.5">
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Ver" onClick={() => navigate(`/exercicios/${fy.id}`)}>
+                          <Eye className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Editar" onClick={() => openEdit(fy)}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" title="Remover" onClick={() => handleDelete(fy.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
       </div>
     </AppLayout>
   );
