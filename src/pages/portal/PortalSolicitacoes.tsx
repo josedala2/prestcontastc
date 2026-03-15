@@ -172,6 +172,18 @@ const PortalSolicitacoes = () => {
       minute: "2-digit",
     });
 
+  const getDeadlineInfo = (deadline?: string) => {
+    if (!deadline) return null;
+    const now = new Date();
+    const dl = new Date(deadline);
+    const diffMs = dl.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    const isExpired = diffDays < 0;
+    const isUrgent = diffDays >= 0 && diffDays <= 3;
+    const isWarning = diffDays > 3 && diffDays <= 7;
+    return { diffDays, isExpired, isUrgent, isWarning, date: dl };
+  };
+
   const pendingSolicitacoes = solicitacoes.filter((s) => !submittedIds.has(s.id));
   const respondedSolicitacoes = solicitacoes.filter((s) => submittedIds.has(s.id));
 
