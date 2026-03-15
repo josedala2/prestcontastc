@@ -1091,6 +1091,45 @@ const TecnicoPrestacaoContas = () => {
                       onChange={(e) => setSolicitarMsg(e.target.value)}
                     />
                   </div>
+
+                  {/* Deadline */}
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Prazo de resposta</Label>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        {[5, 10, 15, 30].map((days) => (
+                          <button
+                            key={days}
+                            type="button"
+                            onClick={() => setSolicitarPrazo(days)}
+                            className={cn(
+                              "px-3 py-1.5 rounded-md text-xs font-medium transition-colors border",
+                              solicitarPrazo === days
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                            )}
+                          >
+                            {days} dias
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Label className="text-xs text-muted-foreground">Personalizado:</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={90}
+                        value={solicitarPrazo}
+                        onChange={(e) => setSolicitarPrazo(Math.max(1, Math.min(90, parseInt(e.target.value) || 1)))}
+                        className="w-20 h-8 text-sm"
+                      />
+                      <span className="text-xs text-muted-foreground">dias</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-1.5">
+                      Prazo limite: {new Date(Date.now() + solicitarPrazo * 86400000).toLocaleDateString("pt-AO", { day: "2-digit", month: "long", year: "numeric" })}
+                    </p>
+                  </div>
                 </div>
 
                 <DialogFooter>
