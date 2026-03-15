@@ -441,6 +441,9 @@ const TecnicoPrestacaoContas = () => {
   const [solicitarDocs, setSolicitarDocs] = useState<string[]>([]);
   const [solicitarMsg, setSolicitarMsg] = useState("");
   const [solicitarPrazo, setSolicitarPrazo] = useState(15);
+  const [comentarios, setComentarios] = useState("");
+  const [tipoParecerIndex, setTipoParecerIndex] = useState(0);
+  const [parecerFinal, setParecerFinal] = useState<"favorável" | "favorável com reservas" | "desfavorável">("favorável");
 
   const documentosDisponiveis = [
     "Balancete Analítico",
