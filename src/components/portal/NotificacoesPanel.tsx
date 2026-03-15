@@ -324,10 +324,12 @@ function NotificationItem({
             variant="outline"
             className={cn(
               "text-[9px] px-1.5 py-0",
-              isSuccess ? "border-green-200 text-green-700 dark:border-green-800 dark:text-green-400" : "border-destructive/30 text-destructive"
+              isSuccess ? "border-green-200 text-green-700 dark:border-green-800 dark:text-green-400"
+                : isSolicitacao ? "border-amber-200 text-amber-700 dark:border-amber-800 dark:text-amber-400"
+                : "border-destructive/30 text-destructive"
             )}
           >
-            {isSuccess ? "Recepcionado" : "Devolvido"}
+            {isSuccess ? "Recepcionado" : isSolicitacao ? "Solicitação" : "Devolvido"}
           </Badge>
           <span className="text-[10px] text-muted-foreground/60">{formatRelative(notif.createdAt)}</span>
           {notif.emailSent !== undefined && (
