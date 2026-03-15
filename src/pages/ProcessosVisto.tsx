@@ -23,9 +23,10 @@ import { cn } from "@/lib/utils";
 import {
   Stamp, Clock, CheckCircle, XCircle, Eye, Building2, FileText,
   AlertTriangle, ShieldCheck, Search, TrendingUp, Banknote,
-  FileCheck, Undo2, Inbox,
+  FileCheck, Undo2, Inbox, Download, Printer, ExternalLink, Pencil, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { exportActaRecepcaoPdf, type ActaRecepcaoData } from "@/lib/exportUtils";
 
 // ── Types ──
 interface SolicitacaoVisto {
@@ -183,6 +184,8 @@ export default function ProcessosVisto() {
   const [motivoDevolucao, setMotivoDevolucao] = useState("");
   const [detailDialog, setDetailDialog] = useState<SolicitacaoVisto | null>(null);
   const [actasGeradas, setActasGeradas] = useState<string[]>([]);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [editingActaVisto, setEditingActaVisto] = useState<SolicitacaoVisto | null>(null);
 
   const filtered = vistos.filter((v) => {
     const matchEstado = filtroEstado === "todos" || v.estado === filtroEstado;
@@ -229,8 +232,45 @@ export default function ProcessosVisto() {
     ? `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(selectedVisto) + 1).padStart(3, "0")}`
     : "";
 
+  const buildActaData = (visto: SolicitacaoVisto, numero: string): ActaRecepcaoData => ({
+    actaNumero: numero,
+    entityName: visto.entidade,
+    entityNif: visto.nif,
+    entityTutela: visto.orgao,
+    entityMorada: "—",
+    exercicioYear: new Date(visto.dataSubmissao).getFullYear(),
+    periodoInicio: visto.dataSubmissao,
+    periodoFim: visto.dataSubmissao,
+    submittedAt: new Date(visto.dataSubmissao).toLocaleDateString("pt-AO"),
+    documentosVerificados: vistoChecklist.map((item) => ({
+      label: item.label,
+      required: item.required,
+      checked: !!checkedDocs[item.id],
+    })),
+    totalDebito: visto.valorNum,
+    totalCredito: 0,
+  });
+
+  const handlePreviewPdf = (visto?: SolicitacaoVisto) => {
+    const target = visto || selectedVisto;
+    if (!target) return;
+    const numero = `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(target) + 1).padStart(3, "0")}`;
+    const data = buildActaData(target, numero);
+    const dataUri = exportActaRecepcaoPdf(data, true);
+    setPdfPreviewUrl(dataUri);
+  };
+
+  const handleDownloadPdf = (visto: SolicitacaoVisto) => {
+    const numero = `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(visto) + 1).padStart(3, "0")}`;
+    const data = buildActaData(visto, numero);
+    exportActaRecepcaoPdf(data);
+  };
+
   const handleConfirmRecepcao = () => {
     if (!selectedVisto) return;
+    const data = buildActaData(selectedVisto, actaNumero);
+    const dataUri = exportActaRecepcaoPdf(data, true);
+
     setVistos((prev) =>
       prev.map((v) =>
         v.id === selectedVisto.id
@@ -240,6 +280,7 @@ export default function ProcessosVisto() {
     );
     setActasGeradas((prev) => [...prev, selectedVisto.id]);
     setConfirmDialogOpen(false);
+    setPdfPreviewUrl(dataUri);
     toast.success(`Acta de recepção gerada — ${selectedVisto.id} — ${selectedVisto.entidade}`);
     setSelectedVisto(null);
     setCheckedDocs({});
@@ -436,12 +477,68 @@ export default function ProcessosVisto() {
                   const v = vistos.find((x) => x.id === id);
                   if (!v) return null;
                   return (
-                    <div key={id} className="flex items-center justify-between p-2.5 rounded-lg bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800">
-                      <div>
-                        <p className="text-sm font-medium">{v.id} — {v.entidade}</p>
-                        <p className="text-[10px] text-muted-foreground">Acta emitida em {now.toLocaleDateString("pt-AO")}</p>
+                    <div key={id} className="rounded-lg bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 p-2.5">
+                      <div className="flex items-start justify-between mb-1.5">
+                        <div>
+                          <p className="text-sm font-medium">{v.id}</p>
+                          <p className="text-[10px] text-muted-foreground line-clamp-1">{v.entidade}</p>
+                          <p className="text-[10px] text-muted-foreground">Emitida em {now.toLocaleDateString("pt-AO")}</p>
+                        </div>
+                        <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
                       </div>
-                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <div className="flex items-center gap-1.5 pt-1.5 border-t border-green-200 dark:border-green-800">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 gap-1 text-[11px] px-2"
+                          onClick={() => handlePreviewPdf(v)}
+                        >
+                          <Eye className="h-3 w-3" /> Ver
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 gap-1 text-[11px] px-2"
+                          onClick={() => handleDownloadPdf(v)}
+                        >
+                          <Download className="h-3 w-3" /> Download
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 gap-1 text-[11px] px-2"
+                          onClick={() => {
+                            setEditingActaVisto(v);
+                            setVistos((prev) =>
+                              prev.map((x) =>
+                                x.id === v.id ? { ...x, estado: "pendente" as const, observacoes: undefined } : x
+                              )
+                            );
+                            setActasGeradas((prev) => prev.filter((x) => x !== v.id));
+                            setSelectedVisto(v);
+                            setCheckedDocs({});
+                            toast.info(`Processo ${v.id} reaberto para edição da acta.`);
+                          }}
+                        >
+                          <Pencil className="h-3 w-3" /> Editar
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 gap-1 text-[11px] px-2 text-destructive hover:text-destructive"
+                          onClick={() => {
+                            setActasGeradas((prev) => prev.filter((x) => x !== v.id));
+                            setVistos((prev) =>
+                              prev.map((x) =>
+                                x.id === v.id ? { ...x, estado: "pendente" as const, observacoes: undefined } : x
+                              )
+                            );
+                            toast.warning(`Acta removida — ${v.id}. Processo retornado a pendente.`);
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" /> Remover
+                        </Button>
+                      </div>
                     </div>
                   );
                 })}
@@ -573,7 +670,7 @@ export default function ProcessosVisto() {
                     Todos os documentos obrigatórios devem ser verificados para emitir a acta.
                   </p>
                 ) : <div />}
-                <div className="flex gap-3">
+                <div className="flex gap-3 flex-wrap">
                   <Button variant="outline" onClick={() => { setSelectedVisto(null); setCheckedDocs({}); }}>
                     Cancelar
                   </Button>
@@ -584,6 +681,14 @@ export default function ProcessosVisto() {
                   >
                     <Undo2 className="h-4 w-4" />
                     Devolver
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => handlePreviewPdf()}
+                    className="gap-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                    Visualizar PDF
                   </Button>
                   <Button
                     disabled={!allRequiredChecked}
@@ -742,6 +847,55 @@ export default function ProcessosVisto() {
             </Button>
             <Button variant="destructive" onClick={handleConfirmDevolucao} className="gap-2">
               <Undo2 className="h-3.5 w-3.5" /> Confirmar Devolução
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Preview PDF da Acta ── */}
+      <Dialog open={!!pdfPreviewUrl} onOpenChange={() => setPdfPreviewUrl(null)}>
+        <DialogContent className="max-w-4xl w-[95vw] h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Stamp className="h-5 w-5 text-primary" />
+              Acta de Recepção — Pré-visualização
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0">
+            {pdfPreviewUrl && (
+              <iframe
+                src={pdfPreviewUrl}
+                className="w-full h-full border rounded-md"
+                title="Pré-visualização da Acta de Recepção"
+              />
+            )}
+          </div>
+          <DialogFooter className="flex-row justify-end gap-2 pt-2 border-t">
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => {
+                if (pdfPreviewUrl) {
+                  window.open(pdfPreviewUrl, "_blank");
+                }
+              }}
+            >
+              <ExternalLink className="h-3.5 w-3.5" /> Abrir em Nova Aba
+            </Button>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => {
+                if (pdfPreviewUrl) {
+                  const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="Pré-visualização da Acta de Recepção"]');
+                  iframe?.contentWindow?.print();
+                }
+              }}
+            >
+              <Printer className="h-3.5 w-3.5" /> Imprimir
+            </Button>
+            <Button variant="outline" onClick={() => setPdfPreviewUrl(null)}>
+              Fechar
             </Button>
           </DialogFooter>
         </DialogContent>
