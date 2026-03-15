@@ -20,6 +20,7 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
+  FileQuestion,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
