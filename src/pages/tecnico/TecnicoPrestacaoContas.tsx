@@ -731,7 +731,7 @@ const TecnicoPrestacaoContas = () => {
         type: "parecer_emitido",
         message: notifMessage,
         detail: notifDetail,
-        entity_email: entity.email || null,
+        entity_email: entity.contacto || null,
       } as any);
 
       if (notifError) {
