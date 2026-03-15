@@ -23,9 +23,10 @@ import { cn } from "@/lib/utils";
 import {
   Stamp, Clock, CheckCircle, XCircle, Eye, Building2, FileText,
   AlertTriangle, ShieldCheck, Search, TrendingUp, Banknote,
-  FileCheck, Undo2, Inbox,
+  FileCheck, Undo2, Inbox, Download, Printer, ExternalLink, Pencil, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { exportActaRecepcaoPdf, type ActaRecepcaoData } from "@/lib/exportUtils";
 
 // ── Types ──
 interface SolicitacaoVisto {
