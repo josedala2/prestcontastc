@@ -477,12 +477,68 @@ export default function ProcessosVisto() {
                   const v = vistos.find((x) => x.id === id);
                   if (!v) return null;
                   return (
-                    <div key={id} className="flex items-center justify-between p-2.5 rounded-lg bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800">
-                      <div>
-                        <p className="text-sm font-medium">{v.id} — {v.entidade}</p>
-                        <p className="text-[10px] text-muted-foreground">Acta emitida em {now.toLocaleDateString("pt-AO")}</p>
+                    <div key={id} className="rounded-lg bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 p-2.5">
+                      <div className="flex items-start justify-between mb-1.5">
+                        <div>
+                          <p className="text-sm font-medium">{v.id}</p>
+                          <p className="text-[10px] text-muted-foreground line-clamp-1">{v.entidade}</p>
+                          <p className="text-[10px] text-muted-foreground">Emitida em {now.toLocaleDateString("pt-AO")}</p>
+                        </div>
+                        <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
                       </div>
-                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <div className="flex items-center gap-1.5 pt-1.5 border-t border-green-200 dark:border-green-800">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 gap-1 text-[11px] px-2"
+                          onClick={() => handlePreviewPdf(v)}
+                        >
+                          <Eye className="h-3 w-3" /> Ver
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 gap-1 text-[11px] px-2"
+                          onClick={() => handleDownloadPdf(v)}
+                        >
+                          <Download className="h-3 w-3" /> Download
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 gap-1 text-[11px] px-2"
+                          onClick={() => {
+                            setEditingActaVisto(v);
+                            setVistos((prev) =>
+                              prev.map((x) =>
+                                x.id === v.id ? { ...x, estado: "pendente" as const, observacoes: undefined } : x
+                              )
+                            );
+                            setActasGeradas((prev) => prev.filter((x) => x !== v.id));
+                            setSelectedVisto(v);
+                            setCheckedDocs({});
+                            toast.info(`Processo ${v.id} reaberto para edição da acta.`);
+                          }}
+                        >
+                          <Pencil className="h-3 w-3" /> Editar
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 gap-1 text-[11px] px-2 text-destructive hover:text-destructive"
+                          onClick={() => {
+                            setActasGeradas((prev) => prev.filter((x) => x !== v.id));
+                            setVistos((prev) =>
+                              prev.map((x) =>
+                                x.id === v.id ? { ...x, estado: "pendente" as const, observacoes: undefined } : x
+                              )
+                            );
+                            toast.warning(`Acta removida — ${v.id}. Processo retornado a pendente.`);
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" /> Remover
+                        </Button>
+                      </div>
                     </div>
                   );
                 })}
