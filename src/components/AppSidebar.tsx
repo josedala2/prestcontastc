@@ -55,6 +55,7 @@ const navSections: { label: string; items: NavEntry[] }[] = [
         children: [
           { title: "Recepção", icon: Inbox, path: "/submissoes" },
           { title: "Submeter por Entidade", icon: FilePlus, path: "/submissoes/manual" },
+          { title: "Submissão de Visto", icon: ShieldCheck, path: "/secretaria" },
         ],
       },
     ],
