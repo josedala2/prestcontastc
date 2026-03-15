@@ -167,8 +167,70 @@ const PortalDashboard = () => {
           </div>
         </div>
 
-        {/* Pedidos de Esclarecimento pendentes */}
+        {/* Solicitações de Visto */}
         <div className="bg-card rounded-lg border border-border card-shadow p-5 animate-fade-in">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Stamp className="h-4 w-4 text-primary" /> Solicitações de Visto
+            </h2>
+            <Link to="/portal/solicitacao-visto" className="text-xs text-primary hover:underline flex items-center gap-1">
+              Ver todas <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+
+          {/* Mini resumo */}
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            {[
+              { label: "Total", value: 4, color: "text-foreground" },
+              { label: "Pendentes", value: 1, color: "text-amber-600", icon: Clock },
+              { label: "Aprovados", value: 1, color: "text-green-600", icon: CheckCircle },
+              { label: "Recusados", value: 1, color: "text-destructive", icon: XCircle },
+            ].map((item) => (
+              <div key={item.label} className="text-center p-2 rounded-md bg-muted/30">
+                <p className={cn("text-lg font-bold", item.color)}>{item.value}</p>
+                <p className="text-[9px] text-muted-foreground">{item.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Últimas solicitações */}
+          <div className="space-y-2">
+            {[
+              { id: "SV-2025-001", tipo: "Prestação de Serviços", estado: "pendente" as const, valor: "18.500.000,00 Kz" },
+              { id: "SV-2024-002", tipo: "Empreitada", estado: "em_analise" as const, valor: "120.000.000,00 Kz" },
+              { id: "SV-2024-001", tipo: "Fornecimento", estado: "aprovado" as const, valor: "45.000.000,00 Kz" },
+            ].map((sol) => {
+              const estadoMap = {
+                pendente: { label: "Pendente", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" },
+                em_analise: { label: "Em Análise", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
+                aprovado: { label: "Aprovado", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" },
+                recusado: { label: "Recusado", color: "bg-destructive/10 text-destructive" },
+              };
+              const config = estadoMap[sol.estado];
+              return (
+                <Link
+                  key={sol.id}
+                  to="/portal/solicitacao-visto"
+                  className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-foreground">{sol.id}</span>
+                      <span className="text-[10px] text-muted-foreground">{sol.tipo}</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{sol.valor}</p>
+                  </div>
+                  <Badge className={cn("text-[10px] shrink-0", config.color)} variant="secondary">
+                    {config.label}
+                  </Badge>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Pedidos de Esclarecimento pendentes */}
+        <div className="bg-card rounded-lg border border-border card-shadow p-5 animate-fade-in lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <MessageSquare className="h-4 w-4 text-primary" /> Pedidos Pendentes
@@ -183,7 +245,7 @@ const PortalDashboard = () => {
               <p className="text-sm text-muted-foreground">Sem pedidos pendentes</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {pendingClarifications.map((cr) => {
                 const daysLeft = Math.ceil(
                   (new Date(cr.deadline).getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
