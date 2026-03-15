@@ -35,6 +35,7 @@ import PortalPrestacaoContas from "./pages/portal/PortalPrestacaoContas";
 import PortalSolicitacoes from "./pages/portal/PortalSolicitacoes";
 import TecnicoDashboard from "./pages/tecnico/TecnicoDashboard";
 import TecnicoPrestacaoContas from "./pages/tecnico/TecnicoPrestacaoContas";
+import ActasRecepcao from "./pages/ActasRecepcao";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
