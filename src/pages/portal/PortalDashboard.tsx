@@ -198,48 +198,6 @@ const PortalDashboard = () => {
           )}
         </div>
 
-        {/* Submissão checklist rápido */}
-        <div className="lg:col-span-2 bg-card rounded-lg border border-border card-shadow p-5 animate-fade-in">
-          <h2 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-4">
-            <Paperclip className="h-4 w-4 text-primary" /> Checklist de Submissão — {activeExercicio?.year || 2024}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {submissionChecklist.map((item, idx) => {
-              const isDone = idx < checklistDone;
-              return (
-                <div
-                  key={item.id}
-                  className={`flex items-center gap-2 p-2 rounded text-sm ${
-                    isDone ? "text-success" : "text-muted-foreground"
-                  }`}
-                >
-                  {isDone ? (
-                    <CheckCircle className="h-4 w-4 shrink-0" />
-                  ) : (
-                    <div className="h-4 w-4 rounded-full border border-muted-foreground/30 shrink-0" />
-                  )}
-                  <span className={isDone ? "line-through opacity-60" : ""}>{item.label}</span>
-                  {item.required && !isDone && (
-                    <span className="text-[9px] text-destructive font-semibold ml-auto">OBRIGATÓRIO</span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-          <div className="mt-4 flex items-center gap-3">
-            <Progress value={activeExercicio?.checklistProgress || 0} className="flex-1 h-2" />
-            <span className="text-xs font-medium text-muted-foreground">
-              {activeExercicio?.checklistProgress || 0}%
-            </span>
-          </div>
-          <div className="mt-3 flex justify-end">
-            <Button size="sm" asChild>
-              <Link to="/portal/documentos">
-                <Paperclip className="h-4 w-4" /> Gerir Documentos
-              </Link>
-            </Button>
-          </div>
-        </div>
       </div>
 
       {/* Notifications Panel */}
