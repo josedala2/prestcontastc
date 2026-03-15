@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Calendar, Pencil, Trash2, Eye, Clock, AlertTriangle, Send } from "lucide-react";
+import { Calendar, Pencil, Trash2, Eye, Clock, AlertTriangle, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -27,18 +27,6 @@ const Exercicios = () => {
     status: "rascunho" as FiscalYear["status"],
   });
 
-  const openNew = () => {
-    setEditing(null);
-    const yr = new Date().getFullYear();
-    setForm({
-      entityId: mockEntities[0]?.id || "",
-      year: yr,
-      startDate: `${yr}-01-01`,
-      endDate: `${yr}-12-31`,
-      status: "rascunho",
-    });
-    setDialogOpen(true);
-  };
 
   const openEdit = (fy: FiscalYear) => {
     setEditing(fy);
@@ -72,24 +60,6 @@ const Exercicios = () => {
         )
       );
       toast.success("Exercício actualizado com sucesso.");
-    } else {
-      const newFy: FiscalYear = {
-        id: `fy_${Date.now()}`,
-        entityId: form.entityId,
-        entityName: entity.name,
-        year: form.year,
-        startDate: form.startDate,
-        endDate: form.endDate,
-        status: form.status,
-        totalDebito: 0,
-        totalCredito: 0,
-        errorsCount: 0,
-        warningsCount: 0,
-        checklistProgress: 0,
-        deadline: `${form.year + 1}-06-30`,
-      };
-      setFiscalYears((prev) => [newFy, ...prev]);
-      toast.success("Exercício criado com sucesso.");
     }
     setDialogOpen(false);
   };
@@ -126,17 +96,13 @@ const Exercicios = () => {
 
   return (
     <AppLayout>
-      <PageHeader title="Exercícios Fiscais" description="Gestão de períodos contabilísticos — Prazo: 30 de Junho do ano seguinte">
-        <Button className="gap-2" onClick={openNew}>
-          <Plus className="h-4 w-4" /> Novo Exercício
-        </Button>
-      </PageHeader>
+      <PageHeader title="Exercícios Fiscais" description="Gestão de períodos contabilísticos — Prazo: 30 de Junho do ano seguinte" />
 
       {/* New / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editing ? "Editar Exercício" : "Novo Exercício"}</DialogTitle>
+            <DialogTitle>Editar Exercício</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
