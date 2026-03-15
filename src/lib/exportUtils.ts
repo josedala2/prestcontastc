@@ -5,6 +5,7 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { TrialBalanceLine, ValidationResult, DocumentoTribunal, DOCUMENTO_TIPO_LABELS, DOCUMENTO_ESTADO_LABELS } from "@/types";
 import { formatKz, mockTrialBalance, mockValidations, mockAttachments, mockFiscalYears, mockAuditLog } from "@/data/mockData";
+import { loadBrasaoBase64, drawOfficialHeader } from "./brasaoLoader";
 
 // ─── PDF Header helper ───
 function addPdfHeader(doc: jsPDF, title: string, subtitle?: string) {
