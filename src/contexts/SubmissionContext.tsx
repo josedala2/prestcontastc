@@ -269,6 +269,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
         submit,
         recepcionar,
         rejeitar,
+        solicitarElementos,
         loadingNotifications,
         refreshNotifications,
       }}
