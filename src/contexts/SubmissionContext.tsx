@@ -68,7 +68,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
             id: n.id,
             entityId: n.entity_id,
             fiscalYearId: n.fiscal_year_id,
-            type: n.type as "recepcionado" | "rejeitado",
+            type: n.type as NotificationType,
             message: n.message,
             detail: n.detail,
             createdAt: n.created_at,
