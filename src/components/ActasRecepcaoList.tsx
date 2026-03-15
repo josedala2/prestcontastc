@@ -248,7 +248,54 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
         </Card>
       )}
 
-      {/* Delete Confirmation */}
+      {/* PDF Preview Dialog */}
+      <Dialog open={!!previewActa} onOpenChange={() => setPreviewActa(null)}>
+        <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
+          <DialogHeader>
+            <div className="flex items-center justify-between pr-6">
+              <DialogTitle>Acta de Recepção — {previewActa?.acta_numero}</DialogTitle>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 text-xs"
+                  onClick={() => previewActa && handleDownload(previewActa.file_path, previewActa.file_name)}
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Descarregar
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 text-xs"
+                  onClick={() => previewActa && handlePrint(previewActa.file_path)}
+                >
+                  <Printer className="h-3.5 w-3.5" />
+                  Imprimir
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5 text-xs"
+                  onClick={() => previewActa && handleOpenNewTab(previewActa.file_path)}
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Nova Aba
+                </Button>
+              </div>
+            </div>
+          </DialogHeader>
+          {previewActa && (
+            <iframe
+              src={getPublicUrl(previewActa.file_path)}
+              className="w-full flex-1 min-h-0 rounded-lg border"
+              title="PDF Preview"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
