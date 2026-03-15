@@ -1,0 +1,1 @@
+ALTER TABLE public.submission_notifications ADD COLUMN deadline timestamptz DEFAULT NULL;

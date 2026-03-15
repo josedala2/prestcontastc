@@ -88,6 +88,7 @@ export type Database = {
       submission_notifications: {
         Row: {
           created_at: string
+          deadline: string | null
           detail: string | null
           email_sent: boolean
           entity_email: string | null
@@ -102,6 +103,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deadline?: string | null
           detail?: string | null
           email_sent?: boolean
           entity_email?: string | null
@@ -116,6 +118,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deadline?: string | null
           detail?: string | null
           email_sent?: boolean
           entity_email?: string | null

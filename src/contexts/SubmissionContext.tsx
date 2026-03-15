@@ -21,6 +21,7 @@ export interface PortalNotification {
   type: NotificationType;
   message: string;
   detail?: string;
+  deadline?: string;
   createdAt: string;
   read: boolean;
   emailSent?: boolean;
