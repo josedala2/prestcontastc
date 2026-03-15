@@ -1306,8 +1306,6 @@ const TecnicoPrestacaoContas = () => {
                     Confirmar Parecer
                   </AlertDialogAction>
                 </AlertDialogFooter>
-                  </AlertDialogAction>
-                </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           </div>
