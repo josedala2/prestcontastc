@@ -121,6 +121,10 @@ const PortalDashboard = () => {
           variant={entityUnread > 0 ? "warning" : "success"}
         />
       </div>
+      {/* Process Timeline */}
+      <div className="mb-6">
+        <ProcessoTimeline fiscalYear="2024" />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Exercícios */}
