@@ -743,7 +743,7 @@ const TecnicoPrestacaoContas = () => {
         await supabase.functions.invoke("send-notification-email", {
           body: {
             entityName: entity.name,
-            entityEmail: entity.email,
+            entityEmail: entity.contacto,
             type: "parecer_emitido",
             message: notifMessage,
             detail: notifDetail,
