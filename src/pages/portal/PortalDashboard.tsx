@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { NotificacoesPanel } from "@/components/portal/NotificacoesPanel";
+import { ProcessoTimeline } from "@/components/portal/ProcessoTimeline";
 import {
   Calendar,
   Clock,
