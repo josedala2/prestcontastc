@@ -127,7 +127,8 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     message: string,
     detail?: string,
     entityName?: string,
-    entityEmail?: string
+    entityEmail?: string,
+    deadline?: string
   ) => {
     const year = fiscalYearId.split("-").pop() || fiscalYearId;
 
@@ -143,6 +144,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
           type,
           message,
           detail,
+          deadline,
         },
       });
 
