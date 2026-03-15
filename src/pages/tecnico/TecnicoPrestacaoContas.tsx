@@ -706,7 +706,7 @@ const TecnicoPrestacaoContas = () => {
         file_path: filePath,
         file_name: fileName,
         integrity_hash: integrityHash,
-      } as Record<string, unknown>);
+      } as any);
       if (insertError) throw insertError;
 
       setParecerRefreshKey((k) => k + 1);
