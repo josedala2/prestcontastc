@@ -257,10 +257,10 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
             <DialogTitle>Acta de Recepção — {previewTitle}</DialogTitle>
           </DialogHeader>
           {previewUrl && (
-            <iframe
+            <embed
               src={previewUrl}
+              type="application/pdf"
               className="w-full flex-1 min-h-0 rounded-lg border"
-              title="PDF Preview"
               style={{ height: "calc(85vh - 80px)" }}
             />
           )}
