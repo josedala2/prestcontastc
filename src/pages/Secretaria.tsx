@@ -14,14 +14,16 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockFiscalYears, mockEntities, submissionChecklist, formatKz } from "@/data/mockData";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck, Eye, X, Undo2 } from "lucide-react";
+import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck, Eye, X, Undo2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 import { EntityProfilePanel } from "@/components/secretaria/EntityProfilePanel";
 import { useSubmissions } from "@/contexts/SubmissionContext";
+import { SecretariaVistoTab } from "@/components/secretaria/SecretariaVistoTab";
 
 const Secretaria = () => {
   const submetidos = mockFiscalYears.filter((fy) => fy.status === "submetido");
