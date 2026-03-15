@@ -40,7 +40,7 @@ const tecnicoNav = [
 
 const routeTitles: Record<string, string> = {
   "/tecnico": "Painel do Técnico",
-  "/tecnico/prestacao-contas": "Análise de Contas — Modelo CC-2",
+  "/tecnico/prestacao-contas": "Prestação de Contas — Modelo CC-2",
   "/tecnico/exercicios": "Exercícios Fiscais",
   "/tecnico/documentos": "Documentos & Anexos",
   "/tecnico/mapas": "Mapas e Modelos",
