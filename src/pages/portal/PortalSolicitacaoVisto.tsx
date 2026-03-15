@@ -192,7 +192,7 @@ export default function PortalSolicitacaoVisto() {
 
       {/* Dialog Detalhe */}
       <Dialog open={!!detailDialog} onOpenChange={() => setDetailDialog(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg w-[95vw] sm:w-full">
           {detailDialog && (
             <>
               <DialogHeader>
