@@ -12,13 +12,8 @@ import {
   CheckCircle,
   XCircle,
   FileText,
-  Upload,
-  Send,
-  Calendar,
-  Building2,
   AlertTriangle,
   Eye,
-  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -26,19 +21,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { toast } from "sonner";
+import { NovaSolicitacaoVistoForm } from "@/components/portal/NovaSolicitacaoVistoForm";
 
 interface SolicitacaoVisto {
   id: string;
@@ -92,13 +76,6 @@ const mockSolicitacoes: SolicitacaoVisto[] = [
   },
 ];
 
-const tiposContrato = [
-  "Contrato de Fornecimento",
-  "Contrato de Empreitada",
-  "Contrato de Prestação de Serviços",
-  "Contrato de Locação",
-  "Outros Actos e Contratos",
-];
 
 const estadoConfig: Record<string, { label: string; color: string; icon: typeof Clock }> = {
   pendente: { label: "Pendente", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400", icon: Clock },
@@ -112,8 +89,6 @@ export default function PortalSolicitacaoVisto() {
   const [solicitacoes] = useState<SolicitacaoVisto[]>(mockSolicitacoes);
   const [showNovaDialog, setShowNovaDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState<SolicitacaoVisto | null>(null);
-  const [novaForm, setNovaForm] = useState({ tipo: "", descricao: "", valor: "" });
-  const [ficheiros, setFicheiros] = useState<File[]>([]);
 
   const resumo = {
     total: solicitacoes.length,
@@ -123,26 +98,6 @@ export default function PortalSolicitacaoVisto() {
     recusados: solicitacoes.filter((s) => s.estado === "recusado").length,
   };
 
-  const handleSubmit = () => {
-    if (!novaForm.tipo || !novaForm.descricao) {
-      toast.error("Preencha todos os campos obrigatórios");
-      return;
-    }
-    toast.success("Solicitação de visto submetida com sucesso");
-    setShowNovaDialog(false);
-    setNovaForm({ tipo: "", descricao: "", valor: "" });
-    setFicheiros([]);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFicheiros((prev) => [...prev, ...Array.from(e.target.files!)]);
-    }
-  };
-
-  const removeFile = (index: number) => {
-    setFicheiros((prev) => prev.filter((_, i) => i !== index));
-  };
 
   return (
     <PortalLayout>
@@ -228,72 +183,8 @@ export default function PortalSolicitacaoVisto() {
 
       {/* Dialog Nova Solicitação */}
       <Dialog open={showNovaDialog} onOpenChange={setShowNovaDialog}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Nova Solicitação de Visto</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Tipo de Contrato / Acto *</Label>
-              <Select value={novaForm.tipo} onValueChange={(v) => setNovaForm((p) => ({ ...p, tipo: v }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {tiposContrato.map((t) => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Descrição *</Label>
-              <Textarea
-                value={novaForm.descricao}
-                onChange={(e) => setNovaForm((p) => ({ ...p, descricao: e.target.value }))}
-                placeholder="Descreva brevemente o contrato ou acto..."
-                rows={3}
-              />
-            </div>
-            <div>
-              <Label>Valor Contratual</Label>
-              <Input
-                value={novaForm.valor}
-                onChange={(e) => setNovaForm((p) => ({ ...p, valor: e.target.value }))}
-                placeholder="Ex: 50.000.000,00 Kz"
-              />
-            </div>
-            <div>
-              <Label>Documentos de Suporte</Label>
-              <div className="mt-1.5">
-                <label className="flex items-center gap-2 px-3 py-2 border border-dashed rounded-md cursor-pointer hover:bg-muted/30 transition-colors">
-                  <Upload className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Seleccionar ficheiros...</span>
-                  <input type="file" multiple className="hidden" onChange={handleFileChange} />
-                </label>
-              </div>
-              {ficheiros.length > 0 && (
-                <div className="mt-2 space-y-1">
-                  {ficheiros.map((f, i) => (
-                    <div key={i} className="flex items-center gap-2 text-xs bg-muted/50 px-2 py-1 rounded">
-                      <FileText className="h-3 w-3 text-muted-foreground" />
-                      <span className="flex-1 truncate">{f.name}</span>
-                      <button onClick={() => removeFile(i)}>
-                        <X className="h-3 w-3 text-muted-foreground hover:text-destructive" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowNovaDialog(false)}>Cancelar</Button>
-            <Button onClick={handleSubmit} className="gap-2">
-              <Send className="h-3.5 w-3.5" />
-              Submeter
-            </Button>
-          </DialogFooter>
+        <DialogContent className="max-w-2xl">
+          <NovaSolicitacaoVistoForm onClose={() => setShowNovaDialog(false)} />
         </DialogContent>
       </Dialog>
 
