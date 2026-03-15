@@ -37,7 +37,7 @@ interface SubmissionContextType {
   submit: (entityId: string, fiscalYearId: string) => void;
   recepcionar: (entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => void;
   rejeitar: (entityId: string, fiscalYearId: string, motivo: string, entityName?: string, entityEmail?: string) => void;
-  solicitarElementos: (entityId: string, fiscalYearId: string, documentos: string[], mensagem: string, entityName?: string, entityEmail?: string) => void;
+  solicitarElementos: (entityId: string, fiscalYearId: string, documentos: string[], mensagem: string, prazo: number, entityName?: string, entityEmail?: string) => void;
   loadingNotifications: boolean;
   refreshNotifications: () => void;
 }
