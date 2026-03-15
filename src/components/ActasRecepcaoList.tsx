@@ -250,12 +250,17 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
 
       {/* PDF Preview Dialog */}
       <Dialog open={!!previewUrl} onOpenChange={handleClosePreview}>
-        <DialogContent className="max-w-4xl h-[85vh]">
+        <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Acta de Recepção — {previewTitle}</DialogTitle>
           </DialogHeader>
           {previewUrl && (
-            <iframe src={previewUrl} className="flex-1 w-full h-full rounded-lg border" title="PDF Preview" />
+            <iframe
+              src={previewUrl}
+              className="w-full flex-1 min-h-0 rounded-lg border"
+              title="PDF Preview"
+              style={{ height: "calc(85vh - 80px)" }}
+            />
           )}
         </DialogContent>
       </Dialog>
