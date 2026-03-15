@@ -287,19 +287,19 @@ export default function ProcessosVisto() {
     ],
   });
 
-  const handlePreviewPdf = (visto?: SolicitacaoVisto) => {
+  const handlePreviewPdf = async (visto?: SolicitacaoVisto) => {
     const target = visto || selectedVisto;
     if (!target) return;
     const numero = `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(target) + 1).padStart(3, "0")}`;
     const data = buildActaData(target, numero);
-    const { blob } = exportActaRecepcaoVistoPdf(data);
+    const { blob } = await exportActaRecepcaoVistoPdf(data);
     setPdfPreviewFromBlob(blob);
   };
 
-  const handleDownloadPdf = (visto: SolicitacaoVisto) => {
+  const handleDownloadPdf = async (visto: SolicitacaoVisto) => {
     const numero = `ARV-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(pendentes.indexOf(visto) + 1).padStart(3, "0")}`;
     const data = buildActaData(visto, numero);
-    const { blob, fileName } = exportActaRecepcaoVistoPdf(data);
+    const { blob, fileName } = await exportActaRecepcaoVistoPdf(data);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -308,10 +308,10 @@ export default function ProcessosVisto() {
     URL.revokeObjectURL(url);
   };
 
-  const handleConfirmRecepcao = () => {
+  const handleConfirmRecepcao = async () => {
     if (!selectedVisto) return;
     const data = buildActaData(selectedVisto, actaNumero);
-    const { blob } = exportActaRecepcaoVistoPdf(data);
+    const { blob } = await exportActaRecepcaoVistoPdf(data);
 
     setVistos((prev) =>
       prev.map((v) =>
