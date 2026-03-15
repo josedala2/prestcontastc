@@ -37,6 +37,7 @@ const SubmissaoDetalhe = () => {
   const [motivoRejeicao, setMotivoRejeicao] = useState("");
   const [actaGerada, setActaGerada] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [docPreview, setDocPreview] = useState<{ label: string; category: string } | null>(null);
   const { recepcionar, rejeitar } = useSubmissions();
 
   const requiredItems = submissionChecklist.filter((c) => c.required);
