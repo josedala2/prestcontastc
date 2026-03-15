@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { PortalLayout } from "@/components/PortalLayout";
+import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -242,6 +243,7 @@ function EntidadeView({
         {/* ─── TAB 2: DOCUMENTOS ─── */}
         <TabsContent value="documentos" className="space-y-4">
           <EntidadeDocumentosTab disabled={isSubmitted && !canResubmit} />
+          <ActasRecepcaoList entityId={entityId} fiscalYear={periodo} />
         </TabsContent>
       </Tabs>
 
