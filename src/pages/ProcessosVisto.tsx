@@ -186,6 +186,10 @@ export default function ProcessosVisto() {
   const [actasGeradas, setActasGeradas] = useState<string[]>([]);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [editingActaVisto, setEditingActaVisto] = useState<SolicitacaoVisto | null>(null);
+  const [representanteNome, setRepresentanteNome] = useState("");
+  const [representanteTelefone, setRepresentanteTelefone] = useState("");
+  const [representanteCargo, setRepresentanteCargo] = useState("");
+  const [oficioNumero, setOficioNumero] = useState("");
   const previewObjectUrlRef = useRef<string | null>(null);
 
   const filtered = vistos.filter((v) => {
@@ -222,6 +226,10 @@ export default function ProcessosVisto() {
   const handleSelectProcesso = (visto: SolicitacaoVisto) => {
     setSelectedVisto(visto);
     setCheckedDocs({});
+    setRepresentanteNome("");
+    setRepresentanteTelefone("");
+    setRepresentanteCargo("");
+    setOficioNumero(`${visto.id}/GMF/${now.getFullYear()}`);
   };
 
   const handleToggleDoc = (docId: string) => {
@@ -260,11 +268,11 @@ export default function ProcessosVisto() {
 
   const buildActaData = (visto: SolicitacaoVisto, numero: string): ActaRecepcaoVistoData => ({
     actaNumero: numero,
-    representanteNome: "Representante",
-    representanteTelefone: "---",
-    representanteCargo: "t\u00E9cnico",
+    representanteNome: representanteNome.trim() || "Representante",
+    representanteTelefone: representanteTelefone.trim() || "---",
+    representanteCargo: representanteCargo.trim() || "técnico",
     entidadeNome: visto.entidade,
-    oficioNumero: `${visto.id}/GMF/${now.getFullYear()}`,
+    oficioNumero: oficioNumero.trim() || `${visto.id}/GMF/${now.getFullYear()}`,
     oficioData: new Date(visto.dataSubmissao).toLocaleDateString("pt-AO"),
     objecto: visto.objecto,
     entidadeContratada: visto.entidadeContratada,
@@ -630,6 +638,63 @@ export default function ProcessosVisto() {
                     <div className="col-span-2 sm:col-span-3">
                       <p className="text-[11px] text-muted-foreground">Objecto do Contrato</p>
                       <p>{selectedVisto.objecto}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Dados do Representante e Ofício */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    Dados do Representante e Ofício
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    Preencha os dados de quem entrega o processo para constar na acta de recepção.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="rep-nome">Nome do Representante *</Label>
+                      <Input
+                        id="rep-nome"
+                        placeholder="Nome completo do representante"
+                        value={representanteNome}
+                        onChange={(e) => setRepresentanteNome(e.target.value)}
+                        maxLength={120}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="rep-cargo">Cargo / Função</Label>
+                      <Input
+                        id="rep-cargo"
+                        placeholder="Ex: Director Administrativo"
+                        value={representanteCargo}
+                        onChange={(e) => setRepresentanteCargo(e.target.value)}
+                        maxLength={80}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="rep-telefone">Telefone de Contacto</Label>
+                      <Input
+                        id="rep-telefone"
+                        placeholder="Ex: 923 456 789"
+                        value={representanteTelefone}
+                        onChange={(e) => setRepresentanteTelefone(e.target.value)}
+                        maxLength={20}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="oficio-numero">N.º do Ofício</Label>
+                      <Input
+                        id="oficio-numero"
+                        placeholder="Número do ofício de solicitação"
+                        value={oficioNumero}
+                        onChange={(e) => setOficioNumero(e.target.value)}
+                        maxLength={60}
+                      />
                     </div>
                   </div>
                 </CardContent>
