@@ -250,6 +250,7 @@ function NotificationItem({
 }) {
   const [expanded, setExpanded] = useState(false);
   const isSuccess = notif.type === "recepcionado";
+  const isSolicitacao = notif.type === "solicitacao_elementos";
 
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleString("pt-AO", {
