@@ -1277,11 +1277,35 @@ const TecnicoPrestacaoContas = () => {
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={() => toast.success("Parecer técnico emitido com sucesso!")}
+                    onClick={async () => {
+                      try {
+                        await generateParecerDocx({
+                          entityName: entity.name,
+                          exercicio: periodo,
+                          nif: entity.nif,
+                          totalActivo,
+                          totalPassivo,
+                          totalCapProprio,
+                          resultadoExercicio,
+                          totalProveitos,
+                          totalCustos,
+                          comentarios,
+                          tipoParecerIndex,
+                          parecerFinal,
+                          tecnicoNome: "Maria Costa",
+                        });
+                        toast.success("Parecer técnico emitido e descarregado com sucesso!");
+                      } catch (err) {
+                        console.error("Error generating parecer:", err);
+                        toast.error("Erro ao gerar o documento do parecer.");
+                      }
+                    }}
                     className="gap-2"
                   >
                     <CheckCircle className="h-4 w-4" />
                     Confirmar Parecer
+                  </AlertDialogAction>
+                </AlertDialogFooter>
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
