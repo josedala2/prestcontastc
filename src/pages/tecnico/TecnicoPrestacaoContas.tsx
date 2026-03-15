@@ -681,7 +681,8 @@ const TecnicoPrestacaoContas = () => {
       const nextVersion = (existing && existing.length > 0 ? (existing[0] as { version: number }).version : 0) + 1;
 
       // Upload DOCX to storage
-      const filePath = `${entity.id}/${periodo}/v${nextVersion}_${fileName}`;
+      const safeEntityName = entity.name.replace(/[^a-zA-Z0-9_-]/g, "_").substring(0, 50);
+      const filePath = `${entity.id}/${periodo}/v${nextVersion}_Parecer_${safeEntityName}_${periodo}.docx`;
       const { error: uploadError } = await supabase.storage.from("pareceres").upload(filePath, blob, {
         contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       });
