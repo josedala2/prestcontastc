@@ -27,18 +27,6 @@ const Exercicios = () => {
     status: "rascunho" as FiscalYear["status"],
   });
 
-  const openNew = () => {
-    setEditing(null);
-    const yr = new Date().getFullYear();
-    setForm({
-      entityId: mockEntities[0]?.id || "",
-      year: yr,
-      startDate: `${yr}-01-01`,
-      endDate: `${yr}-12-31`,
-      status: "rascunho",
-    });
-    setDialogOpen(true);
-  };
 
   const openEdit = (fy: FiscalYear) => {
     setEditing(fy);
