@@ -65,6 +65,7 @@ const App = () => (
           <Route path="/configuracoes" element={<Configuracoes />} />
           <Route path="/secretaria" element={<Navigate to="/submissoes" replace />} />
           <Route path="/submissoes" element={<Submissoes />} />
+          <Route path="/submissoes/manual" element={<SubmissaoManual />} />
           <Route path="/submissoes/:id" element={<SubmissaoDetalhe />} />
           <Route path="/portal/*" element={
             <PortalEntityProvider>
