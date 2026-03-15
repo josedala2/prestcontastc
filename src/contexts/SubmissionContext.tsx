@@ -18,7 +18,7 @@ export interface PortalNotification {
   id: string;
   entityId: string;
   fiscalYearId: string;
-  type: "recepcionado" | "rejeitado";
+  type: NotificationType;
   message: string;
   detail?: string;
   createdAt: string;
