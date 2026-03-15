@@ -303,7 +303,7 @@ export default function ProcessosVisto() {
   const handleConfirmRecepcao = () => {
     if (!selectedVisto) return;
     const data = buildActaData(selectedVisto, actaNumero);
-    const dataUri = exportActaRecepcaoVistoPdf(data, true);
+    const { blob } = exportActaRecepcaoVistoPdf(data);
 
     setVistos((prev) =>
       prev.map((v) =>
@@ -314,7 +314,7 @@ export default function ProcessosVisto() {
     );
     setActasGeradas((prev) => [...prev, selectedVisto.id]);
     setConfirmDialogOpen(false);
-    setPdfPreviewUrl(dataUri);
+    setPdfPreviewFromBlob(blob);
     toast.success(`Acta de recepção gerada — ${selectedVisto.id} — ${selectedVisto.entidade}`);
     setSelectedVisto(null);
     setCheckedDocs({});
