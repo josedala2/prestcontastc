@@ -216,11 +216,14 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     fiscalYearId: string,
     documentos: string[],
     mensagem: string,
+    prazo: number,
     entityName?: string,
     entityEmail?: string
   ) => {
     const year = fiscalYearId.split("-").pop() || fiscalYearId;
     const docList = documentos.map((d) => `• ${d}`).join("\n");
+    const deadlineDate = new Date();
+    deadlineDate.setDate(deadlineDate.getDate() + prazo);
     sendNotification(
       entityId,
       fiscalYearId,
@@ -228,7 +231,8 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
       `Solicitação de elementos adicionais — Exercício ${year}`,
       `${mensagem}\n\nDocumentos solicitados:\n${docList}`,
       entityName,
-      entityEmail
+      entityEmail,
+      deadlineDate.toISOString()
     );
   }, [sendNotification]);
 
