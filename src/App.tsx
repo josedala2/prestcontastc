@@ -20,7 +20,7 @@ import DocumentosObrigatorios from "./pages/DocumentosObrigatorios";
 import Auditoria from "./pages/Auditoria";
 import Esclarecimentos from "./pages/Esclarecimentos";
 import Configuracoes from "./pages/Configuracoes";
-import Secretaria from "./pages/Secretaria";
+
 import Submissoes from "./pages/Submissoes";
 import SubmissaoDetalhe from "./pages/SubmissaoDetalhe";
 import PortalDashboard from "./pages/portal/PortalDashboard";
@@ -62,7 +62,7 @@ const App = () => (
           <Route path="/auditoria" element={<Auditoria />} />
           <Route path="/esclarecimentos" element={<Esclarecimentos />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
-          <Route path="/secretaria" element={<Secretaria />} />
+          <Route path="/secretaria" element={<Navigate to="/submissoes" replace />} />
           <Route path="/submissoes" element={<Submissoes />} />
           <Route path="/submissoes/:id" element={<SubmissaoDetalhe />} />
           <Route path="/portal/*" element={
