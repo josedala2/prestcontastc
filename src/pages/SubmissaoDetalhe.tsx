@@ -37,6 +37,7 @@ const SubmissaoDetalhe = () => {
   const [motivoRejeicao, setMotivoRejeicao] = useState("");
   const [actaGerada, setActaGerada] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [docPreview, setDocPreview] = useState<{ label: string; category: string } | null>(null);
   const { recepcionar, rejeitar } = useSubmissions();
 
   const requiredItems = submissionChecklist.filter((c) => c.required);
@@ -211,7 +212,13 @@ const SubmissaoDetalhe = () => {
                           )}
                         </TableCell>
                         <TableCell className="text-center">
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title={`Visualizar ${item.label}`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            title={`Visualizar ${item.label}`}
+                            onClick={() => setDocPreview({ label: item.label, category: item.category })}
+                          >
                             <Eye className="h-3.5 w-3.5" />
                           </Button>
                         </TableCell>
@@ -358,6 +365,52 @@ const SubmissaoDetalhe = () => {
           {pdfPreviewUrl && (
             <iframe src={pdfPreviewUrl} className="flex-1 w-full h-full rounded-lg border" title="PDF Preview" />
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Document Preview Dialog */}
+      <Dialog open={!!docPreview} onOpenChange={() => setDocPreview(null)}>
+        <DialogContent className="max-w-3xl h-[70vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              {docPreview?.label}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 flex flex-col items-center justify-center gap-4 border rounded-lg bg-muted/30 p-8 overflow-auto">
+            <div className="w-full max-w-md space-y-4">
+              <div className="flex items-center gap-3 p-3 rounded-md bg-background border">
+                <FileText className="h-8 w-8 text-primary shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{docPreview?.label}</p>
+                  <p className="text-xs text-muted-foreground">Categoria: {docPreview?.category}</p>
+                </div>
+                <Badge variant="outline" className="shrink-0">Submetido</Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="p-3 rounded-md bg-background border">
+                  <p className="text-xs text-muted-foreground mb-1">Entidade</p>
+                  <p className="font-medium">{entity.name}</p>
+                </div>
+                <div className="p-3 rounded-md bg-background border">
+                  <p className="text-xs text-muted-foreground mb-1">Exercício</p>
+                  <p className="font-medium">{periodo}</p>
+                </div>
+                <div className="p-3 rounded-md bg-background border">
+                  <p className="text-xs text-muted-foreground mb-1">Data de Submissão</p>
+                  <p className="font-medium">{now.toLocaleDateString("pt-AO")}</p>
+                </div>
+                <div className="p-3 rounded-md bg-background border">
+                  <p className="text-xs text-muted-foreground mb-1">Formato</p>
+                  <p className="font-medium">PDF / Digital</p>
+                </div>
+              </div>
+              <div className="p-4 rounded-md bg-primary/5 border border-primary/20 text-center">
+                <Building2 className="h-10 w-10 mx-auto mb-2 text-primary/40" />
+                <p className="text-sm text-muted-foreground">Pré-visualização do documento disponível após integração com o sistema de armazenamento.</p>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </AppLayout>
