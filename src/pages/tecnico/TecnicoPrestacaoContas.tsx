@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { generateParecerDocx } from "@/lib/parecerGenerator";
+import { generateParecerPdf } from "@/lib/parecerPdfGenerator";
 import { ParecerPreview } from "@/components/ParecerPreview";
 import { ParecerHistorico } from "@/components/ParecerHistorico";
 import { TecnicoLayout } from "@/components/TecnicoLayout";
@@ -16,7 +17,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
-import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X, Download, AlertTriangle, Send, MessageSquare, Eye } from "lucide-react";
+import { Save, FileSpreadsheet, Calculator, TrendingUp, BarChart3, CheckCircle, Upload, FileUp, X, Download, AlertTriangle, Send, MessageSquare, Eye, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import * as XLSX from "xlsx";
@@ -688,6 +689,13 @@ const TecnicoPrestacaoContas = () => {
       });
       if (uploadError) throw uploadError;
 
+      // Also generate official PDF with hash in footer
+      await generateParecerPdf({
+        ...parecerData,
+        integrityHash,
+        version: nextVersion,
+      });
+
       // Persist record
       const { error: insertError } = await supabase.from("pareceres").insert({
         entity_id: entity.id,
@@ -711,7 +719,7 @@ const TecnicoPrestacaoContas = () => {
       if (insertError) throw insertError;
 
       setParecerRefreshKey((k) => k + 1);
-      toast.success(`Parecer v${nextVersion} emitido, guardado e descarregado com sucesso!`);
+      toast.success(`Parecer v${nextVersion} emitido! DOCX e PDF oficial descarregados.`);
     } catch (err) {
       console.error("Error generating parecer:", err);
       toast.error("Erro ao gerar ou guardar o parecer.");
@@ -1315,6 +1323,31 @@ const TecnicoPrestacaoContas = () => {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+            <Button variant="outline" onClick={async () => {
+              try {
+                await generateParecerPdf({
+                  entityName: entity.name,
+                  exercicio: periodo,
+                  nif: entity.nif,
+                  totalActivo,
+                  totalPassivo,
+                  totalCapProprio,
+                  resultadoExercicio,
+                  totalProveitos,
+                  totalCustos,
+                  comentarios,
+                  tipoParecerIndex,
+                  parecerFinal,
+                  tecnicoNome: "Maria Costa",
+                });
+                toast.success("PDF oficial gerado com sucesso!");
+              } catch {
+                toast.error("Erro ao gerar o PDF.");
+              }
+            }} className="gap-2">
+              <FileText className="h-4 w-4" />
+              Exportar PDF
+            </Button>
             <Button variant="outline" onClick={() => setPreviewOpen(true)} className="gap-2">
               <Eye className="h-4 w-4" />
               Pré-visualizar
