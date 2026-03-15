@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatCard } from "@/components/ui-custom/PageElements";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
