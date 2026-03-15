@@ -268,11 +268,11 @@ export default function ProcessosVisto() {
 
   const buildActaData = (visto: SolicitacaoVisto, numero: string): ActaRecepcaoVistoData => ({
     actaNumero: numero,
-    representanteNome: "Representante",
-    representanteTelefone: "---",
-    representanteCargo: "t\u00E9cnico",
+    representanteNome: representanteNome.trim() || "Representante",
+    representanteTelefone: representanteTelefone.trim() || "---",
+    representanteCargo: representanteCargo.trim() || "técnico",
     entidadeNome: visto.entidade,
-    oficioNumero: `${visto.id}/GMF/${now.getFullYear()}`,
+    oficioNumero: oficioNumero.trim() || `${visto.id}/GMF/${now.getFullYear()}`,
     oficioData: new Date(visto.dataSubmissao).toLocaleDateString("pt-AO"),
     objecto: visto.objecto,
     entidadeContratada: visto.entidadeContratada,
