@@ -87,6 +87,7 @@ const PortalPrestacaoContas = () => {
         periodo={periodo}
         entityName={entity.name}
         entityId={entity.id}
+        entityTipologia={entity.tipologia}
       />
     </PortalLayout>
   );
