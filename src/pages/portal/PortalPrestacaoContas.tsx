@@ -27,27 +27,49 @@ import { useFinancialData } from "@/contexts/FinancialDataContext";
 const PortalPrestacaoContas = () => {
   const { entity } = usePortalEntity();
   const [periodo, setPeriodo] = useState("2024");
-  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  return (
+    <PortalLayout>
+      <PageHeader
+        title="Prestação de Contas"
+        description="Submissão de documentos — Resolução Nº 1/17"
+      />
 
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      try {
-        const data = new Uint8Array(evt.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: "array" });
-        setUploadedFile(file.name);
-        toast.success("Ficheiro carregado com sucesso!");
-      } catch {
-        toast.error("Erro ao processar o ficheiro. Verifique se é um ficheiro Excel válido.");
-      }
-    };
-    reader.readAsArrayBuffer(file);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  }, []);
+      {/* Header Info */}
+      <Card className="mb-6">
+        <CardContent className="pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label className="text-xs text-muted-foreground">Entidade</Label>
+              <p className="text-sm font-medium">{entity.name}</p>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">NIF</Label>
+              <p className="text-sm font-medium">{entity.nif}</p>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Período</Label>
+              <Input
+                value={periodo}
+                onChange={(e) => setPeriodo(e.target.value)}
+                className="h-8 text-sm mt-1"
+                placeholder="Ex: 2024"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <EntidadeView
+        periodo={periodo}
+        entityName={entity.name}
+        entityId={entity.id}
+        entityTipologia={entity.tipologia}
+        entityNif={entity.nif}
+      />
+    </PortalLayout>
+  );
+};
 
   return (
     <PortalLayout>
