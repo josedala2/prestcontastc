@@ -53,6 +53,7 @@ export function NotificacoesPanel() {
     // Type/read filter
     if (filter === "nao_lidas") result = result.filter((n) => !n.read);
     else if (filter === "recepcionado") result = result.filter((n) => n.type === "recepcionado");
+    else if (filter === "em_analise") result = result.filter((n) => n.type === "em_analise");
     else if (filter === "rejeitado") result = result.filter((n) => n.type === "rejeitado");
     else if (filter === "solicitacao_elementos") result = result.filter((n) => n.type === "solicitacao_elementos");
 
