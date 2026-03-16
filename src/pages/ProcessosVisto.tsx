@@ -179,6 +179,7 @@ export default function ProcessosVisto() {
   // Verificação documental
   const [selectedVisto, setSelectedVisto] = useState<SolicitacaoVisto | null>(null);
   const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
+  const [viewedDocs, setViewedDocs] = useState<Record<string, boolean>>({});
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [motivoDevolucao, setMotivoDevolucao] = useState("");
