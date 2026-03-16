@@ -248,7 +248,11 @@ function EntidadeView({
 
         {/* ─── TAB 2: DOCUMENTOS ─── */}
         <TabsContent value="documentos" className="space-y-4">
-          <EntidadeDocumentosTab disabled={isSubmitted && !canResubmit} tipologia={entityTipologia} />
+          <EntidadeDocumentosTab
+            disabled={isSubmitted && !canResubmit}
+            tipologia={entityTipologia}
+            onComplianceChange={(allDone, uploaded, required) => setDocsCompliance({ allDone, uploaded, required })}
+          />
           <ActasRecepcaoList entityId={entityId} fiscalYear={periodo} />
         </TabsContent>
       </Tabs>
