@@ -102,7 +102,7 @@ export function TecnicoLayout({ children }: TecnicoLayoutProps) {
             </DropdownMenuContent>
           </DropdownMenu>
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => { logout(); navigate("/login"); }}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] text-header-foreground/70 hover:text-header-foreground hover:bg-header-foreground/10 transition-colors"
             title="Terminar Sessão"
           >

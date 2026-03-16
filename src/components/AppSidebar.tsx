@@ -273,17 +273,25 @@ export function AppSidebar() {
         </button>
       </div>
 
-      {/* User */}
       <div className="p-3 border-t border-sidebar-border">
         <div className={cn("flex items-center gap-2.5", collapsed && "justify-center")}>
           <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[11px] font-bold text-secondary-foreground shrink-0">
-            CM
+            {user?.initials || "??"}
           </div>
           {!collapsed && (
-            <div className="min-w-0 animate-fade-in">
-              <p className="text-xs font-medium text-sidebar-foreground truncate">Carlos Mendes</p>
-              <p className="text-[10px] text-sidebar-foreground/40">Administrador TCA</p>
+            <div className="min-w-0 animate-fade-in flex-1">
+              <p className="text-xs font-medium text-sidebar-foreground truncate">{user?.displayName || "Utilizador"}</p>
+              <p className="text-[10px] text-sidebar-foreground/40">{user?.role || ""}</p>
             </div>
+          )}
+          {!collapsed && (
+            <button
+              onClick={() => { logout(); navigate("/login"); }}
+              className="text-sidebar-foreground/40 hover:text-sidebar-foreground transition-colors"
+              title="Terminar Sessão"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
           )}
         </div>
       </div>
