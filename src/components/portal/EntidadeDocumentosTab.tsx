@@ -7,6 +7,7 @@ import {
   Upload, FileText, CheckCircle, AlertTriangle, Trash2, Paperclip,
 } from "lucide-react";
 import { toast } from "sonner";
+import { EntityTipologia, TIPOLOGIA_RESOLUCAO, RESOLUCAO_LABELS, ResolucaoCategoria } from "@/types";
 
 interface DocRequirement {
   id: string;
@@ -15,12 +16,47 @@ interface DocRequirement {
   accept?: string;
 }
 
-const DOCUMENT_REQUIREMENTS: DocRequirement[] = [
+// ─── Documentos por Resolução ───
+
+const DOCS_RESOLUCAO_2_16: DocRequirement[] = [
+  { id: "modelos", label: "Modelos de Prestação de Contas", required: true, accept: ".pdf,.xlsx,.xls,.docx" },
+  { id: "relatorio_gestao", label: "Relatório de Gestão", required: true, accept: ".pdf,.docx" },
+  { id: "extractos", label: "Extratos Bancários de todas as contas do exercício", required: false, accept: ".pdf,.xlsx,.xls" },
+  { id: "ordens_saque", label: "Relação das Ordens de Saque pagas no período / Livro de Ordens de Saque", required: true, accept: ".pdf,.xlsx,.xls,.docx" },
+  { id: "contratos", label: "Cópia dos Contratos celebrados no período", required: false, accept: ".pdf,.docx" },
+  { id: "suporte_despesas", label: "Suporte documental das despesas realizadas no período", required: false, accept: ".pdf,.xlsx,.xls,.docx" },
+  { id: "emolumentos", label: "Comprovativo de Pagamento dos Emolumentos ao Tribunal de Contas", required: true, accept: ".pdf,.jpg,.jpeg,.png" },
+];
+
+const DOCS_RESOLUCAO_4_16: DocRequirement[] = [
+  { id: "modelos", label: "Modelos de Prestação de Contas", required: true, accept: ".pdf,.xlsx,.xls,.docx" },
+  { id: "relatorio_gestao", label: "Relatório de Gestão", required: true, accept: ".pdf,.docx" },
+  { id: "extractos", label: "Extratos Bancários de todas as contas do exercício", required: false, accept: ".pdf,.xlsx,.xls" },
+  { id: "ordens_saque", label: "Relação das Ordens de Saque pagas no período / Livro de Ordens de Saque", required: true, accept: ".pdf,.xlsx,.xls,.docx" },
+  { id: "contratos", label: "Cópia dos Contratos celebrados no período", required: false, accept: ".pdf,.docx" },
+  { id: "suporte_despesas", label: "Suporte documental das despesas realizadas no período", required: false, accept: ".pdf,.xlsx,.xls,.docx" },
+  { id: "emolumentos", label: "Comprovativo de Pagamento dos Emolumentos devidos ao Tribunal de Contas", required: true, accept: ".pdf,.jpg,.jpeg,.png" },
+];
+
+const DOCS_RESOLUCAO_5_16: DocRequirement[] = [
+  { id: "modelos", label: "Modelos de Prestação de Contas", required: true, accept: ".pdf,.xlsx,.xls,.docx" },
+  { id: "relatorio_gestao", label: "Relatório de Gestão", required: false, accept: ".pdf,.docx" },
+  { id: "extractos", label: "Extratos Bancários de todas as contas do exercício", required: true, accept: ".pdf,.xlsx,.xls" },
+  { id: "reconciliacoes", label: "Reconciliações Bancárias de todas as contas do exercício", required: false, accept: ".pdf,.xlsx,.xls" },
+  { id: "folhas_caixa", label: "Folhas de caixa contendo as operações de tesouraria", required: true, accept: ".pdf,.xlsx,.xls" },
+  { id: "comprov_seguranca", label: "Comprovativos de entrega das Contribuições à Segurança Social", required: true, accept: ".pdf,.jpg,.jpeg,.png" },
+  { id: "recibos_emolumentares", label: "Relação dos recibos Emolumentares emitidos", required: false, accept: ".pdf,.xlsx,.xls,.docx" },
+  { id: "comprov_moeda", label: "Comprovativo de aquisição de moeda local", required: false, accept: ".pdf,.jpg,.jpeg,.png" },
+  { id: "emolumentos", label: "Comprovativo de Pagamento dos Emolumentos devidos ao Tribunal de Contas", required: true, accept: ".pdf,.jpg,.jpeg,.png" },
+];
+
+const DOCS_RESOLUCAO_1_17: DocRequirement[] = [
   { id: "modelos", label: "Modelos de Prestação de Contas", required: true, accept: ".pdf,.xlsx,.xls,.docx" },
   { id: "relatorio_gestao", label: "Relatório de Gestão", required: true, accept: ".pdf,.docx" },
   { id: "balanco", label: "Balanço", required: true, accept: ".pdf,.xlsx,.xls" },
   { id: "dem_resultados", label: "Demonstração de Resultados", required: true, accept: ".pdf,.xlsx,.xls" },
   { id: "fluxo_caixa", label: "Demonstração de Fluxo de Caixa", required: true, accept: ".pdf,.xlsx,.xls" },
+  { id: "balancete_analitico", label: "Balancete Analítico e Sintético, antes e depois do Apuramento", required: true, accept: ".pdf,.xlsx,.xls" },
   { id: "parecer_fiscal", label: "Parecer do Conselho Fiscal", required: true, accept: ".pdf,.docx" },
   { id: "parecer_auditor", label: "Relatório e Parecer do Auditor Externo", required: true, accept: ".pdf,.docx" },
   { id: "comprov_impostos", label: "Comprovativos de Pagamento dos Impostos", required: true, accept: ".pdf,.jpg,.jpeg,.png" },
@@ -32,6 +68,21 @@ const DOCUMENT_REQUIREMENTS: DocRequirement[] = [
   { id: "abates", label: "Relação de Abates e Alienações de Imóveis no período", required: false, accept: ".pdf,.xlsx,.xls,.docx" },
   { id: "emolumentos", label: "Comprovativo de Pagamento dos Emolumentos ao Tribunal de Contas", required: true, accept: ".pdf,.jpg,.jpeg,.png" },
 ];
+
+const DOCS_BY_RESOLUCAO: Record<ResolucaoCategoria, DocRequirement[]> = {
+  resolucao_2_16: DOCS_RESOLUCAO_2_16,
+  resolucao_4_16: DOCS_RESOLUCAO_4_16,
+  resolucao_5_16: DOCS_RESOLUCAO_5_16,
+  resolucao_1_17: DOCS_RESOLUCAO_1_17,
+};
+
+export function getDocumentRequirements(tipologia: EntityTipologia): DocRequirement[] {
+  const resolucao = TIPOLOGIA_RESOLUCAO[tipologia];
+  return DOCS_BY_RESOLUCAO[resolucao] || DOCS_RESOLUCAO_1_17;
+}
+
+// Keep backward compat export
+export const DOCUMENT_REQUIREMENTS = DOCS_RESOLUCAO_1_17;
 
 interface UploadedDoc {
   name: string;
@@ -45,11 +96,16 @@ const formatSize = (bytes: number) => {
 
 interface Props {
   disabled?: boolean;
+  tipologia?: EntityTipologia;
 }
 
-export function EntidadeDocumentosTab({ disabled }: Props) {
+export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica" }: Props) {
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, UploadedDoc>>({});
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  const resolucao = TIPOLOGIA_RESOLUCAO[tipologia];
+  const resolucaoInfo = RESOLUCAO_LABELS[resolucao];
+  const documentRequirements = getDocumentRequirements(tipologia);
 
   const handleDocUpload = (docId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -67,7 +123,7 @@ export function EntidadeDocumentosTab({ disabled }: Props) {
     if (inputRefs.current[docId]) inputRefs.current[docId]!.value = "";
   };
 
-  const requiredDocs = DOCUMENT_REQUIREMENTS.filter((d) => d.required);
+  const requiredDocs = documentRequirements.filter((d) => d.required);
   const uploadedRequiredCount = requiredDocs.filter((d) => uploadedDocs[d.id]).length;
   const totalUploaded = Object.keys(uploadedDocs).length;
   const progress = Math.round((uploadedRequiredCount / requiredDocs.length) * 100);
@@ -107,11 +163,12 @@ export function EntidadeDocumentosTab({ disabled }: Props) {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <FileText className="h-5 w-5 text-primary" />
-            Documentos Exigidos (Resolução nº 1/17)
+            Documentos Exigidos ({resolucaoInfo.label})
           </CardTitle>
+          <p className="text-xs text-muted-foreground">{resolucaoInfo.descricao}</p>
         </CardHeader>
         <CardContent className="space-y-2">
-          {DOCUMENT_REQUIREMENTS.map((doc) => {
+          {documentRequirements.map((doc) => {
             const uploaded = uploadedDocs[doc.id];
             return (
               <div
@@ -197,5 +254,3 @@ export function EntidadeDocumentosTab({ disabled }: Props) {
     </div>
   );
 }
-
-export { DOCUMENT_REQUIREMENTS };
