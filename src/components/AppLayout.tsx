@@ -1,8 +1,10 @@
-import { ReactNode } from "react";
+import { ReactNode, useState, useRef, useEffect } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
-
+import { LogOut, Bell, Send, CheckCircle, XCircle, FileQuestion, FileSearch } from "lucide-react";
+import { useSubmissions, PortalNotification } from "@/contexts/SubmissionContext";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 interface AppLayoutProps {
   children: ReactNode;
