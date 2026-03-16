@@ -123,6 +123,7 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
+    </FinancialDataProvider>
     </SubmissionProvider>
     </AuthProvider>
   </QueryClientProvider>

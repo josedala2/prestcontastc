@@ -642,6 +642,7 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
     setAtivNaoCorr({}); setAtivCorr({}); setCapProprio({});
     setPassNaoCorr({}); setPassCorr({}); setProveitos({}); setCustos({});
     setUploadedFile(null);
+    if (dataKey) financialCtx.clearData(dataKey);
     toast.info("Todos os campos foram limpos.");
   };
 
