@@ -179,6 +179,7 @@ export default function ProcessosVisto() {
   // Verificação documental
   const [selectedVisto, setSelectedVisto] = useState<SolicitacaoVisto | null>(null);
   const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
+  const [viewedDocs, setViewedDocs] = useState<Record<string, boolean>>({});
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [motivoDevolucao, setMotivoDevolucao] = useState("");
@@ -226,6 +227,7 @@ export default function ProcessosVisto() {
   const handleSelectProcesso = (visto: SolicitacaoVisto) => {
     setSelectedVisto(visto);
     setCheckedDocs({});
+    setViewedDocs({});
     setRepresentanteNome("");
     setRepresentanteTelefone("");
     setRepresentanteCargo("");
@@ -233,7 +235,16 @@ export default function ProcessosVisto() {
   };
 
   const handleToggleDoc = (docId: string) => {
+    if (!viewedDocs[docId]) {
+      toast.warning("Deve visualizar o documento antes de o verificar.");
+      return;
+    }
     setCheckedDocs((prev) => ({ ...prev, [docId]: !prev[docId] }));
+  };
+
+  const handleViewDoc = (docId: string, docLabel: string) => {
+    setViewedDocs((prev) => ({ ...prev, [docId]: true }));
+    toast.info(`A visualizar: ${docLabel}`, { duration: 2000 });
   };
 
   const closePdfPreview = () => {
@@ -723,16 +734,23 @@ export default function ProcessosVisto() {
                         <TableHead className="w-10">✓</TableHead>
                         <TableHead>Documento</TableHead>
                         <TableHead className="text-center">Obrigatório</TableHead>
+                        <TableHead className="text-center w-28">Visualizar</TableHead>
                         <TableHead className="text-center">Estado</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {vistoChecklist.map((item) => {
                         const isChecked = !!checkedDocs[item.id];
+                        const isViewed = !!viewedDocs[item.id];
                         return (
                           <TableRow key={item.id} className={isChecked ? "bg-green-50/50 dark:bg-green-900/5" : ""}>
                             <TableCell>
-                              <Checkbox checked={isChecked} onCheckedChange={() => handleToggleDoc(item.id)} />
+                              <Checkbox
+                                checked={isChecked}
+                                onCheckedChange={() => handleToggleDoc(item.id)}
+                                disabled={!isViewed}
+                                title={!isViewed ? "Visualize o documento primeiro" : undefined}
+                              />
                             </TableCell>
                             <TableCell className="text-sm">{item.label}</TableCell>
                             <TableCell className="text-center">
@@ -741,6 +759,17 @@ export default function ProcessosVisto() {
                               ) : (
                                 <Badge variant="outline" className="text-[10px]">Opcional</Badge>
                               )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Button
+                                variant={isViewed ? "ghost" : "outline"}
+                                size="sm"
+                                className={cn("h-7 text-[11px] gap-1", isViewed && "text-muted-foreground")}
+                                onClick={() => handleViewDoc(item.id, item.label)}
+                              >
+                                <Eye className="h-3 w-3" />
+                                {isViewed ? "Visto" : "Ver"}
+                              </Button>
                             </TableCell>
                             <TableCell className="text-center">
                               {isChecked ? (
