@@ -254,6 +254,7 @@ function NotificationItem({
 }) {
   const [expanded, setExpanded] = useState(false);
   const isSuccess = notif.type === "recepcionado";
+  const isEmAnalise = notif.type === "em_analise";
   const isSolicitacao = notif.type === "solicitacao_elementos";
 
   const formatDate = (iso: string) =>
@@ -296,6 +297,8 @@ function NotificationItem({
           "mt-0.5 shrink-0 rounded-full p-1.5",
           isSuccess
             ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+            : isEmAnalise
+            ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
             : isSolicitacao
             ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
             : "bg-destructive/10 text-destructive"
@@ -303,6 +306,8 @@ function NotificationItem({
       >
         {isSuccess ? (
           <CheckCircle className="h-4 w-4" />
+        ) : isEmAnalise ? (
+          <FileSearch className="h-4 w-4" />
         ) : isSolicitacao ? (
           <FileQuestion className="h-4 w-4" />
         ) : (
