@@ -21,6 +21,7 @@ const Exercicios = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<FiscalYear | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [selectedEntityIds, setSelectedEntityIds] = useState<string[]>([]);
   const [form, setForm] = useState({
     entityId: "",
     year: new Date().getFullYear(),
@@ -29,9 +30,9 @@ const Exercicios = () => {
     status: "rascunho" as FiscalYear["status"],
   });
 
-
   const openNew = () => {
     setEditing(null);
+    setSelectedEntityIds([]);
     setForm({
       entityId: "",
       year: new Date().getFullYear(),
