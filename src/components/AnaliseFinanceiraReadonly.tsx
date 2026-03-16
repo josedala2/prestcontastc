@@ -587,16 +587,15 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
       });
     });
 
-    const newSectionData: Record<string, number>[] = allSections.map(() => ({}));
     allSections.forEach((sec, idx) => {
       if (Object.keys(sectionValues[idx]).length > 0) {
-        const merged = { ...sectionValues[idx] };
-        sec.setter((prev) => ({ ...prev, ...merged }));
-        newSectionData[idx] = merged;
+        sec.setter((prev) => {
+          const merged = { ...prev, ...sectionValues[idx] };
+          return merged;
+        });
       }
     });
-    // Return both count and parsed data for context sync
-    return { matchCount, sectionData: newSectionData };
+    return { matchCount, sectionValues };
   }, []);
 
   const syncToContext = useCallback((fileName: string, sectionData?: Record<string, number>[]) => {
