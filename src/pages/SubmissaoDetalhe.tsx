@@ -285,7 +285,7 @@ const SubmissaoDetalhe = () => {
                 className="gap-1.5"
                 onClick={() => {
                   const fiscalYearId = `${entity.id}-${periodo}`;
-                  remeterParaTecnico(entity.id, fiscalYearId, entity.name);
+                  remeterParaTecnico(entity.id, fiscalYearId, entity.name, entity.email);
                   setRemetido(true);
                   toast.success(`Processo remetido para o Técnico Validador — ${entity.name} — ${periodo}`);
                 }}
