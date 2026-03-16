@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Lock, Mail, Shield, Building2, UserCheck, Eye, EyeOff, Stamp, ClipboardCheck, Gavel, Search } from "lucide-react";
+import { Lock, Mail, Shield, Building2, UserCheck, Eye, EyeOff, Stamp, Search } from "lucide-react";
 
 const demoUsers = [
   {
@@ -48,16 +48,6 @@ const demoUsers = [
     color: "bg-warning/10 text-warning border-warning/20",
   },
   {
-    label: "Dirigente / Aprovador",
-    email: "dirigente@ende.co.ao",
-    password: "dirigente123",
-    role: "Dirigente / Aprovador",
-    displayName: "António Sousa",
-    icon: ClipboardCheck,
-    description: "Aprovação e submissão de contas",
-    color: "bg-success/10 text-success border-success/20",
-  },
-  {
     label: "Entidade (Contabilista)",
     email: "entidade@ende.co.ao",
     password: "entidade123",
@@ -66,16 +56,6 @@ const demoUsers = [
     icon: Building2,
     description: "Portal de prestação de contas",
     color: "bg-info/10 text-info border-info/20",
-  },
-  {
-    label: "Auditor Interno",
-    email: "auditoria@ende.co.ao",
-    password: "auditoria123",
-    role: "Auditor Interno",
-    displayName: "Pedro Nunes",
-    icon: Gavel,
-    description: "Controlo interno da entidade",
-    color: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20",
   },
 ];
 
@@ -98,7 +78,7 @@ export default function Login() {
     const matched = demoUsers.find((u) => u.email === email);
     setTimeout(() => {
       setLoading(false);
-      if (matched?.role === "Preparador / Contabilista" || matched?.role === "Dirigente / Aprovador" || matched?.role === "Auditor Interno") {
+      if (matched?.role === "Preparador / Contabilista") {
         navigate("/portal");
       } else if (matched?.role === "Secretaria") {
         navigate("/secretaria");
