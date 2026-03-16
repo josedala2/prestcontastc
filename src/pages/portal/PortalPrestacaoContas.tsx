@@ -243,7 +243,7 @@ function EntidadeView({
 
         {/* ─── TAB 2: DOCUMENTOS ─── */}
         <TabsContent value="documentos" className="space-y-4">
-          <EntidadeDocumentosTab disabled={isSubmitted && !canResubmit} />
+          <EntidadeDocumentosTab disabled={isSubmitted && !canResubmit} tipologia={entity.tipologia} />
           <ActasRecepcaoList entityId={entityId} fiscalYear={periodo} />
         </TabsContent>
       </Tabs>
