@@ -2,7 +2,8 @@ import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { mockEntities } from "@/data/mockData";
-import { Entity, TIPOLOGIA_LABELS } from "@/types";
+import { Entity, TIPOLOGIA_LABELS, TIPOLOGIA_GROUPS, RESOLUCAO_LABELS } from "@/types";
+import { SelectGroup, SelectLabel } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -99,8 +100,13 @@ const Entidades = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(TIPOLOGIA_LABELS).map(([key, label]) => (
-                        <SelectItem key={key} value={key}>{label}</SelectItem>
+                      {Object.entries(TIPOLOGIA_GROUPS).map(([resolucao, tipologias]) => (
+                        <SelectGroup key={resolucao}>
+                          <SelectLabel className="text-xs text-muted-foreground">{RESOLUCAO_LABELS[resolucao as keyof typeof RESOLUCAO_LABELS].label}</SelectLabel>
+                          {tipologias.map((key) => (
+                            <SelectItem key={key} value={key}>{TIPOLOGIA_LABELS[key]}</SelectItem>
+                          ))}
+                        </SelectGroup>
                       ))}
                     </SelectContent>
                   </Select>

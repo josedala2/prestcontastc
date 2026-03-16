@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { EntityTipologia } from "@/types";
 import { PortalLayout } from "@/components/PortalLayout";
 import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
 import { PageHeader } from "@/components/ui-custom/PageElements";
@@ -86,6 +87,7 @@ const PortalPrestacaoContas = () => {
         periodo={periodo}
         entityName={entity.name}
         entityId={entity.id}
+        entityTipologia={entity.tipologia}
       />
     </PortalLayout>
   );
@@ -110,6 +112,7 @@ function EntidadeView({
   periodo,
   entityName,
   entityId,
+  entityTipologia,
 }: {
   uploadedFile: string | null;
   setUploadedFile: (f: string | null) => void;
@@ -118,6 +121,7 @@ function EntidadeView({
   periodo: string;
   entityName: string;
   entityId: string;
+  entityTipologia: EntityTipologia;
 }) {
   const [entidadeTab, setEntidadeTab] = useState("balancete");
   const { getStatus, submit } = useSubmissions();
@@ -243,7 +247,7 @@ function EntidadeView({
 
         {/* ─── TAB 2: DOCUMENTOS ─── */}
         <TabsContent value="documentos" className="space-y-4">
-          <EntidadeDocumentosTab disabled={isSubmitted && !canResubmit} />
+          <EntidadeDocumentosTab disabled={isSubmitted && !canResubmit} tipologia={entityTipologia} />
           <ActasRecepcaoList entityId={entityId} fiscalYear={periodo} />
         </TabsContent>
       </Tabs>

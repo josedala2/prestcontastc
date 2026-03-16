@@ -5,17 +5,69 @@ export interface Entity {
   tutela: string;
   contacto: string;
   morada: string;
-  tipologia: "orgao_autonomo" | "instituto_publico" | "fundo_autonomo" | "servico_autonomo" | "empresa_publica";
+  tipologia: EntityTipologia;
   provincia?: string;
   createdAt: string;
 }
 
-export const TIPOLOGIA_LABELS: Record<Entity["tipologia"], string> = {
+// ─── Tipologias agrupadas por Resolução ───
+export type EntityTipologia =
+  // Resolução 2/16 — Órgãos de Soberania e Afins
+  | "orgao_soberania"
+  // Resolução 4/16 — Administração Central/Local, Institutos Sector Administrativo
+  | "admin_central"
+  | "admin_local"
+  | "instituto_admin"
+  // Resolução 5/16 — Serviços Públicos no Estrangeiro
+  | "servico_estrangeiro"
+  // Resolução 1/17 — Órgãos Autónomos, Sector Empresarial Público (PGC)
+  | "orgao_autonomo"
+  | "instituto_publico"
+  | "fundo_autonomo"
+  | "servico_autonomo"
+  | "empresa_publica";
+
+export const TIPOLOGIA_LABELS: Record<EntityTipologia, string> = {
+  orgao_soberania: "Órgão de Soberania e Afins",
+  admin_central: "Administração Central do Estado",
+  admin_local: "Administração Local do Estado",
+  instituto_admin: "Instituto do Sector Administrativo",
+  servico_estrangeiro: "Serviço Público no Estrangeiro",
   orgao_autonomo: "Órgão Autónomo",
   instituto_publico: "Instituto Público",
   fundo_autonomo: "Fundo Autónomo",
   servico_autonomo: "Serviço Autónomo",
   empresa_publica: "Empresa Pública",
+};
+
+// Agrupamento por Resolução
+export type ResolucaoCategoria = "resolucao_2_16" | "resolucao_4_16" | "resolucao_5_16" | "resolucao_1_17";
+
+export const TIPOLOGIA_RESOLUCAO: Record<EntityTipologia, ResolucaoCategoria> = {
+  orgao_soberania: "resolucao_2_16",
+  admin_central: "resolucao_4_16",
+  admin_local: "resolucao_4_16",
+  instituto_admin: "resolucao_4_16",
+  servico_estrangeiro: "resolucao_5_16",
+  orgao_autonomo: "resolucao_1_17",
+  instituto_publico: "resolucao_1_17",
+  fundo_autonomo: "resolucao_1_17",
+  servico_autonomo: "resolucao_1_17",
+  empresa_publica: "resolucao_1_17",
+};
+
+export const RESOLUCAO_LABELS: Record<ResolucaoCategoria, { label: string; descricao: string }> = {
+  resolucao_2_16: { label: "Resolução nº 2/16", descricao: "Órgãos de Soberania e Afins" },
+  resolucao_4_16: { label: "Resolução nº 4/16", descricao: "Administração Central e Local, Institutos do Sector Administrativo" },
+  resolucao_5_16: { label: "Resolução nº 5/16", descricao: "Serviços Públicos no Estrangeiro" },
+  resolucao_1_17: { label: "Resolução nº 1/17", descricao: "Órgãos Autónomos, Sector Empresarial Público (PGC)" },
+};
+
+export const TIPOLOGIA_GROUPS: Record<ResolucaoCategoria, EntityTipologia[]> = {
+  resolucao_2_16: ["orgao_soberania"],
+  resolucao_4_16: ["admin_central", "admin_local", "instituto_admin"],
+  resolucao_5_16: ["servico_estrangeiro"],
+  resolucao_1_17: ["orgao_autonomo", "instituto_publico", "fundo_autonomo", "servico_autonomo", "empresa_publica"],
 };
 
 export interface FiscalYear {
