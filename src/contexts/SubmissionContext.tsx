@@ -212,6 +212,16 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     );
   }, [sendNotification]);
 
+  const remeterParaTecnico = useCallback((entityId: string, fiscalYearId: string, entityName?: string) => {
+    setSubmissions((prev) =>
+      prev.map((s) =>
+        s.entityId === entityId && s.fiscalYearId === fiscalYearId
+          ? { ...s, status: "em_analise" as SubmissionStatus }
+          : s
+      )
+    );
+  }, []);
+
   const solicitarElementos = useCallback((
     entityId: string,
     fiscalYearId: string,
