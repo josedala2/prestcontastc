@@ -38,6 +38,7 @@ import TecnicoDashboard from "./pages/tecnico/TecnicoDashboard";
 import TecnicoPrestacaoContas from "./pages/tecnico/TecnicoPrestacaoContas";
 import ProcessosVisto from "./pages/ProcessosVisto";
 import ActasRecepcao from "./pages/ActasRecepcao";
+import Secretaria from "./pages/Secretaria";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -67,7 +68,7 @@ const App = () => (
           <Route path="/auditoria" element={<Auditoria />} />
           <Route path="/esclarecimentos" element={<Esclarecimentos />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
-          <Route path="/secretaria" element={<Navigate to="/submissoes" replace />} />
+          <Route path="/secretaria" element={<Secretaria />} />
           <Route path="/processos-visto" element={<ProcessosVisto />} />
           <Route path="/submissoes" element={<Submissoes />} />
           <Route path="/submissoes/manual" element={<SubmissaoManual />} />
