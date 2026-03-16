@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -97,9 +97,10 @@ const formatSize = (bytes: number) => {
 interface Props {
   disabled?: boolean;
   tipologia?: EntityTipologia;
+  onComplianceChange?: (allRequiredUploaded: boolean, uploadedCount: number, requiredCount: number) => void;
 }
 
-export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica" }: Props) {
+export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica", onComplianceChange }: Props) {
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, UploadedDoc>>({});
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
@@ -128,6 +129,10 @@ export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica" 
   const totalUploaded = Object.keys(uploadedDocs).length;
   const progress = Math.round((uploadedRequiredCount / requiredDocs.length) * 100);
   const allRequiredDone = uploadedRequiredCount === requiredDocs.length;
+
+  useEffect(() => {
+    onComplianceChange?.(allRequiredDone, uploadedRequiredCount, requiredDocs.length);
+  }, [allRequiredDone, uploadedRequiredCount, requiredDocs.length, onComplianceChange]);
 
   return (
     <div className="space-y-6">
