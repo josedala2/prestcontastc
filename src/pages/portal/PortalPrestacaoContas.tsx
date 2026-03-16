@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { generateCC2Template } from "@/lib/cc2TemplateGenerator";
 import { EntidadeDocumentosTab } from "@/components/portal/EntidadeDocumentosTab";
+import { useFinancialData } from "@/contexts/FinancialDataContext";
 
 
 
