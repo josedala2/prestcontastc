@@ -134,6 +134,7 @@ export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica",
     onComplianceChange?.(allRequiredDone, uploadedRequiredCount, requiredDocs.length);
   }, [allRequiredDone, uploadedRequiredCount, requiredDocs.length, onComplianceChange]);
 
+  return (
     <div className="space-y-6">
       {/* Progress */}
       <Card>
