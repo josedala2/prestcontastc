@@ -318,7 +318,7 @@ const PortalDocumentos = () => {
       </div>
 
       {/* Submit button */}
-      <SubmitButton entityId={entity.id} entityName={entity.name} allRequiredDone={allRequiredDone} />
+      <PortalDocSubmitButton entityId={entity.id} entityName={entity.name} allRequiredDone={allRequiredDone} />
     </PortalLayout>
   );
 };
