@@ -59,7 +59,11 @@ export const roleHiddenPaths: Record<UserRole, string[]> = {
     "/importacao", "/plano-contas", "/validacoes", "/configuracoes",
     "/portal", "/tecnico", "/secretaria", "/submissoes/manual",
   ],
-  "Secretaria": [],
+  "Secretaria": [
+    "/dashboard", "/exercicios", "/importacao", "/plano-contas", "/validacoes",
+    "/relatorios", "/mapas", "/anexos", "/configuracoes",
+    "/portal", "/tecnico", "/submissoes/manual",
+  ],
   "Preparador / Contabilista": [],
 };
 
