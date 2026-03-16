@@ -55,6 +55,7 @@ export function TecnicoLayout({ children }: TecnicoLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pageTitle = routeTitles[location.pathname] || "Técnico";
   const { entity, setEntityId } = usePortalEntity();
+  const { user, logout } = useAuth();
 
   const shortName = entity.name.split(" - ")[1] || entity.name.split(" — ")[0] || entity.name;
 
