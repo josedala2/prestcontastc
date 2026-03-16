@@ -57,7 +57,7 @@ const SubmissaoManual = () => {
 
   const handleSubmit = () => {
     if (!entity) return;
-    submit(entity.id, fiscalYearId);
+    submit(entity.id, fiscalYearId, entity.name);
     toast.success(`Prestação de contas submetida em nome de ${entity.name}!`);
     navigate("/submissoes");
   };

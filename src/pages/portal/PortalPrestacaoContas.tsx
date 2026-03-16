@@ -129,7 +129,7 @@ function EntidadeView({
   const StatusIcon = STATUS_CONFIG[submissionStatus].icon;
 
   const handleSubmit = () => {
-    submit(entityId, fiscalYearId);
+    submit(entityId, fiscalYearId, entityName);
     toast.success("Prestação de contas submetida com sucesso! Aguarda recepção pela Secretaria.");
   };
 
@@ -151,7 +151,7 @@ function EntidadeView({
           </div>
           {canResubmit && (
             <button
-              onClick={() => submit(entityId, fiscalYearId)}
+              onClick={() => submit(entityId, fiscalYearId, entityName)}
               className="shrink-0 text-xs font-medium px-3 py-1.5 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               Resubmeter
