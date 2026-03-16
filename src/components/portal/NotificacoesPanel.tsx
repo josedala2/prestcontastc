@@ -21,6 +21,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FileQuestion,
+  FileSearch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
