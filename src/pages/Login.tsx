@@ -98,7 +98,7 @@ export default function Login() {
     const matched = demoUsers.find((u) => u.email === email);
     setTimeout(() => {
       setLoading(false);
-      if (matched?.role === "Preparador / Contabilista") {
+      if (matched?.role === "Preparador / Contabilista" || matched?.role === "Dirigente / Aprovador" || matched?.role === "Auditor Interno") {
         navigate("/portal");
       } else if (matched?.role === "Secretaria") {
         navigate("/secretaria");
