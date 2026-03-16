@@ -67,12 +67,16 @@ const navSections: { label: string; items: NavEntry[] }[] = [
     label: "Dados",
     items: [
       { title: "Plano de Contas", icon: FileText, path: "/plano-contas" },
+      { title: "Importação", icon: Upload, path: "/importacao" },
+      { title: "Validações", icon: AlertTriangle, path: "/validacoes" },
     ],
   },
   {
     label: "Relatórios",
     items: [
       { title: "Mapas/Modelos", icon: Map, path: "/mapas" },
+      { title: "Relatórios", icon: FileBarChart, path: "/relatorios" },
+      { title: "Anexos", icon: Paperclip, path: "/anexos" },
     ],
   },
   {
@@ -88,6 +92,8 @@ const navSections: { label: string; items: NavEntry[] }[] = [
     label: "Acesso Externo",
     items: [
       { title: "Portal da Entidade", icon: ExternalLink, path: "/portal" },
+      { title: "Técnico Validador", icon: UserCheck, path: "/tecnico" },
+      { title: "Secretaria", icon: ClipboardCheck, path: "/secretaria" },
     ],
   },
   {
