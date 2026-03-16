@@ -402,20 +402,41 @@ interface AnaliseFinanceiraProps {
   year: string;
   readOnly?: boolean;
   hideTabs?: string[];
+  dataKey?: string;
 }
 
-export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hideTabs = [] }: AnaliseFinanceiraProps) {
+export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hideTabs = [], dataKey }: AnaliseFinanceiraProps) {
   const [activeTab, setActiveTab] = useState("balanco");
+  const financialCtx = useFinancialData();
 
-  const [ativNaoCorr, setAtivNaoCorr] = useState<Record<string, number>>({});
-  const [ativCorr, setAtivCorr] = useState<Record<string, number>>({});
-  const [capProprio, setCapProprio] = useState<Record<string, number>>({});
-  const [passNaoCorr, setPassNaoCorr] = useState<Record<string, number>>({});
-  const [passCorr, setPassCorr] = useState<Record<string, number>>({});
-  const [proveitosV, setProveitos] = useState<Record<string, number>>({});
-  const [custosV, setCustos] = useState<Record<string, number>>({});
-  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+  // Initialize from shared context if dataKey provided
+  const sharedData = dataKey ? financialCtx.getData(dataKey) : null;
+
+  const [ativNaoCorr, setAtivNaoCorr] = useState<Record<string, number>>(sharedData?.ativNaoCorr || {});
+  const [ativCorr, setAtivCorr] = useState<Record<string, number>>(sharedData?.ativCorr || {});
+  const [capProprio, setCapProprio] = useState<Record<string, number>>(sharedData?.capProprio || {});
+  const [passNaoCorr, setPassNaoCorr] = useState<Record<string, number>>(sharedData?.passNaoCorr || {});
+  const [passCorr, setPassCorr] = useState<Record<string, number>>(sharedData?.passCorr || {});
+  const [proveitosV, setProveitos] = useState<Record<string, number>>(sharedData?.proveitos || {});
+  const [custosV, setCustos] = useState<Record<string, number>>(sharedData?.custos || {});
+  const [uploadedFile, setUploadedFile] = useState<string | null>(sharedData?.uploadedFile || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync from shared context when external data changes
+  useEffect(() => {
+    if (!dataKey) return;
+    const data = financialCtx.getData(dataKey);
+    if (data.uploadedFile && data.uploadedFile !== uploadedFile) {
+      setAtivNaoCorr(data.ativNaoCorr);
+      setAtivCorr(data.ativCorr);
+      setCapProprio(data.capProprio);
+      setPassNaoCorr(data.passNaoCorr);
+      setPassCorr(data.passCorr);
+      setProveitos(data.proveitos);
+      setCustos(data.custos);
+      setUploadedFile(data.uploadedFile);
+    }
+  }, [dataKey, financialCtx]);
 
   const emptyPrior: Record<string, number> = {};
 
