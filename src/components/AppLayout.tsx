@@ -25,17 +25,32 @@ const routeTitles: Record<string, string> = {
   "/configuracoes": "Configurações",
 };
 
+type SecretariaNotifFilter = "todas" | "submissao" | "recepcionado" | "rejeitado" | "solicitacao_elementos" | "em_analise";
+
+const NOTIF_FILTERS: { value: SecretariaNotifFilter; label: string }[] = [
+  { value: "todas", label: "Todas" },
+  { value: "submissao", label: "Submissões" },
+  { value: "recepcionado", label: "Recepções" },
+  { value: "rejeitado", label: "Devoluções" },
+  { value: "solicitacao_elementos", label: "Solicitações" },
+  { value: "em_analise", label: "Em Análise" },
+];
+
 export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const pageTitle = routeTitles[location.pathname] || "PGC";
   const { notifications, markAsRead } = useSubmissions();
   const [showNotifs, setShowNotifs] = useState(false);
+  const [notifFilter, setNotifFilter] = useState<SecretariaNotifFilter>("todas");
   const notifRef = useRef<HTMLDivElement>(null);
 
-  // Only show "submissao" type notifications for Secretaria
-  const secretariaNotifs = notifications.filter((n) => n.type === "submissao");
-  const unreadCount = secretariaNotifs.filter((n) => !n.read).length;
+  const allNotifs = notifications;
+  const unreadCount = allNotifs.filter((n) => !n.read).length;
+
+  const filteredNotifs = notifFilter === "todas"
+    ? allNotifs
+    : allNotifs.filter((n) => n.type === notifFilter);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -56,6 +71,18 @@ export function AppLayout({ children }: AppLayoutProps) {
       case "solicitacao_elementos": return <FileQuestion className="h-3.5 w-3.5" />;
       case "em_analise": return <FileSearch className="h-3.5 w-3.5" />;
       default: return <Bell className="h-3.5 w-3.5" />;
+    }
+  };
+
+  const getNotifColor = (type: string, unread: boolean) => {
+    if (!unread) return "bg-muted text-muted-foreground";
+    switch (type) {
+      case "submissao": return "bg-primary/10 text-primary";
+      case "recepcionado": return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+      case "rejeitado": return "bg-destructive/10 text-destructive";
+      case "solicitacao_elementos": return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
+      case "em_analise": return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
+      default: return "bg-primary/10 text-primary";
     }
   };
 
@@ -96,7 +123,8 @@ export function AppLayout({ children }: AppLayoutProps) {
               </button>
 
               {showNotifs && (
-                <div className="absolute right-0 top-9 w-80 bg-popover border border-border rounded-lg shadow-lg z-50 overflow-hidden">
+                <div className="absolute right-0 top-9 w-96 bg-popover border border-border rounded-lg shadow-lg z-50 overflow-hidden">
+                  {/* Header */}
                   <div className="px-3 py-2 border-b border-border flex items-center justify-between">
                     <span className="text-xs font-semibold text-foreground">Notificações</span>
                     {unreadCount > 0 && (
@@ -105,13 +133,48 @@ export function AppLayout({ children }: AppLayoutProps) {
                       </Badge>
                     )}
                   </div>
+
+                  {/* Filter tabs */}
+                  <div className="px-2 py-1.5 border-b border-border flex gap-1 overflow-x-auto">
+                    {NOTIF_FILTERS.map((f) => {
+                      const count = f.value === "todas"
+                        ? allNotifs.length
+                        : allNotifs.filter((n) => n.type === f.value).length;
+                      return (
+                        <button
+                          key={f.value}
+                          onClick={() => setNotifFilter(f.value)}
+                          className={cn(
+                            "shrink-0 px-2 py-1 rounded text-[10px] font-medium transition-colors",
+                            notifFilter === f.value
+                              ? "bg-primary text-primary-foreground"
+                              : "text-muted-foreground hover:bg-muted"
+                          )}
+                        >
+                          {f.label}
+                          {count > 0 && (
+                            <span className={cn(
+                              "ml-1 inline-flex items-center justify-center min-w-[14px] h-3.5 px-0.5 rounded-full text-[9px]",
+                              notifFilter === f.value
+                                ? "bg-primary-foreground/20 text-primary-foreground"
+                                : "bg-muted-foreground/20 text-muted-foreground"
+                            )}>
+                              {count}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Notification list */}
                   <div className="max-h-72 overflow-y-auto">
-                    {secretariaNotifs.length === 0 ? (
+                    {filteredNotifs.length === 0 ? (
                       <div className="py-8 text-center text-xs text-muted-foreground">
-                        Sem notificações
+                        Sem notificações{notifFilter !== "todas" ? " nesta categoria" : ""}
                       </div>
                     ) : (
-                      secretariaNotifs.slice(0, 10).map((n) => (
+                      filteredNotifs.slice(0, 15).map((n) => (
                         <button
                           key={n.id}
                           onClick={() => {
@@ -124,10 +187,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                             !n.read && "bg-primary/5"
                           )}
                         >
-                          <div className={cn(
-                            "mt-0.5 p-1 rounded-full shrink-0",
-                            !n.read ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                          )}>
+                          <div className={cn("mt-0.5 p-1 rounded-full shrink-0", getNotifColor(n.type, !n.read))}>
                             {getNotifIcon(n.type)}
                           </div>
                           <div className="flex-1 min-w-0">
