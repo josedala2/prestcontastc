@@ -422,11 +422,11 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
   const [uploadedFile, setUploadedFile] = useState<string | null>(sharedData?.uploadedFile || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync from shared context when external data changes
+  // Sync from shared context when external data changes (version tracks updates)
   useEffect(() => {
     if (!dataKey) return;
     const data = financialCtx.getData(dataKey);
-    if (data.uploadedFile && data.uploadedFile !== uploadedFile) {
+    if (data.uploadedFile) {
       setAtivNaoCorr(data.ativNaoCorr);
       setAtivCorr(data.ativCorr);
       setCapProprio(data.capProprio);
@@ -436,7 +436,8 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
       setCustos(data.custos);
       setUploadedFile(data.uploadedFile);
     }
-  }, [dataKey, financialCtx]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataKey, financialCtx.version]);
 
   const emptyPrior: Record<string, number> = {};
 
@@ -587,32 +588,16 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
       });
     });
 
-    const newSectionData: Record<string, number>[] = allSections.map(() => ({}));
     allSections.forEach((sec, idx) => {
       if (Object.keys(sectionValues[idx]).length > 0) {
-        const merged = { ...sectionValues[idx] };
-        sec.setter((prev) => ({ ...prev, ...merged }));
-        newSectionData[idx] = merged;
+        sec.setter((prev) => {
+          const merged = { ...prev, ...sectionValues[idx] };
+          return merged;
+        });
       }
     });
-    // Return both count and parsed data for context sync
-    return { matchCount, sectionData: newSectionData };
+    return { matchCount, sectionValues };
   }, []);
-
-  const syncToContext = useCallback((fileName: string, sectionData?: Record<string, number>[]) => {
-    if (!dataKey) return;
-    // Use sectionData if provided (from fresh parse), otherwise use current state
-    financialCtx.setData(dataKey, {
-      ativNaoCorr: sectionData?.[0] || ativNaoCorr,
-      ativCorr: sectionData?.[1] || ativCorr,
-      capProprio: sectionData?.[2] || capProprio,
-      passNaoCorr: sectionData?.[3] || passNaoCorr,
-      passCorr: sectionData?.[4] || passCorr,
-      proveitos: sectionData?.[5] || proveitosV,
-      custos: sectionData?.[6] || custosV,
-      uploadedFile: fileName,
-    });
-  }, [dataKey, financialCtx, ativNaoCorr, ativCorr, capProprio, passNaoCorr, passCorr, proveitosV, custosV]);
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -622,9 +607,30 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
       try {
         const data = new Uint8Array(evt.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: "array" });
-        const { matchCount, sectionData } = mapExcelToForm(workbook);
+        const { matchCount, sectionValues } = mapExcelToForm(workbook);
         setUploadedFile(file.name);
-        syncToContext(file.name, sectionData);
+
+        // Sync to shared context after state updates
+        if (dataKey) {
+          // Use functional updaters to get latest state merged with new values
+          const mergeWith = (current: Record<string, number>, newVals: Record<string, number>) =>
+            Object.keys(newVals).length > 0 ? { ...current, ...newVals } : current;
+
+          // We need to schedule context sync after React state updates
+          setTimeout(() => {
+            financialCtx.setData(dataKey, {
+              ativNaoCorr: mergeWith(ativNaoCorr, sectionValues[0]),
+              ativCorr: mergeWith(ativCorr, sectionValues[1]),
+              capProprio: mergeWith(capProprio, sectionValues[2]),
+              passNaoCorr: mergeWith(passNaoCorr, sectionValues[3]),
+              passCorr: mergeWith(passCorr, sectionValues[4]),
+              proveitos: mergeWith(proveitosV, sectionValues[5]),
+              custos: mergeWith(custosV, sectionValues[6]),
+              uploadedFile: file.name,
+            });
+          }, 0);
+        }
+
         if (matchCount > 0) {
           toast.success(`Ficheiro carregado! ${matchCount} campo(s) preenchido(s).`);
         } else {
@@ -636,7 +642,7 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
     };
     reader.readAsArrayBuffer(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [mapExcelToForm, syncToContext]);
+  }, [mapExcelToForm, dataKey, financialCtx, ativNaoCorr, ativCorr, capProprio, passNaoCorr, passCorr, proveitosV, custosV]);
 
   const handleClearData = () => {
     setAtivNaoCorr({}); setAtivCorr({}); setCapProprio({});
