@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { EntityTipologia } from "@/types";
 import { PortalLayout } from "@/components/PortalLayout";
 import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
 import { PageHeader } from "@/components/ui-custom/PageElements";
