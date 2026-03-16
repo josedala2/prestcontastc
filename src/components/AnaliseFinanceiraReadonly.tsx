@@ -599,6 +599,21 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
     return { matchCount, sectionData: newSectionData };
   }, []);
 
+  const syncToContext = useCallback((fileName: string, sectionData?: Record<string, number>[]) => {
+    if (!dataKey) return;
+    // Use sectionData if provided (from fresh parse), otherwise use current state
+    financialCtx.setData(dataKey, {
+      ativNaoCorr: sectionData?.[0] || ativNaoCorr,
+      ativCorr: sectionData?.[1] || ativCorr,
+      capProprio: sectionData?.[2] || capProprio,
+      passNaoCorr: sectionData?.[3] || passNaoCorr,
+      passCorr: sectionData?.[4] || passCorr,
+      proveitos: sectionData?.[5] || proveitosV,
+      custos: sectionData?.[6] || custosV,
+      uploadedFile: fileName,
+    });
+  }, [dataKey, financialCtx, ativNaoCorr, ativCorr, capProprio, passNaoCorr, passCorr, proveitosV, custosV]);
+
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -607,8 +622,9 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
       try {
         const data = new Uint8Array(evt.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: "array" });
-        const matchCount = mapExcelToForm(workbook);
+        const { matchCount, sectionData } = mapExcelToForm(workbook);
         setUploadedFile(file.name);
+        syncToContext(file.name, sectionData);
         if (matchCount > 0) {
           toast.success(`Ficheiro carregado! ${matchCount} campo(s) preenchido(s).`);
         } else {
@@ -620,7 +636,7 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
     };
     reader.readAsArrayBuffer(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [mapExcelToForm]);
+  }, [mapExcelToForm, syncToContext]);
 
   const handleClearData = () => {
     setAtivNaoCorr({}); setAtivCorr({}); setCapProprio({});
