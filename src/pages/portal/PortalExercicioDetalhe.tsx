@@ -74,6 +74,7 @@ const PortalExercicioDetalhe = () => {
         entityName={entity?.name || fy.entityName}
         nif={entity?.nif || ""}
         year={String(fy.year)}
+        hideTabs={["dre", "indicadores", "resumo"]}
       />
     </PortalLayout>
   );
