@@ -124,6 +124,7 @@ function EntidadeView({
   entityTipologia: EntityTipologia;
 }) {
   const [entidadeTab, setEntidadeTab] = useState("balancete");
+  const [docsCompliance, setDocsCompliance] = useState({ allDone: false, uploaded: 0, required: 0 });
   const { getStatus, submit } = useSubmissions();
   const fiscalYearId = `${entityId}-${periodo}`;
   const submissionStatus = getStatus(entityId, fiscalYearId);
