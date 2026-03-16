@@ -66,6 +66,7 @@ export function PortalLayout({ children }: PortalLayoutProps) {
   const pageTitle = routeTitles[location.pathname] || "Portal";
   const { entity, setEntityId } = usePortalEntity();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useSubmissions();
+  const { logout } = useAuth();
   const entityNotifications = notifications.filter((n) => n.entityId === entity.id);
   const entityUnread = unreadCount(entity.id);
   // Short name for display
