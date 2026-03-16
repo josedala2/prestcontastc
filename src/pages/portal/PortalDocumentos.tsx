@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useSubmissions } from "@/contexts/SubmissionContext";
 import { PortalLayout } from "@/components/PortalLayout";
 import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
