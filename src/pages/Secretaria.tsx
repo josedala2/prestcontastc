@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatCard } from "@/components/ui-custom/PageElements";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Progress } from "@/components/ui/progress";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -18,7 +19,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockFiscalYears, mockEntities, submissionChecklist, formatKz } from "@/data/mockData";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2, FileText, Inbox, BarChart3, CalendarCheck, Eye, X, Undo2, ShieldCheck } from "lucide-react";
+import {
+  CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2,
+  FileText, Inbox, BarChart3, CalendarCheck, Eye, X, Undo2, ShieldCheck,
+  TrendingUp, ArrowRight, Bell, Activity, PieChart,
+} from "lucide-react";
 import { toast } from "sonner";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 import { EntityProfilePanel } from "@/components/secretaria/EntityProfilePanel";
@@ -147,6 +152,44 @@ const Secretaria = () => {
     const d = new Date(fy.submittedAt);
     return d.getMonth() === hoje.getMonth() && d.getFullYear() === hoje.getFullYear();
   }).length;
+
+  // Extra dashboard data
+  const { notifications } = useSubmissions();
+  const recentNotifications = notifications.slice(0, 5);
+  const unreadNotifCount = notifications.filter((n) => !n.read).length;
+
+  const totalEntidades = new Set(mockFiscalYears.map((fy) => fy.entityId)).size;
+  const conformeCount = mockFiscalYears.filter((fy) => fy.status === "conforme").length;
+  const naoConformeCount = mockFiscalYears.filter((fy) => fy.status === "nao_conforme").length;
+  const rascunhoCount = mockFiscalYears.filter((fy) => fy.status === "rascunho").length;
+  const comPedidosCount = mockFiscalYears.filter((fy) => fy.status === "com_pedidos").length;
+
+  // Deadlines
+  const deadlinesSoon = mockFiscalYears
+    .filter((fy) => !["conforme", "nao_conforme"].includes(fy.status))
+    .map((fy) => ({
+      ...fy,
+      daysLeft: Math.ceil((new Date(fy.deadline).getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24)),
+    }))
+    .filter((fy) => fy.daysLeft <= 30 && fy.daysLeft > -365)
+    .sort((a, b) => a.daysLeft - b.daysLeft)
+    .slice(0, 5);
+
+  // Status distribution for mini chart
+  const statusDistribution = useMemo(() => {
+    const counts = {
+      rascunho: rascunhoCount,
+      submetido: submetidos.length,
+      em_analise: emAnalise,
+      com_pedidos: comPedidosCount,
+      conforme: conformeCount,
+      nao_conforme: naoConformeCount,
+    };
+    const total = Object.values(counts).reduce((s, v) => s + v, 0);
+    return { counts, total };
+  }, [rascunhoCount, submetidos.length, emAnalise, comPedidosCount, conformeCount, naoConformeCount]);
+
+  const [activeMainTab, setActiveMainTab] = useState("dashboard");
 
   // ── Verificação Documental content (passed as children to tabs) ──
   const verificacaoContent = selectedFy && selectedEntity ? (
@@ -280,8 +323,12 @@ const Secretaria = () => {
         description="Gestão de recepção de contas e processos de visto."
       />
 
-      <Tabs defaultValue="contas" className="mb-6">
+      <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="mb-6">
         <TabsList>
+          <TabsTrigger value="dashboard" className="gap-2">
+            <Activity className="h-4 w-4" />
+            Painel
+          </TabsTrigger>
           <TabsTrigger value="contas" className="gap-2">
             <Inbox className="h-4 w-4" />
             Recepção de Contas
@@ -292,6 +339,186 @@ const Secretaria = () => {
           </TabsTrigger>
         </TabsList>
 
+        {/* ═══ DASHBOARD TAB ═══ */}
+        <TabsContent value="dashboard" className="mt-6 space-y-6">
+          {/* KPI Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              title="Pendentes de Recepção"
+              value={pendentesCount}
+              subtitle="aguardam validação documental"
+              icon={<Inbox className="h-5 w-5" />}
+              variant={pendentesCount > 0 ? "warning" : "success"}
+            />
+            <StatCard
+              title="Total Submetidos"
+              value={totalSubmetidos}
+              subtitle={`${submetidosEsteMes} este mês`}
+              icon={<CalendarCheck className="h-5 w-5" />}
+              variant="primary"
+            />
+            <StatCard
+              title="Em Análise (TCA)"
+              value={emAnalise}
+              subtitle="transitaram para técnico"
+              icon={<BarChart3 className="h-5 w-5" />}
+              variant="default"
+            />
+            <StatCard
+              title="Actas Emitidas"
+              value={actasGeradas.length}
+              subtitle="nesta sessão"
+              icon={<Stamp className="h-5 w-5" />}
+              variant="success"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Status Distribution */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <PieChart className="h-4 w-4 text-primary" />
+                  Distribuição por Estado
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {[
+                  { label: "Rascunho", count: statusDistribution.counts.rascunho, color: "bg-muted-foreground" },
+                  { label: "Submetido", count: statusDistribution.counts.submetido, color: "bg-amber-500" },
+                  { label: "Em Análise", count: statusDistribution.counts.em_analise, color: "bg-blue-500" },
+                  { label: "Com Pedidos", count: statusDistribution.counts.com_pedidos, color: "bg-orange-500" },
+                  { label: "Conforme", count: statusDistribution.counts.conforme, color: "bg-emerald-500" },
+                  { label: "Não Conforme", count: statusDistribution.counts.nao_conforme, color: "bg-destructive" },
+                ].map((item) => (
+                  <div key={item.label} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">{item.label}</span>
+                      <span className="font-semibold">{item.count}</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${item.color} transition-all duration-500`}
+                        style={{ width: `${statusDistribution.total > 0 ? (item.count / statusDistribution.total) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+                <div className="pt-2 border-t text-xs text-muted-foreground flex justify-between">
+                  <span>Total de processos</span>
+                  <span className="font-bold text-foreground">{statusDistribution.total}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Deadlines */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-warning" />
+                  Prazos Próximos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {deadlinesSoon.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">Sem prazos próximos.</p>
+                ) : (
+                  deadlinesSoon.map((fy) => {
+                    const isOverdue = fy.daysLeft < 0;
+                    return (
+                      <div
+                        key={fy.id}
+                        className={`flex items-center justify-between p-2.5 rounded-lg border ${
+                          isOverdue ? "border-destructive/30 bg-destructive/5" : "border-border bg-muted/20"
+                        }`}
+                      >
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold truncate">{fy.entityName}</p>
+                          <p className="text-[10px] text-muted-foreground">Exercício {fy.year}</p>
+                        </div>
+                        <Badge
+                          variant={isOverdue ? "destructive" : "secondary"}
+                          className="text-[10px] shrink-0"
+                        >
+                          {isOverdue ? `${Math.abs(fy.daysLeft)}d atraso` : `${fy.daysLeft}d`}
+                        </Badge>
+                      </div>
+                    );
+                  })
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Recent Notifications */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Bell className="h-4 w-4 text-primary" />
+                    Actividade Recente
+                  </CardTitle>
+                  {unreadNotifCount > 0 && (
+                    <Badge variant="default" className="text-[10px]">
+                      {unreadNotifCount} novas
+                    </Badge>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {recentNotifications.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">Sem actividade recente.</p>
+                ) : (
+                  recentNotifications.map((n) => (
+                    <div
+                      key={n.id}
+                      className={`p-2.5 rounded-lg border text-xs space-y-0.5 ${
+                        !n.read ? "border-primary/30 bg-primary/5" : "border-border"
+                      }`}
+                    >
+                      <p className="font-medium text-foreground line-clamp-1">{n.message}</p>
+                      <p className="text-muted-foreground text-[10px]">
+                        {new Date(n.createdAt).toLocaleDateString("pt-AO", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Quick Actions */}
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex flex-wrap gap-3">
+                <Button variant="outline" className="gap-2 text-xs" onClick={() => setActiveMainTab("contas")}>
+                  <Inbox className="h-4 w-4" />
+                  Recepcionar Contas
+                  {pendentesCount > 0 && (
+                    <Badge variant="destructive" className="text-[9px] h-4 min-w-4 px-1">{pendentesCount}</Badge>
+                  )}
+                </Button>
+                <Button variant="outline" className="gap-2 text-xs" onClick={() => setActiveMainTab("vistos")}>
+                  <ShieldCheck className="h-4 w-4" />
+                  Processos de Visto
+                </Button>
+                <Button variant="outline" className="gap-2 text-xs" asChild>
+                  <a href="/actas-recepcao">
+                    <Stamp className="h-4 w-4" />
+                    Ver Actas de Recepção
+                  </a>
+                </Button>
+                <Button variant="outline" className="gap-2 text-xs" asChild>
+                  <a href="/entidades">
+                    <Building2 className="h-4 w-4" />
+                    Consultar Entidades
+                  </a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ═══ RECEPÇÃO DE CONTAS TAB ═══ */}
         <TabsContent value="contas" className="mt-6">
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
