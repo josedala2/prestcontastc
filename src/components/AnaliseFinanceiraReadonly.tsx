@@ -400,9 +400,10 @@ interface AnaliseFinanceiraProps {
   nif: string;
   year: string;
   readOnly?: boolean;
+  hideTabs?: string[];
 }
 
-export function AnaliseFinanceira({ entityName, nif, year, readOnly = false }: AnaliseFinanceiraProps) {
+export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hideTabs = [] }: AnaliseFinanceiraProps) {
   const [activeTab, setActiveTab] = useState("balanco");
 
   const [ativNaoCorr, setAtivNaoCorr] = useState<Record<string, number>>({});
