@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect, ReactNode 
 import { supabase } from "@/integrations/supabase/client";
 
 export type SubmissionStatus = "rascunho" | "pendente" | "recepcionado" | "rejeitado" | "em_analise";
-export type NotificationType = "recepcionado" | "rejeitado" | "solicitacao_elementos" | "em_analise";
+export type NotificationType = "submissao" | "recepcionado" | "rejeitado" | "solicitacao_elementos" | "em_analise";
 
 interface SubmissionEntry {
   entityId: string;
