@@ -36,6 +36,7 @@ const SubmissaoDetalhe = () => {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [motivoRejeicao, setMotivoRejeicao] = useState("");
   const [actaGerada, setActaGerada] = useState(false);
+  const [remetido, setRemetido] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [docPreview, setDocPreview] = useState<{ label: string; category: string } | null>(null);
   const { recepcionar, rejeitar, remeterParaTecnico, getStatus } = useSubmissions();
