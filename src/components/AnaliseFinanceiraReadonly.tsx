@@ -426,6 +426,53 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false }: A
     return isNaN(num) ? 0 : num;
   };
 
+  // Normalize labels for fuzzy matching (remove accents, extra spaces, lowercase)
+  const normalizeLabel = (s: string) =>
+    s.toLowerCase().trim()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ");
+
+  // PGC account codes → CC-3 codes mapping
+  const pgcToCC3: Record<string, string> = {
+    "111": "1.1.1.1", "112": "1.1.1.2", "113": "1.1.1.3", "114": "1.1.1.4",
+    "115": "1.1.1.5", "116": "1.1.1.6", "119": "1.1.1.7",
+    "141": "1.1.1.8", "147": "1.1.1.9", "181": "1.1.1.10",
+    "121": "1.1.2.1", "122": "1.1.2.2", "123": "1.1.2.3", "124": "1.1.2.4",
+    "129": "1.1.2.5", "148": "1.1.2.6", "182": "1.1.2.7",
+    "131": "1.1.3.1", "132": "1.1.3.2",
+    "133": "1.1.4.1", "134": "1.1.4.2", "135": "1.1.4.3", "139": "1.1.4.4",
+    "149": "1.1.4.5", "183": "1.1.4.6",
+    "191": "1.1.5.1", "192": "1.1.5.2", "193": "1.1.5.3", "194": "1.1.5.4", "199": "1.1.5.5",
+    "22": "1.2.1.1", "23": "1.2.1.2", "24": "1.2.1.3", "25": "1.2.1.4",
+    "26": "1.2.1.5", "27": "1.2.1.6", "28": "1.2.1.7", "29": "1.2.1.8",
+    "311": "1.2.2.1", "312": "1.2.2.2", "318": "1.2.2.3", "329": "1.2.2.4",
+    "34": "1.2.2.5", "35": "1.2.2.6", "36": "1.2.2.7", "372": "1.2.2.8",
+    "38": "1.2.2.10",
+    "41": "1.2.3.1", "42": "1.2.3.2", "43": "1.2.3.3", "45": "1.2.3.4", "48": "1.2.3.5", "49": "1.2.3.6",
+    "373": "1.2.4.1", "374": "1.2.4.2", "379": "1.2.4.3",
+    "51": "2.1.1.1", "52": "2.1.1.2", "53": "2.1.1.3", "54": "2.1.1.4",
+    "55": "2.1.2.1", "56": "2.1.2.2", "57": "2.1.2.3", "58": "2.1.2.4",
+    "811": "2.1.3.1", "812": "2.1.3.2", "813": "2.1.3.3", "814": "2.1.3.4", "815": "2.1.3.5",
+    "88": "2.1.4",
+    "331": "2.2.1.1", "332": "2.2.1.2", "333": "2.2.1.3", "339": "2.2.1.4",
+    "391": "2.2.3",
+    "392": "2.2.4.1", "393": "2.2.4.2", "394": "2.2.4.3", "399": "2.2.4.4",
+    "321": "2.3.1.1", "322": "2.3.1.2", "328": "2.3.1.3", "319": "2.3.1.4",
+    "371": "2.3.1.8",
+    "375": "2.3.4.1", "376": "2.3.4.2", "377": "2.3.4.3",
+    // Proveitos (Classe 6 no PGC)
+    "611": "3.1.1", "612": "3.1.2", "613": "3.1.3", "614": "3.1.4",
+    "615": "3.1.5", "617": "3.1.6", "618": "3.1.7",
+    "621": "3.2.1", "622": "3.2.2", "628": "3.2.3",
+    "631": "3.3.1", "632": "3.3.2", "633": "3.3.3", "634": "3.3.4", "635": "3.3.5", "638": "3.3.6",
+    // Custos (Classe 7 no PGC)
+    "711": "4.1.1", "712": "4.1.2", "713": "4.1.3",
+    "721": "4.2.1", "722": "4.2.2", "723": "4.2.3", "724": "4.2.4", "725": "4.2.5",
+    "726": "4.2.6", "727": "4.2.7", "728": "4.2.8", "729": "4.2.9",
+    "731": "4.3.1", "732": "4.3.2", "733": "4.3.3", "734": "4.3.4",
+    "735": "4.3.5", "736": "4.3.6", "738": "4.3.7",
+  };
+
   const mapExcelToForm = useCallback((workbook: XLSX.WorkBook) => {
     const allSections = [
       { lines: activoNaoCorrente, setter: setAtivNaoCorr },
@@ -437,15 +484,44 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false }: A
       { lines: custosLines, setter: setCustos },
     ];
 
+    // Build normalized label map and CC-3 code map
     const labelMap = new Map<string, { code: string; section: number }>();
+    const cc3CodeMap = new Map<string, { code: string; section: number }>();
     allSections.forEach((sec, idx) => {
       sec.lines.filter((l) => l.editable).forEach((l) => {
-        labelMap.set(l.label.toLowerCase().trim(), { code: l.code, section: idx });
+        labelMap.set(normalizeLabel(l.label), { code: l.code, section: idx });
+        cc3CodeMap.set(l.code, { code: l.code, section: idx });
       });
     });
 
     const sectionValues: Record<string, number>[] = allSections.map(() => ({}));
     let matchCount = 0;
+
+    const tryMatchValue = (row: unknown[], match: { code: string; section: number }) => {
+      if (sectionValues[match.section][match.code]) return; // already matched
+      // Try "Saldo do Ano Corrente" column first (typically index 4), then any column ≥ 2
+      const priorityCols = [4, 2, 3, 5];
+      for (const j of priorityCols) {
+        if (j < row.length) {
+          const val = parseKzValue(row[j]);
+          if (val !== 0) {
+            sectionValues[match.section][match.code] = val;
+            matchCount++;
+            return;
+          }
+        }
+      }
+      // Fallback: scan all remaining columns
+      for (let j = 2; j < row.length; j++) {
+        if (priorityCols.includes(j)) continue;
+        const val = parseKzValue(row[j]);
+        if (val !== 0) {
+          sectionValues[match.section][match.code] = val;
+          matchCount++;
+          return;
+        }
+      }
+    };
 
     workbook.SheetNames.forEach((sheetName) => {
       const sheet = workbook.Sheets[sheetName];
@@ -453,36 +529,38 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false }: A
 
       rows.forEach((row) => {
         if (!Array.isArray(row) || row.length < 2) return;
-        const cellA = String(row[0] || "").trim();
-        const cellB = String(row[1] || "").toLowerCase().trim();
 
-        const matchByLabel = labelMap.get(cellB);
-        if (matchByLabel) {
-          for (let j = 2; j < row.length; j++) {
-            const val = parseKzValue(row[j]);
-            if (val !== 0) {
-              sectionValues[matchByLabel.section][matchByLabel.code] = val;
-              matchCount++;
-              break;
-            }
+        // Try matching labels from multiple columns (B, C, D)
+        for (let col = 0; col < Math.min(row.length, 4); col++) {
+          const cellText = normalizeLabel(String(row[col] || ""));
+          if (!cellText || cellText.length < 3) continue;
+          const matchByLabel = labelMap.get(cellText);
+          if (matchByLabel) {
+            tryMatchValue(row, matchByLabel);
+            return;
           }
-          return;
         }
 
-        const code = cellA.replace(/^['"]|['"]$/g, "");
-        allSections.forEach((sec, idx) => {
-          const line = sec.lines.find((l) => l.editable && l.code === code);
-          if (line && !sectionValues[idx][line.code]) {
-            for (let j = 2; j < (row as unknown[]).length; j++) {
-              const val = parseKzValue((row as unknown[])[j]);
-              if (val !== 0) {
-                sectionValues[idx][line.code] = val;
-                matchCount++;
-                break;
-              }
-            }
+        // Try matching by CC-3 code from any of the first 3 columns
+        for (let col = 0; col < Math.min(row.length, 3); col++) {
+          const cellCode = String(row[col] || "").trim().replace(/^['"]|['"]$/g, "");
+          if (!cellCode) continue;
+          const matchByCC3 = cc3CodeMap.get(cellCode);
+          if (matchByCC3) {
+            tryMatchValue(row, matchByCC3);
+            return;
           }
-        });
+        }
+
+        // Try matching by PGC code → CC-3 mapping
+        const pgcCode = String(row[0] || "").trim().replace(/[.\s]/g, "");
+        const cc3Code = pgcToCC3[pgcCode];
+        if (cc3Code) {
+          const matchByPgc = cc3CodeMap.get(cc3Code);
+          if (matchByPgc) {
+            tryMatchValue(row, matchByPgc);
+          }
+        }
       });
     });
 
