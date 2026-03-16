@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { PortalEntityProvider } from "@/contexts/PortalEntityContext";
 import { SubmissionProvider } from "@/contexts/SubmissionContext";
+import { FinancialDataProvider } from "@/contexts/FinancialDataContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Login from "./pages/Login";
