@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { PortalEntityProvider } from "@/contexts/PortalEntityContext";
 import { SubmissionProvider } from "@/contexts/SubmissionContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Entidades from "./pages/Entidades";
@@ -20,7 +22,6 @@ import DocumentosObrigatorios from "./pages/DocumentosObrigatorios";
 import Auditoria from "./pages/Auditoria";
 import Esclarecimentos from "./pages/Esclarecimentos";
 import Configuracoes from "./pages/Configuracoes";
-
 import Submissoes from "./pages/Submissoes";
 import SubmissaoDetalhe from "./pages/SubmissaoDetalhe";
 import SubmissaoManual from "./pages/SubmissaoManual";
@@ -45,6 +46,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <AuthProvider>
     <SubmissionProvider>
     <TooltipProvider>
       <Toaster />
@@ -53,61 +55,74 @@ const App = () => (
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/entidades" element={<Entidades />} />
-          <Route path="/exercicios" element={<Exercicios />} />
-          <Route path="/exercicios/:id" element={<ExercicioDetalhe />} />
-          <Route path="/importacao" element={<Importacao />} />
-          <Route path="/plano-contas" element={<PlanoContas />} />
-          <Route path="/validacoes" element={<Validacoes />} />
-          <Route path="/relatorios" element={<Relatorios />} />
-          <Route path="/mapas" element={<Mapas />} />
-          <Route path="/anexos" element={<Anexos />} />
-          <Route path="/actas-recepcao" element={<ActasRecepcao />} />
-          <Route path="/documentos-obrigatorios" element={<DocumentosObrigatorios />} />
-          <Route path="/auditoria" element={<Auditoria />} />
-          <Route path="/esclarecimentos" element={<Esclarecimentos />} />
-          <Route path="/configuracoes" element={<Configuracoes />} />
-          <Route path="/secretaria" element={<Secretaria />} />
-          <Route path="/processos-visto" element={<ProcessosVisto />} />
-          <Route path="/submissoes" element={<Submissoes />} />
-          <Route path="/submissoes/manual" element={<SubmissaoManual />} />
-          <Route path="/submissoes/:id" element={<SubmissaoDetalhe />} />
+          
+          {/* Admin + Auditor routes */}
+          <Route path="/dashboard" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><Dashboard /></ProtectedRoute>} />
+          <Route path="/entidades" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><Entidades /></ProtectedRoute>} />
+          <Route path="/exercicios" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><Exercicios /></ProtectedRoute>} />
+          <Route path="/exercicios/:id" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><ExercicioDetalhe /></ProtectedRoute>} />
+          <Route path="/importacao" element={<ProtectedRoute allowedRoles={["Administrador"]}><Importacao /></ProtectedRoute>} />
+          <Route path="/plano-contas" element={<ProtectedRoute allowedRoles={["Administrador"]}><PlanoContas /></ProtectedRoute>} />
+          <Route path="/validacoes" element={<ProtectedRoute allowedRoles={["Administrador"]}><Validacoes /></ProtectedRoute>} />
+          <Route path="/relatorios" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><Relatorios /></ProtectedRoute>} />
+          <Route path="/mapas" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><Mapas /></ProtectedRoute>} />
+          <Route path="/anexos" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><Anexos /></ProtectedRoute>} />
+          <Route path="/actas-recepcao" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><ActasRecepcao /></ProtectedRoute>} />
+          <Route path="/documentos-obrigatorios" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><DocumentosObrigatorios /></ProtectedRoute>} />
+          <Route path="/auditoria" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><Auditoria /></ProtectedRoute>} />
+          <Route path="/esclarecimentos" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><Esclarecimentos /></ProtectedRoute>} />
+          <Route path="/configuracoes" element={<ProtectedRoute allowedRoles={["Administrador"]}><Configuracoes /></ProtectedRoute>} />
+          <Route path="/submissoes" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><Submissoes /></ProtectedRoute>} />
+          <Route path="/submissoes/manual" element={<ProtectedRoute allowedRoles={["Administrador"]}><SubmissaoManual /></ProtectedRoute>} />
+          <Route path="/submissoes/:id" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><SubmissaoDetalhe /></ProtectedRoute>} />
+          <Route path="/processos-visto" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><ProcessosVisto /></ProtectedRoute>} />
+          
+          {/* Secretaria */}
+          <Route path="/secretaria" element={<ProtectedRoute allowedRoles={["Administrador", "Secretaria"]}><Secretaria /></ProtectedRoute>} />
+
+          {/* Portal Entidade */}
           <Route path="/portal/*" element={
-            <PortalEntityProvider>
-              <Routes>
-                <Route index element={<PortalDashboard />} />
-                <Route path="exercicios" element={<PortalExercicios />} />
-                <Route path="exercicios/:id" element={<PortalExercicioDetalhe />} />
-                <Route path="documentos" element={<PortalDocumentos />} />
-                <Route path="esclarecimentos" element={<PortalEsclarecimentos />} />
-                <Route path="validacoes" element={<PortalValidacoes />} />
-                <Route path="mapas" element={<PortalMapas />} />
-                <Route path="prestacao-contas" element={<PortalPrestacaoContas />} />
-                <Route path="solicitacao-visto" element={<PortalSolicitacaoVisto />} />
-                <Route path="solicitacoes" element={<PortalSolicitacoes />} />
-              </Routes>
-            </PortalEntityProvider>
+            <ProtectedRoute allowedRoles={["Administrador", "Preparador / Contabilista"]}>
+              <PortalEntityProvider>
+                <Routes>
+                  <Route index element={<PortalDashboard />} />
+                  <Route path="exercicios" element={<PortalExercicios />} />
+                  <Route path="exercicios/:id" element={<PortalExercicioDetalhe />} />
+                  <Route path="documentos" element={<PortalDocumentos />} />
+                  <Route path="esclarecimentos" element={<PortalEsclarecimentos />} />
+                  <Route path="validacoes" element={<PortalValidacoes />} />
+                  <Route path="mapas" element={<PortalMapas />} />
+                  <Route path="prestacao-contas" element={<PortalPrestacaoContas />} />
+                  <Route path="solicitacao-visto" element={<PortalSolicitacaoVisto />} />
+                  <Route path="solicitacoes" element={<PortalSolicitacoes />} />
+                </Routes>
+              </PortalEntityProvider>
+            </ProtectedRoute>
           } />
+          
+          {/* Técnico */}
           <Route path="/tecnico/*" element={
-            <PortalEntityProvider>
-              <Routes>
-                <Route index element={<TecnicoDashboard />} />
-                <Route path="prestacao-contas" element={<TecnicoPrestacaoContas />} />
-                <Route path="exercicios" element={<PortalExercicios />} />
-                <Route path="exercicios/:id" element={<PortalExercicioDetalhe />} />
-                <Route path="documentos" element={<PortalDocumentos />} />
-                <Route path="esclarecimentos" element={<PortalEsclarecimentos />} />
-                <Route path="validacoes" element={<PortalValidacoes />} />
-                <Route path="mapas" element={<PortalMapas />} />
-              </Routes>
-            </PortalEntityProvider>
+            <ProtectedRoute allowedRoles={["Administrador", "Técnico Validador"]}>
+              <PortalEntityProvider>
+                <Routes>
+                  <Route index element={<TecnicoDashboard />} />
+                  <Route path="prestacao-contas" element={<TecnicoPrestacaoContas />} />
+                  <Route path="exercicios" element={<PortalExercicios />} />
+                  <Route path="exercicios/:id" element={<PortalExercicioDetalhe />} />
+                  <Route path="documentos" element={<PortalDocumentos />} />
+                  <Route path="esclarecimentos" element={<PortalEsclarecimentos />} />
+                  <Route path="validacoes" element={<PortalValidacoes />} />
+                  <Route path="mapas" element={<PortalMapas />} />
+                </Routes>
+              </PortalEntityProvider>
+            </ProtectedRoute>
           } />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
     </SubmissionProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
