@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Lock, Mail, Shield, Building2, UserCheck, Eye, EyeOff, Stamp } from "lucide-react";
+import { Lock, Mail, Shield, Building2, UserCheck, Eye, EyeOff, Stamp, ClipboardCheck, Gavel, Search } from "lucide-react";
 
 const demoUsers = [
   {
@@ -28,6 +28,16 @@ const demoUsers = [
     color: "bg-accent/10 text-accent border-accent/20",
   },
   {
+    label: "Auditor / Fiscal TCA",
+    email: "auditor@tca.gov.ao",
+    password: "auditor123",
+    role: "Auditor / Fiscal TCA",
+    displayName: "Jorge Baptista",
+    icon: Search,
+    description: "Auditoria e fiscalização",
+    color: "bg-destructive/10 text-destructive border-destructive/20",
+  },
+  {
     label: "Secretaria",
     email: "secretaria@tca.gov.ao",
     password: "secretaria123",
@@ -38,7 +48,17 @@ const demoUsers = [
     color: "bg-warning/10 text-warning border-warning/20",
   },
   {
-    label: "Entidade (Portal)",
+    label: "Dirigente / Aprovador",
+    email: "dirigente@ende.co.ao",
+    password: "dirigente123",
+    role: "Dirigente / Aprovador",
+    displayName: "António Sousa",
+    icon: ClipboardCheck,
+    description: "Aprovação e submissão de contas",
+    color: "bg-success/10 text-success border-success/20",
+  },
+  {
+    label: "Entidade (Contabilista)",
     email: "entidade@ende.co.ao",
     password: "entidade123",
     role: "Preparador / Contabilista",
@@ -46,6 +66,16 @@ const demoUsers = [
     icon: Building2,
     description: "Portal de prestação de contas",
     color: "bg-info/10 text-info border-info/20",
+  },
+  {
+    label: "Auditor Interno",
+    email: "auditoria@ende.co.ao",
+    password: "auditoria123",
+    role: "Auditor Interno",
+    displayName: "Pedro Nunes",
+    icon: Gavel,
+    description: "Controlo interno da entidade",
+    color: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20",
   },
 ];
 
@@ -68,7 +98,7 @@ export default function Login() {
     const matched = demoUsers.find((u) => u.email === email);
     setTimeout(() => {
       setLoading(false);
-      if (matched?.role === "Preparador / Contabilista") {
+      if (matched?.role === "Preparador / Contabilista" || matched?.role === "Dirigente / Aprovador" || matched?.role === "Auditor Interno") {
         navigate("/portal");
       } else if (matched?.role === "Secretaria") {
         navigate("/secretaria");
@@ -146,7 +176,7 @@ export default function Login() {
             <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               Utilizadores Demo — clique para preencher
             </p>
-            <div className="grid gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {demoUsers.map((user) => (
                 <button
                   key={user.email}
