@@ -20,6 +20,7 @@ import {
   FileSearch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { mockEntities } from "@/data/mockData";
