@@ -422,11 +422,11 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
   const [uploadedFile, setUploadedFile] = useState<string | null>(sharedData?.uploadedFile || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync from shared context when external data changes
+  // Sync from shared context when external data changes (version tracks updates)
   useEffect(() => {
     if (!dataKey) return;
     const data = financialCtx.getData(dataKey);
-    if (data.uploadedFile && data.uploadedFile !== uploadedFile) {
+    if (data.uploadedFile) {
       setAtivNaoCorr(data.ativNaoCorr);
       setAtivCorr(data.ativCorr);
       setCapProprio(data.capProprio);
@@ -436,7 +436,8 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
       setCustos(data.custos);
       setUploadedFile(data.uploadedFile);
     }
-  }, [dataKey, financialCtx]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataKey, financialCtx.version]);
 
   const emptyPrior: Record<string, number> = {};
 
