@@ -21,15 +21,17 @@ import {
   ChevronLeft,
   ChevronRight,
   FileQuestion,
+  FileSearch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type FilterType = "todas" | "recepcionado" | "rejeitado" | "solicitacao_elementos" | "nao_lidas";
+type FilterType = "todas" | "recepcionado" | "rejeitado" | "solicitacao_elementos" | "em_analise" | "nao_lidas";
 
 const FILTER_OPTIONS: { value: FilterType; label: string }[] = [
   { value: "todas", label: "Todas" },
   { value: "nao_lidas", label: "Não lidas" },
   { value: "recepcionado", label: "Recepcionadas" },
+  { value: "em_analise", label: "Em Análise" },
   { value: "rejeitado", label: "Devolvidas" },
   { value: "solicitacao_elementos", label: "Solicitações" },
 ];
@@ -52,6 +54,7 @@ export function NotificacoesPanel() {
     // Type/read filter
     if (filter === "nao_lidas") result = result.filter((n) => !n.read);
     else if (filter === "recepcionado") result = result.filter((n) => n.type === "recepcionado");
+    else if (filter === "em_analise") result = result.filter((n) => n.type === "em_analise");
     else if (filter === "rejeitado") result = result.filter((n) => n.type === "rejeitado");
     else if (filter === "solicitacao_elementos") result = result.filter((n) => n.type === "solicitacao_elementos");
 
@@ -87,6 +90,7 @@ export function NotificacoesPanel() {
     todas: entityNotifications.length,
     nao_lidas: entityUnread,
     recepcionado: entityNotifications.filter((n) => n.type === "recepcionado").length,
+    em_analise: entityNotifications.filter((n) => n.type === "em_analise").length,
     rejeitado: entityNotifications.filter((n) => n.type === "rejeitado").length,
     solicitacao_elementos: entityNotifications.filter((n) => n.type === "solicitacao_elementos").length,
   }), [entityNotifications, entityUnread]);
@@ -250,6 +254,7 @@ function NotificationItem({
 }) {
   const [expanded, setExpanded] = useState(false);
   const isSuccess = notif.type === "recepcionado";
+  const isEmAnalise = notif.type === "em_analise";
   const isSolicitacao = notif.type === "solicitacao_elementos";
 
   const formatDate = (iso: string) =>
@@ -292,6 +297,8 @@ function NotificationItem({
           "mt-0.5 shrink-0 rounded-full p-1.5",
           isSuccess
             ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+            : isEmAnalise
+            ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
             : isSolicitacao
             ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
             : "bg-destructive/10 text-destructive"
@@ -299,6 +306,8 @@ function NotificationItem({
       >
         {isSuccess ? (
           <CheckCircle className="h-4 w-4" />
+        ) : isEmAnalise ? (
+          <FileSearch className="h-4 w-4" />
         ) : isSolicitacao ? (
           <FileQuestion className="h-4 w-4" />
         ) : (

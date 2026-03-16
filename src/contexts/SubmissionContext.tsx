@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect, ReactNode 
 import { supabase } from "@/integrations/supabase/client";
 
 export type SubmissionStatus = "rascunho" | "pendente" | "recepcionado" | "rejeitado" | "em_analise";
-export type NotificationType = "recepcionado" | "rejeitado" | "solicitacao_elementos";
+export type NotificationType = "recepcionado" | "rejeitado" | "solicitacao_elementos" | "em_analise";
 
 interface SubmissionEntry {
   entityId: string;
@@ -224,7 +224,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     sendNotification(
       entityId,
       fiscalYearId,
-      "recepcionado",
+      "em_analise",
       `Processo do exercício ${year} remetido para análise técnica`,
       "O processo foi enviado pela Secretaria ao Técnico Validador para análise e emissão de parecer. Poderá acompanhar o estado no portal.",
       entityName,
