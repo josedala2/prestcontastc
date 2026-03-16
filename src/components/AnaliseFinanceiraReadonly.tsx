@@ -587,12 +587,16 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
       });
     });
 
+    const newSectionData: Record<string, number>[] = allSections.map(() => ({}));
     allSections.forEach((sec, idx) => {
       if (Object.keys(sectionValues[idx]).length > 0) {
-        sec.setter((prev) => ({ ...prev, ...sectionValues[idx] }));
+        const merged = { ...sectionValues[idx] };
+        sec.setter((prev) => ({ ...prev, ...merged }));
+        newSectionData[idx] = merged;
       }
     });
-    return matchCount;
+    // Return both count and parsed data for context sync
+    return { matchCount, sectionData: newSectionData };
   }, []);
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
