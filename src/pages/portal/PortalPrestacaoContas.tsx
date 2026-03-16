@@ -257,6 +257,22 @@ function EntidadeView({
         </TabsContent>
       </Tabs>
 
+      {/* Validation warnings */}
+      {(!isSubmitted || canResubmit) && (!uploadedFile || !docsCompliance.allDone) && (
+        <div className="flex items-start gap-3 p-4 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800/30">
+          <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Submissão bloqueada — pendências detectadas</p>
+            <ul className="text-xs text-amber-700 dark:text-amber-400 space-y-0.5 list-disc list-inside">
+              {!uploadedFile && <li>Balancete não carregado (tab "Balancete")</li>}
+              {!docsCompliance.allDone && (
+                <li>Documentos obrigatórios em falta: {docsCompliance.uploaded}/{docsCompliance.required} carregados (tab "Documentos")</li>
+              )}
+            </ul>
+          </div>
+        </div>
+      )}
+
       {/* Submit button */}
       {(!isSubmitted || canResubmit) && (
         <div className="flex justify-end">
@@ -265,7 +281,7 @@ function EntidadeView({
               <Button
                 size="lg"
                 className="gap-2"
-                disabled={!uploadedFile}
+                disabled={!uploadedFile || !docsCompliance.allDone}
               >
                 <Send className="h-4 w-4" />
                 Submeter Prestação de Contas
@@ -297,10 +313,14 @@ function EntidadeView({
                         <span className="text-muted-foreground">Balancete</span>
                         <span className="font-medium text-foreground">{uploadedFile || "—"}</span>
                       </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Documentos obrigatórios</span>
+                        <span className="font-medium text-foreground">{docsCompliance.uploaded}/{docsCompliance.required}</span>
+                      </div>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Ao confirmar, declara que todos os dados e documentos apresentados são verdadeiros e completos,
-                      nos termos da Resolução nº 1/17 do Tribunal de Contas.
+                      nos termos da {RESOLUCAO_LABELS[TIPOLOGIA_RESOLUCAO[entityTipologia]].label} do Tribunal de Contas.
                     </p>
                   </div>
                 </AlertDialogDescription>
