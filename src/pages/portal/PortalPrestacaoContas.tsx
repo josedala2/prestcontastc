@@ -112,6 +112,7 @@ function EntidadeView({
   periodo,
   entityName,
   entityId,
+  entityTipologia,
 }: {
   uploadedFile: string | null;
   setUploadedFile: (f: string | null) => void;
@@ -120,6 +121,7 @@ function EntidadeView({
   periodo: string;
   entityName: string;
   entityId: string;
+  entityTipologia: EntityTipologia;
 }) {
   const [entidadeTab, setEntidadeTab] = useState("balancete");
   const { getStatus, submit } = useSubmissions();
