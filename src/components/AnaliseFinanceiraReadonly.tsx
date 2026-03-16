@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import {
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { generateCC2Template } from "@/lib/cc2TemplateGenerator";
+import { useFinancialData } from "@/contexts/FinancialDataContext";
 
 // ─── Helpers ───
 const formatKz = (v: number) =>
