@@ -101,36 +101,6 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     [submissions]
   );
 
-  const submit = useCallback((entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => {
-    setSubmissions((prev) => {
-      const existing = prev.findIndex(
-        (s) => s.entityId === entityId && s.fiscalYearId === fiscalYearId
-      );
-      const entry: SubmissionEntry = {
-        entityId,
-        fiscalYearId,
-        status: "pendente",
-        submittedAt: new Date().toISOString(),
-      };
-      if (existing >= 0) {
-        const updated = [...prev];
-        updated[existing] = entry;
-        return updated;
-      }
-      return [...prev, entry];
-    });
-    const year = fiscalYearId.split("-").pop() || fiscalYearId;
-    sendNotification(
-      entityId,
-      fiscalYearId,
-      "submissao",
-      `Nova prestação de contas submetida — Exercício ${year}`,
-      `A entidade ${entityName || entityId} submeteu a prestação de contas do exercício ${year}. Aguarda recepção e conferência documental pela Secretaria.`,
-      entityName,
-      entityEmail
-    );
-  }, [sendNotification]);
-
   const sendNotification = useCallback(async (
     entityId: string,
     fiscalYearId: string,
@@ -181,6 +151,36 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
       setNotifications((prev) => [notification, ...prev]);
     }
   }, [refreshNotifications]);
+
+  const submit = useCallback((entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => {
+    setSubmissions((prev) => {
+      const existing = prev.findIndex(
+        (s) => s.entityId === entityId && s.fiscalYearId === fiscalYearId
+      );
+      const entry: SubmissionEntry = {
+        entityId,
+        fiscalYearId,
+        status: "pendente",
+        submittedAt: new Date().toISOString(),
+      };
+      if (existing >= 0) {
+        const updated = [...prev];
+        updated[existing] = entry;
+        return updated;
+      }
+      return [...prev, entry];
+    });
+    const year = fiscalYearId.split("-").pop() || fiscalYearId;
+    sendNotification(
+      entityId,
+      fiscalYearId,
+      "submissao",
+      `Nova prestação de contas submetida — Exercício ${year}`,
+      `A entidade ${entityName || entityId} submeteu a prestação de contas do exercício ${year}. Aguarda recepção e conferência documental pela Secretaria.`,
+      entityName,
+      entityEmail
+    );
+  }, [sendNotification]);
 
   const recepcionar = useCallback((entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => {
     setSubmissions((prev) =>
