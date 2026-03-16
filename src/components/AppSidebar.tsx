@@ -108,8 +108,31 @@ const navSections: { label: string; items: NavEntry[] }[] = [
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+  const { user, logout } = useAuth();
 
+  const userRole = user?.role || "Administrador";
+  const allowedSections = roleSidebarSections[userRole];
+  const hiddenPaths = roleHiddenPaths[userRole];
+
+  // Filter sections and items based on role
+  const filteredSections = navSections
+    .filter((s) => allowedSections.includes(s.label))
+    .map((section) => ({
+      ...section,
+      items: section.items
+        .map((item) => {
+          if (hasChildren(item)) {
+            const filteredChildren = item.children.filter((c) => !hiddenPaths.includes(c.path));
+            if (filteredChildren.length === 0) return null;
+            return { ...item, children: filteredChildren };
+          }
+          return hiddenPaths.includes(item.path) ? null : item;
+        })
+        .filter(Boolean) as NavEntry[],
+    }))
+    .filter((s) => s.items.length > 0);
   const isActive = (path: string) => location.pathname === path;
 
   const isChildActive = (item: NavItemWithChildren) =>
