@@ -38,6 +38,7 @@ import TecnicoDashboard from "./pages/tecnico/TecnicoDashboard";
 import TecnicoPrestacaoContas from "./pages/tecnico/TecnicoPrestacaoContas";
 import ProcessosVisto from "./pages/ProcessosVisto";
 import ActasRecepcao from "./pages/ActasRecepcao";
+import Secretaria from "./pages/Secretaria";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
