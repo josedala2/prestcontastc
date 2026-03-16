@@ -167,7 +167,7 @@ export function AppSidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 py-2 px-2 overflow-y-auto">
-        {navSections.map((section) => (
+        {filteredSections.map((section) => (
           <div key={section.label} className="mb-3">
             {!collapsed && (
               <p className="px-3 mb-1.5 text-[10px] font-semibold text-sidebar-muted uppercase tracking-[0.08em]">
