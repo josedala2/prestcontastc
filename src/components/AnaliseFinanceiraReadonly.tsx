@@ -608,12 +608,10 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false }: A
                   <FileSpreadsheet className="h-4 w-4" />
                   Carregar
                 </Button>
-                {(Object.keys(ativNaoCorr).length > 0 || Object.keys(proveitosV).length > 0) && (
-                  <Button variant="ghost" size="sm" onClick={handleClearData} className="gap-1 text-destructive hover:text-destructive">
-                    <X className="h-3.5 w-3.5" />
-                    Limpar
-                  </Button>
-                )}
+                <Button variant="ghost" size="sm" onClick={handleClearData} className="gap-1 text-destructive hover:text-destructive">
+                  <X className="h-3.5 w-3.5" />
+                  Limpar Dados
+                </Button>
               </div>
             </div>
           </CardContent>
