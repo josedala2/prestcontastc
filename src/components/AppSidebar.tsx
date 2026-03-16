@@ -274,14 +274,27 @@ export function AppSidebar() {
       </div>
 
       <div className="p-3 border-t border-sidebar-border">
-        <div className={cn("flex items-center gap-2.5", collapsed && "justify-center")}>
+        <div className={cn("flex items-center gap-2.5", collapsed && "flex-col")}>
           <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[11px] font-bold text-secondary-foreground shrink-0">
             {user?.initials || "??"}
           </div>
           {!collapsed && (
             <div className="min-w-0 animate-fade-in flex-1">
               <p className="text-xs font-medium text-sidebar-foreground truncate">{user?.displayName || "Utilizador"}</p>
-              <p className="text-[10px] text-sidebar-foreground/40">{user?.role || ""}</p>
+              <span className={cn(
+                "inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider mt-0.5",
+                user?.role === "Administrador" && "bg-primary/20 text-sidebar-primary",
+                user?.role === "Auditor / Fiscal TCA" && "bg-destructive/20 text-destructive",
+                user?.role === "Técnico Validador" && "bg-accent/20 text-accent-foreground",
+                user?.role === "Secretaria" && "bg-warning/20 text-warning",
+                user?.role === "Preparador / Contabilista" && "bg-info/20 text-info",
+              )}>
+                {user?.role === "Administrador" ? "Admin" :
+                 user?.role === "Auditor / Fiscal TCA" ? "Auditor" :
+                 user?.role === "Técnico Validador" ? "Técnico" :
+                 user?.role === "Secretaria" ? "Secretaria" :
+                 user?.role === "Preparador / Contabilista" ? "Entidade" : "—"}
+              </span>
             </div>
           )}
           {!collapsed && (
