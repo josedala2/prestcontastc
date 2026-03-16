@@ -1,16 +1,20 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { PortalLayout } from "@/components/PortalLayout";
 import { StatusBadge } from "@/components/ui-custom/PageElements";
-import { mockFiscalYears } from "@/data/mockData";
+import { mockFiscalYears, mockEntities } from "@/data/mockData";
 import { STATUS_LABELS } from "@/types";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { BalancoPatrimonial } from "@/components/BalancoPatrimonial";
+import { AnaliseFinanceira } from "@/components/AnaliseFinanceiraReadonly";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft,
   Clock,
   AlertTriangle,
   CheckCircle,
+  FileSpreadsheet,
+  BarChart3,
 } from "lucide-react";
 
 const PortalExercicioDetalhe = () => {
@@ -20,6 +24,7 @@ const PortalExercicioDetalhe = () => {
 
   const entityExercicios = mockFiscalYears.filter((fy) => fy.entityId === entityId);
   const fy = entityExercicios.find((f) => f.id === id);
+  const entity = mockEntities.find((e) => e.id === entityId);
 
   if (!fy) {
     return (
@@ -69,8 +74,31 @@ const PortalExercicioDetalhe = () => {
         </div>
       </div>
 
-      {/* Balancete submetido */}
-      <BalancoPatrimonial entityId={fy.entityId} fiscalYearId={fy.id} year={fy.year} />
+      {/* Main tabs: Balancete + Análise Financeira */}
+      <Tabs defaultValue="balancete" className="space-y-4">
+        <TabsList className="grid grid-cols-2 w-full max-w-md">
+          <TabsTrigger value="balancete" className="text-xs gap-1.5">
+            <FileSpreadsheet className="h-3.5 w-3.5" />
+            Balancete
+          </TabsTrigger>
+          <TabsTrigger value="analise" className="text-xs gap-1.5">
+            <BarChart3 className="h-3.5 w-3.5" />
+            Análise Financeira CC-2
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="balancete">
+          <BalancoPatrimonial entityId={fy.entityId} fiscalYearId={fy.id} year={fy.year} />
+        </TabsContent>
+
+        <TabsContent value="analise">
+          <AnaliseFinanceira
+            entityName={entity?.name || fy.entityName}
+            nif={entity?.nif || ""}
+            year={String(fy.year)}
+          />
+        </TabsContent>
+      </Tabs>
     </PortalLayout>
   );
 };
