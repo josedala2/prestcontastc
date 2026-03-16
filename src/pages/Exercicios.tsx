@@ -56,26 +56,25 @@ const Exercicios = () => {
   };
 
   const handleSave = () => {
-    const entity = mockEntities.find((e) => e.id === form.entityId);
-    if (!entity) {
-      toast.error("Seleccione uma entidade.");
-      return;
-    }
     if (!form.startDate || !form.endDate) {
       toast.error("Preencha as datas do exercício.");
       return;
     }
 
-    // Validar duplicação de ano+entidade
-    const duplicate = fiscalYears.find(
-      (fy) => fy.entityId === form.entityId && fy.year === form.year && (!editing || fy.id !== editing.id)
-    );
-    if (duplicate) {
-      toast.error(`Já existe um exercício para ${entity.name} no ano ${form.year}.`);
-      return;
-    }
-
     if (editing) {
+      // Edit mode: single entity
+      const entity = mockEntities.find((e) => e.id === form.entityId);
+      if (!entity) {
+        toast.error("Seleccione uma entidade.");
+        return;
+      }
+      const duplicate = fiscalYears.find(
+        (fy) => fy.entityId === form.entityId && fy.year === form.year && fy.id !== editing.id
+      );
+      if (duplicate) {
+        toast.error(`Já existe um exercício para ${entity.name} no ano ${form.year}.`);
+        return;
+      }
       setFiscalYears((prev) =>
         prev.map((fy) =>
           fy.id === editing.id
@@ -85,23 +84,47 @@ const Exercicios = () => {
       );
       toast.success("Exercício actualizado com sucesso.");
     } else {
-      const newFy: FiscalYear = {
-        id: crypto.randomUUID(),
-        entityId: form.entityId,
-        entityName: entity.name,
-        year: form.year,
-        startDate: form.startDate,
-        endDate: form.endDate,
-        status: "rascunho",
-        totalDebito: 0,
-        totalCredito: 0,
-        errorsCount: 0,
-        warningsCount: 0,
-        checklistProgress: 0,
-        deadline: `${form.year + 1}-06-30`,
-      };
-      setFiscalYears((prev) => [...prev, newFy]);
-      toast.success("Exercício criado com sucesso.");
+      // Create mode: multiple entities
+      if (selectedEntityIds.length === 0) {
+        toast.error("Seleccione pelo menos uma entidade.");
+        return;
+      }
+      const duplicates: string[] = [];
+      const newFys: FiscalYear[] = [];
+      for (const eid of selectedEntityIds) {
+        const entity = mockEntities.find((e) => e.id === eid);
+        if (!entity) continue;
+        const exists = fiscalYears.find((fy) => fy.entityId === eid && fy.year === form.year);
+        if (exists) {
+          duplicates.push(entity.name);
+          continue;
+        }
+        newFys.push({
+          id: crypto.randomUUID(),
+          entityId: eid,
+          entityName: entity.name,
+          year: form.year,
+          startDate: form.startDate,
+          endDate: form.endDate,
+          status: "rascunho",
+          totalDebito: 0,
+          totalCredito: 0,
+          errorsCount: 0,
+          warningsCount: 0,
+          checklistProgress: 0,
+          deadline: `${form.year + 1}-06-30`,
+        });
+      }
+      if (newFys.length > 0) {
+        setFiscalYears((prev) => [...prev, ...newFys]);
+        toast.success(`${newFys.length} exercício(s) criado(s) com sucesso.`);
+      }
+      if (duplicates.length > 0) {
+        toast.warning(`Já existem exercícios ${form.year} para: ${duplicates.join(", ")}`);
+      }
+      if (newFys.length === 0 && duplicates.length > 0) {
+        return; // Don't close dialog if nothing was created
+      }
     }
     setDialogOpen(false);
   };
