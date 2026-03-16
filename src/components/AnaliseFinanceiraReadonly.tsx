@@ -400,9 +400,10 @@ interface AnaliseFinanceiraProps {
   nif: string;
   year: string;
   readOnly?: boolean;
+  hideTabs?: string[];
 }
 
-export function AnaliseFinanceira({ entityName, nif, year, readOnly = false }: AnaliseFinanceiraProps) {
+export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hideTabs = [] }: AnaliseFinanceiraProps) {
   const [activeTab, setActiveTab] = useState("balanco");
 
   const [ativNaoCorr, setAtivNaoCorr] = useState<Record<string, number>>({});
@@ -698,27 +699,35 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false }: A
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
-          <TabsTrigger value="balanco" className="text-xs gap-1">
-            <FileSpreadsheet className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Balanço</span>
-            <span className="sm:hidden">BP</span>
-          </TabsTrigger>
-          <TabsTrigger value="dre" className="text-xs gap-1">
-            <Calculator className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Dem. Resultados</span>
-            <span className="sm:hidden">DRE</span>
-          </TabsTrigger>
-          <TabsTrigger value="indicadores" className="text-xs gap-1">
-            <TrendingUp className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Indicadores</span>
-            <span className="sm:hidden">Ind.</span>
-          </TabsTrigger>
-          <TabsTrigger value="resumo" className="text-xs gap-1">
-            <BarChart3 className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Resumo</span>
-            <span className="sm:hidden">Res.</span>
-          </TabsTrigger>
+        <TabsList className={`grid w-full`} style={{ gridTemplateColumns: `repeat(${4 - hideTabs.length}, 1fr)` }}>
+          {!hideTabs.includes("balanco") && (
+            <TabsTrigger value="balanco" className="text-xs gap-1">
+              <FileSpreadsheet className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Balanço</span>
+              <span className="sm:hidden">BP</span>
+            </TabsTrigger>
+          )}
+          {!hideTabs.includes("dre") && (
+            <TabsTrigger value="dre" className="text-xs gap-1">
+              <Calculator className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Dem. Resultados</span>
+              <span className="sm:hidden">DRE</span>
+            </TabsTrigger>
+          )}
+          {!hideTabs.includes("indicadores") && (
+            <TabsTrigger value="indicadores" className="text-xs gap-1">
+              <TrendingUp className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Indicadores</span>
+              <span className="sm:hidden">Ind.</span>
+            </TabsTrigger>
+          )}
+          {!hideTabs.includes("resumo") && (
+            <TabsTrigger value="resumo" className="text-xs gap-1">
+              <BarChart3 className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Resumo</span>
+              <span className="sm:hidden">Res.</span>
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* BALANÇO */}
