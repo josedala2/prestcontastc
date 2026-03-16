@@ -97,9 +97,10 @@ const formatSize = (bytes: number) => {
 interface Props {
   disabled?: boolean;
   tipologia?: EntityTipologia;
+  onComplianceChange?: (allRequiredUploaded: boolean, uploadedCount: number, requiredCount: number) => void;
 }
 
-export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica" }: Props) {
+export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica", onComplianceChange }: Props) {
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, UploadedDoc>>({});
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
