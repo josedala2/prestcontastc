@@ -101,7 +101,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     [submissions]
   );
 
-  const submit = useCallback((entityId: string, fiscalYearId: string) => {
+  const submit = useCallback((entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => {
     setSubmissions((prev) => {
       const existing = prev.findIndex(
         (s) => s.entityId === entityId && s.fiscalYearId === fiscalYearId
@@ -119,7 +119,17 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
       }
       return [...prev, entry];
     });
-  }, []);
+    const year = fiscalYearId.split("-").pop() || fiscalYearId;
+    sendNotification(
+      entityId,
+      fiscalYearId,
+      "submissao",
+      `Nova prestação de contas submetida — Exercício ${year}`,
+      `A entidade ${entityName || entityId} submeteu a prestação de contas do exercício ${year}. Aguarda recepção e conferência documental pela Secretaria.`,
+      entityName,
+      entityEmail
+    );
+  }, [sendNotification]);
 
   const sendNotification = useCallback(async (
     entityId: string,
