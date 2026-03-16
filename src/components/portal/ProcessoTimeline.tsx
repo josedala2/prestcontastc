@@ -12,10 +12,11 @@ const STEPS = [
 
 function getActiveStep(submissionStatus: string, hasParecer: boolean): number {
   if (hasParecer) return 4;
+  if (submissionStatus === "em_analise") return 3;
   if (submissionStatus === "recepcionado") return 2;
   if (submissionStatus === "pendente") return 1;
-  if (submissionStatus === "rejeitado") return 0; // devolvido, back to 0
-  return 0; // rascunho
+  if (submissionStatus === "rejeitado") return 0;
+  return 0;
 }
 
 interface ProcessoTimelineProps {
