@@ -92,13 +92,14 @@ const PortalPrestacaoContas = () => {
 };
 
 // ─── Entidade View (tabs: Balancete + Documentos + Estado) ───
-type SubmissionStatus = "rascunho" | "pendente" | "recepcionado" | "rejeitado";
+type SubmissionStatus = "rascunho" | "pendente" | "recepcionado" | "rejeitado" | "em_analise";
 
 const STATUS_CONFIG: Record<SubmissionStatus, { label: string; color: string; icon: typeof Clock }> = {
   rascunho: { label: "Rascunho", color: "bg-muted text-muted-foreground", icon: FileText },
   pendente: { label: "Pendente — Aguarda Recepção pela Secretaria", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400", icon: Clock },
   recepcionado: { label: "Recepcionado — Acta de Recepção Emitida", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400", icon: CheckCircle },
   rejeitado: { label: "Devolvido — Documentação Incompleta", color: "bg-destructive/10 text-destructive", icon: AlertTriangle },
+  em_analise: { label: "Em Análise — Processo remetido ao Técnico Validador", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400", icon: FileText },
 };
 
 function EntidadeView({
