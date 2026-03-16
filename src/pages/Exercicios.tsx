@@ -137,7 +137,12 @@ const Exercicios = () => {
 
   return (
     <AppLayout>
-      <PageHeader title="Exercícios Fiscais" description="Gestão de períodos contabilísticos — Prazo: 30 de Junho do ano seguinte" />
+      <div className="flex items-center justify-between mb-6">
+        <PageHeader title="Exercícios Fiscais" description="Gestão de períodos contabilísticos — Prazo: 30 de Junho do ano seguinte" />
+        <Button onClick={openNew} className="gap-1.5">
+          <Plus className="h-4 w-4" /> Novo Exercício
+        </Button>
+      </div>
 
       {/* New / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
