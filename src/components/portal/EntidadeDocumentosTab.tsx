@@ -130,7 +130,10 @@ export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica",
   const progress = Math.round((uploadedRequiredCount / requiredDocs.length) * 100);
   const allRequiredDone = uploadedRequiredCount === requiredDocs.length;
 
-  return (
+  useEffect(() => {
+    onComplianceChange?.(allRequiredDone, uploadedRequiredCount, requiredDocs.length);
+  }, [allRequiredDone, uploadedRequiredCount, requiredDocs.length, onComplianceChange]);
+
     <div className="space-y-6">
       {/* Progress */}
       <Card>
