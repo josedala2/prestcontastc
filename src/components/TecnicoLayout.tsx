@@ -15,6 +15,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { mockEntities } from "@/data/mockData";
 import {
@@ -54,6 +55,7 @@ export function TecnicoLayout({ children }: TecnicoLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pageTitle = routeTitles[location.pathname] || "Técnico";
   const { entity, setEntityId } = usePortalEntity();
+  const { user, logout } = useAuth();
 
   const shortName = entity.name.split(" - ")[1] || entity.name.split(" — ")[0] || entity.name;
 
@@ -101,7 +103,7 @@ export function TecnicoLayout({ children }: TecnicoLayoutProps) {
             </DropdownMenuContent>
           </DropdownMenu>
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => { logout(); navigate("/login"); }}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] text-header-foreground/70 hover:text-header-foreground hover:bg-header-foreground/10 transition-colors"
             title="Terminar Sessão"
           >

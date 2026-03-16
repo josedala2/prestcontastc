@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Building2,
   Calendar,
@@ -25,6 +25,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth, roleHiddenPaths, roleSidebarSections } from "@/contexts/AuthContext";
 
 type NavItem = {
   title: string;
@@ -107,8 +108,31 @@ const navSections: { label: string; items: NavEntry[] }[] = [
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+  const { user, logout } = useAuth();
 
+  const userRole = user?.role || "Administrador";
+  const allowedSections = roleSidebarSections[userRole];
+  const hiddenPaths = roleHiddenPaths[userRole];
+
+  // Filter sections and items based on role
+  const filteredSections = navSections
+    .filter((s) => allowedSections.includes(s.label))
+    .map((section) => ({
+      ...section,
+      items: section.items
+        .map((item) => {
+          if (hasChildren(item)) {
+            const filteredChildren = item.children.filter((c) => !hiddenPaths.includes(c.path));
+            if (filteredChildren.length === 0) return null;
+            return { ...item, children: filteredChildren };
+          }
+          return hiddenPaths.includes(item.path) ? null : item;
+        })
+        .filter(Boolean) as NavEntry[],
+    }))
+    .filter((s) => s.items.length > 0);
   const isActive = (path: string) => location.pathname === path;
 
   const isChildActive = (item: NavItemWithChildren) =>
@@ -143,7 +167,7 @@ export function AppSidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 py-2 px-2 overflow-y-auto">
-        {navSections.map((section) => (
+        {filteredSections.map((section) => (
           <div key={section.label} className="mb-3">
             {!collapsed && (
               <p className="px-3 mb-1.5 text-[10px] font-semibold text-sidebar-muted uppercase tracking-[0.08em]">
@@ -249,17 +273,25 @@ export function AppSidebar() {
         </button>
       </div>
 
-      {/* User */}
       <div className="p-3 border-t border-sidebar-border">
         <div className={cn("flex items-center gap-2.5", collapsed && "justify-center")}>
           <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[11px] font-bold text-secondary-foreground shrink-0">
-            CM
+            {user?.initials || "??"}
           </div>
           {!collapsed && (
-            <div className="min-w-0 animate-fade-in">
-              <p className="text-xs font-medium text-sidebar-foreground truncate">Carlos Mendes</p>
-              <p className="text-[10px] text-sidebar-foreground/40">Administrador TCA</p>
+            <div className="min-w-0 animate-fade-in flex-1">
+              <p className="text-xs font-medium text-sidebar-foreground truncate">{user?.displayName || "Utilizador"}</p>
+              <p className="text-[10px] text-sidebar-foreground/40">{user?.role || ""}</p>
             </div>
+          )}
+          {!collapsed && (
+            <button
+              onClick={() => { logout(); navigate("/login"); }}
+              className="text-sidebar-foreground/40 hover:text-sidebar-foreground transition-colors"
+              title="Terminar Sessão"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
           )}
         </div>
       </div>
