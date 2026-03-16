@@ -21,7 +21,7 @@ import { useSubmissions } from "@/contexts/SubmissionContext";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 import {
   ArrowLeft, CheckCircle, XCircle, FileText, Eye, Stamp, Pencil,
-  AlertTriangle, Undo2, Building2, X, Send,
+  AlertTriangle, Undo2, Building2, X, Send, BarChart3,
 } from "lucide-react";
 import { toast } from "sonner";
 
