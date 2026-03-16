@@ -47,7 +47,7 @@ export const roleSidebarSections: Record<UserRole, string[]> = {
   "Administrador": ["Principal", "Dados", "Relatórios", "Dossiê", "Acesso Externo", "Sistema"],
   "Técnico Validador": [],
   "Auditor / Fiscal TCA": ["Principal", "Relatórios", "Dossiê"],
-  "Secretaria": [],
+  "Secretaria": ["Principal", "Dossiê"],
   "Preparador / Contabilista": [],
 };
 
@@ -59,7 +59,11 @@ export const roleHiddenPaths: Record<UserRole, string[]> = {
     "/importacao", "/plano-contas", "/validacoes", "/configuracoes",
     "/portal", "/tecnico", "/secretaria", "/submissoes/manual",
   ],
-  "Secretaria": [],
+  "Secretaria": [
+    "/dashboard", "/exercicios", "/importacao", "/plano-contas", "/validacoes",
+    "/relatorios", "/mapas", "/anexos", "/configuracoes",
+    "/portal", "/tecnico", "/submissoes/manual",
+  ],
   "Preparador / Contabilista": [],
 };
 
