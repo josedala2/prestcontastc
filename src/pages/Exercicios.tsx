@@ -171,24 +171,67 @@ const Exercicios = () => {
 
       {/* New / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? "Editar Exercício" : "Novo Exercício"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
-            <div>
-              <Label>Entidade</Label>
-              <Select value={form.entityId} onValueChange={(v) => setForm({ ...form, entityId: v })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccione a entidade" />
-                </SelectTrigger>
-                <SelectContent>
-                  {mockEntities.map((e) => (
-                    <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {editing ? (
+              <div>
+                <Label>Entidade</Label>
+                <Select value={form.entityId} onValueChange={(v) => setForm({ ...form, entityId: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione a entidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockEntities.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <div>
+                <Label>Entidades</Label>
+                <div className="mt-2 border border-border rounded-lg max-h-48 overflow-y-auto">
+                  <div className="p-2 border-b border-border bg-muted/30">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <Checkbox
+                        checked={selectedEntityIds.length === mockEntities.length}
+                        onCheckedChange={(checked) => {
+                          setSelectedEntityIds(checked ? mockEntities.map((e) => e.id) : []);
+                        }}
+                      />
+                      <span className="text-sm font-medium">Seleccionar Todas ({mockEntities.length})</span>
+                    </label>
+                  </div>
+                  <div className="p-2 space-y-1.5">
+                    {mockEntities.map((e) => {
+                      const alreadyExists = fiscalYears.some((fy) => fy.entityId === e.id && fy.year === form.year);
+                      return (
+                        <label key={e.id} className="flex items-center gap-2 cursor-pointer py-1 px-1 rounded hover:bg-muted/30">
+                          <Checkbox
+                            checked={selectedEntityIds.includes(e.id)}
+                            onCheckedChange={(checked) => {
+                              setSelectedEntityIds((prev) =>
+                                checked ? [...prev, e.id] : prev.filter((id) => id !== e.id)
+                              );
+                            }}
+                          />
+                          <span className="text-sm flex-1 truncate">{e.name}</span>
+                          {alreadyExists && (
+                            <Badge variant="secondary" className="text-[9px] shrink-0">Já existe</Badge>
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+                {selectedEntityIds.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-1.5">{selectedEntityIds.length} entidade(s) seleccionada(s)</p>
+                )}
+              </div>
+            )}
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label>Ano</Label>
