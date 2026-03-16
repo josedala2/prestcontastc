@@ -235,7 +235,16 @@ export default function ProcessosVisto() {
   };
 
   const handleToggleDoc = (docId: string) => {
+    if (!viewedDocs[docId]) {
+      toast.warning("Deve visualizar o documento antes de o verificar.");
+      return;
+    }
     setCheckedDocs((prev) => ({ ...prev, [docId]: !prev[docId] }));
+  };
+
+  const handleViewDoc = (docId: string, docLabel: string) => {
+    setViewedDocs((prev) => ({ ...prev, [docId]: true }));
+    toast.info(`A visualizar: ${docLabel}`, { duration: 2000 });
   };
 
   const closePdfPreview = () => {
