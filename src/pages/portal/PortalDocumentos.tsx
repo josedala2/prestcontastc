@@ -318,12 +318,7 @@ const PortalDocumentos = () => {
       </div>
 
       {/* Submit button */}
-      <div className="mt-6 flex justify-end">
-        <Button size="lg" disabled={!allRequiredDone} className="gap-2" onClick={() => toast.info("Submissão disponível após activação do backend.")}>
-          <CheckCircle className="h-4 w-4" />
-          Submeter Prestação de Contas
-        </Button>
-      </div>
+      <SubmitButton entityId={entity.id} entityName={entity.name} allRequiredDone={allRequiredDone} />
     </PortalLayout>
   );
 };
