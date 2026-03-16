@@ -65,6 +65,15 @@ const Exercicios = () => {
       return;
     }
 
+    // Validar duplicação de ano+entidade
+    const duplicate = fiscalYears.find(
+      (fy) => fy.entityId === form.entityId && fy.year === form.year && (!editing || fy.id !== editing.id)
+    );
+    if (duplicate) {
+      toast.error(`Já existe um exercício para ${entity.name} no ano ${form.year}.`);
+      return;
+    }
+
     if (editing) {
       setFiscalYears((prev) =>
         prev.map((fy) =>
@@ -74,6 +83,24 @@ const Exercicios = () => {
         )
       );
       toast.success("Exercício actualizado com sucesso.");
+    } else {
+      const newFy: FiscalYear = {
+        id: crypto.randomUUID(),
+        entityId: form.entityId,
+        entityName: entity.name,
+        year: form.year,
+        startDate: form.startDate,
+        endDate: form.endDate,
+        status: "rascunho",
+        totalDebito: 0,
+        totalCredito: 0,
+        errorsCount: 0,
+        warningsCount: 0,
+        checklistProgress: 0,
+        deadline: `${form.year + 1}-06-30`,
+      };
+      setFiscalYears((prev) => [...prev, newFy]);
+      toast.success("Exercício criado com sucesso.");
     }
     setDialogOpen(false);
   };
