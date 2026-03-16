@@ -1,0 +1,2 @@
+ALTER TABLE public.submission_notifications DROP CONSTRAINT submission_notifications_type_check;
+ALTER TABLE public.submission_notifications ADD CONSTRAINT submission_notifications_type_check CHECK (type = ANY (ARRAY['submissao'::text, 'recepcionado'::text, 'rejeitado'::text, 'solicitacao_elementos'::text, 'em_analise'::text]));
