@@ -318,7 +318,22 @@ const PortalDocumentos = () => {
       </div>
 
       {/* Submit button */}
-      <DocSubmitArea entityId={entity.id} entityName={entity.name} disabled={!allRequiredDone} />
+      {(() => {
+        const { submit } = useSubmissions();
+        const fiscalYearId = `${entity.id}-2024`;
+        const handleSubmit = () => {
+          submit(entity.id, fiscalYearId, entity.name);
+          toast.success("Prestação de contas submetida com sucesso! Aguarda recepção pela Secretaria.");
+        };
+        return (
+          <div className="mt-6 flex justify-end">
+            <Button size="lg" disabled={!allRequiredDone} className="gap-2" onClick={handleSubmit}>
+              <CheckCircle className="h-4 w-4" />
+              Submeter Prestação de Contas
+            </Button>
+          </div>
+        );
+      })()}
     </PortalLayout>
   );
 };
