@@ -34,7 +34,7 @@ interface SubmissionContextType {
   markAsRead: (notificationId: string) => void;
   markAllAsRead: (entityId: string) => void;
   getStatus: (entityId: string, fiscalYearId?: string) => SubmissionStatus;
-  submit: (entityId: string, fiscalYearId: string) => void;
+  submit: (entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => void;
   recepcionar: (entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => void;
   rejeitar: (entityId: string, fiscalYearId: string, motivo: string, entityName?: string, entityEmail?: string) => void;
   solicitarElementos: (entityId: string, fiscalYearId: string, documentos: string[], mensagem: string, prazo: number, entityName?: string, entityEmail?: string) => void;
