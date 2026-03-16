@@ -30,6 +30,18 @@ const Exercicios = () => {
   });
 
 
+  const openNew = () => {
+    setEditing(null);
+    setForm({
+      entityId: "",
+      year: new Date().getFullYear(),
+      startDate: "",
+      endDate: "",
+      status: "rascunho",
+    });
+    setDialogOpen(true);
+  };
+
   const openEdit = (fy: FiscalYear) => {
     setEditing(fy);
     setForm({
