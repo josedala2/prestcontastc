@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { EntityTipologia, TIPOLOGIA_RESOLUCAO, RESOLUCAO_LABELS } from "@/types";
 import { PortalLayout } from "@/components/PortalLayout";
 import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
@@ -15,7 +15,7 @@ import { FileSpreadsheet, CheckCircle, AlertTriangle, Send, Clock, FileText, Pap
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { toast } from "sonner";
-import { EntidadeDocumentosTab } from "@/components/portal/EntidadeDocumentosTab";
+import { EntidadeDocumentosTab, getDocumentRequirements } from "@/components/portal/EntidadeDocumentosTab";
 
 const PortalPrestacaoContas = () => {
   const { entity } = usePortalEntity();
@@ -88,7 +88,8 @@ function EntidadeView({
   entityNif: string;
 }) {
   const [entidadeTab, setEntidadeTab] = useState("balancete");
-  const [docsCompliance, setDocsCompliance] = useState({ allDone: false, uploaded: 0, required: 0 });
+  const initialRequired = useMemo(() => getDocumentRequirements(entityTipologia).filter(d => d.required).length, [entityTipologia]);
+  const [docsCompliance, setDocsCompliance] = useState({ allDone: false, uploaded: 0, required: initialRequired });
   const { getStatus, submit } = useSubmissions();
   const { hasData } = useFinancialData();
   const fiscalYearId = `${entityId}-${periodo}`;
