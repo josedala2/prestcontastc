@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { EntityTipologia, TIPOLOGIA_RESOLUCAO, RESOLUCAO_LABELS } from "@/types";
 import { PortalLayout } from "@/components/PortalLayout";
 import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
