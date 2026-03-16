@@ -172,9 +172,17 @@ const Submissoes = () => {
                 </TableRow>
               ) : (
                 paginated.map((s) => (
-                  <TableRow key={s.id} className="hover:bg-muted/30">
+                  <TableRow key={s.id} className={`hover:bg-muted/30 ${s.estado === "submetido" ? "bg-primary/[0.03]" : ""}`}>
                     <TableCell className="text-sm font-medium max-w-[280px]">
-                      <span className="line-clamp-1">{s.entityName}</span>
+                      <div className="flex items-center gap-2">
+                        {s.estado === "submetido" && (
+                          <span className="relative flex h-2.5 w-2.5 shrink-0">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
+                          </span>
+                        )}
+                        <span className="line-clamp-1">{s.entityName}</span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-sm font-mono">{s.nif}</TableCell>
                     <TableCell className="text-sm">{s.provincia}</TableCell>
