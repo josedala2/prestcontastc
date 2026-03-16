@@ -227,6 +227,7 @@ export default function ProcessosVisto() {
   const handleSelectProcesso = (visto: SolicitacaoVisto) => {
     setSelectedVisto(visto);
     setCheckedDocs({});
+    setViewedDocs({});
     setRepresentanteNome("");
     setRepresentanteTelefone("");
     setRepresentanteCargo("");
