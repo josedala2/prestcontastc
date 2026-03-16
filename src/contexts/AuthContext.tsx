@@ -34,6 +34,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
   ],
   "Secretaria": [
     "/secretaria", "/submissoes", "/actas-recepcao", "/entidades",
+    "/relatorios", "/mapas", "/anexos",
   ],
   "Preparador / Contabilista": [
     "/portal", "/portal/exercicios", "/portal/prestacao-contas",
@@ -61,8 +62,8 @@ export const roleHiddenPaths: Record<UserRole, string[]> = {
   ],
   "Secretaria": [
     "/dashboard", "/exercicios", "/importacao", "/plano-contas", "/validacoes",
-    "/relatorios", "/mapas", "/anexos", "/configuracoes",
-    "/portal", "/tecnico",
+    "/configuracoes", "/portal", "/tecnico",
+    "/documentos-obrigatorios", "/esclarecimentos", "/auditoria",
   ],
   "Preparador / Contabilista": [],
 };

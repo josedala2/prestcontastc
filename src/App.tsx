@@ -66,9 +66,9 @@ const App = () => (
           <Route path="/importacao" element={<ProtectedRoute allowedRoles={["Administrador"]}><Importacao /></ProtectedRoute>} />
           <Route path="/plano-contas" element={<ProtectedRoute allowedRoles={["Administrador"]}><PlanoContas /></ProtectedRoute>} />
           <Route path="/validacoes" element={<ProtectedRoute allowedRoles={["Administrador"]}><Validacoes /></ProtectedRoute>} />
-          <Route path="/relatorios" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><Relatorios /></ProtectedRoute>} />
-          <Route path="/mapas" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><Mapas /></ProtectedRoute>} />
-          <Route path="/anexos" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><Anexos /></ProtectedRoute>} />
+          <Route path="/relatorios" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><Relatorios /></ProtectedRoute>} />
+          <Route path="/mapas" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><Mapas /></ProtectedRoute>} />
+          <Route path="/anexos" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><Anexos /></ProtectedRoute>} />
           <Route path="/actas-recepcao" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><ActasRecepcao /></ProtectedRoute>} />
           <Route path="/documentos-obrigatorios" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><DocumentosObrigatorios /></ProtectedRoute>} />
           <Route path="/auditoria" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><Auditoria /></ProtectedRoute>} />
