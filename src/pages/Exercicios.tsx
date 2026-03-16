@@ -5,6 +5,7 @@ import { mockFiscalYears, mockEntities, formatKz } from "@/data/mockData";
 import { FiscalYear, STATUS_LABELS } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,6 +22,7 @@ const Exercicios = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<FiscalYear | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [selectedEntityIds, setSelectedEntityIds] = useState<string[]>([]);
   const [form, setForm] = useState({
     entityId: "",
     year: new Date().getFullYear(),
@@ -29,9 +31,9 @@ const Exercicios = () => {
     status: "rascunho" as FiscalYear["status"],
   });
 
-
   const openNew = () => {
     setEditing(null);
+    setSelectedEntityIds([]);
     setForm({
       entityId: "",
       year: new Date().getFullYear(),
@@ -55,26 +57,25 @@ const Exercicios = () => {
   };
 
   const handleSave = () => {
-    const entity = mockEntities.find((e) => e.id === form.entityId);
-    if (!entity) {
-      toast.error("Seleccione uma entidade.");
-      return;
-    }
     if (!form.startDate || !form.endDate) {
       toast.error("Preencha as datas do exercício.");
       return;
     }
 
-    // Validar duplicação de ano+entidade
-    const duplicate = fiscalYears.find(
-      (fy) => fy.entityId === form.entityId && fy.year === form.year && (!editing || fy.id !== editing.id)
-    );
-    if (duplicate) {
-      toast.error(`Já existe um exercício para ${entity.name} no ano ${form.year}.`);
-      return;
-    }
-
     if (editing) {
+      // Edit mode: single entity
+      const entity = mockEntities.find((e) => e.id === form.entityId);
+      if (!entity) {
+        toast.error("Seleccione uma entidade.");
+        return;
+      }
+      const duplicate = fiscalYears.find(
+        (fy) => fy.entityId === form.entityId && fy.year === form.year && fy.id !== editing.id
+      );
+      if (duplicate) {
+        toast.error(`Já existe um exercício para ${entity.name} no ano ${form.year}.`);
+        return;
+      }
       setFiscalYears((prev) =>
         prev.map((fy) =>
           fy.id === editing.id
@@ -84,23 +85,47 @@ const Exercicios = () => {
       );
       toast.success("Exercício actualizado com sucesso.");
     } else {
-      const newFy: FiscalYear = {
-        id: crypto.randomUUID(),
-        entityId: form.entityId,
-        entityName: entity.name,
-        year: form.year,
-        startDate: form.startDate,
-        endDate: form.endDate,
-        status: "rascunho",
-        totalDebito: 0,
-        totalCredito: 0,
-        errorsCount: 0,
-        warningsCount: 0,
-        checklistProgress: 0,
-        deadline: `${form.year + 1}-06-30`,
-      };
-      setFiscalYears((prev) => [...prev, newFy]);
-      toast.success("Exercício criado com sucesso.");
+      // Create mode: multiple entities
+      if (selectedEntityIds.length === 0) {
+        toast.error("Seleccione pelo menos uma entidade.");
+        return;
+      }
+      const duplicates: string[] = [];
+      const newFys: FiscalYear[] = [];
+      for (const eid of selectedEntityIds) {
+        const entity = mockEntities.find((e) => e.id === eid);
+        if (!entity) continue;
+        const exists = fiscalYears.find((fy) => fy.entityId === eid && fy.year === form.year);
+        if (exists) {
+          duplicates.push(entity.name);
+          continue;
+        }
+        newFys.push({
+          id: crypto.randomUUID(),
+          entityId: eid,
+          entityName: entity.name,
+          year: form.year,
+          startDate: form.startDate,
+          endDate: form.endDate,
+          status: "rascunho",
+          totalDebito: 0,
+          totalCredito: 0,
+          errorsCount: 0,
+          warningsCount: 0,
+          checklistProgress: 0,
+          deadline: `${form.year + 1}-06-30`,
+        });
+      }
+      if (newFys.length > 0) {
+        setFiscalYears((prev) => [...prev, ...newFys]);
+        toast.success(`${newFys.length} exercício(s) criado(s) com sucesso.`);
+      }
+      if (duplicates.length > 0) {
+        toast.warning(`Já existem exercícios ${form.year} para: ${duplicates.join(", ")}`);
+      }
+      if (newFys.length === 0 && duplicates.length > 0) {
+        return; // Don't close dialog if nothing was created
+      }
     }
     setDialogOpen(false);
   };
@@ -146,24 +171,67 @@ const Exercicios = () => {
 
       {/* New / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? "Editar Exercício" : "Novo Exercício"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
-            <div>
-              <Label>Entidade</Label>
-              <Select value={form.entityId} onValueChange={(v) => setForm({ ...form, entityId: v })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccione a entidade" />
-                </SelectTrigger>
-                <SelectContent>
-                  {mockEntities.map((e) => (
-                    <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {editing ? (
+              <div>
+                <Label>Entidade</Label>
+                <Select value={form.entityId} onValueChange={(v) => setForm({ ...form, entityId: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione a entidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockEntities.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <div>
+                <Label>Entidades</Label>
+                <div className="mt-2 border border-border rounded-lg max-h-48 overflow-y-auto">
+                  <div className="p-2 border-b border-border bg-muted/30">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <Checkbox
+                        checked={selectedEntityIds.length === mockEntities.length}
+                        onCheckedChange={(checked) => {
+                          setSelectedEntityIds(checked ? mockEntities.map((e) => e.id) : []);
+                        }}
+                      />
+                      <span className="text-sm font-medium">Seleccionar Todas ({mockEntities.length})</span>
+                    </label>
+                  </div>
+                  <div className="p-2 space-y-1.5">
+                    {mockEntities.map((e) => {
+                      const alreadyExists = fiscalYears.some((fy) => fy.entityId === e.id && fy.year === form.year);
+                      return (
+                        <label key={e.id} className="flex items-center gap-2 cursor-pointer py-1 px-1 rounded hover:bg-muted/30">
+                          <Checkbox
+                            checked={selectedEntityIds.includes(e.id)}
+                            onCheckedChange={(checked) => {
+                              setSelectedEntityIds((prev) =>
+                                checked ? [...prev, e.id] : prev.filter((id) => id !== e.id)
+                              );
+                            }}
+                          />
+                          <span className="text-sm flex-1 truncate">{e.name}</span>
+                          {alreadyExists && (
+                            <Badge variant="secondary" className="text-[9px] shrink-0">Já existe</Badge>
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+                {selectedEntityIds.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-1.5">{selectedEntityIds.length} entidade(s) seleccionada(s)</p>
+                )}
+              </div>
+            )}
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label>Ano</Label>
