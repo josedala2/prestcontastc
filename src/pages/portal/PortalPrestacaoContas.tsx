@@ -3,6 +3,7 @@ import { EntityTipologia, TIPOLOGIA_RESOLUCAO, RESOLUCAO_LABELS } from "@/types"
 import { PortalLayout } from "@/components/PortalLayout";
 import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
 import { PageHeader } from "@/components/ui-custom/PageElements";
+import { AnaliseFinanceira } from "@/components/AnaliseFinanceiraReadonly";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
