@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useRef, ReactNode } from "react";
 
 export interface FinancialDataSet {
   ativNaoCorr: Record<string, number>;
@@ -27,34 +27,37 @@ interface FinancialDataContextType {
   setData: (key: string, data: FinancialDataSet) => void;
   clearData: (key: string) => void;
   hasData: (key: string) => boolean;
+  /** Incremented on each setData/clearData to trigger effects */
+  version: number;
 }
 
 const FinancialDataContext = createContext<FinancialDataContextType | null>(null);
 
 export function FinancialDataProvider({ children }: { children: ReactNode }) {
-  const [store, setStore] = useState<Record<string, FinancialDataSet>>({});
+  const storeRef = useRef<Record<string, FinancialDataSet>>({});
+  const [version, setVersion] = useState(0);
 
   const getData = useCallback(
-    (key: string): FinancialDataSet => store[key] || { ...emptyDataSet },
-    [store]
+    (key: string): FinancialDataSet => storeRef.current[key] || { ...emptyDataSet },
+    []
   );
 
   const setData = useCallback((key: string, data: FinancialDataSet) => {
-    setStore((prev) => ({ ...prev, [key]: data }));
+    storeRef.current = { ...storeRef.current, [key]: data };
+    setVersion((v) => v + 1);
   }, []);
 
   const clearData = useCallback((key: string) => {
-    setStore((prev) => {
-      const next = { ...prev };
-      delete next[key];
-      return next;
-    });
+    const next = { ...storeRef.current };
+    delete next[key];
+    storeRef.current = next;
+    setVersion((v) => v + 1);
   }, []);
 
-  const hasData = useCallback((key: string) => !!store[key]?.uploadedFile, [store]);
+  const hasData = useCallback((key: string) => !!storeRef.current[key]?.uploadedFile, []);
 
   return (
-    <FinancialDataContext.Provider value={{ getData, setData, clearData, hasData }}>
+    <FinancialDataContext.Provider value={{ getData, setData, clearData, hasData, version }}>
       {children}
     </FinancialDataContext.Provider>
   );
