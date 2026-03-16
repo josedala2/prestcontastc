@@ -88,7 +88,8 @@ function EntidadeView({
   entityNif: string;
 }) {
   const [entidadeTab, setEntidadeTab] = useState("balancete");
-  const [docsCompliance, setDocsCompliance] = useState({ allDone: false, uploaded: 0, required: 0 });
+  const initialRequired = useMemo(() => getDocumentRequirements(entityTipologia).filter(d => d.required).length, [entityTipologia]);
+  const [docsCompliance, setDocsCompliance] = useState({ allDone: false, uploaded: 0, required: initialRequired });
   const { getStatus, submit } = useSubmissions();
   const { hasData } = useFinancialData();
   const fiscalYearId = `${entityId}-${periodo}`;
