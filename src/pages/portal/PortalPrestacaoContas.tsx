@@ -15,7 +15,7 @@ import { FileSpreadsheet, CheckCircle, AlertTriangle, Send, Clock, FileText, Pap
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { toast } from "sonner";
-import { EntidadeDocumentosTab } from "@/components/portal/EntidadeDocumentosTab";
+import { EntidadeDocumentosTab, getDocumentRequirements } from "@/components/portal/EntidadeDocumentosTab";
 
 const PortalPrestacaoContas = () => {
   const { entity } = usePortalEntity();
