@@ -31,7 +31,31 @@ import { useSubmissions } from "@/contexts/SubmissionContext";
 import { SecretariaVistoTab } from "@/components/secretaria/SecretariaVistoTab";
 
 const Secretaria = () => {
-  const submetidos = mockFiscalYears.filter((fy) => fy.status === "submetido");
+  const { recepcionar, rejeitar, submissions } = useSubmissions();
+
+  // Merge: mock "submetido" + dynamically submitted via Portal ("pendente" in SubmissionContext)
+  const submetidos = useMemo(() => {
+    // Start with mock data that has status "submetido"
+    const fromMock = mockFiscalYears.filter((fy) => fy.status === "submetido");
+    
+    // Add fiscal years that were dynamically submitted via Portal
+    const dynamicSubmissions = submissions.filter((s) => s.status === "pendente");
+    const dynamicFys = dynamicSubmissions
+      .map((s) => {
+        // Find the fiscal year in mockData (it may have status "rascunho")
+        const fy = mockFiscalYears.find(
+          (f) => f.entityId === s.entityId && `${f.entityId}-${f.year}` === s.fiscalYearId
+        );
+        if (!fy) return null;
+        // Don't duplicate if already in fromMock
+        if (fromMock.some((m) => m.id === fy.id)) return null;
+        return { ...fy, status: "submetido" as const, submittedAt: s.submittedAt || new Date().toISOString() };
+      })
+      .filter(Boolean) as typeof fromMock;
+
+    return [...fromMock, ...dynamicFys];
+  }, [submissions]);
+
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -39,7 +63,6 @@ const Secretaria = () => {
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [motivoRejeicao, setMotivoRejeicao] = useState("");
-  const { recepcionar, rejeitar } = useSubmissions();
 
   const selectedFy = submetidos.find((fy) => fy.id === selectedId);
   const selectedEntity = selectedFy ? mockEntities.find((e) => e.id === selectedFy.entityId) : null;
