@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export type SubmissionStatus = "rascunho" | "pendente" | "recepcionado" | "rejeitado";
+export type SubmissionStatus = "rascunho" | "pendente" | "recepcionado" | "rejeitado" | "em_analise";
 export type NotificationType = "recepcionado" | "rejeitado" | "solicitacao_elementos";
 
 interface SubmissionEntry {
@@ -38,6 +38,7 @@ interface SubmissionContextType {
   recepcionar: (entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => void;
   rejeitar: (entityId: string, fiscalYearId: string, motivo: string, entityName?: string, entityEmail?: string) => void;
   solicitarElementos: (entityId: string, fiscalYearId: string, documentos: string[], mensagem: string, prazo: number, entityName?: string, entityEmail?: string) => void;
+  remeterParaTecnico: (entityId: string, fiscalYearId: string, entityName?: string) => void;
   loadingNotifications: boolean;
   refreshNotifications: () => void;
 }
@@ -211,6 +212,16 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     );
   }, [sendNotification]);
 
+  const remeterParaTecnico = useCallback((entityId: string, fiscalYearId: string, entityName?: string) => {
+    setSubmissions((prev) =>
+      prev.map((s) =>
+        s.entityId === entityId && s.fiscalYearId === fiscalYearId
+          ? { ...s, status: "em_analise" as SubmissionStatus }
+          : s
+      )
+    );
+  }, []);
+
   const solicitarElementos = useCallback((
     entityId: string,
     fiscalYearId: string,
@@ -278,6 +289,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
         recepcionar,
         rejeitar,
         solicitarElementos,
+        remeterParaTecnico,
         loadingNotifications,
         refreshNotifications,
       }}

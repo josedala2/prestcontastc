@@ -2,20 +2,17 @@ import { TecnicoLayout } from "@/components/TecnicoLayout";
 import { PageHeader, StatCard } from "@/components/ui-custom/PageElements";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { usePortalEntity } from "@/contexts/PortalEntityContext";
-import { mockFiscalYears, mockEntities } from "@/data/mockData";
+import { useNavigate } from "react-router-dom";
+import { useSubmissions } from "@/contexts/SubmissionContext";
+import { mockEntities } from "@/data/mockData";
 import { FileBarChart, CheckCircle, Clock, AlertTriangle, ArrowRight, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { STATUS_LABELS } from "@/types";
 
 const TecnicoDashboard = () => {
-  const { entity } = usePortalEntity();
+  const navigate = useNavigate();
+  const { submissions } = useSubmissions();
 
-  const totalEntidades = mockEntities.length;
-  const totalExercicios = mockFiscalYears.length;
-  const pendentes = mockFiscalYears.filter((fy) => fy.status === "submetido" || fy.status === "em_analise").length;
-  const conformes = mockFiscalYears.filter((fy) => fy.status === "conforme").length;
+  const emAnalise = submissions.filter((s) => s.status === "em_analise");
 
   return (
     <TecnicoLayout>
@@ -25,49 +22,50 @@ const TecnicoDashboard = () => {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Entidades" value={totalEntidades} subtitle="entidades no sistema" icon={<FileBarChart className="h-5 w-5" />} variant="primary" />
-        <StatCard title="Exercícios" value={totalExercicios} subtitle="exercícios fiscais" icon={<BarChart3 className="h-5 w-5" />} variant="default" />
-        <StatCard title="Pendentes de Análise" value={pendentes} subtitle="aguardam parecer" icon={<Clock className="h-5 w-5" />} variant="warning" />
-        <StatCard title="Conformes" value={conformes} subtitle="aprovados" icon={<CheckCircle className="h-5 w-5" />} variant="success" />
+        <StatCard title="Em Análise" value={emAnalise.length} subtitle="processos atribuídos" icon={<Clock className="h-5 w-5" />} variant="warning" />
+        <StatCard title="Entidades" value={mockEntities.length} subtitle="entidades no sistema" icon={<FileBarChart className="h-5 w-5" />} variant="primary" />
+        <StatCard title="Concluídos" value={0} subtitle="pareceres emitidos" icon={<CheckCircle className="h-5 w-5" />} variant="success" />
+        <StatCard title="Alertas" value={0} subtitle="pendentes" icon={<AlertTriangle className="h-5 w-5" />} variant="default" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Clock className="h-4 w-4 text-primary" />
-              Exercícios Pendentes de Análise
+              <BarChart3 className="h-4 w-4 text-primary" />
+              Processos Atribuídos para Análise
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {mockFiscalYears
-              .filter((fy) => fy.status === "submetido" || fy.status === "em_analise")
-              .slice(0, 5)
-              .map((fy) => {
-                const ent = mockEntities.find((e) => e.id === fy.entityId);
+            {emAnalise.length > 0 ? (
+              emAnalise.map((s) => {
+                const ent = mockEntities.find((e) => e.id === s.entityId);
+                const year = s.fiscalYearId.split("-").pop() || "";
                 return (
-                  <div key={fy.id} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 transition-colors">
+                  <div key={s.fiscalYearId} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 transition-colors">
                     <div>
-                      <p className="text-sm font-medium">{fy.entityName}</p>
-                      <p className="text-xs text-muted-foreground">Exercício {fy.year} · {ent?.provincia}</p>
+                      <p className="text-sm font-medium">{ent?.name || s.entityId}</p>
+                      <p className="text-xs text-muted-foreground">Exercício {year} · {ent?.provincia}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-[10px]">
-                        {(STATUS_LABELS[fy.status] as { label: string; color: string })?.label || fy.status}
-                      </Badge>
-                      <Link to="/tecnico/prestacao-contas">
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                          <ArrowRight className="h-3.5 w-3.5" />
-                        </Button>
-                      </Link>
+                      <Badge variant="secondary" className="text-[10px]">Em Análise</Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        onClick={() => navigate(`/tecnico/prestacao-contas?entityId=${s.entityId}&exercicio=${year}`)}
+                      >
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </div>
                 );
-              })}
-            {pendentes === 0 && (
+              })
+            ) : (
               <div className="text-center py-6 text-muted-foreground">
                 <CheckCircle className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                <p className="text-sm">Nenhum exercício pendente de análise.</p>
+                <p className="text-sm">Nenhum processo pendente de análise.</p>
+                <p className="text-xs mt-1">Os processos aparecerão aqui quando a Secretaria os remeter para validação técnica.</p>
               </div>
             )}
           </CardContent>

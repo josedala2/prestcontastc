@@ -21,7 +21,7 @@ import { useSubmissions } from "@/contexts/SubmissionContext";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 import {
   ArrowLeft, CheckCircle, XCircle, FileText, Eye, Stamp, Pencil,
-  AlertTriangle, Undo2, Building2, X,
+  AlertTriangle, Undo2, Building2, X, Send, BarChart3,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,9 +36,10 @@ const SubmissaoDetalhe = () => {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [motivoRejeicao, setMotivoRejeicao] = useState("");
   const [actaGerada, setActaGerada] = useState(false);
+  const [remetido, setRemetido] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [docPreview, setDocPreview] = useState<{ label: string; category: string } | null>(null);
-  const { recepcionar, rejeitar } = useSubmissions();
+  const { recepcionar, rejeitar, remeterParaTecnico, getStatus } = useSubmissions();
 
   const requiredItems = submissionChecklist.filter((c) => c.required);
   const allRequiredChecked = requiredItems.every((item) => checkedDocs[item.id]);
@@ -262,14 +263,51 @@ const SubmissaoDetalhe = () => {
               <p className="text-sm font-semibold text-foreground">Acta de Recepção Emitida</p>
               <p className="text-xs text-muted-foreground">A documentação foi verificada e a acta de recepção foi gerada com sucesso.</p>
             </div>
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setActaGerada(false); setCheckedDocs({}); }}>
-              <Pencil className="h-3.5 w-3.5" /> Editar e Regenerar
-            </Button>
+            <div className="flex items-center gap-2">
+              {!remetido && (
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setActaGerada(false); setCheckedDocs({}); }}>
+                  <Pencil className="h-3.5 w-3.5" /> Editar e Regenerar
+                </Button>
+              )}
+            </div>
           </div>
+
+          {/* Remeter para Técnico */}
+          {!remetido ? (
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
+              <Send className="h-5 w-5 shrink-0 text-primary" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">Remessa para Validação Técnica</p>
+                <p className="text-xs text-muted-foreground">Envie o processo para o Técnico Validador proceder à análise das contas (Modelo CC-2).</p>
+              </div>
+              <Button
+                size="sm"
+                className="gap-1.5"
+                onClick={() => {
+                  const fiscalYearId = `${entity.id}-${periodo}`;
+                  remeterParaTecnico(entity.id, fiscalYearId, entity.name);
+                  setRemetido(true);
+                  toast.success(`Processo remetido para o Técnico Validador — ${entity.name} — ${periodo}`);
+                }}
+              >
+                <Send className="h-3.5 w-3.5" /> Remeter para Técnico
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
+              <BarChart3 className="h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">Processo em Análise Técnica</p>
+                <p className="text-xs text-muted-foreground">O processo foi remetido para o Técnico Validador e encontra-se em análise no módulo CC-2.</p>
+              </div>
+              <Badge variant="secondary" className="text-xs">Em Análise</Badge>
+            </div>
+          )}
+
           <ActasRecepcaoList
             entityId={entity.id}
             fiscalYear={periodo}
-            allowEdit
+            allowEdit={!remetido}
             onEdit={() => { setActaGerada(false); setCheckedDocs({}); }}
           />
         </div>
