@@ -12,7 +12,7 @@ interface NotificationPayload {
   entityEmail?: string;
   fiscalYearId: string;
   fiscalYear: string;
-  type: "recepcionado" | "rejeitado" | "solicitacao_elementos";
+  type: "submissao" | "recepcionado" | "rejeitado" | "solicitacao_elementos" | "em_analise";
   message: string;
   detail?: string;
   deadline?: string;
