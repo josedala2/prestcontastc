@@ -47,7 +47,7 @@ export const roleSidebarSections: Record<UserRole, string[]> = {
   "Administrador": ["Principal", "Dados", "Relatórios", "Dossiê", "Acesso Externo", "Sistema"],
   "Técnico Validador": [],
   "Auditor / Fiscal TCA": ["Principal", "Relatórios", "Dossiê"],
-  "Secretaria": ["Principal", "Dossiê"],
+  "Secretaria": ["Principal", "Relatórios", "Dossiê"],
   "Preparador / Contabilista": [],
 };
 
