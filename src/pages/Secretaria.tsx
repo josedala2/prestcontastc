@@ -153,6 +153,44 @@ const Secretaria = () => {
     return d.getMonth() === hoje.getMonth() && d.getFullYear() === hoje.getFullYear();
   }).length;
 
+  // Extra dashboard data
+  const { notifications } = useSubmissions();
+  const recentNotifications = notifications.slice(0, 5);
+  const unreadNotifCount = notifications.filter((n) => !n.read).length;
+
+  const totalEntidades = new Set(mockFiscalYears.map((fy) => fy.entityId)).size;
+  const conformeCount = mockFiscalYears.filter((fy) => fy.status === "conforme").length;
+  const naoConformeCount = mockFiscalYears.filter((fy) => fy.status === "nao_conforme").length;
+  const rascunhoCount = mockFiscalYears.filter((fy) => fy.status === "rascunho").length;
+  const comPedidosCount = mockFiscalYears.filter((fy) => fy.status === "com_pedidos").length;
+
+  // Deadlines
+  const deadlinesSoon = mockFiscalYears
+    .filter((fy) => !["conforme", "nao_conforme"].includes(fy.status))
+    .map((fy) => ({
+      ...fy,
+      daysLeft: Math.ceil((new Date(fy.deadline).getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24)),
+    }))
+    .filter((fy) => fy.daysLeft <= 30 && fy.daysLeft > -365)
+    .sort((a, b) => a.daysLeft - b.daysLeft)
+    .slice(0, 5);
+
+  // Status distribution for mini chart
+  const statusDistribution = useMemo(() => {
+    const counts = {
+      rascunho: rascunhoCount,
+      submetido: submetidos.length,
+      em_analise: emAnalise,
+      com_pedidos: comPedidosCount,
+      conforme: conformeCount,
+      nao_conforme: naoConformeCount,
+    };
+    const total = Object.values(counts).reduce((s, v) => s + v, 0);
+    return { counts, total };
+  }, [rascunhoCount, submetidos.length, emAnalise, comPedidosCount, conformeCount, naoConformeCount]);
+
+  const [activeMainTab, setActiveMainTab] = useState("dashboard");
+
   // ── Verificação Documental content (passed as children to tabs) ──
   const verificacaoContent = selectedFy && selectedEntity ? (
     <div className="space-y-4">
