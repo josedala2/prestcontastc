@@ -176,7 +176,7 @@ export default function Login() {
             <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               Utilizadores Demo — clique para preencher
             </p>
-            <div className="grid gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {demoUsers.map((user) => (
                 <button
                   key={user.email}
