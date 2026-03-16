@@ -24,12 +24,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type FilterType = "todas" | "recepcionado" | "rejeitado" | "solicitacao_elementos" | "nao_lidas";
+type FilterType = "todas" | "recepcionado" | "rejeitado" | "solicitacao_elementos" | "em_analise" | "nao_lidas";
 
 const FILTER_OPTIONS: { value: FilterType; label: string }[] = [
   { value: "todas", label: "Todas" },
   { value: "nao_lidas", label: "Não lidas" },
   { value: "recepcionado", label: "Recepcionadas" },
+  { value: "em_analise", label: "Em Análise" },
   { value: "rejeitado", label: "Devolvidas" },
   { value: "solicitacao_elementos", label: "Solicitações" },
 ];

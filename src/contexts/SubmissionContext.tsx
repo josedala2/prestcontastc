@@ -224,7 +224,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     sendNotification(
       entityId,
       fiscalYearId,
-      "recepcionado",
+      "em_analise",
       `Processo do exercício ${year} remetido para análise técnica`,
       "O processo foi enviado pela Secretaria ao Técnico Validador para análise e emissão de parecer. Poderá acompanhar o estado no portal.",
       entityName,
