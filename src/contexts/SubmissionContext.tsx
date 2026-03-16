@@ -38,7 +38,7 @@ interface SubmissionContextType {
   recepcionar: (entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => void;
   rejeitar: (entityId: string, fiscalYearId: string, motivo: string, entityName?: string, entityEmail?: string) => void;
   solicitarElementos: (entityId: string, fiscalYearId: string, documentos: string[], mensagem: string, prazo: number, entityName?: string, entityEmail?: string) => void;
-  remeterParaTecnico: (entityId: string, fiscalYearId: string, entityName?: string) => void;
+  remeterParaTecnico: (entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => void;
   loadingNotifications: boolean;
   refreshNotifications: () => void;
 }
@@ -212,7 +212,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     );
   }, [sendNotification]);
 
-  const remeterParaTecnico = useCallback((entityId: string, fiscalYearId: string, entityName?: string) => {
+  const remeterParaTecnico = useCallback((entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => {
     setSubmissions((prev) =>
       prev.map((s) =>
         s.entityId === entityId && s.fiscalYearId === fiscalYearId
@@ -220,7 +220,17 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
           : s
       )
     );
-  }, []);
+    const year = fiscalYearId.split("-").pop() || fiscalYearId;
+    sendNotification(
+      entityId,
+      fiscalYearId,
+      "recepcionado",
+      `Processo do exercício ${year} remetido para análise técnica`,
+      "O processo foi enviado pela Secretaria ao Técnico Validador para análise e emissão de parecer. Poderá acompanhar o estado no portal.",
+      entityName,
+      entityEmail
+    );
+  }, [sendNotification]);
 
   const solicitarElementos = useCallback((
     entityId: string,
