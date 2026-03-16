@@ -154,11 +154,14 @@ export function PortalLayout({ children }: PortalLayoutProps) {
                     <div className={cn(
                       "mt-0.5 shrink-0 rounded-full p-1",
                       notif.type === "recepcionado" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                        : notif.type === "em_analise" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
                         : notif.type === "solicitacao_elementos" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
                         : "bg-destructive/10 text-destructive"
                     )}>
                       {notif.type === "recepcionado" ? (
                         <CheckCircle className="h-3.5 w-3.5" />
+                      ) : notif.type === "em_analise" ? (
+                        <FileSearch className="h-3.5 w-3.5" />
                       ) : notif.type === "solicitacao_elementos" ? (
                         <FileQuestion className="h-3.5 w-3.5" />
                       ) : (
