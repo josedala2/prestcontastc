@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import {
-  ESTADO_LABELS, PRIORIDADE_LABELS, atualizarEstadoAtividade,
+  ESTADO_LABELS, PRIORIDADE_LABELS, EVENTO_LABELS, PERFIS_WORKFLOW, atualizarEstadoAtividade,
   type AtividadeEstado, type AtividadePrioridade,
 } from "@/lib/atividadeEngine";
 import { WORKFLOW_STAGES } from "@/types/workflow";
