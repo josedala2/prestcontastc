@@ -176,7 +176,7 @@ const Secretaria = () => {
   };
 
   const selectedFy = submetidos.find((fy) => fy.id === selectedId);
-  const selectedEntity = selectedFy ? mockEntities.find((e) => e.id === selectedFy.entityId) : null;
+  const selectedEntity = selectedFy ? allEntities.find((e) => e.id === selectedFy.entityId) : null;
 
   const requiredItems = submissionChecklist.filter((c) => c.required);
   const allRequiredChecked = requiredItems.every((item) => checkedDocs[item.id]);
