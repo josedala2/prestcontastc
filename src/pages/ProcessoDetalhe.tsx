@@ -254,6 +254,17 @@ const ProcessoDetalhe = () => {
         documentos_gerados: generatedDocs.length > 0 ? generatedDocs : (currentStageInfo?.documentosGerados?.length ? currentStageInfo.documentosGerados : null),
       } as any);
 
+      // Internal notification for the next responsible
+      await supabase.from("submission_notifications").insert({
+        entity_id: processo.entity_id,
+        entity_name: processo.entity_name,
+        fiscal_year_id: `fy-${processo.ano_gerencia}`,
+        fiscal_year: String(processo.ano_gerencia),
+        type: "em_analise",
+        message: `Processo ${processo.numero_processo} avançou para etapa ${nextStage}: ${nextStageInfo?.nome}`,
+        detail: `O processo da entidade ${processo.entity_name} (${processo.numero_processo}) transitou da etapa ${currentStageId} para a etapa ${nextStage}. Responsável: ${nextStageInfo?.responsavelPerfil || "—"}.${observacoes ? ` Observações: ${observacoes}` : ""}`,
+      } as any);
+
       const docMsg = generatedDocs.length > 0 ? ` | Documentos gerados: ${generatedDocs.join(", ")}` : "";
       toast({ title: "Processo avançado", description: `Transitou para: ${nextStageInfo?.nome}${docMsg}` });
       setObservacoes("");
