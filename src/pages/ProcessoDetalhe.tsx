@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { roleStagePermissions } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
@@ -9,16 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { generateWorkflowDocument, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { saveAs } from "file-saver";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, Clock, FileText, Building2,
-  User, Calendar, AlertTriangle, History, Send, Download, Loader2
+  User, Calendar, AlertTriangle, History, Send, Download, Loader2, Upload, Trash2, Eye
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 interface ProcessoDocumento {
   id: string;
   processo_id: string;
@@ -42,6 +43,9 @@ const ProcessoDetalhe = () => {
   const [observacoes, setObservacoes] = useState("");
   const [advancing, setAdvancing] = useState(false);
   const [generatingDoc, setGeneratingDoc] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadTipoDoc, setUploadTipoDoc] = useState("Documento Digitalizado");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (id) loadData();
@@ -141,6 +145,75 @@ const ProcessoDetalhe = () => {
       } catch { /* continue */ }
     }
     return generated;
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !processo) return;
+    setUploading(true);
+
+    try {
+      for (const file of Array.from(files)) {
+        const filePath = `${processo.id}/etapa-${processo.etapa_atual}/${Date.now()}-${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from("processo-documentos")
+          .upload(filePath, file);
+
+        if (uploadError) {
+          toast({ title: "Erro no upload", description: `${file.name}: ${uploadError.message}`, variant: "destructive" });
+          continue;
+        }
+
+        await supabase.from("processo_documentos").insert({
+          processo_id: processo.id,
+          tipo_documento: uploadTipoDoc,
+          nome_ficheiro: file.name,
+          caminho_ficheiro: filePath,
+          estado: "anexado",
+          obrigatorio: false,
+          versao: 1,
+        } as any);
+
+        // Record in history
+        await supabase.from("processo_historico").insert({
+          processo_id: processo.id,
+          etapa_anterior: processo.etapa_atual,
+          etapa_seguinte: processo.etapa_atual,
+          estado_anterior: processo.estado,
+          estado_seguinte: processo.estado,
+          acao: `Documento anexado: ${file.name}`,
+          executado_por: user?.displayName || "Sistema",
+          perfil_executor: user?.role || null,
+          observacoes: `Tipo: ${uploadTipoDoc} | Etapa: ${WORKFLOW_STAGES.find(s => s.id === processo.etapa_atual)?.nome}`,
+          documentos_alterados: [file.name],
+        } as any);
+      }
+
+      toast({ title: "Upload concluído", description: `${files.length} ficheiro(s) anexado(s) com sucesso` });
+      loadData();
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const downloadAttachment = async (filePath: string, fileName: string) => {
+    const { data } = supabase.storage.from("processo-documentos").getPublicUrl(filePath);
+    if (data?.publicUrl) {
+      window.open(data.publicUrl, "_blank");
+    }
+  };
+
+  const deleteAttachment = async (docId: string, filePath: string | null) => {
+    if (filePath) {
+      await supabase.storage.from("processo-documentos").remove([filePath]);
+    }
+    // We can't delete from processo_documentos (no RLS), so mark as removed
+    await supabase.from("processo_documentos").update({ estado: "removido" } as any).eq("id", docId);
+    toast({ title: "Documento removido" });
+    loadData();
   };
 
   const advanceStage = async () => {
@@ -422,44 +495,110 @@ const ProcessoDetalhe = () => {
             </Card>
           )}
 
-          {/* Generated Documents */}
-          {documentos.length > 0 && (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-primary" /> Documentos Gerados ({documentos.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+          {/* Documents (Generated + Uploaded) */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" /> Documentos do Processo ({documentos.filter(d => d.estado !== "removido").length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Upload section */}
+              {canAct && processo.estado !== "arquivado" && (
+                <div className="p-3 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 space-y-3">
+                  <p className="text-xs font-semibold text-primary flex items-center gap-1">
+                    <Upload className="h-3.5 w-3.5" /> Anexar Documentos à Etapa Actual
+                  </p>
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1 space-y-1">
+                      <label className="text-[10px] text-muted-foreground font-medium">Tipo de documento</label>
+                      <Select value={uploadTipoDoc} onValueChange={setUploadTipoDoc}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Documento Digitalizado">Documento Digitalizado</SelectItem>
+                          <SelectItem value="Comprovativo">Comprovativo</SelectItem>
+                          <SelectItem value="Extracto Bancário">Extracto Bancário</SelectItem>
+                          <SelectItem value="Relatório">Relatório</SelectItem>
+                          <SelectItem value="Ofício">Ofício</SelectItem>
+                          <SelectItem value="Despacho">Despacho</SelectItem>
+                          <SelectItem value="Parecer">Parecer</SelectItem>
+                          <SelectItem value="Certidão">Certidão</SelectItem>
+                          <SelectItem value="Outro">Outro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 text-xs"
+                      disabled={uploading}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      {uploading ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Upload className="h-3.5 w-3.5 mr-1" />}
+                      {uploading ? "A enviar..." : "Escolher ficheiros"}
+                    </Button>
+                  </div>
+                  <Input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.tif,.tiff"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                  <p className="text-[10px] text-muted-foreground">PDF, Word, Excel, Imagens — até 50 MB por ficheiro</p>
+                </div>
+              )}
+
+              {/* Document list */}
+              {documentos.filter(d => d.estado !== "removido").length === 0 ? (
+                <p className="text-sm text-muted-foreground py-4 text-center">Nenhum documento anexado</p>
+              ) : (
                 <div className="space-y-2">
-                  {documentos.map(doc => (
+                  {documentos.filter(d => d.estado !== "removido").map(doc => (
                     <div key={doc.id} className="flex items-center justify-between p-2 rounded-md border border-border hover:bg-accent/30 transition-colors">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded bg-primary/10 flex items-center justify-center">
-                          <FileText className="h-4 w-4 text-primary" />
+                        <div className={cn("h-8 w-8 rounded flex items-center justify-center",
+                          doc.estado === "anexado" ? "bg-blue-100" : "bg-primary/10"
+                        )}>
+                          <FileText className={cn("h-4 w-4", doc.estado === "anexado" ? "text-blue-600" : "text-primary")} />
                         </div>
                         <div>
                           <p className="text-xs font-medium">{doc.tipo_documento}</p>
                           <p className="text-[10px] text-muted-foreground">{doc.nome_ficheiro} — {new Date(doc.created_at).toLocaleString("pt-AO")}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         <Badge variant="outline" className={cn("text-[10px]",
                           doc.estado === "gerado" && "bg-green-50 text-green-700",
+                          doc.estado === "anexado" && "bg-blue-50 text-blue-700",
                           doc.estado === "pendente" && "bg-amber-50 text-amber-700"
                         )}>
-                          {doc.estado === "gerado" ? "Gerado" : "Pendente"}
+                          {doc.estado === "gerado" ? "Gerado" : doc.estado === "anexado" ? "Anexado" : "Pendente"}
                         </Badge>
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => generateAndSaveDocument(doc.tipo_documento)}>
-                          <Download className="h-3.5 w-3.5" />
-                        </Button>
+                        {doc.caminho_ficheiro ? (
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => downloadAttachment(doc.caminho_ficheiro!, doc.nome_ficheiro)}>
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                        ) : (
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => generateAndSaveDocument(doc.tipo_documento)}>
+                            <Download className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                        {canAct && doc.estado === "anexado" && (
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => deleteAttachment(doc.id, doc.caminho_ficheiro)}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              )}
+            </CardContent>
+          </Card>
 
           {/* History */}
           <Card>
