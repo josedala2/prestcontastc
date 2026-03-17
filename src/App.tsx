@@ -104,6 +104,7 @@ const App = () => (
           <Route path="/processos-visto" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Juiz Relator", "Presidente da Câmara", "Presidente do Tribunal de Contas"]}><ProcessosVisto /></ProtectedRoute>} />
           <Route path="/gestao-processos" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><GestaoProcessos /></ProtectedRoute>} />
           <Route path="/gestao-processos/:id" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><ProcessoDetalhePage /></ProtectedRoute>} />
+          <Route path="/atividades" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><Atividades /></ProtectedRoute>} />
           
           {/* Secretaria */}
           <Route path="/secretaria" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secretaria-Geral", "Chefe da Secretaria-Geral"]}><Secretaria /></ProtectedRoute>} />
