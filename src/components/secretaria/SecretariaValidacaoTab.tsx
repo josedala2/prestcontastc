@@ -58,6 +58,9 @@ export function SecretariaValidacaoTab() {
   const [documentos, setDocumentos] = useState<ProcessoDoc[]>([]);
   const [loadingDocs, setLoadingDocs] = useState(false);
 
+  // Notifications
+  const [notificacoes, setNotificacoes] = useState<any[]>([]);
+
   // Approve flow
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [approving, setApproving] = useState(false);
@@ -72,6 +75,24 @@ export function SecretariaValidacaoTab() {
   const isChefe = user?.role === "Chefe da Secretaria-Geral" ||
     user?.role === "Administrador do Sistema" ||
     user?.role === "Presidente do Tribunal de Contas";
+
+  // Fetch encaminhamento notifications
+  const fetchNotificacoes = useCallback(async () => {
+    const { data } = await supabase
+      .from("submission_notifications")
+      .select("*")
+      .eq("type", "encaminhamento_validacao")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    setNotificacoes(data || []);
+  }, []);
+
+  const handleMarkAsRead = async (id: string) => {
+    await supabase.from("submission_notifications").update({ read: true } as any).eq("id", id);
+    setNotificacoes((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n));
+  };
+
+  const unreadCount = useMemo(() => notificacoes.filter((n) => !n.read).length, [notificacoes]);
 
   const fetchProcessos = useCallback(async () => {
     setLoading(true);
