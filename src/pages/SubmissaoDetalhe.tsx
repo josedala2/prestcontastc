@@ -274,7 +274,18 @@ const SubmissaoDetalhe = () => {
                     const isChecked = !!checkedDocs[item.id];
                     const subDoc = findSubmissionDoc(item.id);
                     return (
-                      <TableRow key={item.id} className={isChecked ? "bg-success/5" : ""}>
+                      <TableRow
+                        key={item.id}
+                        className={
+                          isChecked
+                            ? "bg-success/5"
+                            : subDoc
+                              ? "bg-green-50/50 dark:bg-green-950/10"
+                              : item.required
+                                ? "bg-destructive/5"
+                                : ""
+                        }
+                      >
                         <TableCell>
                           <Checkbox checked={isChecked} onCheckedChange={() => handleToggleDoc(item.id)} />
                         </TableCell>
@@ -288,12 +299,17 @@ const SubmissaoDetalhe = () => {
                         </TableCell>
                         <TableCell className="text-center">
                           {subDoc ? (
-                            <span className="flex items-center justify-center gap-1 text-xs text-green-700 dark:text-green-400">
-                              <CheckCircle className="h-3 w-3" />
-                              <span className="max-w-[120px] truncate" title={subDoc.file_name}>{subDoc.file_name}</span>
+                            <span className="flex items-center justify-center gap-1.5 text-xs">
+                              <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                              <span className="text-green-700 dark:text-green-400 font-medium max-w-[140px] truncate" title={subDoc.file_name}>
+                                {subDoc.file_name}
+                              </span>
                             </span>
                           ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
+                            <span className="flex items-center justify-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+                              <AlertTriangle className="h-3.5 w-3.5" />
+                              Não carregado
+                            </span>
                           )}
                         </TableCell>
                         <TableCell className="text-center">
