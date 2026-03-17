@@ -476,6 +476,55 @@ const Dashboard = () => {
         </Card>
       </div>
 
+      {/* Escrivão dos Autos — card de autuação */}
+      {user?.role === "Escrivão dos Autos" && (
+        <Card className="mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <FileText className="h-4 w-4 text-primary" /> Estatísticas de Autuação
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              const pendentes = processos.filter(p => p.etapa_atual === 5).length;
+              const autuados = processos.filter(p => p.etapa_atual > 5).length;
+              const total = pendentes + autuados;
+              const pct = total > 0 ? Math.round((autuados / total) * 100) : 0;
+              return (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center p-3 rounded-lg bg-amber-50 border border-amber-200">
+                      <p className="text-2xl font-bold text-amber-700">{pendentes}</p>
+                      <p className="text-[10px] text-amber-600 font-medium">Pendentes de Autuação</p>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-green-50 border border-green-200">
+                      <p className="text-2xl font-bold text-green-700">{autuados}</p>
+                      <p className="text-[10px] text-green-600 font-medium">Autuados</p>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-muted/50 border border-border">
+                      <p className="text-2xl font-bold text-foreground">{total}</p>
+                      <p className="text-[10px] text-muted-foreground font-medium">Total</p>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-muted-foreground">Progresso de autuação</span>
+                      <span className="text-xs font-semibold">{pct}%</span>
+                    </div>
+                    <Progress value={pct} className="h-2" />
+                  </div>
+                  {pendentes > 0 && (
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/escrivao/registo-autuacao")}>
+                      <FileText className="h-3.5 w-3.5 mr-1.5" /> Ir para Registo e Autuação
+                    </Button>
+                  )}
+                </div>
+              );
+            })()}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Row 4: Notification panel filtered by role */}
       <div className="mt-6">
         <DashboardNotificacoesPanel />
