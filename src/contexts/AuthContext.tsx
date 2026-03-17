@@ -20,7 +20,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/dashboard", "/entidades", "/exercicios", "/importacao", "/plano-contas",
     "/validacoes", "/relatorios", "/mapas", "/anexos", "/actas-recepcao",
     "/documentos-obrigatorios", "/auditoria", "/esclarecimentos", "/configuracoes",
-    "/submissoes", "/processos-visto", "/secretaria", "/portal", "/tecnico",
+    "/submissoes", "/processos-visto", "/gestao-processos", "/secretaria", "/portal", "/tecnico",
   ],
   "Técnico Validador": [
     "/tecnico", "/tecnico/prestacao-contas", "/tecnico/exercicios",
