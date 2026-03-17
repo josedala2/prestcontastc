@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { WORKFLOW_STAGES, WORKFLOW_ESTADOS, CATEGORIAS_ENTIDADE, type Processo } from "@/types/workflow";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { gerarNumeroProcesso } from "@/hooks/useBackendFunctions";
-import { mockEntities } from "@/data/mockData";
+import { useEntities } from "@/hooks/useEntities";
 import { EntityTipologia } from "@/types";
 
 // Mapping: workflow category → entity tipologias
