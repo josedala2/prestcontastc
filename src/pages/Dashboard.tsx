@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { obterEstatisticasDashboard } from "@/hooks/useBackendFunctions";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { supabase } from "@/integrations/supabase/client";
