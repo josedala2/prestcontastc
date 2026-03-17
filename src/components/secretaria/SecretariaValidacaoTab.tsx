@@ -558,7 +558,7 @@ export function SecretariaValidacaoTab() {
                   </div>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Após aprovação, poderá encaminhar o processo para a Contadoria Geral (Etapa 4).
+                  Após aprovação, será gerada a Nota de Remessa e o processo encaminhado para a Contadoria Geral (Etapa 4).
                 </p>
               </div>
             </AlertDialogDescription>
