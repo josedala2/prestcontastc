@@ -421,6 +421,84 @@ export async function generateOficioSolicitacaoElementos(data: ProcessoDocData, 
   return doc.output("blob");
 }
 
+// ==================== NOTA DE REMESSA (Secretaria → Contadoria) ====================
+export async function generateNotaRemessa(
+  data: ProcessoDocData,
+  executadoPor: string,
+  destinatario: string = "Contadoria Geral"
+): Promise<Blob> {
+  const doc = new jsPDF();
+  const brasao = await loadImage(brasaoImg);
+
+  let y = addHeader(doc, brasao, "NOTA DE REMESSA");
+
+  y += 5;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.text(`N.º de Referência: NR-${data.numeroProcesso}`, 25, y);
+  y += 7;
+  doc.text(`Data: ${new Date().toLocaleDateString("pt-AO", { day: "numeric", month: "long", year: "numeric" })}`, 25, y);
+  y += 10;
+
+  doc.setFont("helvetica", "normal");
+  doc.text("De: Secretaria-Geral do Tribunal de Contas", 25, y);
+  y += 6;
+  doc.text(`Para: ${destinatario}`, 25, y);
+  y += 10;
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Assunto: Remessa de Processo para Verificação Documental", 25, y);
+  y += 10;
+
+  doc.setFont("helvetica", "normal");
+  const body = [
+    `Nos termos do fluxo de tramitação de Prestação de Contas do Tribunal de Contas de Angola, a Secretaria-Geral vem, por este meio, remeter à ${destinatario} o processo abaixo identificado, para efeitos de verificação e conferência documental detalhada.`,
+    "",
+    "Após validação da conformidade documental, o presente processo foi considerado apto a prosseguir para a etapa de verificação técnica.",
+  ];
+
+  const lines = doc.splitTextToSize(body.join("\n"), 160);
+  doc.text(lines, 25, y);
+  y += lines.length * 5 + 10;
+
+  // Process details table
+  autoTable(doc, {
+    startY: y,
+    head: [["Campo", "Valor"]],
+    body: [
+      ["Número do Processo", data.numeroProcesso],
+      ["Entidade", data.entityName],
+      ["Exercício / Gerência", String(data.anoGerencia)],
+      ["Categoria", data.categoriaEntidade],
+      ["Canal de Entrada", data.canalEntrada === "portal" ? "Portal Electrónico" : "Presencial"],
+      ["Data de Submissão", data.dataSubmissao],
+      ["Etapa Actual", `Etapa ${data.etapaAtual} — Verificação de Documento`],
+      ["Responsável Anterior", "Chefe da Secretaria-Geral"],
+      ["Responsável Seguinte", "Técnico da Contadoria Geral"],
+    ],
+    theme: "grid",
+    headStyles: { fillColor: [45, 55, 72], textColor: 255, fontSize: 9 },
+    bodyStyles: { fontSize: 9 },
+    columnStyles: { 0: { fontStyle: "bold", cellWidth: 55 } },
+    margin: { left: 25, right: 25 },
+  });
+
+  y = (doc as any).lastAutoTable.finalY + 12;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  const closing = "Solicita-se que a verificação seja efectuada com a devida celeridade, de acordo com os prazos regulamentares estabelecidos.";
+  doc.text(doc.splitTextToSize(closing, 160), 25, y);
+  y += 15;
+
+  doc.text("A Chefe da Secretaria-Geral", 105, y, { align: "center" });
+  doc.line(55, y + 15, 155, y + 15);
+  doc.text("(assinatura e carimbo)", 105, y + 20, { align: "center" });
+
+  addFooter(doc, executadoPor);
+  return doc.output("blob");
+}
+
 // ==================== FACTORY: get generator by document name ====================
 export type DocumentType =
   | "Acta de Recebimento"
@@ -437,7 +515,8 @@ export type DocumentType =
   | "Ofício de Remessa"
   | "Termo de Notificação"
   | "Certidão de Diligência"
-  | "Despacho de Arquivamento";
+  | "Despacho de Arquivamento"
+  | "Nota de Remessa";
 
 export async function generateWorkflowDocument(
   docType: string,
@@ -462,6 +541,8 @@ export async function generateWorkflowDocument(
       return { blob: await generateDespachoPromocao(data, executadoPor), fileName: `Despacho_Promocao_${sanitized}_${timestamp}.pdf` };
     case "Ofício de Remessa":
       return { blob: await generateOficioRemessa(data, executadoPor), fileName: `Oficio_Remessa_${sanitized}_${timestamp}.pdf` };
+    case "Nota de Remessa":
+      return { blob: await generateNotaRemessa(data, executadoPor), fileName: `Nota_Remessa_${sanitized}_${timestamp}.pdf` };
     case "Termo de Notificação":
     case "Certidão de Diligência":
       return { blob: await generateTermoNotificacao(data, executadoPor), fileName: `Termo_Notificacao_${sanitized}_${timestamp}.pdf` };
