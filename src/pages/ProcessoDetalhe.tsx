@@ -54,7 +54,108 @@ const ProcessoDetalhe = () => {
   const [uploadTipoDoc, setUploadTipoDoc] = useState("Documento Digitalizado");
   const [previewDoc, setPreviewDoc] = useState<ProcessoDocumento | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [firingEvent, setFiringEvent] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Map etapa → available workflow events
+  const STAGE_EVENTS: Record<number, { evento: EventoWorkflow; label: string; icon: React.ReactNode; variant?: "default" | "outline" | "destructive" | "secondary" }[]> = {
+    1: [
+      { evento: "expediente_submetido", label: "Expediente Submetido", icon: <Send className="h-3.5 w-3.5" />, variant: "default" },
+      { evento: "submissao_presencial", label: "Submissão Presencial", icon: <FileCheck className="h-3.5 w-3.5" />, variant: "outline" },
+    ],
+    2: [
+      { evento: "checklist_incompleta", label: "Checklist Incompleta", icon: <AlertTriangle className="h-3.5 w-3.5" />, variant: "destructive" },
+    ],
+    3: [
+      { evento: "validacao_aprovada", label: "Validação Aprovada", icon: <CheckCircle2 className="h-3.5 w-3.5" />, variant: "default" },
+      { evento: "validacao_reprovada", label: "Validação Reprovada", icon: <AlertTriangle className="h-3.5 w-3.5" />, variant: "destructive" },
+    ],
+    4: [
+      { evento: "falta_elementos", label: "Falta de Elementos", icon: <Search className="h-3.5 w-3.5" />, variant: "destructive" },
+    ],
+    5: [
+      { evento: "autuacao_concluida", label: "Autuação Concluída", icon: <FileCheck className="h-3.5 w-3.5" />, variant: "default" },
+    ],
+    6: [
+      { evento: "distribuicao_divisao", label: "Distribuir à Secção", icon: <Send className="h-3.5 w-3.5" />, variant: "default" },
+    ],
+    7: [
+      { evento: "distribuicao_seccao", label: "Distribuir a Técnico", icon: <Send className="h-3.5 w-3.5" />, variant: "default" },
+    ],
+    8: [
+      { evento: "analise_concluida", label: "Análise Concluída", icon: <CheckCircle2 className="h-3.5 w-3.5" />, variant: "default" },
+      { evento: "falta_elementos", label: "Solicitar Elementos", icon: <Search className="h-3.5 w-3.5" />, variant: "outline" },
+    ],
+    9: [
+      { evento: "validacao_seccao_aprovada", label: "Secção Aprova", icon: <CheckCircle2 className="h-3.5 w-3.5" />, variant: "default" },
+      { evento: "relatorio_sintese_pronto", label: "Relatório Síntese Pronto", icon: <FileText className="h-3.5 w-3.5" />, variant: "outline" },
+    ],
+    10: [
+      { evento: "validacao_divisao_aprovada", label: "Divisão Aprova", icon: <CheckCircle2 className="h-3.5 w-3.5" />, variant: "default" },
+    ],
+    11: [
+      { evento: "controle_qualidade_aprovado", label: "Qualidade Aprovada", icon: <CheckCircle2 className="h-3.5 w-3.5" />, variant: "default" },
+      { evento: "submissao_juiz", label: "Submeter ao Juiz", icon: <Gavel className="h-3.5 w-3.5" />, variant: "default" },
+    ],
+    12: [
+      { evento: "decisao_juiz", label: "Decisão do Juiz", icon: <Scale className="h-3.5 w-3.5" />, variant: "default" },
+      { evento: "contraditorio_ordenado", label: "Ordenar Contraditório", icon: <Gavel className="h-3.5 w-3.5" />, variant: "outline" },
+      { evento: "diligencia_solicitada", label: "Solicitar Diligência", icon: <Search className="h-3.5 w-3.5" />, variant: "outline" },
+    ],
+    13: [
+      { evento: "emolumentos_calculados", label: "Emolumentos Calculados", icon: <Receipt className="h-3.5 w-3.5" />, variant: "default" },
+    ],
+    14: [
+      { evento: "despacho_mp", label: "Despacho do MP", icon: <Gavel className="h-3.5 w-3.5" />, variant: "default" },
+    ],
+    15: [
+      { evento: "pagamento_recebido", label: "Pagamento Recebido", icon: <Receipt className="h-3.5 w-3.5" />, variant: "default" },
+    ],
+    16: [
+      { evento: "notificacao_expedida", label: "Notificação Expedida", icon: <MailCheck className="h-3.5 w-3.5" />, variant: "default" },
+    ],
+    17: [
+      { evento: "notificacao_expedida", label: "Notificação Concluída", icon: <MailCheck className="h-3.5 w-3.5" />, variant: "default" },
+    ],
+    18: [
+      { evento: "arquivamento", label: "Arquivar Processo", icon: <Archive className="h-3.5 w-3.5" />, variant: "default" },
+    ],
+  };
+
+  const dispatchEvent = async (evento: EventoWorkflow) => {
+    if (!processo) return;
+    setFiringEvent(evento);
+    try {
+      const count = await gerarAtividadesParaEvento(evento, processo.id, {
+        canal: (processo.canal_entrada as "portal" | "presencial") || "portal",
+        categoriaEntidade: processo.categoria_entidade,
+        checklistIncompleta: evento === "checklist_incompleta",
+      });
+
+      // Record in history
+      await supabase.from("processo_historico").insert({
+        processo_id: processo.id,
+        etapa_anterior: processo.etapa_atual,
+        etapa_seguinte: processo.etapa_atual,
+        estado_anterior: processo.estado,
+        estado_seguinte: processo.estado,
+        acao: `Evento disparado: ${evento}`,
+        executado_por: user?.displayName || "Sistema",
+        perfil_executor: user?.role || null,
+        observacoes: observacoes || `${count} atividade(s) gerada(s) para o evento "${evento}"`,
+      } as any);
+
+      toast({
+        title: "Evento disparado",
+        description: `${count} atividade(s) gerada(s) para "${evento.replace(/_/g, " ")}"`,
+      });
+      loadData();
+    } catch (err: any) {
+      toast({ title: "Erro ao disparar evento", description: err.message, variant: "destructive" });
+    } finally {
+      setFiringEvent(null);
+    }
+  };
 
   useEffect(() => {
     if (id) loadData();
