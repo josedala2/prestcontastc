@@ -3,65 +3,39 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Mail, Shield, Building2, UserCheck, Eye, EyeOff, Stamp, Search } from "lucide-react";
-import { useAuth, UserRole } from "@/contexts/AuthContext";
+import { Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { useAuth, UserRole, roleGroups, roleDefaultRoute } from "@/contexts/AuthContext";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-const demoUsers = [
-  {
-    label: "Administrador TCA",
-    email: "admin@tca.gov.ao",
-    password: "admin123",
-    role: "Administrador" as UserRole,
-    displayName: "Carlos Mendes",
-    initials: "CM",
-    icon: Shield,
-    description: "Acesso total ao sistema",
-    color: "bg-primary/10 text-primary border-primary/20",
-  },
-  {
-    label: "Técnico Validador",
-    email: "tecnico@tca.gov.ao",
-    password: "tecnico123",
-    role: "Técnico Validador" as UserRole,
-    displayName: "Ana Ferreira",
-    initials: "AF",
-    icon: UserCheck,
-    description: "Validação e análise de contas",
-    color: "bg-accent/10 text-accent border-accent/20",
-  },
-  {
-    label: "Auditor / Fiscal TCA",
-    email: "auditor@tca.gov.ao",
-    password: "auditor123",
-    role: "Auditor / Fiscal TCA" as UserRole,
-    displayName: "Jorge Baptista",
-    initials: "JB",
-    icon: Search,
-    description: "Auditoria e fiscalização",
-    color: "bg-destructive/10 text-destructive border-destructive/20",
-  },
-  {
-    label: "Secretaria",
-    email: "secretaria@tca.gov.ao",
-    password: "secretaria123",
-    role: "Secretaria" as UserRole,
-    displayName: "Rosa Tavares",
-    initials: "RT",
-    icon: Stamp,
-    description: "Recepção e emissão de actas",
-    color: "bg-warning/10 text-warning border-warning/20",
-  },
-  {
-    label: "Entidade (Contabilista)",
-    email: "entidade@ende.co.ao",
-    password: "entidade123",
-    role: "Preparador / Contabilista" as UserRole,
-    displayName: "Maria Costa",
-    initials: "MC",
-    icon: Building2,
-    description: "Portal de prestação de contas",
-    color: "bg-info/10 text-info border-info/20",
-  },
+interface DemoUser {
+  label: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  displayName: string;
+  initials: string;
+  stages: string;
+}
+
+const demoUsers: DemoUser[] = [
+  { label: "Representante da Entidade", email: "entidade@ende.co.ao", password: "entidade123", role: "Representante da Entidade", displayName: "Maria Costa", initials: "MC", stages: "Portal" },
+  { label: "Técnico da Secretaria-Geral", email: "tec.secretaria@tca.gov.ao", password: "tec123", role: "Técnico da Secretaria-Geral", displayName: "João Silva", initials: "JS", stages: "Etapas 1, 2, 16" },
+  { label: "Chefe da Secretaria-Geral", email: "chefe.secretaria@tca.gov.ao", password: "chefe123", role: "Chefe da Secretaria-Geral", displayName: "Rosa Tavares", initials: "RT", stages: "Etapa 3" },
+  { label: "Técnico da Contadoria Geral", email: "contadoria@tca.gov.ao", password: "contadoria123", role: "Técnico da Contadoria Geral", displayName: "Pedro Neto", initials: "PN", stages: "Etapa 4" },
+  { label: "Escrivão dos Autos", email: "escrivao@tca.gov.ao", password: "escrivao123", role: "Escrivão dos Autos", displayName: "António Gomes", initials: "AG", stages: "Etapas 5, 15" },
+  { label: "Chefe de Divisão", email: "chefe.divisao@tca.gov.ao", password: "divisao123", role: "Chefe de Divisão", displayName: "Fernanda Lopes", initials: "FL", stages: "Etapas 6, 10" },
+  { label: "Chefe de Secção", email: "chefe.seccao@tca.gov.ao", password: "seccao123", role: "Chefe de Secção", displayName: "Manuel Dias", initials: "MD", stages: "Etapas 7, 9" },
+  { label: "Técnico de Análise", email: "tecnico@tca.gov.ao", password: "tecnico123", role: "Técnico de Análise", displayName: "Ana Ferreira", initials: "AF", stages: "Etapa 8" },
+  { label: "Coordenador de Equipa", email: "coordenador@tca.gov.ao", password: "coord123", role: "Coordenador de Equipa", displayName: "Luís Pereira", initials: "LP", stages: "Etapas 6–10" },
+  { label: "Diretor dos Serviços Técnicos", email: "dst@tca.gov.ao", password: "dst123", role: "Diretor dos Serviços Técnicos", displayName: "Carlos Mendes", initials: "CM", stages: "Etapa 11" },
+  { label: "Juiz Relator", email: "juiz.relator@tca.gov.ao", password: "juiz123", role: "Juiz Relator", displayName: "Dr. Alberto Sousa", initials: "AS", stages: "Etapas 12, 18" },
+  { label: "Juiz Adjunto", email: "juiz.adjunto@tca.gov.ao", password: "adjunto123", role: "Juiz Adjunto", displayName: "Dra. Beatriz Faria", initials: "BF", stages: "Etapa 12" },
+  { label: "Ministério Público", email: "mp@tca.gov.ao", password: "mp123", role: "Ministério Público", displayName: "Dr. Ricardo Alves", initials: "RA", stages: "Etapa 14" },
+  { label: "Téc. Custas e Emolumentos", email: "custas@tca.gov.ao", password: "custas123", role: "Técnico da Secção de Custas e Emolumentos", displayName: "Helena Santos", initials: "HS", stages: "Etapa 13" },
+  { label: "Oficial de Diligências", email: "oficial@tca.gov.ao", password: "oficial123", role: "Oficial de Diligências", displayName: "Jorge Baptista", initials: "JB", stages: "Etapa 17" },
+  { label: "Presidente da Câmara", email: "presidente.camara@tca.gov.ao", password: "pcam123", role: "Presidente da Câmara", displayName: "Dr. Paulo Mendonça", initials: "PM", stages: "Supervisão" },
+  { label: "Presidente do Tribunal", email: "presidente@tca.gov.ao", password: "ptc123", role: "Presidente do Tribunal de Contas", displayName: "Cons. Mariana Vaz", initials: "MV", stages: "Acesso total" },
+  { label: "Administrador do Sistema", email: "admin@tca.gov.ao", password: "admin123", role: "Administrador do Sistema", displayName: "Sysadmin TCA", initials: "SA", stages: "Acesso total" },
 ];
 
 export default function Login() {
@@ -72,7 +46,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleDemoLogin = (user: (typeof demoUsers)[number]) => {
+  const handleDemoLogin = (user: DemoUser) => {
     setEmail(user.email);
     setPassword(user.password);
   };
@@ -80,7 +54,6 @@ export default function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     const matched = demoUsers.find((u) => u.email === email);
     setTimeout(() => {
       setLoading(false);
@@ -91,15 +64,7 @@ export default function Login() {
           role: matched.role,
           initials: matched.initials,
         });
-        if (matched.role === "Preparador / Contabilista") {
-          navigate("/portal");
-        } else if (matched.role === "Secretaria") {
-          navigate("/secretaria");
-        } else if (matched.role === "Técnico Validador") {
-          navigate("/tecnico");
-        } else {
-          navigate("/dashboard");
-        }
+        navigate(roleDefaultRoute[matched.role]);
       }
     }, 600);
   };
@@ -149,42 +114,55 @@ export default function Login() {
           </div>
         </div>
 
-        <div className="w-full max-w-md space-y-8">
+        <div className="w-full max-w-lg space-y-6">
           <div className="text-center lg:text-left">
             <h2 className="text-2xl font-bold text-foreground">Iniciar Sessão</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Introduza as suas credenciais para aceder ao sistema
+              Selecione um perfil demo ou introduza as credenciais
             </p>
           </div>
 
           <div className="space-y-2">
             <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-              Utilizadores Demo — clique para preencher
+              Perfis Demo — clique para preencher
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {demoUsers.map((user) => (
-                <button
-                  key={user.email}
-                  type="button"
-                  onClick={() => handleDemoLogin(user)}
-                  className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all hover:scale-[1.01] hover:shadow-sm ${user.color} ${
-                    email === user.email ? "ring-2 ring-primary/30 shadow-sm" : ""
-                  }`}
-                >
-                  <div className="h-9 w-9 rounded-full bg-background/80 flex items-center justify-center shrink-0">
-                    <user.icon className="h-4 w-4" />
+            <ScrollArea className="h-[280px] rounded-lg border border-border p-3">
+              <div className="space-y-3">
+                {roleGroups.map((group) => (
+                  <div key={group.label}>
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 px-1">
+                      {group.label}
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      {group.roles.map((roleName) => {
+                        const user = demoUsers.find((u) => u.role === roleName);
+                        if (!user) return null;
+                        return (
+                          <button
+                            key={user.email}
+                            type="button"
+                            onClick={() => handleDemoLogin(user)}
+                            className={`flex items-center gap-2 p-2 rounded-md border text-left transition-all hover:bg-accent/50 ${
+                              email === user.email
+                                ? "ring-2 ring-primary/40 bg-primary/5 border-primary/30"
+                                : "border-border"
+                            }`}
+                          >
+                            <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-[10px] font-bold text-primary">
+                              {user.initials}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-semibold truncate text-foreground">{user.label}</p>
+                              <p className="text-[10px] text-muted-foreground">{user.stages}</p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate">{user.label}</p>
-                    <p className="text-[11px] opacity-70">{user.description}</p>
-                  </div>
-                  <div className="text-right shrink-0 hidden sm:block">
-                    <p className="text-[10px] font-mono opacity-60">{user.email}</p>
-                    <p className="text-[10px] font-mono opacity-40">{user.password}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
+                ))}
+              </div>
+            </ScrollArea>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -215,8 +193,8 @@ export default function Login() {
             </Button>
           </form>
 
-          <p className="text-center text-[10px] text-muted-foreground/60 pt-2">
-            Sistema protegido com autenticação e controlo de acesso
+          <p className="text-center text-[10px] text-muted-foreground/60 pt-1">
+            Sistema protegido com autenticação e controlo de acesso por perfil
           </p>
         </div>
       </div>

@@ -283,19 +283,8 @@ export function AppSidebar() {
           {!collapsed && (
             <div className="min-w-0 animate-fade-in flex-1">
               <p className="text-xs font-medium text-sidebar-foreground truncate">{user?.displayName || "Utilizador"}</p>
-              <span className={cn(
-                "inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider mt-0.5",
-                user?.role === "Administrador" && "bg-primary/20 text-sidebar-primary",
-                user?.role === "Auditor / Fiscal TCA" && "bg-destructive/20 text-destructive",
-                user?.role === "Técnico Validador" && "bg-accent/20 text-accent-foreground",
-                user?.role === "Secretaria" && "bg-warning/20 text-warning",
-                user?.role === "Preparador / Contabilista" && "bg-info/20 text-info",
-              )}>
-                {user?.role === "Administrador" ? "Admin" :
-                 user?.role === "Auditor / Fiscal TCA" ? "Auditor" :
-                 user?.role === "Técnico Validador" ? "Técnico" :
-                 user?.role === "Secretaria" ? "Secretaria" :
-                 user?.role === "Preparador / Contabilista" ? "Entidade" : "—"}
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider mt-0.5 bg-primary/20 text-sidebar-primary">
+                {user?.role || "—"}
               </span>
             </div>
           )}
