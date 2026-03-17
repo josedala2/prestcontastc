@@ -32,9 +32,15 @@ import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { EntityProfilePanel } from "@/components/secretaria/EntityProfilePanel";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { SecretariaVistoTab } from "@/components/secretaria/SecretariaVistoTab";
+import { SecretariaValidacaoTab } from "@/components/secretaria/SecretariaValidacaoTab";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Secretaria = () => {
   const { recepcionar, rejeitar, submissions, getUploadedDocs } = useSubmissions();
+  const { user } = useAuth();
+  const isChefe = user?.role === "Chefe da Secretaria-Geral" ||
+    user?.role === "Administrador do Sistema" ||
+    user?.role === "Presidente do Tribunal de Contas";
 
   // Merge: mock "submetido" + dynamically submitted via Portal ("pendente" in SubmissionContext)
   const submetidos = useMemo(() => {
@@ -526,6 +532,10 @@ const Secretaria = () => {
             <Inbox className="h-4 w-4" />
             Recepção de Contas
           </TabsTrigger>
+          <TabsTrigger value="validacao" className="gap-2">
+            <FileCheck className="h-4 w-4" />
+            Validação
+          </TabsTrigger>
           <TabsTrigger value="vistos" className="gap-2">
             <ShieldCheck className="h-4 w-4" />
             Processos de Visto
@@ -956,6 +966,10 @@ const Secretaria = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+        </TabsContent>
+
+        <TabsContent value="validacao" className="mt-6">
+          <SecretariaValidacaoTab />
         </TabsContent>
 
         <TabsContent value="vistos" className="mt-6">
