@@ -336,6 +336,7 @@ const ProcessoDetalhe = () => {
 
       toast({ title: "Processo devolvido", description: `Devolvido para: ${prevStageInfo?.nome}` });
       setObservacoes("");
+      refreshNotifications();
       loadData();
     }
     setAdvancing(false);
