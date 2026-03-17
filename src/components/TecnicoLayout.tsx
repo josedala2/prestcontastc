@@ -69,6 +69,7 @@ export function TecnicoLayout({ children }: TecnicoLayoutProps) {
   const routeTitles = buildRouteTitles(prefix);
   const pageTitle = routeTitles[location.pathname] || (isContadoria ? "Contadoria Geral" : "Técnico");
   const { entity, setEntityId } = usePortalEntity();
+  const { entities: allEntities } = useEntities();
   const { user, logout } = useAuth();
 
   const shortName = entity.name.split(" - ")[1] || entity.name.split(" — ")[0] || entity.name;
