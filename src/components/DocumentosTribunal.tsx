@@ -324,7 +324,7 @@ export function DocumentosTribunal({ exercicioId, entidadeId, readOnly = false }
                     </TableCell>
                     <TableCell className="text-right space-x-1">
                       <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={() => {
-                        const entity = mockEntities.find((e) => e.id === entidadeId);
+                        const entity = findById(entidadeId);
                         exportDocumentoTribunalPdf(doc, entity?.name || "Entidade");
                       }}>
                         <Download className="h-3 w-3" /> PDF
