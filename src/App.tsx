@@ -43,6 +43,7 @@ import GestaoProcessos from "./pages/GestaoProcessos";
 import ProcessoDetalhePage from "./pages/ProcessoDetalhe";
 import ActasRecepcao from "./pages/ActasRecepcao";
 import Secretaria from "./pages/Secretaria";
+import Atividades from "./pages/Atividades";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
