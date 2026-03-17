@@ -66,7 +66,7 @@ const Exercicios = () => {
 
     if (editing) {
       // Edit mode: single entity
-      const entity = mockEntities.find((e) => e.id === form.entityId);
+      const entity = allEntities.find((e) => e.id === form.entityId);
       if (!entity) {
         toast.error("Seleccione uma entidade.");
         return;
