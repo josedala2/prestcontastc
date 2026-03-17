@@ -30,7 +30,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
   "Auditor / Fiscal TCA": [
     "/dashboard", "/entidades", "/exercicios", "/relatorios", "/mapas",
     "/anexos", "/auditoria", "/documentos-obrigatorios", "/actas-recepcao",
-    "/esclarecimentos", "/submissoes", "/processos-visto",
+    "/esclarecimentos", "/submissoes", "/processos-visto", "/gestao-processos",
   ],
   "Secretaria": [
     "/secretaria", "/submissoes", "/actas-recepcao", "/entidades",
