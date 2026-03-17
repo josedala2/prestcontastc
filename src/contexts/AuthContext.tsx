@@ -90,7 +90,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
   "Técnico de Análise": [
     "/tecnico", "/tecnico/prestacao-contas", "/tecnico/exercicios",
     "/tecnico/documentos", "/tecnico/mapas", "/tecnico/esclarecimentos",
-    "/tecnico/validacoes", "/gestao-processos",
+    "/tecnico/validacoes", "/gestao-processos", "/analise-tecnica",
   ],
   "Coordenador de Equipa": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
