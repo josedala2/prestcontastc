@@ -95,7 +95,7 @@ const Exercicios = () => {
       const duplicates: string[] = [];
       const newFys: FiscalYear[] = [];
       for (const eid of selectedEntityIds) {
-        const entity = mockEntities.find((e) => e.id === eid);
+        const entity = allEntities.find((e) => e.id === eid);
         if (!entity) continue;
         const exists = fiscalYears.find((fy) => fy.entityId === eid && fy.year === form.year);
         if (exists) {
