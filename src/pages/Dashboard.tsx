@@ -532,28 +532,6 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           )}
-          {actas.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold">📄 Actas de Recepção ({actas.length})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {actas.slice(0, 5).map((a: any) => (
-                    <div key={a.id} className="flex items-center justify-between p-2 rounded bg-muted/30">
-                      <div>
-                        <p className="text-xs font-medium">{a.entity_name}</p>
-                        <p className="text-[10px] text-muted-foreground">{a.acta_numero} — {a.fiscal_year}</p>
-                      </div>
-                      <span className="text-[10px] text-muted-foreground">
-                        {new Date(a.created_at).toLocaleDateString("pt-AO")}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
       )}
     </AppLayout>
