@@ -101,38 +101,39 @@ const entityShort = (id: string) => {
   return e ? getEntityShortName(e) : "Desconhecida";
 };
 
-// ─── Exercícios Fiscais (2023 e 2024 para cada entidade) ───
+// ─── Exercícios Fiscais (2023 e 2024 para entidades representativas) ───
+// IDs: 55=ENDE, 57=EPAL, 56=PRODEL, 54=TAAG, 51=Sonangol, 37=Gov.Prov.Luanda, 28=Min.Saúde, 2=Assembleia Nacional, 11=Min.Finanças, 61=Porto de Luanda
 export const mockFiscalYears: FiscalYear[] = [
-  // ENDE
-  { id: "fy1", entityId: "1", entityName: entityShort("1"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "rascunho", totalDebito: 15834567890, totalCredito: 15834567890, errorsCount: 5, warningsCount: 3, checklistProgress: 45, deadline: "2025-06-30" },
-  { id: "fy1b", entityId: "1", entityName: entityShort("1"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 14200000000, totalCredito: 14200000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-10" },
-  // INEA
-  { id: "fy2", entityId: "2", entityName: entityShort("2"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 8921345000, totalCredito: 8921345000, errorsCount: 0, warningsCount: 2, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-15" },
-  { id: "fy2b", entityId: "2", entityName: entityShort("2"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 7850000000, totalCredito: 7850000000, errorsCount: 0, warningsCount: 1, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-03-28" },
-  // FSDEA
-  { id: "fy3", entityId: "3", entityName: entityShort("3"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_analise", totalDebito: 45230000000, totalCredito: 45230000000, errorsCount: 1, warningsCount: 0, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-03-28" },
-  { id: "fy3b", entityId: "3", entityName: entityShort("3"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 42100000000, totalCredito: 42100000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-05" },
-  // EPAL
-  { id: "fy4", entityId: "4", entityName: entityShort("4"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_validacao", totalDebito: 12450000000, totalCredito: 12450000000, errorsCount: 3, warningsCount: 4, checklistProgress: 78, deadline: "2025-06-30" },
-  { id: "fy4b", entityId: "4", entityName: entityShort("4"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "nao_conforme", totalDebito: 11200000000, totalCredito: 11200000000, errorsCount: 7, warningsCount: 5, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-05-12" },
-  // INAVIC
-  { id: "fy5", entityId: "5", entityName: entityShort("5"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "com_pedidos", totalDebito: 3280000000, totalCredito: 3280000000, errorsCount: 2, warningsCount: 1, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-20" },
-  { id: "fy5b", entityId: "5", entityName: entityShort("5"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 2950000000, totalCredito: 2950000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-12" },
-  // FADA
-  { id: "fy6", entityId: "6", entityName: entityShort("6"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 5670000000, totalCredito: 5670000000, errorsCount: 0, warningsCount: 3, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-10" },
-  { id: "fy6b", entityId: "6", entityName: entityShort("6"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 4890000000, totalCredito: 4890000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-08" },
-  // EPL
-  { id: "fy7", entityId: "7", entityName: entityShort("7"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "rascunho", totalDebito: 7890000000, totalCredito: 7890000000, errorsCount: 8, warningsCount: 6, checklistProgress: 25, deadline: "2025-06-30" },
-  { id: "fy7b", entityId: "7", entityName: entityShort("7"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "nao_conforme", totalDebito: 7120000000, totalCredito: 7120000000, errorsCount: 4, warningsCount: 3, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-05-20" },
-  // INAMET
-  { id: "fy8", entityId: "8", entityName: entityShort("8"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_validacao", totalDebito: 1560000000, totalCredito: 1560000000, errorsCount: 1, warningsCount: 2, checklistProgress: 92, deadline: "2025-06-30" },
-  { id: "fy8b", entityId: "8", entityName: entityShort("8"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 1420000000, totalCredito: 1420000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-15" },
-  // ENSA
-  { id: "fy9", entityId: "9", entityName: entityShort("9"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_analise", totalDebito: 28900000000, totalCredito: 28900000000, errorsCount: 0, warningsCount: 1, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-03-20" },
-  { id: "fy9b", entityId: "9", entityName: entityShort("9"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 26500000000, totalCredito: 26500000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-02" },
-  // IGAPE
-  { id: "fy10", entityId: "10", entityName: entityShort("10"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 95400000000, totalCredito: 95400000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-01" },
-  { id: "fy10b", entityId: "10", entityName: entityShort("10"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 89200000000, totalCredito: 89200000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-03-25" },
+  // ENDE (id=55)
+  { id: "fy1", entityId: "55", entityName: entityShort("55"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "rascunho", totalDebito: 15834567890, totalCredito: 15834567890, errorsCount: 5, warningsCount: 3, checklistProgress: 45, deadline: "2025-06-30" },
+  { id: "fy1b", entityId: "55", entityName: entityShort("55"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 14200000000, totalCredito: 14200000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-10" },
+  // Sonangol (id=51)
+  { id: "fy2", entityId: "51", entityName: entityShort("51"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 89210000000, totalCredito: 89210000000, errorsCount: 0, warningsCount: 2, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-15" },
+  { id: "fy2b", entityId: "51", entityName: entityShort("51"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 78500000000, totalCredito: 78500000000, errorsCount: 0, warningsCount: 1, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-03-28" },
+  // TAAG (id=54)
+  { id: "fy3", entityId: "54", entityName: entityShort("54"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_analise", totalDebito: 45230000000, totalCredito: 45230000000, errorsCount: 1, warningsCount: 0, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-03-28" },
+  { id: "fy3b", entityId: "54", entityName: entityShort("54"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 42100000000, totalCredito: 42100000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-05" },
+  // EPAL (id=57)
+  { id: "fy4", entityId: "57", entityName: entityShort("57"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_validacao", totalDebito: 12450000000, totalCredito: 12450000000, errorsCount: 3, warningsCount: 4, checklistProgress: 78, deadline: "2025-06-30" },
+  { id: "fy4b", entityId: "57", entityName: entityShort("57"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "nao_conforme", totalDebito: 11200000000, totalCredito: 11200000000, errorsCount: 7, warningsCount: 5, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-05-12" },
+  // Min. Finanças (id=11)
+  { id: "fy5", entityId: "11", entityName: entityShort("11"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "com_pedidos", totalDebito: 32800000000, totalCredito: 32800000000, errorsCount: 2, warningsCount: 1, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-20" },
+  { id: "fy5b", entityId: "11", entityName: entityShort("11"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 29500000000, totalCredito: 29500000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-12" },
+  // Assembleia Nacional (id=2)
+  { id: "fy6", entityId: "2", entityName: entityShort("2"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 5670000000, totalCredito: 5670000000, errorsCount: 0, warningsCount: 3, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-10" },
+  { id: "fy6b", entityId: "2", entityName: entityShort("2"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 4890000000, totalCredito: 4890000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-08" },
+  // Gov. Prov. Luanda (id=47)
+  { id: "fy7", entityId: "47", entityName: entityShort("47"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "rascunho", totalDebito: 7890000000, totalCredito: 7890000000, errorsCount: 8, warningsCount: 6, checklistProgress: 25, deadline: "2025-06-30" },
+  { id: "fy7b", entityId: "47", entityName: entityShort("47"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "nao_conforme", totalDebito: 7120000000, totalCredito: 7120000000, errorsCount: 4, warningsCount: 3, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-05-20" },
+  // Min. Saúde (id=28)
+  { id: "fy8", entityId: "28", entityName: entityShort("28"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_validacao", totalDebito: 15600000000, totalCredito: 15600000000, errorsCount: 1, warningsCount: 2, checklistProgress: 92, deadline: "2025-06-30" },
+  { id: "fy8b", entityId: "28", entityName: entityShort("28"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 14200000000, totalCredito: 14200000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-15" },
+  // Porto de Luanda (id=61)
+  { id: "fy9", entityId: "61", entityName: entityShort("61"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_analise", totalDebito: 28900000000, totalCredito: 28900000000, errorsCount: 0, warningsCount: 1, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-03-20" },
+  { id: "fy9b", entityId: "61", entityName: entityShort("61"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 26500000000, totalCredito: 26500000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-02" },
+  // PRODEL (id=56)
+  { id: "fy10", entityId: "56", entityName: entityShort("56"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 9540000000, totalCredito: 9540000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-01" },
+  { id: "fy10b", entityId: "56", entityName: entityShort("56"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 8920000000, totalCredito: 8920000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-03-25" },
 ];
 
 // ─── Plano de Contas PGC (Decreto nº 82/2001, actualizado pelo DP nº 180/19) ───
