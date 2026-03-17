@@ -432,126 +432,178 @@ const SubmissaoDetalhe = () => {
           </div>
 
           {/* Visualizar Processo Completo */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <FolderOpen className="h-4 w-4 text-primary" />
-                  Processo Completo
-                </CardTitle>
-                <Badge variant="outline" className="text-[10px]">
-                  {(generatedActaFilePath ? 1 : 0) + submissionDocs.length} documento(s)
-                </Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Visualize todos os documentos do processo, desde a capa até ao último documento submetido.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="max-h-[400px]">
-                <div className="space-y-2">
-                  {/* Acta de Recepção */}
-                  {generatedActaFilePath && (
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/20">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center">
-                          <Stamp className="h-4 w-4 text-primary" />
+          {(() => {
+            // Build unified doc list for sorting/filtering/pagination
+            const allDocs: Array<{ type: "acta" | "doc"; label: string; fileName: string; size: number; doc?: SubmissionDoc }> = [];
+            if (generatedActaFilePath) {
+              allDocs.push({ type: "acta", label: "Acta de Recepção", fileName: generatedActaFileName || "acta.pdf", size: 0 });
+            }
+            submissionDocs.forEach(d => allDocs.push({ type: "doc", label: d.doc_label, fileName: d.file_name, size: d.file_size, doc: d }));
+
+            const filtered = allDocs.filter(d => {
+              if (!docSearch.trim()) return true;
+              const q = docSearch.toLowerCase();
+              return d.label.toLowerCase().includes(q) || d.fileName.toLowerCase().includes(q);
+            });
+
+            const sorted = [...filtered].sort((a, b) => {
+              let cmp = 0;
+              if (docSortField === "label") cmp = a.label.localeCompare(b.label, "pt");
+              else if (docSortField === "name") cmp = a.fileName.localeCompare(b.fileName, "pt");
+              else if (docSortField === "size") cmp = a.size - b.size;
+              return docSortDir === "asc" ? cmp : -cmp;
+            });
+
+            const totalPages = Math.max(1, Math.ceil(sorted.length / DOC_PAGE_SIZE));
+            const safePage = Math.min(docPage, totalPages - 1);
+            const paged = sorted.slice(safePage * DOC_PAGE_SIZE, (safePage + 1) * DOC_PAGE_SIZE);
+
+            const SortIcon = docSortDir === "asc" ? ArrowUp : ArrowDown;
+
+            return (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <FolderOpen className="h-4 w-4 text-primary" />
+                      Processo Completo
+                    </CardTitle>
+                    <Badge variant="outline" className="text-[10px]">
+                      {allDocs.length} documento(s)
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Visualize todos os documentos do processo, desde a capa até ao último documento submetido.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {/* Toolbar: Search + Sort */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="relative flex-1 min-w-[180px]">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                      <Input
+                        placeholder="Pesquisar documentos..."
+                        value={docSearch}
+                        onChange={(e) => { setDocSearch(e.target.value); setDocPage(0); }}
+                        className="pl-8 h-8 text-xs"
+                      />
+                    </div>
+                    <Select value={docSortField} onValueChange={(v: any) => { setDocSortField(v); setDocPage(0); }}>
+                      <SelectTrigger className="w-[140px] h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="label">Ordenar: Nome</SelectItem>
+                        <SelectItem value="name">Ordenar: Ficheiro</SelectItem>
+                        <SelectItem value="size">Ordenar: Tamanho</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={() => setDocSortDir(d => d === "asc" ? "desc" : "asc")}
+                      title={docSortDir === "asc" ? "Ascendente" : "Descendente"}
+                    >
+                      <SortIcon className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+
+                  {/* Document list */}
+                  <div className="space-y-2">
+                    {paged.map((item, idx) => item.type === "acta" ? (
+                      <div key="acta" className="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/20">
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center">
+                            <Stamp className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Acta de Recepção</p>
+                            <p className="text-[10px] text-muted-foreground">{actaNumero} · Documento oficial</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium">Acta de Recepção</p>
-                          <p className="text-[10px] text-muted-foreground">{actaNumero} · Documento oficial</p>
+                        <div className="flex items-center gap-1.5">
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Visualizar"
+                            onClick={() => { const { data } = supabase.storage.from("actas-recepcao").getPublicUrl(generatedActaFilePath!); setPdfPreviewUrl(data.publicUrl); }}>
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Descarregar"
+                            onClick={async () => {
+                              const { data, error } = await supabase.storage.from("actas-recepcao").download(generatedActaFilePath!);
+                              if (error || !data) return;
+                              const url = URL.createObjectURL(data);
+                              const a = document.createElement("a"); a.href = url; a.download = generatedActaFileName || "acta.pdf"; a.click(); URL.revokeObjectURL(url);
+                            }}>
+                            <Download className="h-3.5 w-3.5" />
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0"
-                          title="Visualizar"
-                          onClick={() => {
-                            const { data } = supabase.storage.from("actas-recepcao").getPublicUrl(generatedActaFilePath);
-                            setPdfPreviewUrl(data.publicUrl);
-                          }}
-                        >
-                          <Eye className="h-3.5 w-3.5" />
+                    ) : (
+                      <div key={item.doc!.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border">
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-md bg-muted flex items-center justify-center">
+                            <File className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">{item.doc!.doc_label}</p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {item.doc!.file_name} · {(item.doc!.file_size / 1024).toFixed(0)} KB
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Visualizar"
+                            onClick={() => {
+                              const { data } = supabase.storage.from("submission-documents").getPublicUrl(item.doc!.file_path);
+                              if (item.doc!.file_name.toLowerCase().endsWith(".pdf")) { setPdfPreviewUrl(data.publicUrl); }
+                              else { setDocPreview({ label: item.doc!.doc_label, category: item.doc!.doc_category }); setDocPreviewUrl(data.publicUrl); }
+                            }}>
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Descarregar"
+                            onClick={() => handleDownloadDoc(item.doc!)}>
+                            <Download className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+
+                    {sorted.length === 0 && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <FolderOpen className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                        <p className="text-sm">{docSearch ? "Nenhum documento encontrado para a pesquisa." : "Nenhum documento encontrado no processo."}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between pt-2 border-t border-border">
+                      <p className="text-[10px] text-muted-foreground">
+                        {safePage * DOC_PAGE_SIZE + 1}–{Math.min((safePage + 1) * DOC_PAGE_SIZE, sorted.length)} de {sorted.length}
+                      </p>
+                      <div className="flex items-center gap-1">
+                        <Button variant="outline" size="sm" className="h-7 w-7 p-0" disabled={safePage === 0}
+                          onClick={() => setDocPage(p => Math.max(0, p - 1))}>
+                          <ChevronLeft className="h-3.5 w-3.5" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0"
-                          title="Descarregar"
-                          onClick={async () => {
-                            const { data, error } = await supabase.storage.from("actas-recepcao").download(generatedActaFilePath);
-                            if (error || !data) return;
-                            const url = URL.createObjectURL(data);
-                            const a = document.createElement("a");
-                            a.href = url;
-                            a.download = generatedActaFileName || "acta.pdf";
-                            a.click();
-                            URL.revokeObjectURL(url);
-                          }}
-                        >
-                          <Download className="h-3.5 w-3.5" />
+                        {Array.from({ length: totalPages }, (_, i) => (
+                          <Button key={i} variant={i === safePage ? "default" : "outline"} size="sm"
+                            className="h-7 w-7 p-0 text-[10px]" onClick={() => setDocPage(i)}>
+                            {i + 1}
+                          </Button>
+                        ))}
+                        <Button variant="outline" size="sm" className="h-7 w-7 p-0" disabled={safePage >= totalPages - 1}
+                          onClick={() => setDocPage(p => Math.min(totalPages - 1, p + 1))}>
+                          <ChevronRight className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     </div>
                   )}
-
-                  {/* Documentos submetidos pela entidade */}
-                  {submissionDocs.map((doc, idx) => (
-                    <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-md bg-muted flex items-center justify-center">
-                          <File className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">{doc.doc_label}</p>
-                          <p className="text-[10px] text-muted-foreground">
-                            {doc.file_name} · {(doc.file_size / 1024).toFixed(0)} KB
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0"
-                          title="Visualizar"
-                          onClick={() => {
-                            const { data } = supabase.storage.from("submission-documents").getPublicUrl(doc.file_path);
-                            if (doc.file_name.toLowerCase().endsWith(".pdf")) {
-                              setPdfPreviewUrl(data.publicUrl);
-                            } else {
-                              setDocPreview({ label: doc.doc_label, category: doc.doc_category });
-                              setDocPreviewUrl(data.publicUrl);
-                            }
-                          }}
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0"
-                          title="Descarregar"
-                          onClick={() => handleDownloadDoc(doc)}
-                        >
-                          <Download className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-
-                  {submissionDocs.length === 0 && !generatedActaFilePath && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <FolderOpen className="h-8 w-8 mx-auto mb-2 opacity-40" />
-                      <p className="text-sm">Nenhum documento encontrado no processo.</p>
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            );
+          })()}
 
           {/* Remeter para Chefe de Divisão */}
           {!remetido ? (
