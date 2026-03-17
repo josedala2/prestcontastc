@@ -968,6 +968,10 @@ const Secretaria = () => {
       </AlertDialog>
         </TabsContent>
 
+        <TabsContent value="validacao" className="mt-6">
+          <SecretariaValidacaoTab />
+        </TabsContent>
+
         <TabsContent value="vistos" className="mt-6">
           <SecretariaVistoTab />
         </TabsContent>
