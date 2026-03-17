@@ -38,6 +38,7 @@ const ProcessoDetalhe = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, canActOnStage } = useAuth();
+  const { refreshNotifications } = useSubmissions();
   const [processo, setProcesso] = useState<Processo | null>(null);
   const [historico, setHistorico] = useState<ProcessoHistorico[]>([]);
   const [documentos, setDocumentos] = useState<ProcessoDocumento[]>([]);
