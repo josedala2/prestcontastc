@@ -392,7 +392,7 @@ const SubmissaoDetalhe = () => {
                       setPdfPreviewUrl(data.publicUrl);
                     }}
                   >
-                    <Eye className="h-3.5 w-3.5" /> Visualizar Acta
+                    <Eye className="h-3.5 w-3.5" /> Visualizar Nota
                   </Button>
                   <Button
                     variant="outline"
