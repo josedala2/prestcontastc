@@ -59,10 +59,12 @@ export const rolePermissions: Record<UserRole, string[]> = {
   "Técnico da Secretaria-Geral": [
     "/secretaria", "/submissoes", "/actas-recepcao", "/entidades",
     "/gestao-processos", "/mapas", "/relatorios", "/anexos",
+    "/secretaria/oficio-remessa",
   ],
   "Chefe da Secretaria-Geral": [
     "/secretaria", "/submissoes", "/actas-recepcao", "/entidades",
     "/gestao-processos", "/mapas", "/relatorios", "/anexos",
+    "/secretaria/oficio-remessa",
   ],
   "Técnico da Contadoria Geral": [
     "/contadoria", "/contadoria/verificacao", "/contadoria/documentos",
@@ -73,20 +75,22 @@ export const rolePermissions: Record<UserRole, string[]> = {
   "Escrivão dos Autos": [
     "/dashboard", "/gestao-processos", "/entidades", "/submissoes",
     "/actas-recepcao", "/documentos-obrigatorios", "/escrivao/registo-autuacao",
+    "/escrivao/cumprimento-despachos",
   ],
   "Chefe de Divisão": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
     "/relatorios", "/mapas", "/anexos", "/documentos-obrigatorios",
-    "/chefe-divisao/processos",
+    "/chefe-divisao/processos", "/chefe-divisao/validacao",
   ],
   "Chefe de Secção": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
     "/relatorios", "/mapas", "/documentos-obrigatorios",
+    "/chefe-seccao/distribuicao", "/chefe-seccao/validacao",
   ],
   "Técnico de Análise": [
     "/tecnico", "/tecnico/prestacao-contas", "/tecnico/exercicios",
     "/tecnico/documentos", "/tecnico/mapas", "/tecnico/esclarecimentos",
-    "/tecnico/validacoes", "/gestao-processos",
+    "/tecnico/validacoes", "/gestao-processos", "/analise-tecnica",
   ],
   "Coordenador de Equipa": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
@@ -97,25 +101,31 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/dashboard", "/entidades", "/exercicios", "/gestao-processos",
     "/submissoes", "/relatorios", "/mapas", "/anexos",
     "/documentos-obrigatorios", "/esclarecimentos", "/auditoria",
+    "/dst/controle-qualidade",
   ],
   "Juiz Relator": [
     "/dashboard", "/entidades", "/exercicios", "/gestao-processos",
     "/submissoes", "/relatorios", "/mapas", "/anexos",
     "/documentos-obrigatorios", "/auditoria", "/processos-visto",
+    "/juiz/decisao", "/juiz/arquivamento",
   ],
   "Juiz Adjunto": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
     "/relatorios", "/mapas", "/documentos-obrigatorios",
+    "/juiz/decisao",
   ],
   "Ministério Público": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
     "/relatorios", "/mapas", "/documentos-obrigatorios", "/auditoria",
+    "/ministerio-publico/despacho",
   ],
   "Técnico da Secção de Custas e Emolumentos": [
     "/dashboard", "/gestao-processos", "/submissoes", "/entidades",
+    "/custas/emolumentos",
   ],
   "Oficial de Diligências": [
     "/dashboard", "/gestao-processos", "/entidades",
+    "/diligencias/expediente-saida",
   ],
   "Presidente da Câmara": [
     "/dashboard", "/entidades", "/exercicios", "/gestao-processos",
@@ -139,20 +149,20 @@ export const rolePermissions: Record<UserRole, string[]> = {
 // Sidebar sections visible per role
 export const roleSidebarSections: Record<UserRole, string[]> = {
   "Representante da Entidade": [],
-  "Técnico da Secretaria-Geral": ["Principal", "Relatórios", "Dossiê"],
-  "Chefe da Secretaria-Geral": ["Principal", "Relatórios", "Dossiê"],
+  "Técnico da Secretaria-Geral": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
+  "Chefe da Secretaria-Geral": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
   "Técnico da Contadoria Geral": ["Principal", "Relatórios", "Dossiê"],
   "Escrivão dos Autos": ["Principal", "Dossiê", "Acesso Externo"],
   "Chefe de Divisão": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
-  "Chefe de Secção": ["Principal", "Relatórios", "Dossiê"],
-  "Técnico de Análise": [],
+  "Chefe de Secção": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
+  "Técnico de Análise": ["Acesso Externo"],
   "Coordenador de Equipa": ["Principal", "Relatórios", "Dossiê"],
-  "Diretor dos Serviços Técnicos": ["Principal", "Relatórios", "Dossiê"],
-  "Juiz Relator": ["Principal", "Relatórios", "Dossiê"],
-  "Juiz Adjunto": ["Principal", "Relatórios", "Dossiê"],
-  "Ministério Público": ["Principal", "Relatórios", "Dossiê"],
-  "Técnico da Secção de Custas e Emolumentos": ["Principal"],
-  "Oficial de Diligências": ["Principal"],
+  "Diretor dos Serviços Técnicos": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
+  "Juiz Relator": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
+  "Juiz Adjunto": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
+  "Ministério Público": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
+  "Técnico da Secção de Custas e Emolumentos": ["Principal", "Acesso Externo"],
+  "Oficial de Diligências": ["Principal", "Acesso Externo"],
   "Presidente da Câmara": ["Principal", "Relatórios", "Dossiê"],
   "Presidente do Tribunal de Contas": ["Principal", "Relatórios", "Dossiê", "Sistema"],
   "Administrador do Sistema": ["Principal", "Dados", "Relatórios", "Dossiê", "Acesso Externo", "Sistema"],
