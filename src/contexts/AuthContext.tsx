@@ -125,6 +125,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
   ],
   "Oficial de Diligências": [
     "/dashboard", "/gestao-processos", "/entidades",
+    "/diligencias/expediente-saida",
   ],
   "Presidente da Câmara": [
     "/dashboard", "/entidades", "/exercicios", "/gestao-processos",
