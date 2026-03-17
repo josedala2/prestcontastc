@@ -58,6 +58,8 @@ const CHECKLIST_ITEMS = [
   { id: "certidao_divida", label: "Certidão de Dívida", obrigatorio: false },
   { id: "orcamento", label: "Mapa de Execução Orçamental", obrigatorio: true },
   { id: "relacao_abates", label: "Relação de Abates", obrigatorio: false },
+  { id: "acta_recepcao", label: "Acta de Recepção", obrigatorio: true },
+  { id: "nota_remessa", label: "Nota de Remessa", obrigatorio: true },
 ];
 
 export default function ContadoriaVerificacao() {
