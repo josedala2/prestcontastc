@@ -1,197 +1,92 @@
 import { Entity, FiscalYear, TrialBalanceLine, ValidationResult, Account, Attachment, AuditLogEntry, ClarificationRequest, FinancialIndicators, ComplianceQuestion, ComplianceEvaluation, DocumentoTribunal } from "@/types";
 
-// ─── 10 Entidades Angolanas ───
+// ─── Entidades Angolanas (baseado no ficheiro orgaos_angola.xlsx) ───
+let _entityId = 0;
+const eid = () => String(++_entityId);
+
 export const mockEntities: Entity[] = [
-  {
-    id: "1",
-    name: "Empresa Nacional de Distribuição de Electricidade - ENDE, E.P.",
-    nif: "5417183920",
-    tutela: "Ministério da Energia e Águas",
-    contacto: "+244 222 310 000",
-    morada: "Rua Rainha Ginga, Luanda",
-    tipologia: "empresa_publica",
-    provincia: "Luanda",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: "2",
-    name: "Instituto Nacional de Estradas de Angola - INEA",
-    nif: "5401028734",
-    tutela: "Ministério das Obras Públicas",
-    contacto: "+244 222 330 500",
-    morada: "Av. 4 de Fevereiro, Luanda",
-    tipologia: "instituto_publico",
-    provincia: "Luanda",
-    createdAt: "2024-02-10",
-  },
-  {
-    id: "3",
-    name: "Fundo Soberano de Angola - FSDEA",
-    nif: "5402019845",
-    tutela: "Ministério das Finanças",
-    contacto: "+244 222 390 100",
-    morada: "Rua Major Kanhangulo, Luanda",
-    tipologia: "fundo_autonomo",
-    provincia: "Luanda",
-    createdAt: "2024-03-01",
-  },
-  {
-    id: "4",
-    name: "Empresa de Águas de Luanda - EPAL, E.P.",
-    nif: "5404032156",
-    tutela: "Ministério da Energia e Águas",
-    contacto: "+244 222 321 400",
-    morada: "Rua do Engenheiro Ezequiel, Luanda",
-    tipologia: "empresa_publica",
-    provincia: "Luanda",
-    createdAt: "2024-01-20",
-  },
-  {
-    id: "5",
-    name: "Instituto Nacional da Aviação Civil - INAVIC",
-    nif: "5405045678",
-    tutela: "Ministério dos Transportes",
-    contacto: "+244 222 352 200",
-    morada: "Aeroporto Internacional 4 de Fevereiro, Luanda",
-    tipologia: "instituto_publico",
-    provincia: "Luanda",
-    createdAt: "2024-02-15",
-  },
-  {
-    id: "6",
-    name: "Fundo de Apoio ao Desenvolvimento Agrário - FADA",
-    nif: "5406058901",
-    tutela: "Ministério da Agricultura e Pescas",
-    contacto: "+244 222 323 800",
-    morada: "Rua Comandante Gika, Luanda",
-    tipologia: "fundo_autonomo",
-    provincia: "Luanda",
-    createdAt: "2024-03-10",
-  },
-  {
-    id: "7",
-    name: "Empresa Portuária do Lobito - EPL, E.P.",
-    nif: "5407061234",
-    tutela: "Ministério dos Transportes",
-    contacto: "+244 261 222 300",
-    morada: "Porto do Lobito, Benguela",
-    tipologia: "empresa_publica",
-    provincia: "Benguela",
-    createdAt: "2024-04-05",
-  },
-  {
-    id: "8",
-    name: "Serviço Nacional de Meteorologia e Geofísica - INAMET",
-    nif: "5408074567",
-    tutela: "Ministério das Telecomunicações e TI",
-    contacto: "+244 222 326 100",
-    morada: "Rua Cónego Manuel das Neves, Luanda",
-    tipologia: "servico_autonomo",
-    provincia: "Luanda",
-    createdAt: "2024-04-15",
-  },
-  {
-    id: "9",
-    name: "Empresa Nacional de Seguros de Angola - ENSA, E.P.",
-    nif: "5409087890",
-    tutela: "Ministério das Finanças",
-    contacto: "+244 222 332 400",
-    morada: "Av. 4 de Fevereiro, 93, Luanda",
-    tipologia: "empresa_publica",
-    provincia: "Luanda",
-    createdAt: "2024-05-01",
-  },
-  {
-    id: "10",
-    name: "Instituto de Gestão de Activos e Participações do Estado - IGAPE",
-    nif: "5410091234",
-    tutela: "Ministério das Finanças",
-    contacto: "+244 222 339 200",
-    morada: "Largo Kinaxixi, Luanda",
-    tipologia: "instituto_publico",
-    provincia: "Luanda",
-    createdAt: "2024-05-20",
-  },
-  // ─── Resolução 2/16 — Órgãos de Soberania ───
-  {
-    id: "11",
-    name: "Assembleia Nacional",
-    nif: "5411000001",
-    tutela: "Órgão de Soberania",
-    contacto: "+244 222 310 500",
-    morada: "Praça da República, Luanda",
-    tipologia: "orgao_soberania",
-    provincia: "Luanda",
-    createdAt: "2024-06-01",
-  },
-  {
-    id: "12",
-    name: "Tribunal Constitucional",
-    nif: "5412000002",
-    tutela: "Órgão de Soberania",
-    contacto: "+244 222 311 200",
-    morada: "Cidade Alta, Luanda",
-    tipologia: "orgao_soberania",
-    provincia: "Luanda",
-    createdAt: "2024-06-05",
-  },
-  // ─── Resolução 4/16 — Administração Central e Local ───
-  {
-    id: "13",
-    name: "Ministério da Saúde",
-    nif: "5413000003",
-    tutela: "Administração Central",
-    contacto: "+244 222 340 100",
-    morada: "Rua 17 de Setembro, Luanda",
-    tipologia: "admin_central",
-    provincia: "Luanda",
-    createdAt: "2024-06-10",
-  },
-  {
-    id: "14",
-    name: "Governo Provincial de Benguela",
-    nif: "5414000004",
-    tutela: "Administração Local",
-    contacto: "+244 261 222 100",
-    morada: "Rua 5 de Outubro, Benguela",
-    tipologia: "admin_local",
-    provincia: "Benguela",
-    createdAt: "2024-06-15",
-  },
-  {
-    id: "15",
-    name: "Instituto Nacional de Estatística - INE",
-    nif: "5415000005",
-    tutela: "Ministério da Economia e Planeamento",
-    contacto: "+244 222 350 200",
-    morada: "Rua Amilcar Cabral, Luanda",
-    tipologia: "instituto_admin",
-    provincia: "Luanda",
-    createdAt: "2024-06-20",
-  },
-  // ─── Resolução 5/16 — Serviços no Estrangeiro ───
-  {
-    id: "16",
-    name: "Embaixada de Angola em Portugal",
-    nif: "5416000006",
-    tutela: "Ministério das Relações Exteriores",
-    contacto: "+351 213 962 094",
-    morada: "Av. da República 68, Lisboa",
-    tipologia: "servico_estrangeiro",
-    provincia: undefined,
-    createdAt: "2024-07-01",
-  },
-  {
-    id: "17",
-    name: "Consulado Geral de Angola em São Paulo",
-    nif: "5417000007",
-    tutela: "Ministério das Relações Exteriores",
-    contacto: "+55 11 3667 4200",
-    morada: "Rua Augusta, São Paulo",
-    tipologia: "servico_estrangeiro",
-    provincia: undefined,
-    createdAt: "2024-07-05",
-  },
+  // ═══ Resolução 2/16 — Órgãos de Soberania e Afins ═══
+  { id: eid(), name: "Presidente da República", nif: "5000000001", tutela: "Órgão de Soberania", contacto: "+244 222 300 000", morada: "Cidade Alta, Luanda", tipologia: "orgao_soberania", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Assembleia Nacional", nif: "5000000002", tutela: "Órgão de Soberania", contacto: "+244 222 310 500", morada: "Praça da República, Luanda", tipologia: "orgao_soberania", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo", nif: "5000000003", tutela: "Órgão de Soberania", contacto: "+244 222 300 100", morada: "Cidade Alta, Luanda", tipologia: "orgao_soberania", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Tribunal Constitucional", nif: "5000000004", tutela: "Órgão de Soberania", contacto: "+244 222 311 200", morada: "Cidade Alta, Luanda", tipologia: "orgao_soberania", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Tribunal Supremo", nif: "5000000005", tutela: "Órgão de Soberania", contacto: "+244 222 311 300", morada: "Cidade Alta, Luanda", tipologia: "orgao_soberania", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Tribunal de Contas", nif: "5000000006", tutela: "Órgão de Soberania", contacto: "+244 222 311 400", morada: "Luanda", tipologia: "orgao_soberania", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Tribunal Supremo Militar", nif: "5000000007", tutela: "Órgão de Soberania", contacto: "+244 222 311 500", morada: "Luanda", tipologia: "orgao_soberania", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Procuradoria-Geral da República", nif: "5000000008", tutela: "Órgão Auxiliar", contacto: "+244 222 311 600", morada: "Rua 17 de Setembro, Luanda", tipologia: "orgao_soberania", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Provedoria de Justiça", nif: "5000000009", tutela: "Órgão Auxiliar", contacto: "+244 222 311 700", morada: "Luanda", tipologia: "orgao_soberania", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Conselho da República", nif: "5000000010", tutela: "Órgão Auxiliar", contacto: "+244 222 311 800", morada: "Luanda", tipologia: "orgao_soberania", provincia: "Luanda", createdAt: "2024-01-01" },
+
+  // ═══ Resolução 4/16 — Administração Central (Ministérios) ═══
+  { id: eid(), name: "Ministério das Finanças", nif: "5100000001", tutela: "Administração Central", contacto: "+244 222 340 000", morada: "Largo da Mutamba, Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério do Planeamento", nif: "5100000002", tutela: "Administração Central", contacto: "+244 222 340 100", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério da Administração do Território", nif: "5100000003", tutela: "Administração Central", contacto: "+244 222 340 200", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério da Justiça e dos Direitos Humanos", nif: "5100000004", tutela: "Administração Central", contacto: "+244 222 340 300", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério do Interior", nif: "5100000005", tutela: "Administração Central", contacto: "+244 222 340 400", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério da Defesa Nacional e Veteranos da Pátria", nif: "5100000006", tutela: "Administração Central", contacto: "+244 222 340 500", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério das Relações Exteriores", nif: "5100000007", tutela: "Administração Central", contacto: "+244 222 340 600", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério da Economia e Planeamento", nif: "5100000008", tutela: "Administração Central", contacto: "+244 222 340 700", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério da Indústria e Comércio", nif: "5100000009", tutela: "Administração Central", contacto: "+244 222 340 800", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério da Agricultura e Florestas", nif: "5100000010", tutela: "Administração Central", contacto: "+244 222 340 900", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério das Pescas e Recursos Marinhos", nif: "5100000011", tutela: "Administração Central", contacto: "+244 222 341 000", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério dos Recursos Minerais, Petróleo e Gás", nif: "5100000012", tutela: "Administração Central", contacto: "+244 222 341 100", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério da Energia e Águas", nif: "5100000013", tutela: "Administração Central", contacto: "+244 222 341 200", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério dos Transportes", nif: "5100000014", tutela: "Administração Central", contacto: "+244 222 341 300", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério das Telecomunicações, Tecnologias de Informação e Comunicação Social", nif: "5100000015", tutela: "Administração Central", contacto: "+244 222 341 400", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério da Construção e Obras Públicas", nif: "5100000016", tutela: "Administração Central", contacto: "+244 222 341 500", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério do Urbanismo e Habitação", nif: "5100000017", tutela: "Administração Central", contacto: "+244 222 341 600", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério da Saúde", nif: "5100000018", tutela: "Administração Central", contacto: "+244 222 341 700", morada: "Rua 17 de Setembro, Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério da Educação", nif: "5100000019", tutela: "Administração Central", contacto: "+244 222 341 800", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério do Ensino Superior, Ciência, Tecnologia e Inovação", nif: "5100000020", tutela: "Administração Central", contacto: "+244 222 341 900", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério da Cultura", nif: "5100000021", tutela: "Administração Central", contacto: "+244 222 342 000", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério do Turismo", nif: "5100000022", tutela: "Administração Central", contacto: "+244 222 342 100", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério da Juventude e Desportos", nif: "5100000023", tutela: "Administração Central", contacto: "+244 222 342 200", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério da Acção Social, Família e Promoção da Mulher", nif: "5100000024", tutela: "Administração Central", contacto: "+244 222 342 300", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério da Administração Pública, Trabalho e Segurança Social", nif: "5100000025", tutela: "Administração Central", contacto: "+244 222 342 400", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Ministério do Ambiente", nif: "5100000026", tutela: "Administração Central", contacto: "+244 222 342 500", morada: "Luanda", tipologia: "admin_central", provincia: "Luanda", createdAt: "2024-01-01" },
+
+  // ═══ Resolução 4/16 — Administração Local (Governos Provinciais) ═══
+  { id: eid(), name: "Governo Provincial do Bengo", nif: "5200000001", tutela: "Administração Local", contacto: "+244 234 200 000", morada: "Caxito, Bengo", tipologia: "admin_local", provincia: "Bengo", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial de Benguela", nif: "5200000002", tutela: "Administração Local", contacto: "+244 261 222 100", morada: "Benguela", tipologia: "admin_local", provincia: "Benguela", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial do Bié", nif: "5200000003", tutela: "Administração Local", contacto: "+244 248 200 000", morada: "Cuíto, Bié", tipologia: "admin_local", provincia: "Bié", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial de Cabinda", nif: "5200000004", tutela: "Administração Local", contacto: "+244 231 200 000", morada: "Cabinda", tipologia: "admin_local", provincia: "Cabinda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial do Cuando Cubango", nif: "5200000005", tutela: "Administração Local", contacto: "+244 249 200 000", morada: "Menongue, Cuando Cubango", tipologia: "admin_local", provincia: "Cuando Cubango", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial do Cuanza Norte", nif: "5200000006", tutela: "Administração Local", contacto: "+244 235 200 000", morada: "N'dalatando, Cuanza Norte", tipologia: "admin_local", provincia: "Cuanza Norte", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial do Cuanza Sul", nif: "5200000007", tutela: "Administração Local", contacto: "+244 236 200 000", morada: "Sumbe, Cuanza Sul", tipologia: "admin_local", provincia: "Cuanza Sul", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial do Cunene", nif: "5200000008", tutela: "Administração Local", contacto: "+244 265 200 000", morada: "Ondjiva, Cunene", tipologia: "admin_local", provincia: "Cunene", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial do Huambo", nif: "5200000009", tutela: "Administração Local", contacto: "+244 241 200 000", morada: "Huambo", tipologia: "admin_local", provincia: "Huambo", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial da Huíla", nif: "5200000010", tutela: "Administração Local", contacto: "+244 261 200 000", morada: "Lubango, Huíla", tipologia: "admin_local", provincia: "Huíla", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial de Luanda", nif: "5200000011", tutela: "Administração Local", contacto: "+244 222 200 000", morada: "Luanda", tipologia: "admin_local", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial da Lunda Norte", nif: "5200000012", tutela: "Administração Local", contacto: "+244 253 200 000", morada: "Dundo, Lunda Norte", tipologia: "admin_local", provincia: "Lunda Norte", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial da Lunda Sul", nif: "5200000013", tutela: "Administração Local", contacto: "+244 254 200 000", morada: "Saurimo, Lunda Sul", tipologia: "admin_local", provincia: "Lunda Sul", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial de Malanje", nif: "5200000014", tutela: "Administração Local", contacto: "+244 251 200 000", morada: "Malanje", tipologia: "admin_local", provincia: "Malanje", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial do Moxico", nif: "5200000015", tutela: "Administração Local", contacto: "+244 254 200 000", morada: "Luena, Moxico", tipologia: "admin_local", provincia: "Moxico", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial do Namibe", nif: "5200000016", tutela: "Administração Local", contacto: "+244 264 200 000", morada: "Namibe", tipologia: "admin_local", provincia: "Namibe", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial do Uíge", nif: "5200000017", tutela: "Administração Local", contacto: "+244 233 200 000", morada: "Uíge", tipologia: "admin_local", provincia: "Uíge", createdAt: "2024-01-01" },
+  { id: eid(), name: "Governo Provincial do Zaire", nif: "5200000018", tutela: "Administração Local", contacto: "+244 232 200 000", morada: "M'banza Kongo, Zaire", tipologia: "admin_local", provincia: "Zaire", createdAt: "2024-01-01" },
+
+  // ═══ Resolução 1/17 — Sector Empresarial Público ═══
+  { id: eid(), name: "Sonangol - Sociedade Nacional de Combustíveis de Angola, E.P.", nif: "5300000001", tutela: "Min. Recursos Minerais, Petróleo e Gás", contacto: "+244 222 200 100", morada: "Rua Rainha Ginga, Luanda", tipologia: "empresa_publica", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Endiama - Empresa Nacional de Diamantes de Angola, E.P.", nif: "5300000002", tutela: "Min. Recursos Minerais, Petróleo e Gás", contacto: "+244 222 200 200", morada: "Luanda", tipologia: "empresa_publica", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Sodiam - Sociedade de Comercialização de Diamantes de Angola", nif: "5300000003", tutela: "Min. Recursos Minerais, Petróleo e Gás", contacto: "+244 222 200 300", morada: "Luanda", tipologia: "empresa_publica", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "TAAG - Linhas Aéreas de Angola, E.P.", nif: "5300000004", tutela: "Ministério dos Transportes", contacto: "+244 222 200 400", morada: "Aeroporto 4 de Fevereiro, Luanda", tipologia: "empresa_publica", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "ENDE - Empresa Nacional de Distribuição de Electricidade, E.P.", nif: "5300000005", tutela: "Ministério da Energia e Águas", contacto: "+244 222 310 000", morada: "Rua Rainha Ginga, Luanda", tipologia: "empresa_publica", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "PRODEL - Empresa de Produção de Electricidade, E.P.", nif: "5300000006", tutela: "Ministério da Energia e Águas", contacto: "+244 222 200 600", morada: "Luanda", tipologia: "empresa_publica", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "EPAL - Empresa Pública de Águas de Luanda, E.P.", nif: "5300000007", tutela: "Ministério da Energia e Águas", contacto: "+244 222 321 400", morada: "Luanda", tipologia: "empresa_publica", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "CFL - Caminho de Ferro de Luanda, E.P.", nif: "5300000008", tutela: "Ministério dos Transportes", contacto: "+244 222 200 800", morada: "Luanda", tipologia: "empresa_publica", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "CFB - Caminho de Ferro de Benguela, E.P.", nif: "5300000009", tutela: "Ministério dos Transportes", contacto: "+244 261 200 900", morada: "Lobito, Benguela", tipologia: "empresa_publica", provincia: "Benguela", createdAt: "2024-01-01" },
+  { id: eid(), name: "CFM - Caminho de Ferro de Moçâmedes, E.P.", nif: "5300000010", tutela: "Ministério dos Transportes", contacto: "+244 264 201 000", morada: "Namibe", tipologia: "empresa_publica", provincia: "Namibe", createdAt: "2024-01-01" },
+  { id: eid(), name: "Porto de Luanda, E.P.", nif: "5300000011", tutela: "Ministério dos Transportes", contacto: "+244 222 201 100", morada: "Porto de Luanda", tipologia: "empresa_publica", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Porto do Lobito, E.P.", nif: "5300000012", tutela: "Ministério dos Transportes", contacto: "+244 261 201 200", morada: "Lobito, Benguela", tipologia: "empresa_publica", provincia: "Benguela", createdAt: "2024-01-01" },
+  { id: eid(), name: "Porto do Namibe, E.P.", nif: "5300000013", tutela: "Ministério dos Transportes", contacto: "+244 264 201 300", morada: "Namibe", tipologia: "empresa_publica", provincia: "Namibe", createdAt: "2024-01-01" },
+  { id: eid(), name: "Angola Telecom, E.P.", nif: "5300000014", tutela: "Min. Telecomunicações e TI", contacto: "+244 222 201 400", morada: "Luanda", tipologia: "empresa_publica", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "TPA - Televisão Pública de Angola, E.P.", nif: "5300000015", tutela: "Min. Telecomunicações e TI", contacto: "+244 222 201 500", morada: "Luanda", tipologia: "empresa_publica", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "RNA - Rádio Nacional de Angola, E.P.", nif: "5300000016", tutela: "Min. Telecomunicações e TI", contacto: "+244 222 201 600", morada: "Luanda", tipologia: "empresa_publica", provincia: "Luanda", createdAt: "2024-01-01" },
+  { id: eid(), name: "Edições Novembro, E.P.", nif: "5300000017", tutela: "Min. Telecomunicações e TI", contacto: "+244 222 201 700", morada: "Luanda", tipologia: "empresa_publica", provincia: "Luanda", createdAt: "2024-01-01" },
+
+  // ═══ Resolução 5/16 — Serviços Públicos no Estrangeiro ═══
+  { id: eid(), name: "Embaixada de Angola em Portugal", nif: "5400000001", tutela: "Ministério das Relações Exteriores", contacto: "+351 213 962 094", morada: "Av. da República 68, Lisboa", tipologia: "servico_estrangeiro", createdAt: "2024-01-01" },
+  { id: eid(), name: "Consulado Geral de Angola em São Paulo", nif: "5400000002", tutela: "Ministério das Relações Exteriores", contacto: "+55 11 3667 4200", morada: "Rua Augusta, São Paulo", tipologia: "servico_estrangeiro", createdAt: "2024-01-01" },
 ];
 
 // Helper: extract short name from entity full name
@@ -206,38 +101,39 @@ const entityShort = (id: string) => {
   return e ? getEntityShortName(e) : "Desconhecida";
 };
 
-// ─── Exercícios Fiscais (2023 e 2024 para cada entidade) ───
+// ─── Exercícios Fiscais (2023 e 2024 para entidades representativas) ───
+// IDs: 55=ENDE, 57=EPAL, 56=PRODEL, 54=TAAG, 51=Sonangol, 37=Gov.Prov.Luanda, 28=Min.Saúde, 2=Assembleia Nacional, 11=Min.Finanças, 61=Porto de Luanda
 export const mockFiscalYears: FiscalYear[] = [
-  // ENDE
-  { id: "fy1", entityId: "1", entityName: entityShort("1"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "rascunho", totalDebito: 15834567890, totalCredito: 15834567890, errorsCount: 5, warningsCount: 3, checklistProgress: 45, deadline: "2025-06-30" },
-  { id: "fy1b", entityId: "1", entityName: entityShort("1"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 14200000000, totalCredito: 14200000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-10" },
-  // INEA
-  { id: "fy2", entityId: "2", entityName: entityShort("2"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 8921345000, totalCredito: 8921345000, errorsCount: 0, warningsCount: 2, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-15" },
-  { id: "fy2b", entityId: "2", entityName: entityShort("2"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 7850000000, totalCredito: 7850000000, errorsCount: 0, warningsCount: 1, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-03-28" },
-  // FSDEA
-  { id: "fy3", entityId: "3", entityName: entityShort("3"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_analise", totalDebito: 45230000000, totalCredito: 45230000000, errorsCount: 1, warningsCount: 0, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-03-28" },
-  { id: "fy3b", entityId: "3", entityName: entityShort("3"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 42100000000, totalCredito: 42100000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-05" },
-  // EPAL
-  { id: "fy4", entityId: "4", entityName: entityShort("4"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_validacao", totalDebito: 12450000000, totalCredito: 12450000000, errorsCount: 3, warningsCount: 4, checklistProgress: 78, deadline: "2025-06-30" },
-  { id: "fy4b", entityId: "4", entityName: entityShort("4"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "nao_conforme", totalDebito: 11200000000, totalCredito: 11200000000, errorsCount: 7, warningsCount: 5, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-05-12" },
-  // INAVIC
-  { id: "fy5", entityId: "5", entityName: entityShort("5"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "com_pedidos", totalDebito: 3280000000, totalCredito: 3280000000, errorsCount: 2, warningsCount: 1, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-20" },
-  { id: "fy5b", entityId: "5", entityName: entityShort("5"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 2950000000, totalCredito: 2950000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-12" },
-  // FADA
-  { id: "fy6", entityId: "6", entityName: entityShort("6"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 5670000000, totalCredito: 5670000000, errorsCount: 0, warningsCount: 3, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-10" },
-  { id: "fy6b", entityId: "6", entityName: entityShort("6"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 4890000000, totalCredito: 4890000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-08" },
-  // EPL
-  { id: "fy7", entityId: "7", entityName: entityShort("7"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "rascunho", totalDebito: 7890000000, totalCredito: 7890000000, errorsCount: 8, warningsCount: 6, checklistProgress: 25, deadline: "2025-06-30" },
-  { id: "fy7b", entityId: "7", entityName: entityShort("7"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "nao_conforme", totalDebito: 7120000000, totalCredito: 7120000000, errorsCount: 4, warningsCount: 3, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-05-20" },
-  // INAMET
-  { id: "fy8", entityId: "8", entityName: entityShort("8"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_validacao", totalDebito: 1560000000, totalCredito: 1560000000, errorsCount: 1, warningsCount: 2, checklistProgress: 92, deadline: "2025-06-30" },
-  { id: "fy8b", entityId: "8", entityName: entityShort("8"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 1420000000, totalCredito: 1420000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-15" },
-  // ENSA
-  { id: "fy9", entityId: "9", entityName: entityShort("9"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_analise", totalDebito: 28900000000, totalCredito: 28900000000, errorsCount: 0, warningsCount: 1, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-03-20" },
-  { id: "fy9b", entityId: "9", entityName: entityShort("9"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 26500000000, totalCredito: 26500000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-02" },
-  // IGAPE
-  { id: "fy10", entityId: "10", entityName: entityShort("10"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 95400000000, totalCredito: 95400000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-01" },
-  { id: "fy10b", entityId: "10", entityName: entityShort("10"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 89200000000, totalCredito: 89200000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-03-25" },
+  // ENDE (id=55)
+  { id: "fy1", entityId: "55", entityName: entityShort("55"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "rascunho", totalDebito: 15834567890, totalCredito: 15834567890, errorsCount: 5, warningsCount: 3, checklistProgress: 45, deadline: "2025-06-30" },
+  { id: "fy1b", entityId: "55", entityName: entityShort("55"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 14200000000, totalCredito: 14200000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-10" },
+  // Sonangol (id=51)
+  { id: "fy2", entityId: "51", entityName: entityShort("51"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 89210000000, totalCredito: 89210000000, errorsCount: 0, warningsCount: 2, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-15" },
+  { id: "fy2b", entityId: "51", entityName: entityShort("51"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 78500000000, totalCredito: 78500000000, errorsCount: 0, warningsCount: 1, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-03-28" },
+  // TAAG (id=54)
+  { id: "fy3", entityId: "54", entityName: entityShort("54"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_analise", totalDebito: 45230000000, totalCredito: 45230000000, errorsCount: 1, warningsCount: 0, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-03-28" },
+  { id: "fy3b", entityId: "54", entityName: entityShort("54"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 42100000000, totalCredito: 42100000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-05" },
+  // EPAL (id=57)
+  { id: "fy4", entityId: "57", entityName: entityShort("57"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_validacao", totalDebito: 12450000000, totalCredito: 12450000000, errorsCount: 3, warningsCount: 4, checklistProgress: 78, deadline: "2025-06-30" },
+  { id: "fy4b", entityId: "57", entityName: entityShort("57"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "nao_conforme", totalDebito: 11200000000, totalCredito: 11200000000, errorsCount: 7, warningsCount: 5, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-05-12" },
+  // Min. Finanças (id=11)
+  { id: "fy5", entityId: "11", entityName: entityShort("11"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "com_pedidos", totalDebito: 32800000000, totalCredito: 32800000000, errorsCount: 2, warningsCount: 1, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-20" },
+  { id: "fy5b", entityId: "11", entityName: entityShort("11"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 29500000000, totalCredito: 29500000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-12" },
+  // Assembleia Nacional (id=2)
+  { id: "fy6", entityId: "2", entityName: entityShort("2"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 5670000000, totalCredito: 5670000000, errorsCount: 0, warningsCount: 3, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-10" },
+  { id: "fy6b", entityId: "2", entityName: entityShort("2"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 4890000000, totalCredito: 4890000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-08" },
+  // Gov. Prov. Luanda (id=47)
+  { id: "fy7", entityId: "47", entityName: entityShort("47"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "rascunho", totalDebito: 7890000000, totalCredito: 7890000000, errorsCount: 8, warningsCount: 6, checklistProgress: 25, deadline: "2025-06-30" },
+  { id: "fy7b", entityId: "47", entityName: entityShort("47"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "nao_conforme", totalDebito: 7120000000, totalCredito: 7120000000, errorsCount: 4, warningsCount: 3, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-05-20" },
+  // Min. Saúde (id=28)
+  { id: "fy8", entityId: "28", entityName: entityShort("28"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_validacao", totalDebito: 15600000000, totalCredito: 15600000000, errorsCount: 1, warningsCount: 2, checklistProgress: 92, deadline: "2025-06-30" },
+  { id: "fy8b", entityId: "28", entityName: entityShort("28"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 14200000000, totalCredito: 14200000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-15" },
+  // Porto de Luanda (id=61)
+  { id: "fy9", entityId: "61", entityName: entityShort("61"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "em_analise", totalDebito: 28900000000, totalCredito: 28900000000, errorsCount: 0, warningsCount: 1, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-03-20" },
+  { id: "fy9b", entityId: "61", entityName: entityShort("61"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 26500000000, totalCredito: 26500000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-04-02" },
+  // PRODEL (id=56)
+  { id: "fy10", entityId: "56", entityName: entityShort("56"), year: 2024, startDate: "2024-01-01", endDate: "2024-12-31", status: "submetido", totalDebito: 9540000000, totalCredito: 9540000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2025-06-30", submittedAt: "2025-04-01" },
+  { id: "fy10b", entityId: "56", entityName: entityShort("56"), year: 2023, startDate: "2023-01-01", endDate: "2023-12-31", status: "conforme", totalDebito: 8920000000, totalCredito: 8920000000, errorsCount: 0, warningsCount: 0, checklistProgress: 100, deadline: "2024-06-30", submittedAt: "2024-03-25" },
 ];
 
 // ─── Plano de Contas PGC (Decreto nº 82/2001, actualizado pelo DP nº 180/19) ───
