@@ -186,7 +186,7 @@ export function SecretariaValidacaoTab() {
         upsert: true,
       });
 
-      // Register document in processo_documentos
+      // Register Nota de Remessa in processo_documentos
       await supabase.from("processo_documentos").insert({
         processo_id: processo.id,
         tipo_documento: "Nota de Remessa",
@@ -197,6 +197,46 @@ export function SecretariaValidacaoTab() {
         validado_por: executadoPor,
         validado_em: new Date().toISOString(),
       } as any);
+
+      // Also attach the Acta de Recebimento (generated earlier by Secretaria)
+      try {
+        const { data: actaData } = await supabase
+          .from("actas_recepcao")
+          .select("*")
+          .eq("entity_id", processo.entity_id)
+          .eq("fiscal_year", String(processo.ano_gerencia))
+          .order("created_at", { ascending: false })
+          .limit(1);
+
+        if (actaData && actaData.length > 0) {
+          const acta = actaData[0];
+          // Copy acta file to processo-documentos bucket
+          const actaDestPath = `${processo.id}/${acta.file_name}`;
+          const { data: actaFileData } = await supabase.storage
+            .from("actas-recepcao")
+            .download(acta.file_path);
+
+          if (actaFileData) {
+            await supabase.storage.from("processo-documentos").upload(actaDestPath, actaFileData, {
+              contentType: "application/pdf",
+              upsert: true,
+            });
+
+            await supabase.from("processo_documentos").insert({
+              processo_id: processo.id,
+              tipo_documento: "Acta de Recebimento",
+              nome_ficheiro: acta.file_name,
+              caminho_ficheiro: actaDestPath,
+              estado: "validado",
+              obrigatorio: true,
+              validado_por: executadoPor,
+              validado_em: new Date().toISOString(),
+            } as any);
+          }
+        }
+      } catch (actaErr) {
+        console.error("Erro ao anexar Acta de Recebimento:", actaErr);
+      }
 
       // Download for user
       saveAs(notaBlob, fileName);
