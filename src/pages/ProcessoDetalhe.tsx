@@ -787,6 +787,15 @@ const ProcessoDetalhe = () => {
               </CardContent>
             </Card>
           )}
+
+          {/* Atividades do Processo */}
+          {id && (
+            <Card>
+              <CardContent className="pt-4">
+                <AtividadesTimeline processoId={id} compact />
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 
