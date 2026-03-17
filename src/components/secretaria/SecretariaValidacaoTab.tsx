@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,13 +10,14 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { StatCard } from "@/components/ui-custom/PageElements";
 import {
   CheckCircle, XCircle, Clock, FileText, Eye, Send, Loader2,
-  Undo2, ShieldCheck, ArrowRight, Inbox, AlertTriangle, Lock,
+  Undo2, ShieldCheck, ArrowRight, Inbox, AlertTriangle, Lock, Bell,
 } from "lucide-react";
 import { toast } from "sonner";
 import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
@@ -58,6 +59,9 @@ export function SecretariaValidacaoTab() {
   const [documentos, setDocumentos] = useState<ProcessoDoc[]>([]);
   const [loadingDocs, setLoadingDocs] = useState(false);
 
+  // Notifications
+  const [notificacoes, setNotificacoes] = useState<any[]>([]);
+
   // Approve flow
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [approving, setApproving] = useState(false);
@@ -72,6 +76,24 @@ export function SecretariaValidacaoTab() {
   const isChefe = user?.role === "Chefe da Secretaria-Geral" ||
     user?.role === "Administrador do Sistema" ||
     user?.role === "Presidente do Tribunal de Contas";
+
+  // Fetch encaminhamento notifications
+  const fetchNotificacoes = useCallback(async () => {
+    const { data } = await supabase
+      .from("submission_notifications")
+      .select("*")
+      .eq("type", "encaminhamento_validacao")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    setNotificacoes(data || []);
+  }, []);
+
+  const handleMarkAsRead = async (id: string) => {
+    await supabase.from("submission_notifications").update({ read: true } as any).eq("id", id);
+    setNotificacoes((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n));
+  };
+
+  const unreadCount = useMemo(() => notificacoes.filter((n) => !n.read).length, [notificacoes]);
 
   const fetchProcessos = useCallback(async () => {
     setLoading(true);
@@ -100,7 +122,8 @@ export function SecretariaValidacaoTab() {
 
   useEffect(() => {
     fetchProcessos();
-  }, [fetchProcessos]);
+    fetchNotificacoes();
+  }, [fetchProcessos, fetchNotificacoes]);
 
   useEffect(() => {
     if (selectedProcesso) {
@@ -300,6 +323,54 @@ export function SecretariaValidacaoTab() {
           variant="default"
         />
       </div>
+
+      {/* Notificações de Encaminhamento */}
+      {isChefe && notificacoes.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <Bell className="h-4 w-4 text-primary" />
+              Notificações de Encaminhamento
+              {unreadCount > 0 && (
+                <Badge variant="destructive" className="text-[10px] h-5">
+                  {unreadCount} pendente{unreadCount !== 1 ? "s" : ""}
+                </Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1 max-h-48 overflow-y-auto">
+            {notificacoes.slice(0, 10).map((n) => (
+              <button
+                key={n.id}
+                onClick={() => handleMarkAsRead(n.id)}
+                className={cn(
+                  "w-full text-left px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors flex items-start gap-2.5",
+                  !n.read && "bg-primary/5"
+                )}
+              >
+                <div className={cn(
+                  "mt-0.5 p-1 rounded-full shrink-0",
+                  !n.read ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                )}>
+                  <Send className="h-3.5 w-3.5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={cn("text-xs leading-snug", !n.read ? "font-medium text-foreground" : "text-muted-foreground")}>
+                    {n.message}
+                  </p>
+                  {n.detail && (
+                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{n.detail}</p>
+                  )}
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    {new Date(n.created_at).toLocaleDateString("pt-AO", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
+                {!n.read && <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />}
+              </button>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {!isChefe && (
         <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
