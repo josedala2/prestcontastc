@@ -43,6 +43,9 @@ const ProcessoDetalhe = () => {
   const [observacoes, setObservacoes] = useState("");
   const [advancing, setAdvancing] = useState(false);
   const [generatingDoc, setGeneratingDoc] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadTipoDoc, setUploadTipoDoc] = useState("Documento Digitalizado");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (id) loadData();
