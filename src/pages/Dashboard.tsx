@@ -92,9 +92,15 @@ const Dashboard = () => {
     const arquivados = processos.filter(p => p.estado === "arquivado").length;
     const contaEmTermos = processos.filter(p => p.estado === "conta_em_termos").length;
     const contaNaoEmTermos = processos.filter(p => p.estado === "conta_nao_em_termos").length;
-    const unreadNotifs = notifications.filter(n => !n.read).length;
+    const roleFilteredNotifs = notifications.filter(n => {
+      const match = n.message.match(/etapa\s+(\d+)/i);
+      if (!match) return true;
+      const stage = parseInt(match[1], 10);
+      return myStages.length === 0 || myStages.includes(stage) || myStages.includes(stage - 1);
+    });
+    const unreadNotifs = roleFilteredNotifs.filter(n => !n.read).length;
     return { total, emTramitacao, urgentes, arquivados, contaEmTermos, contaNaoEmTermos, unreadNotifs };
-  }, [processos, notifications]);
+  }, [processos, notifications, myStages]);
 
   // === Chart Data ===
 
