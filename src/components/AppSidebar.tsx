@@ -98,6 +98,7 @@ const navSections: { label: string; items: NavEntry[] }[] = [
       { title: "Portal da Entidade", icon: ExternalLink, path: "/portal" },
       { title: "Técnico Validador", icon: UserCheck, path: "/tecnico" },
       { title: "Secretaria", icon: ClipboardCheck, path: "/secretaria" },
+      { title: "Registo e Autuação", icon: FileText, path: "/escrivao/registo-autuacao" },
     ],
   },
   {

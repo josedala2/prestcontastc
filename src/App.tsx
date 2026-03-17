@@ -167,6 +167,14 @@ const App = () => (
               </PortalEntityProvider>
             </ProtectedRoute>
           } />
+
+          {/* Escrivão dos Autos */}
+          <Route path="/escrivao/registo-autuacao" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Escrivão dos Autos"]}>
+              <EscrivaoRegistoAutuacao />
+            </ProtectedRoute>
+          } />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
