@@ -12,6 +12,7 @@ interface SubmissionEntry {
   recepcionadoAt?: string;
   rejeitadoAt?: string;
   motivoRejeicao?: string;
+  uploadedDocIds?: string[];
 }
 
 export interface PortalNotification {
@@ -34,7 +35,8 @@ interface SubmissionContextType {
   markAsRead: (notificationId: string) => void;
   markAllAsRead: (entityId: string) => void;
   getStatus: (entityId: string, fiscalYearId?: string) => SubmissionStatus;
-  submit: (entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => void;
+  submit: (entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string, uploadedDocIds?: string[]) => void;
+  getUploadedDocs: (entityId: string, fiscalYearId: string) => string[];
   recepcionar: (entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => void;
   rejeitar: (entityId: string, fiscalYearId: string, motivo: string, entityName?: string, entityEmail?: string) => void;
   solicitarElementos: (entityId: string, fiscalYearId: string, documentos: string[], mensagem: string, prazo: number, entityName?: string, entityEmail?: string) => void;
@@ -152,7 +154,14 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     }
   }, [refreshNotifications]);
 
-  const submit = useCallback((entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => {
+  const getUploadedDocs = useCallback((entityId: string, fiscalYearId: string): string[] => {
+    const entry = submissions.find(
+      (s) => s.entityId === entityId && s.fiscalYearId === fiscalYearId
+    );
+    return entry?.uploadedDocIds || [];
+  }, [submissions]);
+
+  const submit = useCallback((entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string, uploadedDocIds?: string[]) => {
     setSubmissions((prev) => {
       const existing = prev.findIndex(
         (s) => s.entityId === entityId && s.fiscalYearId === fiscalYearId
@@ -162,6 +171,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
         fiscalYearId,
         status: "pendente",
         submittedAt: new Date().toISOString(),
+        uploadedDocIds,
       };
       if (existing >= 0) {
         const updated = [...prev];
@@ -305,6 +315,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
         markAsRead,
         markAllAsRead,
         getStatus,
+        getUploadedDocs,
         submit,
         recepcionar,
         rejeitar,

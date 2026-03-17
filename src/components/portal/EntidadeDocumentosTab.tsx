@@ -97,7 +97,7 @@ const formatSize = (bytes: number) => {
 interface Props {
   disabled?: boolean;
   tipologia?: EntityTipologia;
-  onComplianceChange?: (allRequiredUploaded: boolean, uploadedCount: number, requiredCount: number) => void;
+  onComplianceChange?: (allRequiredUploaded: boolean, uploadedCount: number, requiredCount: number, uploadedDocIds: string[]) => void;
 }
 
 export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica", onComplianceChange }: Props) {
@@ -131,8 +131,9 @@ export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica",
   const allRequiredDone = uploadedRequiredCount === requiredDocs.length;
 
   useEffect(() => {
-    onComplianceChange?.(allRequiredDone, uploadedRequiredCount, requiredDocs.length);
-  }, [allRequiredDone, uploadedRequiredCount, requiredDocs.length, onComplianceChange]);
+    const uploadedIds = Object.keys(uploadedDocs);
+    onComplianceChange?.(allRequiredDone, uploadedRequiredCount, requiredDocs.length, uploadedIds);
+  }, [allRequiredDone, uploadedRequiredCount, requiredDocs.length, onComplianceChange, uploadedDocs]);
 
   return (
     <div className="space-y-6">

@@ -89,7 +89,7 @@ function EntidadeView({
 }) {
   const [entidadeTab, setEntidadeTab] = useState("balancete");
   const initialRequired = useMemo(() => getDocumentRequirements(entityTipologia).filter(d => d.required).length, [entityTipologia]);
-  const [docsCompliance, setDocsCompliance] = useState({ allDone: false, uploaded: 0, required: initialRequired });
+  const [docsCompliance, setDocsCompliance] = useState({ allDone: false, uploaded: 0, required: initialRequired, uploadedDocIds: [] as string[] });
   const { getStatus, submit } = useSubmissions();
   const { hasData } = useFinancialData();
   const fiscalYearId = `${entityId}-${periodo}`;
@@ -102,7 +102,7 @@ function EntidadeView({
   const StatusIcon = STATUS_CONFIG[submissionStatus].icon;
 
   const handleSubmit = () => {
-    submit(entityId, fiscalYearId, entityName);
+    submit(entityId, fiscalYearId, entityName, undefined, docsCompliance.uploadedDocIds);
     toast.success("Prestação de contas submetida com sucesso! Aguarda recepção pela Secretaria.");
   };
 
@@ -162,7 +162,7 @@ function EntidadeView({
           <EntidadeDocumentosTab
             disabled={isSubmitted && !canResubmit}
             tipologia={entityTipologia}
-            onComplianceChange={(allDone, uploaded, required) => setDocsCompliance({ allDone, uploaded, required })}
+            onComplianceChange={(allDone, uploaded, required, uploadedDocIds) => setDocsCompliance({ allDone, uploaded, required, uploadedDocIds })}
           />
           <ActasRecepcaoList entityId={entityId} fiscalYear={periodo} />
         </TabsContent>

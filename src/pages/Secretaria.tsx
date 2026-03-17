@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockFiscalYears, mockEntities, submissionChecklist, formatKz } from "@/data/mockData";
+import { getDocumentRequirements } from "@/components/portal/EntidadeDocumentosTab";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
@@ -31,7 +32,7 @@ import { useSubmissions } from "@/contexts/SubmissionContext";
 import { SecretariaVistoTab } from "@/components/secretaria/SecretariaVistoTab";
 
 const Secretaria = () => {
-  const { recepcionar, rejeitar, submissions } = useSubmissions();
+  const { recepcionar, rejeitar, submissions, getUploadedDocs } = useSubmissions();
 
   // Merge: mock "submetido" + dynamically submitted via Portal ("pendente" in SubmissionContext)
   const submetidos = useMemo(() => {
@@ -214,6 +215,47 @@ const Secretaria = () => {
 
   const [activeMainTab, setActiveMainTab] = useState("dashboard");
 
+  // Get uploaded docs for selected fiscal year
+  const selectedUploadedDocs = useMemo(() => {
+    if (!selectedFy) return [];
+    const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
+    const fromContext = getUploadedDocs(selectedFy.entityId, fiscalYearId);
+    // Mock data entries: assume all docs uploaded
+    if (fromContext.length === 0 && mockFiscalYears.some(f => f.id === selectedFy.id && f.status === "submetido")) {
+      return submissionChecklist.map(c => c.id);
+    }
+    return fromContext;
+  }, [selectedFy, getUploadedDocs]);
+
+  // Map EntidadeDocumentosTab doc IDs to submissionChecklist IDs
+  const DOC_ID_MAP: Record<string, string> = {
+    relatorio_gestao: "c1",
+    balanco: "c2",
+    dem_resultados: "c3",
+    fluxo_caixa: "c4",
+    balancete_analitico: "c5",
+    parecer_fiscal: "c6",
+    parecer_auditor: "c7",
+    modelos: "c8",
+    comprov_impostos: "c9",
+    comprov_seguranca: "c10",
+    inventario: "c11",
+    acta_apreciacao: "c12",
+    extractos: "c13",
+    reconciliacoes: "c14",
+    abates: "c15",
+    emolumentos: "c16",
+  };
+
+  const isDocUploaded = (checklistId: string): boolean => {
+    // Direct match (mock data uses checklist IDs)
+    if (selectedUploadedDocs.includes(checklistId)) return true;
+    // Match via mapping (portal uses doc IDs from EntidadeDocumentosTab)
+    return Object.entries(DOC_ID_MAP).some(
+      ([docId, cId]) => cId === checklistId && selectedUploadedDocs.includes(docId)
+    );
+  };
+
   // ── Verificação Documental content (passed as children to tabs) ──
   const verificacaoContent = selectedFy && selectedEntity ? (
     <div className="space-y-4">
@@ -255,12 +297,28 @@ const Secretaria = () => {
             <TableBody>
               {submissionChecklist.map((item) => {
                 const isChecked = !!checkedDocs[item.id];
+                const uploaded = isDocUploaded(item.id);
                 return (
-                  <TableRow key={item.id} className={isChecked ? "bg-success/5" : ""}>
+                  <TableRow
+                    key={item.id}
+                    className={
+                      !uploaded
+                        ? "bg-destructive/5 opacity-70"
+                        : isChecked
+                          ? "bg-green-50 dark:bg-green-950/10"
+                          : ""
+                    }
+                  >
                     <TableCell>
-                      <Checkbox checked={isChecked} onCheckedChange={() => handleToggleDoc(item.id)} />
+                      <Checkbox
+                        checked={isChecked}
+                        onCheckedChange={() => handleToggleDoc(item.id)}
+                        disabled={!uploaded}
+                      />
                     </TableCell>
-                    <TableCell className="text-sm">{item.label}</TableCell>
+                    <TableCell className={`text-sm ${!uploaded ? "text-muted-foreground line-through" : ""}`}>
+                      {item.label}
+                    </TableCell>
                     <TableCell className="text-center">
                       {item.required ? (
                         <Badge variant="destructive" className="text-[10px]">Obrigatório</Badge>
@@ -269,26 +327,34 @@ const Secretaria = () => {
                       )}
                     </TableCell>
                     <TableCell className="text-center">
-                      {isChecked ? (
-                        <span className="flex items-center justify-center gap-1 text-success text-xs">
+                      {!uploaded ? (
+                        <span className="flex items-center justify-center gap-1 text-destructive text-xs font-medium">
+                          <XCircle className="h-3.5 w-3.5" /> Em Falta
+                        </span>
+                      ) : isChecked ? (
+                        <span className="flex items-center justify-center gap-1 text-green-600 dark:text-green-400 text-xs">
                           <CheckCircle className="h-3.5 w-3.5" /> Verificado
                         </span>
                       ) : (
                         <span className="flex items-center justify-center gap-1 text-muted-foreground text-xs">
-                          <XCircle className="h-3.5 w-3.5" /> Pendente
+                          <Clock className="h-3.5 w-3.5" /> Pendente
                         </span>
                       )}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 w-7 p-0"
-                        title={`Visualizar ${item.label}`}
-                        onClick={handlePreviewPdf}
-                      >
-                        <Eye className="h-3.5 w-3.5" />
-                      </Button>
+                      {uploaded ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0"
+                          title={`Visualizar ${item.label}`}
+                          onClick={handlePreviewPdf}
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                        </Button>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
                     </TableCell>
                   </TableRow>
                 );
