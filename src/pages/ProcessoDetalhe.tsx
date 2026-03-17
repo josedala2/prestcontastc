@@ -289,6 +289,7 @@ const ProcessoDetalhe = () => {
       const docMsg = generatedDocs.length > 0 ? ` | Documentos gerados: ${generatedDocs.join(", ")}` : "";
       toast({ title: "Processo avançado", description: `Transitou para: ${nextStageInfo?.nome}${docMsg}` });
       setObservacoes("");
+      refreshNotifications();
       loadData();
     } else {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
