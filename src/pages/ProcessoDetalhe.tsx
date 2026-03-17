@@ -147,6 +147,75 @@ const ProcessoDetalhe = () => {
     return generated;
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !processo) return;
+    setUploading(true);
+
+    try {
+      for (const file of Array.from(files)) {
+        const filePath = `${processo.id}/etapa-${processo.etapa_atual}/${Date.now()}-${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from("processo-documentos")
+          .upload(filePath, file);
+
+        if (uploadError) {
+          toast({ title: "Erro no upload", description: `${file.name}: ${uploadError.message}`, variant: "destructive" });
+          continue;
+        }
+
+        await supabase.from("processo_documentos").insert({
+          processo_id: processo.id,
+          tipo_documento: uploadTipoDoc,
+          nome_ficheiro: file.name,
+          caminho_ficheiro: filePath,
+          estado: "anexado",
+          obrigatorio: false,
+          versao: 1,
+        } as any);
+
+        // Record in history
+        await supabase.from("processo_historico").insert({
+          processo_id: processo.id,
+          etapa_anterior: processo.etapa_atual,
+          etapa_seguinte: processo.etapa_atual,
+          estado_anterior: processo.estado,
+          estado_seguinte: processo.estado,
+          acao: `Documento anexado: ${file.name}`,
+          executado_por: user?.displayName || "Sistema",
+          perfil_executor: user?.role || null,
+          observacoes: `Tipo: ${uploadTipoDoc} | Etapa: ${WORKFLOW_STAGES.find(s => s.id === processo.etapa_atual)?.nome}`,
+          documentos_alterados: [file.name],
+        } as any);
+      }
+
+      toast({ title: "Upload concluído", description: `${files.length} ficheiro(s) anexado(s) com sucesso` });
+      loadData();
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const downloadAttachment = async (filePath: string, fileName: string) => {
+    const { data } = supabase.storage.from("processo-documentos").getPublicUrl(filePath);
+    if (data?.publicUrl) {
+      window.open(data.publicUrl, "_blank");
+    }
+  };
+
+  const deleteAttachment = async (docId: string, filePath: string | null) => {
+    if (filePath) {
+      await supabase.storage.from("processo-documentos").remove([filePath]);
+    }
+    // We can't delete from processo_documentos (no RLS), so mark as removed
+    await supabase.from("processo_documentos").update({ estado: "removido" } as any).eq("id", docId);
+    toast({ title: "Documento removido" });
+    loadData();
+  };
+
   const advanceStage = async () => {
     if (!processo || processo.etapa_atual >= 18) return;
     setAdvancing(true);
