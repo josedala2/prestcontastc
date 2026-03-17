@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { roleStagePermissions } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
@@ -9,16 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { generateWorkflowDocument, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { saveAs } from "file-saver";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, Clock, FileText, Building2,
-  User, Calendar, AlertTriangle, History, Send, Download, Loader2
+  User, Calendar, AlertTriangle, History, Send, Download, Loader2, Upload, Trash2, Eye
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 interface ProcessoDocumento {
   id: string;
   processo_id: string;
