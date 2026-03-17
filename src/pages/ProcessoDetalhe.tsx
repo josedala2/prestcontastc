@@ -666,7 +666,7 @@ const ProcessoDetalhe = () => {
                     ))}
                   </div>
                 )}
-                {canAct ? (
+                {effectiveCanAct ? (
                   <>
                     {/* Event action buttons */}
                     {STAGE_EVENTS[processo.etapa_atual] && (
