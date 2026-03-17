@@ -6,6 +6,7 @@ import { Building2, Phone, MapPin, Calendar, Hash, Briefcase, Globe } from "luci
 import { mockFiscalYears, mockFinancialIndicators, formatKz } from "@/data/mockData";
 import { EntityExerciciosTab } from "./EntityExerciciosTab";
 import { EntityFinanceiroTab } from "./EntityFinanceiroTab";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface EntityProfilePanelProps {
   entity: Entity;
@@ -14,8 +15,15 @@ interface EntityProfilePanelProps {
 }
 
 export function EntityProfilePanel({ entity, fiscalYear, children }: EntityProfilePanelProps) {
+  const { user } = useAuth();
   const entityFiscalYears = mockFiscalYears.filter((fy) => fy.entityId === entity.id);
   const entityIndicators = mockFinancialIndicators.filter((fi) => fi.entityId === entity.id);
+
+  // Hide financial data for Secretaria roles
+  const showFinanceiro = user?.role !== "Chefe da Secretaria-Geral" &&
+    user?.role !== "Técnico da Secretaria-Geral";
+
+  const tabCount = showFinanceiro ? 4 : 3;
 
   return (
     <div className="space-y-4">
@@ -45,11 +53,13 @@ export function EntityProfilePanel({ entity, fiscalYear, children }: EntityProfi
 
       {/* Tabs */}
       <Tabs defaultValue="perfil" className="w-full">
-        <TabsList className="w-full grid grid-cols-4">
+        <TabsList className={`w-full grid grid-cols-${tabCount}`}>
           <TabsTrigger value="perfil" className="text-xs">Perfil</TabsTrigger>
           <TabsTrigger value="exercicios" className="text-xs">Exercícios</TabsTrigger>
           <TabsTrigger value="verificacao" className="text-xs">Verificação</TabsTrigger>
-          <TabsTrigger value="financeiro" className="text-xs">Financeiro</TabsTrigger>
+          {showFinanceiro && (
+            <TabsTrigger value="financeiro" className="text-xs">Financeiro</TabsTrigger>
+          )}
         </TabsList>
 
         {/* Perfil Tab */}
@@ -68,22 +78,26 @@ export function EntityProfilePanel({ entity, fiscalYear, children }: EntityProfi
                 <InfoRow icon={<Calendar className="h-4 w-4" />} label="Registado em" value={entity.createdAt} />
               </div>
 
-              {/* Summary for the selected fiscal year */}
+              {/* Summary for the selected fiscal year — hide financial values for Secretaria */}
               <div className="mt-6 pt-4 border-t">
                 <p className="text-xs text-muted-foreground uppercase font-medium mb-3">Exercício Seleccionado</p>
-                <div className="grid grid-cols-3 gap-4">
+                <div className={`grid gap-4 ${showFinanceiro ? "grid-cols-3" : "grid-cols-1"}`}>
                   <div className="bg-muted/30 rounded-lg p-3 text-center">
                     <p className="text-[10px] uppercase text-muted-foreground">Exercício</p>
                     <p className="text-sm font-bold">{fiscalYear.year}</p>
                   </div>
-                  <div className="bg-muted/30 rounded-lg p-3 text-center">
-                    <p className="text-[10px] uppercase text-muted-foreground">Total Débito</p>
-                    <p className="text-sm font-bold font-mono">{formatKz(fiscalYear.totalDebito)} Kz</p>
-                  </div>
-                  <div className="bg-muted/30 rounded-lg p-3 text-center">
-                    <p className="text-[10px] uppercase text-muted-foreground">Total Crédito</p>
-                    <p className="text-sm font-bold font-mono">{formatKz(fiscalYear.totalCredito)} Kz</p>
-                  </div>
+                  {showFinanceiro && (
+                    <>
+                      <div className="bg-muted/30 rounded-lg p-3 text-center">
+                        <p className="text-[10px] uppercase text-muted-foreground">Total Débito</p>
+                        <p className="text-sm font-bold font-mono">{formatKz(fiscalYear.totalDebito)} Kz</p>
+                      </div>
+                      <div className="bg-muted/30 rounded-lg p-3 text-center">
+                        <p className="text-[10px] uppercase text-muted-foreground">Total Crédito</p>
+                        <p className="text-sm font-bold font-mono">{formatKz(fiscalYear.totalCredito)} Kz</p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -100,10 +114,12 @@ export function EntityProfilePanel({ entity, fiscalYear, children }: EntityProfi
           {children}
         </TabsContent>
 
-        {/* Financeiro Tab */}
-        <TabsContent value="financeiro" className="mt-4">
-          <EntityFinanceiroTab indicators={entityIndicators} entityName={entity.name} />
-        </TabsContent>
+        {/* Financeiro Tab — only for non-Secretaria roles */}
+        {showFinanceiro && (
+          <TabsContent value="financeiro" className="mt-4">
+            <EntityFinanceiroTab indicators={entityIndicators} entityName={entity.name} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
