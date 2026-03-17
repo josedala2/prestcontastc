@@ -467,6 +467,6 @@ export default function EscrivaoRegistoAutuacao() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </TecnicoLayout>
+    </AppLayout>
   );
 }
