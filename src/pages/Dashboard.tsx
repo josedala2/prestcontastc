@@ -221,32 +221,8 @@ const Dashboard = () => {
         <KPICard icon={<Activity />} label="Actas Emitidas" value={rpcStats?.total_actas ?? actas.length} color="text-amber-600" bg="bg-amber-100" />
       </div>
 
-      {/* Row 1: Bar chart + Pie charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        {/* Processos por etapa */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <GitBranch className="h-4 w-4 text-primary" /> Processos por Etapa do Workflow
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {etapaData.length === 0 ? (
-              <EmptyState message="Sem processos registados" />
-            ) : (
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={etapaData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(213, 15%, 85%)" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(213, 20%, 45%)" }} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "hsl(213, 20%, 45%)" }} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="value" fill="hsl(213, 100%, 18%)" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-
+      {/* Row 1: Pie charts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         {/* Estado dos processos */}
         <Card>
           <CardHeader className="pb-2">
@@ -283,7 +259,6 @@ const Dashboard = () => {
             )}
           </CardContent>
         </Card>
-      </div>
 
       {/* Row 2: Area chart + Canal + Categories */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
