@@ -117,6 +117,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
   "Ministério Público": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
     "/relatorios", "/mapas", "/documentos-obrigatorios", "/auditoria",
+    "/ministerio-publico/despacho",
   ],
   "Técnico da Secção de Custas e Emolumentos": [
     "/dashboard", "/gestao-processos", "/submissoes", "/entidades",
