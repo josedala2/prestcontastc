@@ -12,6 +12,9 @@ import { Badge } from "@/components/ui/badge";
 
 const TecnicoDashboard = () => {
   const navigate = useNavigate();
+  const location = window.location.pathname;
+  const prefix = location.startsWith("/contadoria") ? "/contadoria" : "/tecnico";
+  const isContadoria = prefix === "/contadoria";
   const { submissions } = useSubmissions();
   const [rpcStats, setRpcStats] = useState<any>(null);
   const [perfilStats, setPerfilStats] = useState<any>(null);
@@ -38,8 +41,10 @@ const TecnicoDashboard = () => {
   return (
     <TecnicoLayout>
       <PageHeader
-        title="Painel do Técnico Validador"
-        description="Visão geral dos processos de prestação de contas atribuídos para análise."
+        title={isContadoria ? "Painel da Contadoria Geral" : "Painel do Técnico Validador"}
+        description={isContadoria
+          ? "Verificação documental detalhada dos processos encaminhados pela Secretaria (Etapa 4)."
+          : "Visão geral dos processos de prestação de contas atribuídos para análise."}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -74,7 +79,7 @@ const TecnicoDashboard = () => {
                         variant="ghost"
                         size="sm"
                         className="h-7 w-7 p-0"
-                        onClick={() => navigate(`/tecnico/prestacao-contas?entityId=${s.entityId}&exercicio=${year}`)}
+                        onClick={() => navigate(`${prefix}/prestacao-contas?entityId=${s.entityId}&exercicio=${year}`)}
                       >
                         <ArrowRight className="h-3.5 w-3.5" />
                       </Button>
