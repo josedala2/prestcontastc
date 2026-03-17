@@ -45,6 +45,8 @@ const SubmissaoDetalhe = () => {
   const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [generatedActaFilePath, setGeneratedActaFilePath] = useState<string | null>(null);
+  const [generatedActaFileName, setGeneratedActaFileName] = useState<string | null>(null);
   const [motivoRejeicao, setMotivoRejeicao] = useState("");
   const [actaGerada, setActaGerada] = useState(false);
   const [remetido, setRemetido] = useState(false);
@@ -164,7 +166,7 @@ const SubmissaoDetalhe = () => {
     try {
       await supabase.storage
         .from("actas-recepcao")
-        .upload(filePath, blob, { contentType: "application/pdf" });
+        .upload(filePath, blob, { contentType: "application/pdf", upsert: true });
 
       const fiscalYearId = `${entity.id}-${periodo}`;
       await supabase.from("actas_recepcao").insert({
@@ -176,6 +178,9 @@ const SubmissaoDetalhe = () => {
         file_path: filePath,
         file_name: fileName,
       } as any);
+
+      setGeneratedActaFilePath(filePath);
+      setGeneratedActaFileName(fileName);
     } catch (err) {
       console.error("Error persisting acta:", err);
     }
@@ -354,8 +359,40 @@ const SubmissaoDetalhe = () => {
               <p className="text-xs text-muted-foreground">A documentação foi verificada e a acta de recepção foi gerada com sucesso.</p>
             </div>
             <div className="flex items-center gap-2">
+              {generatedActaFilePath && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => {
+                      const { data } = supabase.storage.from("actas-recepcao").getPublicUrl(generatedActaFilePath);
+                      setPdfPreviewUrl(data.publicUrl);
+                    }}
+                  >
+                    <Eye className="h-3.5 w-3.5" /> Visualizar Acta
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={async () => {
+                      const { data, error } = await supabase.storage.from("actas-recepcao").download(generatedActaFilePath);
+                      if (error || !data) { toast.error("Erro ao descarregar."); return; }
+                      const url = URL.createObjectURL(data);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = generatedActaFileName || "acta.pdf";
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    <Download className="h-3.5 w-3.5" /> Descarregar PDF
+                  </Button>
+                </>
+              )}
               {!remetido && (
-                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setActaGerada(false); setCheckedDocs({}); }}>
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setActaGerada(false); setCheckedDocs({}); setGeneratedActaFilePath(null); }}>
                   <Pencil className="h-3.5 w-3.5" /> Editar e Regenerar
                 </Button>
               )}
