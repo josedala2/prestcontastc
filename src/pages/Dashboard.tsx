@@ -464,9 +464,13 @@ const Dashboard = () => {
         </Card>
       </div>
 
+      {/* Row 4: Notification panel filtered by role */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <DashboardNotificacoesPanel />
+
       {/* Bottom: Pareceres + Actas summary */}
       {(pareceres.length > 0 || actas.length > 0) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div className="grid grid-cols-1 gap-6">
           {pareceres.length > 0 && (
             <Card>
               <CardHeader className="pb-2">
