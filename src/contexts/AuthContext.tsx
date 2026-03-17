@@ -112,6 +112,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
   "Juiz Adjunto": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
     "/relatorios", "/mapas", "/documentos-obrigatorios",
+    "/juiz/decisao",
   ],
   "Ministério Público": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
