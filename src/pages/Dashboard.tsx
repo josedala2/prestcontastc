@@ -486,33 +486,31 @@ const Dashboard = () => {
         <DashboardNotificacoesPanel />
       </div>
 
-      {/* Bottom: Pareceres + Actas summary */}
-      {(pareceres.length > 0 || actas.length > 0) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          {pareceres.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold">📋 Pareceres Emitidos ({pareceres.length})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {pareceres.slice(0, 5).map((p: any) => (
-                    <div key={p.id} className="flex items-center justify-between p-2 rounded bg-muted/30">
-                      <div>
-                        <p className="text-xs font-medium">{p.entity_name}</p>
-                        <p className="text-[10px] text-muted-foreground">Exercício {p.fiscal_year} — {p.tecnico_nome}</p>
-                      </div>
-                      <Badge variant="outline" className={cn("text-[10px]",
-                        p.parecer_final?.includes("Termos") ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                      )}>
-                        {p.parecer_final}
-                      </Badge>
+      {/* Bottom: Pareceres summary */}
+      {pareceres.length > 0 && (
+        <div className="grid grid-cols-1 gap-6 mt-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold">📋 Pareceres Emitidos ({pareceres.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {pareceres.slice(0, 5).map((p: any) => (
+                  <div key={p.id} className="flex items-center justify-between p-2 rounded bg-muted/30">
+                    <div>
+                      <p className="text-xs font-medium">{p.entity_name}</p>
+                      <p className="text-[10px] text-muted-foreground">Exercício {p.fiscal_year} — {p.tecnico_nome}</p>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                    <Badge variant="outline" className={cn("text-[10px]",
+                      p.parecer_final?.includes("Termos") ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                    )}>
+                      {p.parecer_final}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </AppLayout>
