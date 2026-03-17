@@ -47,6 +47,27 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Roles that access the main dashboard layout
+const DASHBOARD_ROLES = [
+  "Administrador do Sistema",
+  "Chefe da Secretaria-Geral",
+  "Técnico da Contadoria Geral",
+  "Escrivão dos Autos",
+  "Chefe de Divisão",
+  "Chefe de Secção",
+  "Coordenador de Equipa",
+  "Diretor dos Serviços Técnicos",
+  "Juiz Relator",
+  "Juiz Adjunto",
+  "Ministério Público",
+  "Técnico da Secção de Custas e Emolumentos",
+  "Oficial de Diligências",
+  "Presidente da Câmara",
+  "Presidente do Tribunal de Contas",
+];
+
+const ALL_INTERNAL = [...DASHBOARD_ROLES, "Técnico da Secretaria-Geral"];
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -60,35 +81,35 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
           
-          {/* Admin + Auditor routes */}
-          <Route path="/dashboard" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><Dashboard /></ProtectedRoute>} />
-          <Route path="/entidades" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><Entidades /></ProtectedRoute>} />
-          <Route path="/exercicios" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><Exercicios /></ProtectedRoute>} />
-          <Route path="/exercicios/:id" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><ExercicioDetalhe /></ProtectedRoute>} />
-          <Route path="/importacao" element={<ProtectedRoute allowedRoles={["Administrador"]}><Importacao /></ProtectedRoute>} />
-          <Route path="/plano-contas" element={<ProtectedRoute allowedRoles={["Administrador"]}><PlanoContas /></ProtectedRoute>} />
-          <Route path="/validacoes" element={<ProtectedRoute allowedRoles={["Administrador"]}><Validacoes /></ProtectedRoute>} />
-          <Route path="/relatorios" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><Relatorios /></ProtectedRoute>} />
-          <Route path="/mapas" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><Mapas /></ProtectedRoute>} />
-          <Route path="/anexos" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><Anexos /></ProtectedRoute>} />
-          <Route path="/actas-recepcao" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><ActasRecepcao /></ProtectedRoute>} />
-          <Route path="/documentos-obrigatorios" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><DocumentosObrigatorios /></ProtectedRoute>} />
-          <Route path="/auditoria" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><Auditoria /></ProtectedRoute>} />
-          <Route path="/esclarecimentos" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><Esclarecimentos /></ProtectedRoute>} />
-          <Route path="/configuracoes" element={<ProtectedRoute allowedRoles={["Administrador"]}><Configuracoes /></ProtectedRoute>} />
-          <Route path="/submissoes" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><Submissoes /></ProtectedRoute>} />
-          <Route path="/submissoes/manual" element={<ProtectedRoute allowedRoles={["Administrador"]}><SubmissaoManual /></ProtectedRoute>} />
-          <Route path="/submissoes/:id" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><SubmissaoDetalhe /></ProtectedRoute>} />
-          <Route path="/processos-visto" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><ProcessosVisto /></ProtectedRoute>} />
-          <Route path="/gestao-processos" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><GestaoProcessos /></ProtectedRoute>} />
-          <Route path="/gestao-processos/:id" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><ProcessoDetalhePage /></ProtectedRoute>} />
+          {/* Dashboard */}
+          <Route path="/dashboard" element={<ProtectedRoute allowedRoles={DASHBOARD_ROLES}><Dashboard /></ProtectedRoute>} />
+          <Route path="/entidades" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><Entidades /></ProtectedRoute>} />
+          <Route path="/exercicios" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Diretor dos Serviços Técnicos", "Juiz Relator", "Presidente da Câmara", "Presidente do Tribunal de Contas"]}><Exercicios /></ProtectedRoute>} />
+          <Route path="/exercicios/:id" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Diretor dos Serviços Técnicos", "Juiz Relator", "Presidente da Câmara", "Presidente do Tribunal de Contas"]}><ExercicioDetalhe /></ProtectedRoute>} />
+          <Route path="/importacao" element={<ProtectedRoute allowedRoles={["Administrador do Sistema"]}><Importacao /></ProtectedRoute>} />
+          <Route path="/plano-contas" element={<ProtectedRoute allowedRoles={["Administrador do Sistema"]}><PlanoContas /></ProtectedRoute>} />
+          <Route path="/validacoes" element={<ProtectedRoute allowedRoles={["Administrador do Sistema"]}><Validacoes /></ProtectedRoute>} />
+          <Route path="/relatorios" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><Relatorios /></ProtectedRoute>} />
+          <Route path="/mapas" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><Mapas /></ProtectedRoute>} />
+          <Route path="/anexos" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><Anexos /></ProtectedRoute>} />
+          <Route path="/actas-recepcao" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secretaria-Geral", "Chefe da Secretaria-Geral", "Escrivão dos Autos", "Presidente da Câmara", "Presidente do Tribunal de Contas"]}><ActasRecepcao /></ProtectedRoute>} />
+          <Route path="/documentos-obrigatorios" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><DocumentosObrigatorios /></ProtectedRoute>} />
+          <Route path="/auditoria" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Coordenador de Equipa", "Diretor dos Serviços Técnicos", "Juiz Relator", "Ministério Público", "Presidente da Câmara", "Presidente do Tribunal de Contas"]}><Auditoria /></ProtectedRoute>} />
+          <Route path="/esclarecimentos" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Contadoria Geral", "Coordenador de Equipa", "Diretor dos Serviços Técnicos", "Presidente do Tribunal de Contas"]}><Esclarecimentos /></ProtectedRoute>} />
+          <Route path="/configuracoes" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Presidente do Tribunal de Contas"]}><Configuracoes /></ProtectedRoute>} />
+          <Route path="/submissoes" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><Submissoes /></ProtectedRoute>} />
+          <Route path="/submissoes/manual" element={<ProtectedRoute allowedRoles={["Administrador do Sistema"]}><SubmissaoManual /></ProtectedRoute>} />
+          <Route path="/submissoes/:id" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><SubmissaoDetalhe /></ProtectedRoute>} />
+          <Route path="/processos-visto" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Juiz Relator", "Presidente da Câmara", "Presidente do Tribunal de Contas"]}><ProcessosVisto /></ProtectedRoute>} />
+          <Route path="/gestao-processos" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><GestaoProcessos /></ProtectedRoute>} />
+          <Route path="/gestao-processos/:id" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><ProcessoDetalhePage /></ProtectedRoute>} />
           
           {/* Secretaria */}
-          <Route path="/secretaria" element={<ProtectedRoute allowedRoles={["Administrador", "Secretaria"]}><Secretaria /></ProtectedRoute>} />
+          <Route path="/secretaria" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secretaria-Geral", "Chefe da Secretaria-Geral"]}><Secretaria /></ProtectedRoute>} />
 
           {/* Portal Entidade */}
           <Route path="/portal/*" element={
-            <ProtectedRoute allowedRoles={["Administrador", "Preparador / Contabilista"]}>
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Representante da Entidade"]}>
               <PortalEntityProvider>
                 <Routes>
                   <Route index element={<PortalDashboard />} />
@@ -108,7 +129,7 @@ const App = () => (
           
           {/* Técnico */}
           <Route path="/tecnico/*" element={
-            <ProtectedRoute allowedRoles={["Administrador", "Técnico Validador"]}>
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico de Análise"]}>
               <PortalEntityProvider>
                 <Routes>
                   <Route index element={<TecnicoDashboard />} />
