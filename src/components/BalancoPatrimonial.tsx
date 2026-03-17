@@ -400,7 +400,7 @@ function BalancoCharts({
                   />
                 }
               />
-              <ChartLegend content={<ChartLegendContent />} />
+              <ChartLegend content={<ChartLegendContent payload={[]} />} />
             </PieChart>
           </ChartContainer>
         </CardContent>
