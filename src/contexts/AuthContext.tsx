@@ -65,6 +65,8 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/gestao-processos", "/mapas", "/relatorios", "/anexos", "/dashboard",
   ],
   "Técnico da Contadoria Geral": [
+    "/contadoria", "/contadoria/verificacao", "/contadoria/documentos",
+    "/contadoria/esclarecimentos", "/contadoria/processos",
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
     "/documentos-obrigatorios", "/esclarecimentos", "/mapas", "/relatorios",
   ],
@@ -288,7 +290,7 @@ export const roleDefaultRoute: Record<UserRole, string> = {
   "Representante da Entidade": "/portal",
   "Técnico da Secretaria-Geral": "/secretaria",
   "Chefe da Secretaria-Geral": "/secretaria",
-  "Técnico da Contadoria Geral": "/dashboard",
+  "Técnico da Contadoria Geral": "/contadoria",
   "Escrivão dos Autos": "/dashboard",
   "Chefe de Divisão": "/dashboard",
   "Chefe de Secção": "/dashboard",
