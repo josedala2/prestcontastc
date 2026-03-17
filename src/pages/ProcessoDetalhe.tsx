@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { roleStagePermissions } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { WORKFLOW_STAGES, WORKFLOW_ESTADOS, CATEGORIAS_ENTIDADE, type Processo, type ProcessoHistorico } from "@/types/workflow";
@@ -275,15 +276,25 @@ const ProcessoDetalhe = () => {
                   const isCurrent = stage.id === processo.etapa_atual;
                   const isCompleted = stage.id < processo.etapa_atual;
                   const isPending = stage.id > processo.etapa_atual;
+                  const isMyStage = user?.role ? (roleStagePermissions[user.role] || []).includes(stage.id) : false;
 
                   return (
-                    <div key={stage.id} className="flex gap-3 mb-1 last:mb-0">
+                    <div key={stage.id} className={cn(
+                      "flex gap-3 mb-1 last:mb-0",
+                      isMyStage && !isCurrent && "relative",
+                    )}>
+                      {/* Left indicator for user's stages */}
+                      {isMyStage && !isCurrent && (
+                        <div className="absolute -left-1.5 top-1 w-1 h-5 rounded-full bg-accent" />
+                      )}
                       <div className="flex flex-col items-center">
                         <div className={cn(
                           "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 shrink-0",
                           isCompleted && "bg-green-500 border-green-500 text-white",
-                          isCurrent && "bg-primary border-primary text-primary-foreground animate-pulse",
-                          isPending && "bg-background border-muted-foreground/30 text-muted-foreground"
+                          isCurrent && isMyStage && "bg-accent border-accent text-accent-foreground ring-2 ring-accent/30 ring-offset-1",
+                          isCurrent && !isMyStage && "bg-primary border-primary text-primary-foreground animate-pulse",
+                          isPending && isMyStage && "bg-accent/20 border-accent text-accent-foreground",
+                          isPending && !isMyStage && "bg-background border-muted-foreground/30 text-muted-foreground"
                         )}>
                           {isCompleted ? <CheckCircle2 className="h-4 w-4" /> : stage.id}
                         </div>
@@ -293,23 +304,39 @@ const ProcessoDetalhe = () => {
                       </div>
                       <div className={cn(
                         "flex-1 pb-2 pt-0.5",
-                        isCurrent && "bg-primary/5 rounded-lg px-3 py-2 -mt-0.5 border border-primary/20",
+                        isCurrent && isMyStage && "bg-accent/10 rounded-lg px-3 py-2 -mt-0.5 border border-accent/30",
+                        isCurrent && !isMyStage && "bg-primary/5 rounded-lg px-3 py-2 -mt-0.5 border border-primary/20",
                       )}>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <p className={cn(
                             "text-sm font-medium",
-                            isPending && "text-muted-foreground",
+                            isPending && !isMyStage && "text-muted-foreground",
+                            isPending && isMyStage && "text-accent-foreground",
                             isCompleted && "text-green-700",
                             isCurrent && "text-primary font-bold"
                           )}>
                             {stage.nome}
                           </p>
-                          {isCurrent && <Badge className="text-[10px] h-4">Actual</Badge>}
+                          {isCurrent && isMyStage && (
+                            <Badge className="text-[10px] h-4 bg-accent text-accent-foreground">A sua etapa</Badge>
+                          )}
+                          {isCurrent && !isMyStage && <Badge className="text-[10px] h-4">Actual</Badge>}
+                          {!isCurrent && isMyStage && (
+                            <span className="text-[10px] text-accent font-semibold">● Sua competência</span>
+                          )}
                         </div>
+                        {/* Always show responsible profile */}
+                        <p className={cn(
+                          "text-[10px] mt-0.5",
+                          isCurrent ? "text-muted-foreground" : "text-muted-foreground/70"
+                        )}>
+                          <User className="h-3 w-3 inline mr-0.5 -mt-0.5" />
+                          {stage.responsavelPerfil}
+                          {stage.prazoDefault > 0 && <span className="ml-2">· {stage.prazoDefault}d</span>}
+                        </p>
                         {isCurrent && (
                           <div className="mt-1">
                             <p className="text-xs text-muted-foreground">{stage.descricao}</p>
-                            <p className="text-xs mt-1"><span className="font-semibold">Responsável:</span> {stage.responsavelPerfil}</p>
                             {stage.documentosGerados.length > 0 && (
                               <div className="mt-1">
                                 <span className="text-xs font-semibold">Documentos a gerar:</span>
