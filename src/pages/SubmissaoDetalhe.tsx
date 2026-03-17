@@ -188,7 +188,7 @@ const SubmissaoDetalhe = () => {
     const fiscalYearId = `${entity.id}-${periodo}`;
     recepcionar(entity.id, fiscalYearId, entity.name, `entidade@${entity.nif}.ao`);
     setConfirmDialogOpen(false);
-    toast.success(`Acta de recepção gerada — ${entity.name} — ${periodo}`);
+    toast.success(`Nota de Remessa gerada — ${entity.name} — ${periodo}`);
   };
 
   const handleConfirmRejeicao = () => {
@@ -353,7 +353,7 @@ const SubmissaoDetalhe = () => {
             {!allRequiredChecked ? (
               <p className="text-xs text-warning flex items-center gap-1">
                 <AlertTriangle className="h-3.5 w-3.5" />
-                Todos os documentos obrigatórios devem ser verificados para emitir a acta.
+                Todos os documentos obrigatórios devem ser verificados para emitir a nota de remessa.
               </p>
             ) : <div />}
             <div className="flex gap-3">
@@ -367,7 +367,7 @@ const SubmissaoDetalhe = () => {
                 <Eye className="h-4 w-4" /> Visualizar PDF
               </Button>
               <Button disabled={!allRequiredChecked} onClick={() => setConfirmDialogOpen(true)} className="gap-2">
-                <Stamp className="h-4 w-4" /> Confirmar e Gerar Acta
+                <FileText className="h-4 w-4" /> Confirmar e Gerar Nota de Remessa
               </Button>
             </div>
           </div>
@@ -377,8 +377,8 @@ const SubmissaoDetalhe = () => {
           <div className="flex items-center gap-3 p-4 rounded-lg bg-success/10 border border-success/20">
             <CheckCircle className="h-5 w-5 shrink-0 text-success" />
             <div className="flex-1">
-              <p className="text-sm font-semibold text-foreground">Acta de Recepção Emitida</p>
-              <p className="text-xs text-muted-foreground">A documentação foi verificada e a acta de recepção foi gerada com sucesso.</p>
+              <p className="text-sm font-semibold text-foreground">Nota de Remessa Emitida</p>
+              <p className="text-xs text-muted-foreground">A documentação foi verificada e a nota de remessa foi gerada com sucesso.</p>
             </div>
             <div className="flex items-center gap-2">
               {generatedActaFilePath && (
@@ -392,7 +392,7 @@ const SubmissaoDetalhe = () => {
                       setPdfPreviewUrl(data.publicUrl);
                     }}
                   >
-                    <Eye className="h-3.5 w-3.5" /> Visualizar Acta
+                    <Eye className="h-3.5 w-3.5" /> Visualizar Nota
                   </Button>
                   <Button
                     variant="outline"
@@ -467,14 +467,14 @@ const SubmissaoDetalhe = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <Stamp className="h-5 w-5 text-primary" /> Confirmar Emissão da Acta
+              <FileText className="h-5 w-5 text-primary" /> Confirmar Emissão da Nota de Remessa
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-3">
-                <p>Confirma a emissão da acta de recepção com os seguintes dados?</p>
+                <p>Confirma a emissão da nota de remessa com os seguintes dados?</p>
                 <div className="bg-muted/50 rounded-lg p-3 space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Acta Nº</span>
+                    <span className="text-muted-foreground">Referência</span>
                     <span className="font-medium text-foreground font-mono">{actaNumero}</span>
                   </div>
                   <div className="flex justify-between">
@@ -496,7 +496,7 @@ const SubmissaoDetalhe = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmRecepcao} className="gap-2">
-              <Stamp className="h-4 w-4" /> Confirmar e Gerar Acta
+              <FileText className="h-4 w-4" /> Confirmar e Gerar Nota de Remessa
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
