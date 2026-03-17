@@ -66,7 +66,7 @@ const TecnicoDashboard = () => {
           <CardContent className="space-y-2">
             {emAnalise.length > 0 ? (
               emAnalise.map((s) => {
-                const ent = mockEntities.find((e) => e.id === s.entityId);
+                const ent = allEntities.find((e) => e.id === s.entityId);
                 const year = s.fiscalYearId.split("-").pop() || "";
                 return (
                   <div key={s.fiscalYearId} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 transition-colors">
