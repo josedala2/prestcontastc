@@ -60,6 +60,11 @@ const SubmissaoDetalhe = () => {
   const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
   const [docPreviewLoading, setDocPreviewLoading] = useState(false);
   const [submissionDocs, setSubmissionDocs] = useState<SubmissionDoc[]>([]);
+  const [docSortField, setDocSortField] = useState<"label" | "name" | "size">("label");
+  const [docSortDir, setDocSortDir] = useState<"asc" | "desc">("asc");
+  const [docSearch, setDocSearch] = useState("");
+  const [docPage, setDocPage] = useState(0);
+  const DOC_PAGE_SIZE = 5;
   const { recepcionar, rejeitar, remeterParaTecnico, getStatus } = useSubmissions();
 
   const fiscalYearId = `${entity.id}-${periodo}`;
