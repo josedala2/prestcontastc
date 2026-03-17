@@ -248,8 +248,8 @@ export function SecretariaValidacaoTab() {
         novoEstado: "em_analise",
         executadoPor,
         perfilExecutor: "Chefe da Secretaria-Geral",
-        observacoes: "Nota de Remessa gerada. Encaminhado para verificação documental pela Contadoria Geral.",
-        documentosGerados: ["Nota de Remessa"],
+        observacoes: "Nota de Remessa e Acta de Recebimento anexas. Encaminhado para verificação documental pela Contadoria Geral.",
+        documentosGerados: ["Nota de Remessa", "Acta de Recebimento"],
       });
 
       // Update responsavel
