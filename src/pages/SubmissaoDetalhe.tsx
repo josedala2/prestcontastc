@@ -496,7 +496,7 @@ const SubmissaoDetalhe = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmRecepcao} className="gap-2">
-              <FileText className="h-4 w-4" /> Confirmar e Gerar Nota de Remessa
+              <FileText className="h-4 w-4" /> Confirmar e Autuar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
