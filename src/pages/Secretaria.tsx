@@ -156,7 +156,7 @@ const Secretaria = () => {
     try {
       const numAtividades = await gerarAtividadesParaEvento("expediente_submetido", fiscalYearId, {
         canal,
-        categoriaEntidade: selectedEntity.category || "resolucao_1_17",
+        categoriaEntidade: selectedEntity.tipologia || "resolucao_1_17",
         checklistIncompleta,
       });
       if (numAtividades > 0) {
