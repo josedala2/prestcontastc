@@ -12,6 +12,7 @@ interface SubmissionEntry {
   recepcionadoAt?: string;
   rejeitadoAt?: string;
   motivoRejeicao?: string;
+  uploadedDocIds?: string[];
 }
 
 export interface PortalNotification {
