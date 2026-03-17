@@ -47,6 +47,18 @@ import Atividades from "./pages/Atividades";
 import ContadoriaVerificacao from "./pages/contadoria/ContadoriaVerificacao";
 import EscrivaoRegistoAutuacao from "./pages/escrivao/EscrivaoRegistoAutuacao";
 import ChefeDivisaoProcessos from "./pages/chefe-divisao/ChefeDivisaoProcessos";
+import ValidacaoChefeDivisao from "./pages/chefe-divisao/ValidacaoChefeDivisao";
+import ChefeSeccaoDistribuicao from "./pages/chefe-seccao/ChefeSeccaoDistribuicao";
+import ValidacaoChefeSeccao from "./pages/chefe-seccao/ValidacaoChefeSeccao";
+import AnaliseTecnicaPage from "./pages/tecnico-analise/AnaliseTecnicaPage";
+import ControleQualidadeDST from "./pages/dst/ControleQualidadeDST";
+import DecisaoJuizRelator from "./pages/juiz/DecisaoJuizRelator";
+import Arquivamento from "./pages/juiz/Arquivamento";
+import CobrancaEmolumentos from "./pages/custas/CobrancaEmolumentos";
+import DespachoMinisterioPublico from "./pages/ministerio-publico/DespachoMinisterioPublico";
+import CumprimentoDespachos from "./pages/escrivao/CumprimentoDespachos";
+import OficioRemessa from "./pages/secretaria/OficioRemessa";
+import ExpedienteSaida from "./pages/diligencias/ExpedienteSaida";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
