@@ -33,6 +33,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const GestaoProcessos = () => {
+  const { entities: allEntities } = useEntities();
   const navigate = useNavigate();
   const [processos, setProcessos] = useState<Processo[]>([]);
   const [loading, setLoading] = useState(true);
