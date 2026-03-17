@@ -148,6 +148,21 @@ const Secretaria = () => {
         console.error("Erro ao gerar atividades de validação:", err);
       }
 
+      // Notificação automática para a Chefe da Secretaria-Geral
+      try {
+        await supabase.from("submission_notifications").insert({
+          entity_id: entity.id,
+          entity_name: entity.name,
+          fiscal_year_id: fy.id,
+          fiscal_year: String(fy.year),
+          type: "encaminhamento_validacao",
+          message: `Processo de ${entity.name} (${fy.year}) encaminhado para sua validação`,
+          detail: `O Técnico da Secretaria-Geral concluiu a recepção e verificação documental. Processo ${processoId.substring(0, 8)}... aguarda a sua aprovação para encaminhamento à Contadoria Geral.`,
+        } as any);
+      } catch (err) {
+        console.error("Erro ao criar notificação:", err);
+      }
+
       setEncaminhados((prev) => [...prev, fyId]);
       toast.success(`Processo encaminhado para validação da Chefe da Secretaria-Geral — ${entity.name} ${fy.year}`);
     } catch (err: any) {
