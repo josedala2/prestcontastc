@@ -141,134 +141,42 @@ export default function EscrivaoRegistoAutuacao() {
     }
   };
 
-  // ——— Step 3: Confirmar Pesquisa de Conta Existente ———
-  const handlePesquisaConta = async () => {
+  // ——— Step 2: Validar Documentação ———
+  const [documentos, setDocumentos] = useState<any[]>([]);
+  const [docsLoading, setDocsLoading] = useState(false);
+
+  const fetchDocumentos = async (processoId: string) => {
+    setDocsLoading(true);
+    const { data } = await supabase
+      .from("processo_documentos")
+      .select("*")
+      .eq("processo_id", processoId)
+      .order("created_at", { ascending: true });
+    setDocumentos((data as any[]) || []);
+    setDocsLoading(false);
+  };
+
+  const handleValidarDocumentos = async () => {
     if (!selectedProcesso) return;
-    setCurrentStep("pesquisa");
+    setCurrentStep("validar");
     setActing(true);
     try {
-      // Check if entity has prior processes
-      const { data: priorProcessos } = await supabase
-        .from("processos")
-        .select("id, numero_processo, ano_gerencia")
-        .eq("entity_id", selectedProcesso.entity_id)
-        .neq("id", selectedProcesso.id)
-        .order("ano_gerencia", { ascending: false })
-        .limit(5);
-
-      const count = priorProcessos?.length || 0;
-      const obs = count > 0
-        ? `Encontrados ${count} processo(s) anterior(es) da entidade: ${priorProcessos!.map((p: any) => `${p.numero_processo} (${p.ano_gerencia})`).join(", ")}`
-        : "Nenhum processo anterior encontrado para esta entidade — primeiro exercício";
+      await fetchDocumentos(selectedProcesso.id);
 
       await supabase.from("processo_historico").insert({
         processo_id: selectedProcesso.id,
         etapa_anterior: 5,
         etapa_seguinte: 5,
-        estado_anterior: "em_autuacao",
+        estado_anterior: selectedProcesso.estado,
         estado_seguinte: "em_autuacao",
-        acao: "Pesquisa de conta existente confirmada",
+        acao: "Documentação do processo verificada e validada pelo Escrivão",
         executado_por: executadoPor,
         perfil_executor: "Escrivão dos Autos",
-        observacoes: obs,
+        observacoes: `${documentos.length || 0} documento(s) anexo(s) verificados`,
       } as any);
 
-      setCompletedSteps((prev) => ({ ...prev, pesquisa: true }));
-      toast.success(count > 0 ? `${count} processo(s) anterior(es) encontrado(s)` : "Sem processos anteriores — primeiro exercício");
-    } catch (err: any) {
-      toast.error(`Erro: ${err.message}`);
-    } finally {
-      setActing(false);
-      setCurrentStep(null);
-    }
-  };
-
-  // ——— Step 4: Gerar Capa do Processo ———
-  const handleGerarCapa = async () => {
-    if (!selectedProcesso) return;
-    setCurrentStep("capa");
-    setActing(true);
-    try {
-      const docData: ProcessoDocData = {
-        numeroProcesso: selectedProcesso.numero_processo,
-        entityName: selectedProcesso.entity_name,
-        anoGerencia: selectedProcesso.ano_gerencia,
-        categoriaEntidade: selectedProcesso.categoria_entidade,
-        canalEntrada: "portal",
-        dataSubmissao: selectedProcesso.data_submissao,
-        responsavelAtual: executadoPor,
-        submetidoPor: "sistema",
-        etapaAtual: 5,
-        estado: selectedProcesso.estado,
-      };
-
-      const capaBlob = await generateCapaProcesso(docData, executadoPor);
-      const sanitized = selectedProcesso.numero_processo.replace(/[^a-zA-Z0-9-]/g, "_");
-      const fileName = `Capa_Processo_${sanitized}.pdf`;
-      const filePath = `${selectedProcesso.id}/${fileName}`;
-
-      await supabase.storage.from("processo-documentos").upload(filePath, capaBlob, {
-        contentType: "application/pdf",
-        upsert: true,
-      });
-
-      await supabase.from("processo_documentos").insert({
-        processo_id: selectedProcesso.id,
-        tipo_documento: "Capa do Processo",
-        nome_ficheiro: fileName,
-        caminho_ficheiro: filePath,
-        estado: "validado",
-        obrigatorio: true,
-        validado_por: executadoPor,
-        validado_em: new Date().toISOString(),
-      } as any);
-
-      saveAs(capaBlob, fileName);
-
-      setCompletedSteps((prev) => ({ ...prev, capa: true }));
-      toast.success("Capa do processo gerada e descarregada");
-    } catch (err: any) {
-      toast.error(`Erro: ${err.message}`);
-    } finally {
-      setActing(false);
-      setCurrentStep(null);
-    }
-  };
-
-  // ——— Step 5: Preparar Termos Processuais ———
-  const handleTermos = async () => {
-    if (!selectedProcesso) return;
-    setCurrentStep("termos");
-    setActing(true);
-    try {
-      const termos = ["Termo de Abertura", "Termo de Autuação"];
-      for (const termo of termos) {
-        await supabase.from("processo_documentos").insert({
-          processo_id: selectedProcesso.id,
-          tipo_documento: termo,
-          nome_ficheiro: `${termo.replace(/ /g, "_")}_${selectedProcesso.numero_processo.replace(/[^a-zA-Z0-9-]/g, "_")}.pdf`,
-          estado: "validado",
-          obrigatorio: true,
-          validado_por: executadoPor,
-          validado_em: new Date().toISOString(),
-        } as any);
-      }
-
-      await supabase.from("processo_historico").insert({
-        processo_id: selectedProcesso.id,
-        etapa_anterior: 5,
-        etapa_seguinte: 5,
-        estado_anterior: "em_autuacao",
-        estado_seguinte: "em_autuacao",
-        acao: "Termos processuais preparados",
-        executado_por: executadoPor,
-        perfil_executor: "Escrivão dos Autos",
-        observacoes: "Gerados: Termo de Abertura e Termo de Autuação",
-        documentos_gerados: termos,
-      } as any);
-
-      setCompletedSteps((prev) => ({ ...prev, termos: true }));
-      toast.success("Termos processuais preparados");
+      setCompletedSteps((prev) => ({ ...prev, validar: true }));
+      toast.success("Documentação validada com sucesso");
     } catch (err: any) {
       toast.error(`Erro: ${err.message}`);
     } finally {
