@@ -467,14 +467,14 @@ const SubmissaoDetalhe = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <Stamp className="h-5 w-5 text-primary" /> Confirmar Emissão da Acta
+              <FileText className="h-5 w-5 text-primary" /> Confirmar Emissão da Nota de Remessa
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-3">
-                <p>Confirma a emissão da acta de recepção com os seguintes dados?</p>
+                <p>Confirma a emissão da nota de remessa com os seguintes dados?</p>
                 <div className="bg-muted/50 rounded-lg p-3 space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Acta Nº</span>
+                    <span className="text-muted-foreground">Referência</span>
                     <span className="font-medium text-foreground font-mono">{actaNumero}</span>
                   </div>
                   <div className="flex justify-between">
