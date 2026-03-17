@@ -22,7 +22,9 @@ import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 import {
   ArrowLeft, CheckCircle, XCircle, FileText, Eye, Stamp, Pencil,
   AlertTriangle, Undo2, Building2, X, Send, Download, ShieldCheck,
+  FolderOpen, File,
 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 
 interface SubmissionDoc {
