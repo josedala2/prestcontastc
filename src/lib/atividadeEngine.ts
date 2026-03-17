@@ -4,7 +4,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { WORKFLOW_STAGES } from "@/types/workflow";
-import { CATEGORIAS_EntIDADE } from "@/types/workflow";
+import { CATEGORIAS_ENTIDADE } from "@/types/workflow";
 
 export type AtividadeEstado =
   | "pendente"
