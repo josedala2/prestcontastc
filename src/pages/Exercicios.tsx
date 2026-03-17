@@ -19,6 +19,7 @@ import { toast } from "sonner";
 
 const Exercicios = () => {
   const navigate = useNavigate();
+  const { entities: allEntities } = useEntities();
   const [fiscalYears, setFiscalYears] = useState<FiscalYear[]>(mockFiscalYears);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<FiscalYear | null>(null);
