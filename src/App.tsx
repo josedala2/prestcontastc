@@ -147,6 +147,13 @@ const App = () => (
               </PortalEntityProvider>
             </ProtectedRoute>
           } />
+
+          {/* Contadoria Geral */}
+          <Route path="/contadoria" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Contadoria Geral"]}>
+              <ContadoriaDashboard />
+            </ProtectedRoute>
+          } />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
