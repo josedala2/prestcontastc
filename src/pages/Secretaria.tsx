@@ -523,7 +523,7 @@ const Secretaria = () => {
             className="gap-2"
           >
             <Stamp className="h-4 w-4" />
-            Confirmar e Gerar Acta
+            Confirmar e Autuar
           </Button>
         </div>
       </div>
@@ -901,7 +901,7 @@ const Secretaria = () => {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmRecepcao} className="gap-2">
               <CheckCircle className="h-4 w-4" />
-              Confirmar e Gerar Acta
+              Confirmar e Autuar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

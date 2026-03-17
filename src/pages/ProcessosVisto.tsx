@@ -824,7 +824,7 @@ export default function ProcessosVisto() {
                     className="gap-2"
                   >
                     <Stamp className="h-4 w-4" />
-                    Confirmar e Gerar Acta
+                    Confirmar e Autuar
                   </Button>
                 </div>
               </div>
@@ -938,7 +938,7 @@ export default function ProcessosVisto() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmRecepcao} className="gap-2">
               <Stamp className="h-3.5 w-3.5" />
-              Confirmar e Gerar Acta
+              Confirmar e Autuar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
