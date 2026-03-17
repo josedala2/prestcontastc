@@ -280,6 +280,58 @@ export default function ContadoriaVerificacao() {
     }
   };
 
+  // Solicitar elementos em falta
+  const uncheckedItems = CHECKLIST_ITEMS.filter((i) => !checkedItems[i.id]);
+
+  const handleSolicitarElementos = async () => {
+    if (!selectedProcesso) return;
+    const selected = CHECKLIST_ITEMS.filter((i) => elementosSelecionados[i.id]);
+    if (selected.length === 0) {
+      toast.error("Seleccione pelo menos um elemento em falta");
+      return;
+    }
+    setActing(true);
+    try {
+      const listaElementos = selected.map((i) => `• ${i.label}`).join("\n");
+      const detalhe = mensagemSolicitacao.trim()
+        ? `${listaElementos}\n\nObservações: ${mensagemSolicitacao.trim()}`
+        : listaElementos;
+
+      await supabase.from("submission_notifications").insert({
+        entity_id: selectedProcesso.entity_id,
+        entity_name: selectedProcesso.entity_name,
+        fiscal_year_id: `${selectedProcesso.entity_id}-${selectedProcesso.ano_gerencia}`,
+        fiscal_year: String(selectedProcesso.ano_gerencia),
+        type: "solicitacao_elementos",
+        message: `Solicitação de elementos em falta — Processo ${selectedProcesso.numero_processo}`,
+        detail: detalhe,
+        deadline: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+      } as any);
+
+      // Log in processo_historico
+      await supabase.from("processo_historico").insert({
+        processo_id: selectedProcesso.id,
+        etapa_anterior: 4,
+        etapa_seguinte: 4,
+        estado_anterior: selectedProcesso.estado,
+        estado_seguinte: selectedProcesso.estado,
+        acao: `Solicitação de ${selected.length} elemento(s) em falta à entidade`,
+        executado_por: executadoPor,
+        perfil_executor: "Técnico da Contadoria Geral",
+        observacoes: detalhe,
+      } as any);
+
+      toast.success(`Solicitação de ${selected.length} elemento(s) enviada à entidade ${selectedProcesso.entity_name}`);
+      setSolicitarDialogOpen(false);
+      setElementosSelecionados({});
+      setMensagemSolicitacao("");
+    } catch (err: any) {
+      toast.error(`Erro: ${err.message}`);
+    } finally {
+      setActing(false);
+    }
+  };
+
   // Separate attached docs into categories
   const actaDoc = documentos.find((d) => d.tipo_documento === "Acta de Recebimento");
   const notaDoc = documentos.find((d) => d.tipo_documento === "Nota de Remessa");
