@@ -259,6 +259,7 @@ const SubmissaoDetalhe = () => {
                     <TableHead className="w-10">✓</TableHead>
                     <TableHead>Documento</TableHead>
                     <TableHead className="text-center">Obrigatório</TableHead>
+                    <TableHead className="text-center">Ficheiro</TableHead>
                     <TableHead className="text-center">Estado</TableHead>
                     <TableHead className="text-center w-24">Acções</TableHead>
                   </TableRow>
