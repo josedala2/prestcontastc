@@ -56,8 +56,10 @@ interface HistoricoDB {
 }
 
 const Dashboard = () => {
-  const navigate = useNavigate();
   const { notifications } = useSubmissions();
+  const { user } = useAuth();
+  const myStages = user ? roleStagePermissions[user.role] || [] : [];
+  const navigate = useNavigate();
   const [processos, setProcessos] = useState<ProcessoDB[]>([]);
   const [historico, setHistorico] = useState<HistoricoDB[]>([]);
   const [actas, setActas] = useState<any[]>([]);
