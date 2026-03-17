@@ -154,6 +154,7 @@ const App = () => (
               <PortalEntityProvider>
                 <Routes>
                   <Route index element={<TecnicoDashboard />} />
+                  <Route path="verificacao" element={<ContadoriaVerificacao />} />
                   <Route path="prestacao-contas" element={<TecnicoPrestacaoContas />} />
                   <Route path="exercicios" element={<PortalExercicios />} />
                   <Route path="exercicios/:id" element={<PortalExercicioDetalhe />} />
