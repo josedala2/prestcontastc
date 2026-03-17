@@ -379,7 +379,7 @@ export function DocumentosTribunal({ exercicioId, entidadeId, readOnly = false }
                       size="sm"
                       className="gap-1.5 text-xs"
                       onClick={() => {
-                        const entity = mockEntities.find((e) => e.id === entidadeId);
+                        const entity = findById(entidadeId);
                         exportDocumentoTribunalPdf(selectedDoc, entity?.name || "Entidade");
                       }}
                     >
