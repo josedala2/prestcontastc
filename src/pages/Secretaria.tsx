@@ -32,6 +32,8 @@ import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { EntityProfilePanel } from "@/components/secretaria/EntityProfilePanel";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { SecretariaVistoTab } from "@/components/secretaria/SecretariaVistoTab";
+import { SecretariaValidacaoTab } from "@/components/secretaria/SecretariaValidacaoTab";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Secretaria = () => {
   const { recepcionar, rejeitar, submissions, getUploadedDocs } = useSubmissions();
