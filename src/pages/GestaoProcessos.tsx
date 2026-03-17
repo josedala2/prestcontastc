@@ -4,6 +4,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { supabase } from "@/integrations/supabase/client";
 import { WORKFLOW_STAGES, WORKFLOW_ESTADOS, CATEGORIAS_ENTIDADE, type Processo } from "@/types/workflow";
+import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,10 +94,11 @@ const GestaoProcessos = () => {
       return;
     }
 
-    // Add history entry
+    // Add history entry and generate activities
     if (data && data[0]) {
+      const processoId = (data[0] as any).id;
       await supabase.from("processo_historico").insert({
-        processo_id: (data[0] as any).id,
+        processo_id: processoId,
         etapa_seguinte: 1,
         estado_seguinte: "submetido",
         acao: "Processo criado e registado no sistema",
@@ -104,6 +106,17 @@ const GestaoProcessos = () => {
         perfil_executor: "Técnico da Secretaria-Geral",
         documentos_gerados: ["Acta de Recebimento"],
       } as any);
+
+      // Gerar atividades automáticas
+      try {
+        await gerarAtividadesParaEvento("expediente_submetido", processoId, {
+          canal: newProcess.canal_entrada as "portal" | "presencial",
+          categoriaEntidade: newProcess.categoria_entidade,
+          checklistIncompleta: false,
+        });
+      } catch (err) {
+        console.error("Erro ao gerar atividades:", err);
+      }
     }
 
     toast({ title: "Processo criado", description: `Processo ${numero} registado com sucesso.` });

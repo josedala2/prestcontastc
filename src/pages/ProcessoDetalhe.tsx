@@ -16,6 +16,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { generateWorkflowDocument, type ProcessoDocData } from "@/lib/workflowDocGenerator";
+import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { saveAs } from "file-saver";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, Clock, FileText, Building2,
@@ -285,6 +286,26 @@ const ProcessoDetalhe = () => {
         message: `Processo ${processo.numero_processo} avançou para etapa ${nextStage}: ${nextStageInfo?.nome}`,
         detail: `O processo da entidade ${processo.entity_name} (${processo.numero_processo}) transitou da etapa ${currentStageId} para a etapa ${nextStage}. Responsável: ${nextStageInfo?.responsavelPerfil || "—"}.${observacoes ? ` Observações: ${observacoes}` : ""}`,
       } as any);
+
+      // Gerar atividades automáticas conforme a etapa de destino
+      try {
+        let evento: string | null = null;
+        if (nextStage === 4) evento = "validacao_aprovada";        // Contadoria
+        else if (nextStage === 9) evento = "analise_concluida";    // Coordenador consolida
+        else if (nextStage === 12) evento = "submissao_juiz";      // Juiz Relator
+        else if (nextStage === 13) evento = "decisao_juiz";        // Custas e Emolumentos
+        else if (nextStage === 18) evento = "pagamento_recebido";  // Arquivamento
+
+        if (evento) {
+          const n = await gerarAtividadesParaEvento(evento, processo.id, {
+            canal: (processo.canal_entrada as "portal" | "presencial") || "portal",
+            categoriaEntidade: processo.categoria_entidade,
+          });
+          if (n > 0) console.log(`${n} atividades geradas para evento "${evento}"`);
+        }
+      } catch (err) {
+        console.error("Erro ao gerar atividades no avanço:", err);
+      }
 
       const docMsg = generatedDocs.length > 0 ? ` | Documentos gerados: ${generatedDocs.join(", ")}` : "";
       toast({ title: "Processo avançado", description: `Transitou para: ${nextStageInfo?.nome}${docMsg}` });
