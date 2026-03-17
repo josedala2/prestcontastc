@@ -131,14 +131,11 @@ export default function ChefeDivisaoProcessos() {
       });
 
       // 3. Generate activities for the next stage
-      await gerarAtividadesParaEvento({
-        processoId: selectedProcesso.id,
-        etapa: 7,
-        evento: "avanco_etapa",
-        executadoPor,
-        categoriaEntidade: selectedProcesso.categoria_entidade,
-        canalSubmissao: selectedProcesso.canal_entrada,
-      });
+      await gerarAtividadesParaEvento(
+        "validacao_aprovada",
+        selectedProcesso.id,
+        { categoriaEntidade: selectedProcesso.categoria_entidade }
+      );
 
       toast.success(`Processo ${selectedProcesso.numero_processo} encaminhado à secção competente.`);
       setSelectedProcesso(null);
