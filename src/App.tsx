@@ -80,6 +80,8 @@ const App = () => (
           <Route path="/submissoes/manual" element={<ProtectedRoute allowedRoles={["Administrador"]}><SubmissaoManual /></ProtectedRoute>} />
           <Route path="/submissoes/:id" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><SubmissaoDetalhe /></ProtectedRoute>} />
           <Route path="/processos-visto" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><ProcessosVisto /></ProtectedRoute>} />
+          <Route path="/gestao-processos" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><GestaoProcessos /></ProtectedRoute>} />
+          <Route path="/gestao-processos/:id" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><ProcessoDetalhePage /></ProtectedRoute>} />
           
           {/* Secretaria */}
           <Route path="/secretaria" element={<ProtectedRoute allowedRoles={["Administrador", "Secretaria"]}><Secretaria /></ProtectedRoute>} />
