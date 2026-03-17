@@ -177,7 +177,7 @@ export function TecnicoLayout({ children }: TecnicoLayoutProps) {
       {/* Breadcrumb */}
       <div className="h-9 bg-muted/30 border-b border-border flex items-center px-5">
         <span className="text-[11px] text-muted-foreground">
-          Técnico &nbsp;/&nbsp; <span className="text-foreground font-medium">{pageTitle}</span>
+          {isContadoria ? "Contadoria" : "Técnico"} &nbsp;/&nbsp; <span className="text-foreground font-medium">{pageTitle}</span>
         </span>
       </div>
 
