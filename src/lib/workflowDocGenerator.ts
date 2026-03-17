@@ -12,12 +12,28 @@ export interface ProcessoDocData {
   responsavelAtual: string;
   submetidoPor: string;
   juizRelator?: string;
+  juizAdjunto?: string;
   tecnicoAnalise?: string;
   portadorNome?: string;
   portadorDocumento?: string;
+  portadorContacto?: string;
   observacoes?: string;
   etapaAtual: number;
   estado: string;
+  tipoProcesso?: string;
+  naturezaProcesso?: string;
+  tipoEntidade?: string;
+  resolucaoAplicavel?: string;
+  periodoGerencia?: string;
+  responsaveisGerencia?: { nome: string; cargo: string }[];
+  actaRecebimentoNumero?: string;
+  divisaoCompetente?: string;
+  seccaoCompetente?: string;
+  checklistCompleta?: boolean;
+  totalDocumentos?: number;
+  totalPaginas?: number;
+  dataAutuacao?: string;
+  escrivaoAutos?: string;
 }
 
 async function loadImage(url: string): Promise<string> {
