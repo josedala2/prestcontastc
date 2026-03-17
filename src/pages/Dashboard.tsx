@@ -18,6 +18,8 @@ import {
   TrendingUp, GitBranch, Bell, Eye, ArrowRight, Activity
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth, roleStagePermissions } from "@/contexts/AuthContext";
+import { DashboardNotificacoesPanel } from "@/components/DashboardNotificacoesPanel";
 
 // Chart colors using HSL from design system
 const COLORS = [
