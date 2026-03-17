@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { TecnicoLayout } from "@/components/TecnicoLayout";
 import { toast } from "sonner";
-import { BookOpen, Hash, Search, FileText, ScrollText, Send, CheckCircle2, Loader2, ArrowRight } from "lucide-react";
+import { BookOpen, Hash, FileText, Send, CheckCircle2, Loader2, ArrowRight, ClipboardCheck, Eye, Download } from "lucide-react";
 import { generateCapaProcesso, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { saveAs } from "file-saver";
@@ -141,40 +141,42 @@ export default function EscrivaoRegistoAutuacao() {
     }
   };
 
-  // ——— Step 3: Confirmar Pesquisa de Conta Existente ———
-  const handlePesquisaConta = async () => {
+  // ——— Step 2: Validar Documentação ———
+  const [documentos, setDocumentos] = useState<any[]>([]);
+  const [docsLoading, setDocsLoading] = useState(false);
+
+  const fetchDocumentos = async (processoId: string) => {
+    setDocsLoading(true);
+    const { data } = await supabase
+      .from("processo_documentos")
+      .select("*")
+      .eq("processo_id", processoId)
+      .order("created_at", { ascending: true });
+    setDocumentos((data as any[]) || []);
+    setDocsLoading(false);
+  };
+
+  const handleValidarDocumentos = async () => {
     if (!selectedProcesso) return;
-    setCurrentStep("pesquisa");
+    setCurrentStep("validar");
     setActing(true);
     try {
-      // Check if entity has prior processes
-      const { data: priorProcessos } = await supabase
-        .from("processos")
-        .select("id, numero_processo, ano_gerencia")
-        .eq("entity_id", selectedProcesso.entity_id)
-        .neq("id", selectedProcesso.id)
-        .order("ano_gerencia", { ascending: false })
-        .limit(5);
-
-      const count = priorProcessos?.length || 0;
-      const obs = count > 0
-        ? `Encontrados ${count} processo(s) anterior(es) da entidade: ${priorProcessos!.map((p: any) => `${p.numero_processo} (${p.ano_gerencia})`).join(", ")}`
-        : "Nenhum processo anterior encontrado para esta entidade — primeiro exercício";
+      await fetchDocumentos(selectedProcesso.id);
 
       await supabase.from("processo_historico").insert({
         processo_id: selectedProcesso.id,
         etapa_anterior: 5,
         etapa_seguinte: 5,
-        estado_anterior: "em_autuacao",
+        estado_anterior: selectedProcesso.estado,
         estado_seguinte: "em_autuacao",
-        acao: "Pesquisa de conta existente confirmada",
+        acao: "Documentação do processo verificada e validada pelo Escrivão",
         executado_por: executadoPor,
         perfil_executor: "Escrivão dos Autos",
-        observacoes: obs,
+        observacoes: `${documentos.length || 0} documento(s) anexo(s) verificados`,
       } as any);
 
-      setCompletedSteps((prev) => ({ ...prev, pesquisa: true }));
-      toast.success(count > 0 ? `${count} processo(s) anterior(es) encontrado(s)` : "Sem processos anteriores — primeiro exercício");
+      setCompletedSteps((prev) => ({ ...prev, validar: true }));
+      toast.success("Documentação validada com sucesso");
     } catch (err: any) {
       toast.error(`Erro: ${err.message}`);
     } finally {
@@ -235,49 +237,7 @@ export default function EscrivaoRegistoAutuacao() {
     }
   };
 
-  // ——— Step 5: Preparar Termos Processuais ———
-  const handleTermos = async () => {
-    if (!selectedProcesso) return;
-    setCurrentStep("termos");
-    setActing(true);
-    try {
-      const termos = ["Termo de Abertura", "Termo de Autuação"];
-      for (const termo of termos) {
-        await supabase.from("processo_documentos").insert({
-          processo_id: selectedProcesso.id,
-          tipo_documento: termo,
-          nome_ficheiro: `${termo.replace(/ /g, "_")}_${selectedProcesso.numero_processo.replace(/[^a-zA-Z0-9-]/g, "_")}.pdf`,
-          estado: "validado",
-          obrigatorio: true,
-          validado_por: executadoPor,
-          validado_em: new Date().toISOString(),
-        } as any);
-      }
-
-      await supabase.from("processo_historico").insert({
-        processo_id: selectedProcesso.id,
-        etapa_anterior: 5,
-        etapa_seguinte: 5,
-        estado_anterior: "em_autuacao",
-        estado_seguinte: "em_autuacao",
-        acao: "Termos processuais preparados",
-        executado_por: executadoPor,
-        perfil_executor: "Escrivão dos Autos",
-        observacoes: "Gerados: Termo de Abertura e Termo de Autuação",
-        documentos_gerados: termos,
-      } as any);
-
-      setCompletedSteps((prev) => ({ ...prev, termos: true }));
-      toast.success("Termos processuais preparados");
-    } catch (err: any) {
-      toast.error(`Erro: ${err.message}`);
-    } finally {
-      setActing(false);
-      setCurrentStep(null);
-    }
-  };
-
-  // ——— Step 6: Remeter para o Chefe da Divisão ———
+  // ——— Step 5: Remeter para o Chefe da Divisão ———
   const handleRemeter = async () => {
     if (!selectedProcesso) return;
     setActing(true);
@@ -317,11 +277,10 @@ export default function EscrivaoRegistoAutuacao() {
   };
 
   const steps: Step[] = [
+    { id: "validar", label: "Validar Documentação", description: "Verificar e validar os documentos anexos ao processo", icon: ClipboardCheck, action: handleValidarDocumentos },
     { id: "registar", label: "Registar e Autuar Processo", description: "Iniciar o registo formal e autuação", icon: BookOpen, action: handleRegistarAutuar },
     { id: "numero", label: "Gerar Número Único", description: "Atribuir número definitivo ao processo", icon: Hash, action: handleGerarNumero },
-    { id: "pesquisa", label: "Confirmar Pesquisa de Conta", description: "Verificar existência de contas anteriores", icon: Search, action: handlePesquisaConta },
     { id: "capa", label: "Gerar Capa do Processo", description: "Criar documento de capa oficial", icon: FileText, action: handleGerarCapa },
-    { id: "termos", label: "Preparar Termos Processuais", description: "Gerar Termo de Abertura e Autuação", icon: ScrollText, action: handleTermos },
   ];
 
   const allStepsDone = steps.every((s) => completedSteps[s.id]);
@@ -409,7 +368,7 @@ export default function EscrivaoRegistoAutuacao() {
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
-                      <ScrollText className="h-4 w-4 text-primary" />
+                      <ClipboardCheck className="h-4 w-4 text-primary" />
                       Atividades de Autuação
                       <Badge variant="outline" className="ml-auto text-[10px]">
                         {Object.values(completedSteps).filter(Boolean).length}/{steps.length} concluídas
