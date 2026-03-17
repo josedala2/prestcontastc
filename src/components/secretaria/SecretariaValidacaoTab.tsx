@@ -21,8 +21,10 @@ import {
 import { toast } from "sonner";
 import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
+import { generateNotaRemessa, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { useAuth } from "@/contexts/AuthContext";
 import { WORKFLOW_STAGES } from "@/types/workflow";
+import { saveAs } from "file-saver";
 
 interface ProcessoValidacao {
   id: string;
@@ -134,14 +136,57 @@ export function SecretariaValidacaoTab() {
   const handleEncaminharContadoria = async (processo: ProcessoValidacao) => {
     setEncaminhando(true);
     try {
+      // Generate Nota de Remessa PDF
+      const docData: ProcessoDocData = {
+        numeroProcesso: processo.numero_processo,
+        entityName: processo.entity_name,
+        anoGerencia: processo.ano_gerencia,
+        categoriaEntidade: processo.categoria_entidade,
+        canalEntrada: "portal",
+        dataSubmissao: processo.data_submissao,
+        responsavelAtual: "Chefe da Secretaria-Geral",
+        submetidoPor: "Técnico da Secretaria-Geral",
+        etapaAtual: 4,
+        estado: "em_analise",
+      };
+      const executadoPor = user?.displayName || "Chefe da Secretaria-Geral";
+      const notaBlob = await generateNotaRemessa(docData, executadoPor, "Contadoria Geral");
+
+      // Upload to storage
+      const sanitized = processo.numero_processo.replace(/[^a-zA-Z0-9-]/g, "_");
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const fileName = `Nota_Remessa_${sanitized}_${timestamp}.pdf`;
+      const filePath = `${processo.id}/${fileName}`;
+
+      await supabase.storage.from("processo-documentos").upload(filePath, notaBlob, {
+        contentType: "application/pdf",
+        upsert: true,
+      });
+
+      // Register document in processo_documentos
+      await supabase.from("processo_documentos").insert({
+        processo_id: processo.id,
+        tipo_documento: "Nota de Remessa",
+        nome_ficheiro: fileName,
+        caminho_ficheiro: filePath,
+        estado: "validado",
+        obrigatorio: true,
+        validado_por: executadoPor,
+        validado_em: new Date().toISOString(),
+      } as any);
+
+      // Download for user
+      saveAs(notaBlob, fileName);
+
+      // Advance workflow
       await avancarEtapaProcesso({
         processoId: processo.id,
         novaEtapa: 4,
         novoEstado: "em_analise",
-        executadoPor: user?.displayName || "Chefe da Secretaria-Geral",
+        executadoPor,
         perfilExecutor: "Chefe da Secretaria-Geral",
-        observacoes: "Encaminhado para verificação documental pela Contadoria Geral",
-        documentosGerados: [],
+        observacoes: "Nota de Remessa gerada. Encaminhado para verificação documental pela Contadoria Geral.",
+        documentosGerados: ["Nota de Remessa"],
       });
 
       // Update responsavel
@@ -173,7 +218,7 @@ export function SecretariaValidacaoTab() {
         console.error("Erro ao criar notificação:", err);
       }
 
-      toast.success(`Processo ${processo.numero_processo} encaminhado para a Contadoria Geral`);
+      toast.success(`Nota de Remessa gerada e processo ${processo.numero_processo} encaminhado para a Contadoria Geral`);
       // Remove from local list
       setProcessos((prev) => prev.filter((p) => p.id !== processo.id));
       setApprovedProcessos((prev) => prev.filter((id) => id !== processo.id));
@@ -443,7 +488,7 @@ export function SecretariaValidacaoTab() {
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 p-3 rounded-md bg-green-50 dark:bg-green-950/20 border border-green-200 text-sm text-green-800 dark:text-green-200">
                           <CheckCircle className="h-4 w-4" />
-                          Validação aprovada. Pronto para encaminhar à Contadoria Geral.
+                          Validação aprovada. Gere a Nota de Remessa e encaminhe à Contadoria Geral.
                         </div>
                         <Button
                           className="w-full gap-2"
@@ -453,9 +498,9 @@ export function SecretariaValidacaoTab() {
                           {encaminhando ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
-                            <Send className="h-4 w-4" />
+                            <FileText className="h-4 w-4" />
                           )}
-                          Encaminhar para a Contadoria Geral
+                          Gerar Nota de Remessa e Encaminhar
                         </Button>
                       </div>
                     ) : (
@@ -513,7 +558,7 @@ export function SecretariaValidacaoTab() {
                   </div>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Após aprovação, poderá encaminhar o processo para a Contadoria Geral (Etapa 4).
+                  Após aprovação, será gerada a Nota de Remessa e o processo encaminhado para a Contadoria Geral (Etapa 4).
                 </p>
               </div>
             </AlertDialogDescription>
