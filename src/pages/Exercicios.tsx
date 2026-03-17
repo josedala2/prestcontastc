@@ -204,7 +204,7 @@ const Exercicios = () => {
                           setSelectedEntityIds(checked ? allEntities.map((e) => e.id) : []);
                         }}
                       />
-                      <span className="text-sm font-medium">Seleccionar Todas ({mockEntities.length})</span>
+                      <span className="text-sm font-medium">Seleccionar Todas ({allEntities.length})</span>
                     </label>
                   </div>
                   <div className="p-2 space-y-1.5">
