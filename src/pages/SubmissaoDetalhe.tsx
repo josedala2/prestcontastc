@@ -78,6 +78,55 @@ const SubmissaoDetalhe = () => {
     setCheckedDocs((prev) => ({ ...prev, [docId]: !prev[docId] }));
   };
 
+  // Map checklist categories to submission doc_ids
+  const DOC_CATEGORY_MAP: Record<string, string> = {
+    c1: "relatorio_gestao",
+    c2: "balanco",
+    c3: "dem_resultados",
+    c4: "fluxo_caixa",
+    c5: "balancete_analitico",
+    c6: "parecer_fiscal",
+    c7: "parecer_auditor",
+    c8: "modelos",
+    c9: "comprov_impostos",
+    c10: "comprov_seguranca",
+    c11: "inventario",
+    c12: "dem_resultados",
+    c13: "modelos",
+  };
+
+  const findSubmissionDoc = (checklistId: string): SubmissionDoc | undefined => {
+    const docId = DOC_CATEGORY_MAP[checklistId];
+    return submissionDocs.find(d => d.doc_id === docId);
+  };
+
+  const handleOpenDocPreview = async (label: string, category: string, checklistId: string) => {
+    const subDoc = findSubmissionDoc(checklistId);
+    if (subDoc) {
+      setDocPreviewLoading(true);
+      setDocPreview({ label, category });
+      try {
+        const { data } = supabase.storage
+          .from("submission-documents")
+          .getPublicUrl(subDoc.file_path);
+        setDocPreviewUrl(data.publicUrl);
+      } catch {
+        setDocPreviewUrl(null);
+      }
+      setDocPreviewLoading(false);
+    } else {
+      setDocPreview({ label, category });
+      setDocPreviewUrl(null);
+    }
+  };
+
+  const handleDownloadDoc = async (subDoc: SubmissionDoc) => {
+    const { data } = supabase.storage
+      .from("submission-documents")
+      .getPublicUrl(subDoc.file_path);
+    window.open(data.publicUrl, "_blank");
+  };
+
   const now = new Date();
   const actaNumero = `AR-${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(parseInt(entity.id || "1")).padStart(3, "0")}`;
 
