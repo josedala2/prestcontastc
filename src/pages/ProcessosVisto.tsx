@@ -824,7 +824,7 @@ export default function ProcessosVisto() {
                     className="gap-2"
                   >
                     <Stamp className="h-4 w-4" />
-                    Confirmar e Gerar Acta
+                    Confirmar e Autuar
                   </Button>
                 </div>
               </div>
