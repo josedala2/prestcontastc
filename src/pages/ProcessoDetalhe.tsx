@@ -16,6 +16,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { generateWorkflowDocument, type ProcessoDocData } from "@/lib/workflowDocGenerator";
+import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { saveAs } from "file-saver";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, Clock, FileText, Building2,
