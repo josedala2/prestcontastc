@@ -23,11 +23,13 @@ import {
   ArrowLeft, CheckCircle, XCircle, FileText, Eye, Stamp, Pencil,
   AlertTriangle, Undo2, Building2, X, Send, Download, ShieldCheck,
   FolderOpen, File, ArrowUpDown, ArrowUp, ArrowDown, Search,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Archive, Loader2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 import { toast } from "sonner";
 
 interface SubmissionDoc {
@@ -65,7 +67,37 @@ const SubmissaoDetalhe = () => {
   const [docSearch, setDocSearch] = useState("");
   const [docPage, setDocPage] = useState(0);
   const DOC_PAGE_SIZE = 5;
+  const [exportingZip, setExportingZip] = useState(false);
   const { recepcionar, rejeitar, remeterParaTecnico, getStatus } = useSubmissions();
+
+  const handleExportZip = async () => {
+    setExportingZip(true);
+    try {
+      const zip = new JSZip();
+      const folder = zip.folder(`Processo_${entity.name.replace(/[^a-zA-Z0-9À-ú ]/g, "").replace(/\s+/g, "_")}_${periodo}`)!;
+
+      // Download acta
+      if (generatedActaFilePath) {
+        const { data } = await supabase.storage.from("actas-recepcao").download(generatedActaFilePath);
+        if (data) folder.file(generatedActaFileName || "Acta_Recepcao.pdf", data);
+      }
+
+      // Download all submission docs
+      for (const doc of submissionDocs) {
+        const { data } = await supabase.storage.from("submission-documents").download(doc.file_path);
+        if (data) folder.file(doc.file_name, data);
+      }
+
+      const blob = await zip.generateAsync({ type: "blob" });
+      saveAs(blob, `Processo_${entity.name.replace(/[^a-zA-Z0-9À-ú]/g, "_")}_${periodo}.zip`);
+      toast.success("Pacote ZIP gerado com sucesso");
+    } catch (err) {
+      console.error("Erro ao gerar ZIP:", err);
+      toast.error("Erro ao gerar o pacote ZIP");
+    } finally {
+      setExportingZip(false);
+    }
+  };
 
   const fiscalYearId = `${entity.id}-${periodo}`;
 
@@ -506,6 +538,16 @@ const SubmissaoDetalhe = () => {
                       title={docSortDir === "asc" ? "Ascendente" : "Descendente"}
                     >
                       <SortIcon className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1.5 text-xs"
+                      disabled={exportingZip || allDocs.length === 0}
+                      onClick={handleExportZip}
+                    >
+                      {exportingZip ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Archive className="h-3.5 w-3.5" />}
+                      {exportingZip ? "A gerar..." : "Exportar ZIP"}
                     </Button>
                   </div>
 
