@@ -38,6 +38,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Secretaria = () => {
   const { recepcionar, rejeitar, submissions, getUploadedDocs } = useSubmissions();
+  const { entities: allEntities } = useEntities();
   const { user } = useAuth();
   const isChefe = user?.role === "Chefe da Secretaria-Geral" ||
     user?.role === "Administrador do Sistema" ||
