@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { TecnicoLayout } from "@/components/TecnicoLayout";
 import { toast } from "sonner";
-import { BookOpen, Hash, Search, FileText, ScrollText, Send, CheckCircle2, Loader2, ArrowRight } from "lucide-react";
+import { BookOpen, Hash, FileText, Send, CheckCircle2, Loader2, ArrowRight, ClipboardCheck, Eye, Download } from "lucide-react";
 import { generateCapaProcesso, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { saveAs } from "file-saver";
