@@ -15,6 +15,8 @@ import { toast } from "sonner";
 import { FileText, Download, CheckCircle2, XCircle, ClipboardCheck, Send, ArrowLeft, Eye } from "lucide-react";
 import { CATEGORIAS_ENTIDADE } from "@/types/workflow";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
+import { generateRelatorioVerificacao, type ProcessoDocData, type ChecklistItem } from "@/lib/workflowDocGenerator";
+import { saveAs } from "file-saver";
 
 interface Processo {
   id: string;
