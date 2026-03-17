@@ -23,11 +23,13 @@ import {
   ArrowLeft, CheckCircle, XCircle, FileText, Eye, Stamp, Pencil,
   AlertTriangle, Undo2, Building2, X, Send, Download, ShieldCheck,
   FolderOpen, File, ArrowUpDown, ArrowUp, ArrowDown, Search,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Archive, Loader2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 import { toast } from "sonner";
 
 interface SubmissionDoc {
