@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubmissions } from "@/contexts/SubmissionContext";
 import { generateWorkflowDocument, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { saveAs } from "file-saver";
 import {
@@ -37,6 +38,7 @@ const ProcessoDetalhe = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, canActOnStage } = useAuth();
+  const { refreshNotifications } = useSubmissions();
   const [processo, setProcesso] = useState<Processo | null>(null);
   const [historico, setHistorico] = useState<ProcessoHistorico[]>([]);
   const [documentos, setDocumentos] = useState<ProcessoDocumento[]>([]);
@@ -287,6 +289,7 @@ const ProcessoDetalhe = () => {
       const docMsg = generatedDocs.length > 0 ? ` | Documentos gerados: ${generatedDocs.join(", ")}` : "";
       toast({ title: "Processo avançado", description: `Transitou para: ${nextStageInfo?.nome}${docMsg}` });
       setObservacoes("");
+      refreshNotifications();
       loadData();
     } else {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
@@ -333,6 +336,7 @@ const ProcessoDetalhe = () => {
 
       toast({ title: "Processo devolvido", description: `Devolvido para: ${prevStageInfo?.nome}` });
       setObservacoes("");
+      refreshNotifications();
       loadData();
     }
     setAdvancing(false);
