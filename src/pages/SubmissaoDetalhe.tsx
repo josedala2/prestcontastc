@@ -45,6 +45,8 @@ const SubmissaoDetalhe = () => {
   const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [generatedActaFilePath, setGeneratedActaFilePath] = useState<string | null>(null);
+  const [generatedActaFileName, setGeneratedActaFileName] = useState<string | null>(null);
   const [motivoRejeicao, setMotivoRejeicao] = useState("");
   const [actaGerada, setActaGerada] = useState(false);
   const [remetido, setRemetido] = useState(false);
