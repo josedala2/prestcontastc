@@ -211,17 +211,66 @@ const Dashboard = () => {
         description="Painel de Fiscalização — Tribunal de Contas de Angola"
       />
 
-      {/* KPI Cards — powered by RPC estatisticas_dashboard */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         <KPICard icon={<FileText />} label="Total Processos" value={rpcStats?.total_processos ?? stats.total} color="text-primary" bg="bg-primary/10" />
-        <KPICard icon={<GitBranch />} label="Em Tramitação" value={stats.emTramitacao} color="text-purple-600" bg="bg-purple-100" />
-        <KPICard icon={<AlertTriangle />} label="Atividades Atrasadas" value={rpcStats?.atividades_atrasadas ?? 0} color="text-orange-600" bg="bg-orange-100" />
-        <KPICard icon={<CheckCircle2 />} label="Pareceres" value={rpcStats?.total_pareceres ?? pareceres.length} color="text-green-600" bg="bg-green-100" />
-        <KPICard icon={<Bell />} label="Submissões Pendentes" value={rpcStats?.submissions_pendentes ?? 0} color="text-blue-600" bg="bg-blue-100" />
-        <KPICard icon={<Activity />} label="Actas Emitidas" value={rpcStats?.total_actas ?? actas.length} color="text-amber-600" bg="bg-amber-100" />
+        <KPICard icon={<GitBranch />} label="Em Tramitação" value={stats.emTramitacao} color="text-primary" bg="bg-primary/5" />
+        <KPICard icon={<AlertTriangle />} label="Ativ. Atrasadas" value={rpcStats?.atividades_atrasadas ?? 0} color="text-destructive" bg="bg-destructive/10" />
+        <KPICard icon={<CheckCircle2 />} label="Pareceres" value={rpcStats?.total_pareceres ?? pareceres.length} color="text-success" bg="bg-success/10" />
+        <KPICard icon={<Bell />} label="Subm. Pendentes" value={rpcStats?.submissions_pendentes ?? 0} color="text-info" bg="bg-info/10" />
+        <KPICard icon={<Activity />} label="Actas Emitidas" value={rpcStats?.total_actas ?? actas.length} color="text-accent-foreground" bg="bg-accent/10" />
       </div>
 
-      {/* Row 1: Pie charts */}
+      {/* Escrivão dos Autos — card de autuação (role-specific, top priority) */}
+      {user?.role === "Escrivão dos Autos" && (
+        <Card className="mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <FileText className="h-4 w-4 text-primary" /> Estatísticas de Autuação
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              const pendentes = processos.filter(p => p.etapa_atual === 5).length;
+              const autuados = processos.filter(p => p.etapa_atual > 5).length;
+              const total = pendentes + autuados;
+              const pct = total > 0 ? Math.round((autuados / total) * 100) : 0;
+              return (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center p-3 rounded-lg bg-accent/10 border border-accent/30">
+                      <p className="text-2xl font-bold text-accent-foreground">{pendentes}</p>
+                      <p className="text-[10px] text-accent-foreground/70 font-medium">Pendentes de Autuação</p>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-success/10 border border-success/30">
+                      <p className="text-2xl font-bold text-success">{autuados}</p>
+                      <p className="text-[10px] text-success font-medium">Autuados</p>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-muted/50 border border-border">
+                      <p className="text-2xl font-bold text-foreground">{total}</p>
+                      <p className="text-[10px] text-muted-foreground font-medium">Total</p>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-muted-foreground">Progresso de autuação</span>
+                      <span className="text-xs font-semibold">{pct}%</span>
+                    </div>
+                    <Progress value={pct} className="h-2" />
+                  </div>
+                  {pendentes > 0 && (
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/escrivao/registo-autuacao")}>
+                      <FileText className="h-3.5 w-3.5 mr-1.5" /> Ir para Registo e Autuação
+                    </Button>
+                  )}
+                </div>
+              );
+            })()}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Row 1: Charts — Estado + Canal + Categoria */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         {/* Estado dos processos */}
         <Card>
@@ -234,35 +283,21 @@ const Dashboard = () => {
             {estadoData.length === 0 ? (
               <EmptyState message="Sem dados" />
             ) : (
-              <ResponsiveContainer width="100%" height={280}>
+              <ResponsiveContainer width="100%" height={240}>
                 <PieChart>
-                  <Pie
-                    data={estadoData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={90}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
+                  <Pie data={estadoData} cx="50%" cy="50%" innerRadius={45} outerRadius={80} paddingAngle={3} dataKey="value">
                     {estadoData.map((_, i) => (
                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
-                  <Legend
-                    wrapperStyle={{ fontSize: "11px" }}
-                    formatter={(value: string) => <span className="text-xs text-foreground">{value}</span>}
-                  />
+                  <Legend wrapperStyle={{ fontSize: "11px" }} formatter={(value: string) => <span className="text-xs text-foreground">{value}</span>} />
                 </PieChart>
               </ResponsiveContainer>
             )}
           </CardContent>
         </Card>
-      </div>
 
-      {/* Row 2: Canal + Categories */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Canal de entrada */}
         <Card>
           <CardHeader className="pb-2">
@@ -274,16 +309,9 @@ const Dashboard = () => {
             {canalData.length === 0 ? (
               <EmptyState message="Sem dados" />
             ) : (
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={240}>
                 <PieChart>
-                  <Pie
-                    data={canalData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={70}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
+                  <Pie data={canalData} cx="50%" cy="50%" outerRadius={70} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
                     <Cell fill="hsl(213, 80%, 45%)" />
                     <Cell fill="hsl(37, 56%, 52%)" />
                   </Pie>
@@ -306,7 +334,7 @@ const Dashboard = () => {
               <EmptyState message="Sem dados" />
             ) : (
               <div className="space-y-3 pt-2">
-                {categoriaData.map((c, i) => (
+                {categoriaData.map((c) => (
                   <div key={c.name}>
                     <div className="flex justify-between mb-1">
                       <span className="text-xs text-foreground font-medium">{c.name}</span>
@@ -322,9 +350,8 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Row 3: Recent processes + Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Últimos processos */}
+      {/* Row 2: Últimos Processos + Actividade Recente */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
@@ -373,7 +400,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Actividade recente */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -385,21 +411,12 @@ const Dashboard = () => {
               <EmptyState message="Sem actividade recente" />
             ) : (
               <div className="space-y-2">
-                {/* Mix historico + notifications, sorted by date */}
                 {[
                   ...historico.slice(0, 8).map(h => ({
-                    id: h.id,
-                    text: h.acao,
-                    by: h.executado_por,
-                    date: h.created_at,
-                    type: "historico" as const,
+                    id: h.id, text: h.acao, by: h.executado_por, date: h.created_at, type: "historico" as const,
                   })),
                   ...notifications.slice(0, 5).map(n => ({
-                    id: n.id,
-                    text: n.message,
-                    by: n.entityId,
-                    date: n.createdAt,
-                    type: "notif" as const,
+                    id: n.id, text: n.message, by: n.entityId, date: n.createdAt, type: "notif" as const,
                   })),
                 ]
                   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -408,11 +425,11 @@ const Dashboard = () => {
                     <div key={item.id} className="flex items-start gap-2.5 py-2 border-b border-border/50 last:border-0">
                       <div className={cn(
                         "w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5",
-                        item.type === "historico" ? "bg-primary/10" : "bg-amber-100"
+                        item.type === "historico" ? "bg-primary/10" : "bg-accent/20"
                       )}>
                         {item.type === "historico"
                           ? <GitBranch className="h-3 w-3 text-primary" />
-                          : <Bell className="h-3 w-3 text-amber-600" />
+                          : <Bell className="h-3 w-3 text-accent-foreground" />
                         }
                       </div>
                       <div className="flex-1 min-w-0">
@@ -432,63 +449,11 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Escrivão dos Autos — card de autuação */}
-      {user?.role === "Escrivão dos Autos" && (
-        <Card className="mb-6">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <FileText className="h-4 w-4 text-primary" /> Estatísticas de Autuação
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {(() => {
-              const pendentes = processos.filter(p => p.etapa_atual === 5).length;
-              const autuados = processos.filter(p => p.etapa_atual > 5).length;
-              const total = pendentes + autuados;
-              const pct = total > 0 ? Math.round((autuados / total) * 100) : 0;
-              return (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-3 rounded-lg bg-amber-50 border border-amber-200">
-                      <p className="text-2xl font-bold text-amber-700">{pendentes}</p>
-                      <p className="text-[10px] text-amber-600 font-medium">Pendentes de Autuação</p>
-                    </div>
-                    <div className="text-center p-3 rounded-lg bg-green-50 border border-green-200">
-                      <p className="text-2xl font-bold text-green-700">{autuados}</p>
-                      <p className="text-[10px] text-green-600 font-medium">Autuados</p>
-                    </div>
-                    <div className="text-center p-3 rounded-lg bg-muted/50 border border-border">
-                      <p className="text-2xl font-bold text-foreground">{total}</p>
-                      <p className="text-[10px] text-muted-foreground font-medium">Total</p>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-muted-foreground">Progresso de autuação</span>
-                      <span className="text-xs font-semibold">{pct}%</span>
-                    </div>
-                    <Progress value={pct} className="h-2" />
-                  </div>
-                  {pendentes > 0 && (
-                    <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/escrivao/registo-autuacao")}>
-                      <FileText className="h-3.5 w-3.5 mr-1.5" /> Ir para Registo e Autuação
-                    </Button>
-                  )}
-                </div>
-              );
-            })()}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Row 4: Notification panel filtered by role */}
-      <div className="mt-6">
+      {/* Row 3: Notificações + Pareceres */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DashboardNotificacoesPanel />
-      </div>
 
-      {/* Bottom: Pareceres summary */}
-      {pareceres.length > 0 && (
-        <div className="grid grid-cols-1 gap-6 mt-6">
+        {pareceres.length > 0 && (
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold">📋 Pareceres Emitidos ({pareceres.length})</CardTitle>
@@ -502,7 +467,7 @@ const Dashboard = () => {
                       <p className="text-[10px] text-muted-foreground">Exercício {p.fiscal_year} — {p.tecnico_nome}</p>
                     </div>
                     <Badge variant="outline" className={cn("text-[10px]",
-                      p.parecer_final?.includes("Termos") ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                      p.parecer_final?.includes("Termos") ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
                     )}>
                       {p.parecer_final}
                     </Badge>
@@ -511,8 +476,8 @@ const Dashboard = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
-      )}
+        )}
+      </div>
     </AppLayout>
   );
 };
