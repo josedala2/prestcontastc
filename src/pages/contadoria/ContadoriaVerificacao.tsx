@@ -623,6 +623,61 @@ export default function ContadoriaVerificacao() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {/* Solicitar elementos dialog */}
+      <Dialog open={solicitarDialogOpen} onOpenChange={setSolicitarDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-amber-600" />
+              Solicitar Elementos em Falta
+            </DialogTitle>
+            <DialogDescription>
+              Seleccione os documentos em falta para notificar a entidade <strong>{selectedProcesso?.entity_name}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 max-h-[300px] overflow-y-auto">
+            {CHECKLIST_ITEMS.map((item) => (
+              <div key={item.id} className="flex items-center gap-2 py-1">
+                <Checkbox
+                  id={`elem-${item.id}`}
+                  checked={!!elementosSelecionados[item.id]}
+                  onCheckedChange={() =>
+                    setElementosSelecionados((prev) => ({ ...prev, [item.id]: !prev[item.id] }))
+                  }
+                />
+                <Label htmlFor={`elem-${item.id}`} className="text-sm cursor-pointer flex-1">
+                  {item.label}
+                  {item.obrigatorio && (
+                    <Badge variant="destructive" className="ml-2 text-[9px]">Obrigatório</Badge>
+                  )}
+                </Label>
+              </div>
+            ))}
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs">Observações adicionais (opcional)</Label>
+            <Textarea
+              placeholder="Indique informações adicionais sobre os elementos solicitados..."
+              value={mensagemSolicitacao}
+              onChange={(e) => setMensagemSolicitacao(e.target.value)}
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setSolicitarDialogOpen(false)} disabled={acting}>
+              Cancelar
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSolicitarElementos}
+              disabled={acting || Object.values(elementosSelecionados).filter(Boolean).length === 0}
+              className="bg-amber-600 hover:bg-amber-700 text-white"
+            >
+              {acting ? "A enviar..." : `Enviar Solicitação (${Object.values(elementosSelecionados).filter(Boolean).length})`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </TecnicoLayout>
   );
 }
