@@ -90,42 +90,147 @@ function addFooter(doc: jsPDF, executadoPor: string) {
 export async function generateCapaProcesso(data: ProcessoDocData, executadoPor: string): Promise<Blob> {
   const doc = new jsPDF();
   const brasao = await loadImage(brasaoImg);
+  const leftMargin = 25;
+  const fieldGap = 7;
 
-  let y = addHeader(doc, brasao, "CAPA DO PROCESSO");
+  // Helper for section title
+  const sectionTitle = (title: string, y: number): number => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text(title, leftMargin, y);
+    doc.setLineWidth(0.3);
+    doc.setDrawColor(180, 160, 100);
+    doc.line(leftMargin, y + 1.5, 185, y + 1.5);
+    return y + 8;
+  };
 
-  y += 5;
-  doc.setFontSize(16);
+  const field = (label: string, value: string, y: number): number => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.5);
+    doc.text(`${label}:`, leftMargin, y);
+    doc.setFont("helvetica", "normal");
+    const labelWidth = doc.getTextWidth(`${label}: `);
+    doc.text(value || "—", leftMargin + labelWidth + 1, y);
+    return y + fieldGap;
+  };
+
+  // ===== PAGE 1 =====
+  // Header with brasão
+  doc.addImage(brasao, "JPEG", 82, 8, 18, 18, undefined, "FAST");
+  doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
-  doc.text(data.numeroProcesso, 105, y, { align: "center" });
-  y += 12;
+  doc.text("REPÚBLICA DE ANGOLA", 105, 30, { align: "center" });
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(50, 100, 150);
+  doc.text("TRIBUNAL DE CONTAS", 105, 36, { align: "center" });
+  doc.setTextColor(0);
+  doc.setDrawColor(180, 160, 100);
+  doc.setLineWidth(0.5);
+  doc.line(30, 39, 180, 39);
 
-  doc.setDrawColor(200);
-  doc.setFillColor(248, 248, 248);
-  doc.roundedRect(25, y, 160, 90, 3, 3, "FD");
-  y += 10;
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("CAPA DO PROCESSO DE PRESTAÇÃO DE CONTAS", 105, 48, { align: "center" });
 
-  y = addField(doc, "Entidade", data.entityName, y, 32);
-  y = addField(doc, "Ano de Gerência", String(data.anoGerencia), y, 32);
-  y = addField(doc, "Categoria", data.categoriaEntidade, y, 32);
-  y = addField(doc, "Canal de Entrada", data.canalEntrada === "portal" ? "Portal Electrónico" : "Presencial", y, 32);
-  y = addField(doc, "Data de Submissão", new Date(data.dataSubmissao).toLocaleDateString("pt-AO"), y, 32);
-  y = addField(doc, "Submetido por", data.submetidoPor, y, 32);
-  if (data.portadorNome) {
-    y = addField(doc, "Portador", `${data.portadorNome}${data.portadorDocumento ? ` (${data.portadorDocumento})` : ""}`, y, 32);
+  let y = 58;
+
+  // Secção 1: Dados do processo
+  y = field("N.º DO PROCESSO", data.numeroProcesso, y);
+  y = field("TIPO DE PROCESSO", data.tipoProcesso || "Prestação de Contas", y);
+  y = field("NATUREZA DO PROCESSO", data.naturezaProcesso || "Ordinário", y);
+  y += 4;
+
+  // Secção 2: Identificação da Entidade
+  y = sectionTitle("IDENTIFICAÇÃO DA ENTIDADE", y);
+  y = field("Nome da Entidade", data.entityName, y);
+  y = field("Tipo/Natureza da Entidade", data.tipoEntidade || "Empresa Pública", y);
+  y = field("Categoria da Entidade", data.categoriaEntidade, y);
+  y = field("Base Legal (Resolução Aplicável)", data.resolucaoAplicavel || "Resolução n.º 1/17 de 5 de Janeiro", y);
+  y += 4;
+
+  // Secção 3: Dados da Conta de Gerência
+  y = sectionTitle("DADOS DA CONTA DE GERÊNCIA", y);
+  y = field("Ano da Conta de Gerência", String(data.anoGerencia), y);
+  y = field("Período (Início/Fim)", data.periodoGerencia || `01/01/${data.anoGerencia} a 31/12/${data.anoGerencia}`, y);
+  y += 4;
+
+  // Secção 4: Responsáveis pela Gerência
+  y = sectionTitle("RESPONSÁVEIS PELA GERÊNCIA", y);
+  if (data.responsaveisGerencia && data.responsaveisGerencia.length > 0) {
+    data.responsaveisGerencia.forEach((r, i) => {
+      y = field(`${i + 1}. Nome / Cargo`, `${r.nome} / ${r.cargo}`, y);
+    });
+  } else {
+    y = field("1. Nome / Cargo", "—", y);
+    y = field("2. Nome / Cargo", "—", y);
   }
-  y = addField(doc, "Estado", data.estado, y, 32);
-  y += 5;
+  y += 4;
 
-  // Signature area
-  y += 15;
+  // Secção 5: Dados do Expediente
+  y = sectionTitle("DADOS DO EXPEDIENTE", y);
+  y = field("Canal de Entrada (Portal / Presencial)", data.canalEntrada === "portal" ? "Portal Electrónico" : "Presencial", y);
+  y = field("Data de Submissão", new Date(data.dataSubmissao).toLocaleDateString("pt-AO"), y);
+  y = field("Portador do Expediente", data.portadorNome || data.submetidoPor || "—", y);
+
+  addFooter(doc, executadoPor);
+
+  // ===== PAGE 2 =====
+  doc.addPage();
+  let y2 = 20;
+
+  // Acta de Recebimento
+  y2 = field("N.º Acta de Recebimento", data.actaRecebimentoNumero || "—", y2);
+  y2 += 4;
+
+  // Tramitação Processual
+  y2 = sectionTitle("TRAMITAÇÃO PROCESSUAL", y2);
+  y2 = field("Juiz Relator", data.juizRelator || "—", y2);
+  y2 = field("Juiz Adjunto", data.juizAdjunto || "—", y2);
+  y2 = field("Divisão Competente", data.divisaoCompetente || "—", y2);
+  y2 = field("Secção Competente", data.seccaoCompetente || "—", y2);
+  y2 += 4;
+
+  // Situação do Processo
+  y2 = sectionTitle("SITUAÇÃO DO PROCESSO", y2);
+  y2 = field("Estado Atual", data.estado, y2);
+  y2 = field("Etapa Atual", `Etapa ${data.etapaAtual}`, y2);
+  y2 += 4;
+
+  // Documentação
+  y2 = sectionTitle("DOCUMENTAÇÃO", y2);
+  y2 = field("Checklist (Completa/Incompleta)", data.checklistCompleta !== undefined ? (data.checklistCompleta ? "Completa" : "Incompleta") : "—", y2);
+  if (data.totalDocumentos !== undefined) {
+    y2 = field("Total de Documentos", String(data.totalDocumentos), y2);
+  }
+  if (data.totalPaginas !== undefined) {
+    y2 = field("Total de Páginas do Processo", String(data.totalPaginas), y2);
+  }
+  y2 = field("Observações", data.observacoes || "—", y2);
+  y2 += 4;
+
+  // Registo
+  y2 = sectionTitle("REGISTO", y2);
+  y2 = field("Data de Autuação", data.dataAutuacao || new Date().toLocaleDateString("pt-AO"), y2);
+  y2 = field("Escrivão dos Autos", data.escrivaoAutos || executadoPor, y2);
+  y2 += 4;
+
+  // Observações Gerais
+  y2 = sectionTitle("OBSERVAÇÕES GERAIS", y2);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text("O Escrivão dos Autos", 55, y, { align: "center" });
-  doc.text("O Chefe da Secretaria", 155, y, { align: "center" });
-  doc.line(25, y + 15, 85, y + 15);
-  doc.line(125, y + 15, 185, y + 15);
-  doc.text("(assinatura e carimbo)", 55, y + 20, { align: "center" });
-  doc.text("(assinatura e carimbo)", 155, y + 20, { align: "center" });
+  doc.text("—", leftMargin, y2);
+  y2 += 10;
+
+  // Signature area
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text("O Escrivão dos Autos", 55, y2 + 20, { align: "center" });
+  doc.text("O Chefe da Secretaria", 155, y2 + 20, { align: "center" });
+  doc.line(25, y2 + 35, 85, y2 + 35);
+  doc.line(125, y2 + 35, 185, y2 + 35);
+  doc.text("(assinatura e carimbo)", 55, y2 + 40, { align: "center" });
+  doc.text("(assinatura e carimbo)", 155, y2 + 40, { align: "center" });
 
   addFooter(doc, executadoPor);
   return doc.output("blob");
