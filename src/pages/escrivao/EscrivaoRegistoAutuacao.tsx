@@ -204,7 +204,7 @@ export default function EscrivaoRegistoAutuacao() {
       }
 
       const mergedBytes = await finalPdf.save();
-      const mergedBlob = new Blob([mergedBytes], { type: "application/pdf" });
+      const mergedBlob = new Blob([mergedBytes.buffer as ArrayBuffer], { type: "application/pdf" });
 
       // 6. Upload merged PDF and cover
       const sanitized = numero.replace(/[^a-zA-Z0-9-]/g, "_");
