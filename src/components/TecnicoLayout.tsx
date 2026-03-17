@@ -51,6 +51,7 @@ const buildNav = (prefix: string) => {
 const buildRouteTitles = (prefix: string): Record<string, string> => ({
   [prefix]: prefix === "/contadoria" ? "Painel da Contadoria Geral" : "Painel do Técnico",
   [`${prefix}/prestacao-contas`]: "Prestação de Contas — Modelo CC-2",
+  [`${prefix}/verificacao`]: "Verificação Documental",
   [`${prefix}/exercicios`]: "Exercícios Fiscais",
   [`${prefix}/documentos`]: "Documentos & Anexos",
   [`${prefix}/mapas`]: "Mapas e Modelos",
