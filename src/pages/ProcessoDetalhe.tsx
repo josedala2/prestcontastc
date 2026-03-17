@@ -733,7 +733,7 @@ const ProcessoDetalhe = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Upload section */}
-              {canAct && processo.estado !== "arquivado" && (
+              {effectiveCanAct && processo.estado !== "arquivado" && (
                 <div className="p-3 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 space-y-3">
                   <p className="text-xs font-semibold text-primary flex items-center gap-1">
                     <Upload className="h-3.5 w-3.5" /> Anexar Documentos à Etapa Actual
