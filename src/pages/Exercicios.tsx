@@ -208,7 +208,7 @@ const Exercicios = () => {
                     </label>
                   </div>
                   <div className="p-2 space-y-1.5">
-                    {mockEntities.map((e) => {
+                    {allEntities.map((e) => {
                       const alreadyExists = fiscalYears.some((fy) => fy.entityId === e.id && fy.year === form.year);
                       return (
                         <label key={e.id} className="flex items-center gap-2 cursor-pointer py-1 px-1 rounded hover:bg-muted/30">
