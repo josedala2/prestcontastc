@@ -259,29 +259,10 @@ const Dashboard = () => {
             )}
           </CardContent>
         </Card>
+      </div>
 
-      {/* Row 2: Area chart + Canal + Categories */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        {/* Evolução mensal */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-primary" /> Evolução Mensal
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={mensalData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(213, 15%, 85%)" />
-                <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(213, 20%, 45%)" }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "hsl(213, 20%, 45%)" }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="value" stroke="hsl(213, 100%, 18%)" fill="hsl(213, 100%, 18%)" fillOpacity={0.15} strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
+      {/* Row 2: Canal + Categories */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Canal de entrada */}
         <Card>
           <CardHeader className="pb-2">
