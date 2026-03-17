@@ -23,6 +23,7 @@ import {
   ClipboardCheck,
   AlertTriangle,
   UserCheck,
+  GitBranch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth, roleHiddenPaths, roleSidebarSections } from "@/contexts/AuthContext";
