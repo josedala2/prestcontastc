@@ -1,0 +1,1 @@
+UPDATE processos SET etapa_atual = 5, estado = 'em_validacao', responsavel_atual = 'Escrivão dos Autos' WHERE id = '539ac4ec-1316-4a4b-8838-94a3854c708e';
