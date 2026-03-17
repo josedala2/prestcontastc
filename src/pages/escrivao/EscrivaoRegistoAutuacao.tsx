@@ -286,7 +286,7 @@ export default function EscrivaoRegistoAutuacao() {
   const allStepsDone = steps.every((s) => completedSteps[s.id]);
 
   return (
-    <TecnicoLayout>
+    <AppLayout>
       <div className="space-y-5">
         <div>
           <h1 className="text-xl font-bold text-foreground">Registo e Autuação</h1>
