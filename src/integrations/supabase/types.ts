@@ -261,6 +261,92 @@ export type Database = {
         }
         Relationships: []
       }
+      entities: {
+        Row: {
+          contacto: string | null
+          created_at: string
+          id: string
+          morada: string | null
+          name: string
+          nif: string
+          provincia: string | null
+          tipologia: string
+          tutela: string | null
+        }
+        Insert: {
+          contacto?: string | null
+          created_at?: string
+          id: string
+          morada?: string | null
+          name: string
+          nif: string
+          provincia?: string | null
+          tipologia?: string
+          tutela?: string | null
+        }
+        Update: {
+          contacto?: string | null
+          created_at?: string
+          id?: string
+          morada?: string | null
+          name?: string
+          nif?: string
+          provincia?: string | null
+          tipologia?: string
+          tutela?: string | null
+        }
+        Relationships: []
+      }
+      fiscal_years: {
+        Row: {
+          completude: number | null
+          created_at: string
+          deadline: string | null
+          entity_id: string
+          id: string
+          status: string
+          submitted_at: string | null
+          total_despesa: number | null
+          total_receita: number | null
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          completude?: number | null
+          created_at?: string
+          deadline?: string | null
+          entity_id: string
+          id: string
+          status?: string
+          submitted_at?: string | null
+          total_despesa?: number | null
+          total_receita?: number | null
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          completude?: number | null
+          created_at?: string
+          deadline?: string | null
+          entity_id?: string
+          id?: string
+          status?: string
+          submitted_at?: string | null
+          total_despesa?: number | null
+          total_receita?: number | null
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_years_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pareceres: {
         Row: {
           comentarios: string | null
