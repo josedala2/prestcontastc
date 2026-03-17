@@ -180,6 +180,7 @@ export const WORKFLOW_ESTADOS = [
   { value: "em_validacao", label: "Em Validação", color: "bg-yellow-100 text-yellow-800" },
   { value: "pendente_correccao", label: "Pendente de Correcção", color: "bg-orange-100 text-orange-800" },
   { value: "em_analise", label: "Em Análise", color: "bg-purple-100 text-purple-800" },
+  { value: "em_autuacao", label: "Em Autuação", color: "bg-cyan-100 text-cyan-800" },
   { value: "aguardando_elementos", label: "Aguardando Elementos", color: "bg-amber-100 text-amber-800" },
   { value: "em_decisao", label: "Em Decisão", color: "bg-indigo-100 text-indigo-800" },
   { value: "aguardando_pagamento", label: "Aguardando Pagamento", color: "bg-pink-100 text-pink-800" },
