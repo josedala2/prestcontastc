@@ -461,7 +461,7 @@ function BalancoCharts({
                     />
                   }
                 />
-                <ChartLegend content={<ChartLegendContent />} />
+                <ChartLegend content={<ChartLegendContent payload={[]} />} />
                 <Bar dataKey="previous" fill="var(--color-previous)" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="current" fill="var(--color-current)" radius={[4, 4, 0, 0]} />
               </BarChart>
