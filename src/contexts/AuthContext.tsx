@@ -64,6 +64,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
   "Chefe da Secretaria-Geral": [
     "/secretaria", "/submissoes", "/actas-recepcao", "/entidades",
     "/gestao-processos", "/mapas", "/relatorios", "/anexos",
+    "/secretaria/oficio-remessa",
   ],
   "Técnico da Contadoria Geral": [
     "/contadoria", "/contadoria/verificacao", "/contadoria/documentos",
