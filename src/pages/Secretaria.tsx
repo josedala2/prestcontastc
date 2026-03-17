@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
+import { gerarNumeroProcesso, avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
 import { PageHeader, StatCard } from "@/components/ui-custom/PageElements";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,7 @@ import { Label } from "@/components/ui/label";
 import {
   CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2,
   FileText, Inbox, BarChart3, CalendarCheck, Eye, X, Undo2, ShieldCheck,
-  TrendingUp, ArrowRight, Bell, Activity, PieChart,
+  TrendingUp, ArrowRight, Bell, Activity, PieChart, Send, Lock, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
@@ -65,6 +66,91 @@ const Secretaria = () => {
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [motivoRejeicao, setMotivoRejeicao] = useState("");
+  const [encaminhados, setEncaminhados] = useState<string[]>([]);
+  const [encaminhando, setEncaminhando] = useState<string | null>(null);
+
+  const handleEncaminharValidacao = async (fyId: string) => {
+    const fy = submetidos.find((f) => f.id === fyId) || mockFiscalYears.find((f) => f.id === fyId);
+    const entity = fy ? mockEntities.find((e) => e.id === fy.entityId) : null;
+    if (!fy || !entity) return;
+
+    setEncaminhando(fyId);
+    try {
+      // Check if a processo already exists for this entity/year
+      const { data: existingProcessos } = await supabase
+        .from("processos")
+        .select("id, etapa_atual")
+        .eq("entity_id", entity.id)
+        .eq("ano_gerencia", fy.year)
+        .limit(1);
+
+      let processoId: string;
+
+      if (existingProcessos && existingProcessos.length > 0) {
+        processoId = existingProcessos[0].id;
+        // Advance to etapa 3 (Validação da Secretaria)
+        if (existingProcessos[0].etapa_atual < 3) {
+          await avancarEtapaProcesso({
+            processoId,
+            novaEtapa: 3,
+            novoEstado: "em_validacao",
+            executadoPor: "Técnico da Secretaria-Geral",
+            perfilExecutor: "Técnico da Secretaria-Geral",
+            observacoes: "Encaminhado para validação da Chefe da Secretaria-Geral",
+            documentosGerados: ["Acta de Recepção"],
+          });
+        }
+      } else {
+        // Create new processo
+        const numero = await gerarNumeroProcesso(fy.year);
+        const { data: newProc, error } = await supabase.from("processos").insert({
+          numero_processo: numero,
+          entity_id: entity.id,
+          entity_name: entity.name,
+          categoria_entidade: entity.tipologia || "categoria_1",
+          ano_gerencia: fy.year,
+          canal_entrada: "portal",
+          etapa_atual: 3,
+          estado: "em_validacao",
+          responsavel_atual: "Chefe da Secretaria-Geral",
+          submetido_por: "Técnico da Secretaria-Geral",
+          observacoes: "Encaminhado para validação da Chefe da Secretaria-Geral",
+        } as any).select("id").single();
+        if (error) throw error;
+        processoId = newProc!.id;
+
+        // Record history
+        await supabase.from("processo_historico").insert({
+          processo_id: processoId,
+          etapa_anterior: 1,
+          etapa_seguinte: 3,
+          estado_anterior: "submetido",
+          estado_seguinte: "em_validacao",
+          acao: "Recepção concluída e encaminhado para validação da Chefe da Secretaria-Geral",
+          executado_por: "Técnico da Secretaria-Geral",
+          perfil_executor: "Técnico da Secretaria-Geral",
+          documentos_gerados: ["Acta de Recepção"],
+        } as any);
+      }
+
+      // Generate activities for validation event
+      try {
+        await gerarAtividadesParaEvento("validacao_aprovada", processoId, {
+          categoriaEntidade: entity.tipologia || "resolucao_1_17",
+        });
+      } catch (err) {
+        console.error("Erro ao gerar atividades de validação:", err);
+      }
+
+      setEncaminhados((prev) => [...prev, fyId]);
+      toast.success(`Processo encaminhado para validação da Chefe da Secretaria-Geral — ${entity.name} ${fy.year}`);
+    } catch (err: any) {
+      console.error("Erro ao encaminhar:", err);
+      toast.error(`Erro ao encaminhar: ${err.message}`);
+    } finally {
+      setEncaminhando(null);
+    }
+  };
 
   const selectedFy = submetidos.find((fy) => fy.id === selectedId);
   const selectedEntity = selectedFy ? mockEntities.find((e) => e.id === selectedFy.entityId) : null;
@@ -694,17 +780,47 @@ const Secretaria = () => {
                   Actas Geradas ({actasGeradas.length})
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-3">
                 {actasGeradas.map((fyId) => {
                   const fy = mockFiscalYears.find((f) => f.id === fyId);
                   if (!fy) return null;
+                  const isEncaminhado = encaminhados.includes(fyId);
+                  const isEncaminhando = encaminhando === fyId;
                   return (
-                    <div key={fyId} className="flex items-center justify-between p-2.5 rounded-lg bg-success/5 border border-success/20">
-                      <div>
-                        <p className="text-sm font-medium">{fy.entityName} — {fy.year}</p>
-                        <p className="text-[10px] text-muted-foreground">Acta emitida em {now.toLocaleDateString("pt-AO")}</p>
+                    <div key={fyId} className={`p-3 rounded-lg border ${isEncaminhado ? "bg-muted/40 border-muted" : "bg-success/5 border-success/20"}`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <p className="text-sm font-medium">{fy.entityName} — {fy.year}</p>
+                          <p className="text-[10px] text-muted-foreground">Acta emitida em {now.toLocaleDateString("pt-AO")}</p>
+                        </div>
+                        {isEncaminhado ? (
+                          <Badge variant="secondary" className="gap-1 text-[10px]">
+                            <Lock className="h-3 w-3" /> Bloqueado
+                          </Badge>
+                        ) : (
+                          <CheckCircle className="h-4 w-4 text-success" />
+                        )}
                       </div>
-                      <CheckCircle className="h-4 w-4 text-success" />
+                      {isEncaminhado ? (
+                        <div className="flex items-center gap-2 p-2 rounded-md bg-muted/60 text-xs text-muted-foreground">
+                          <Lock className="h-3.5 w-3.5" />
+                          Encaminhado para validação da Chefe da Secretaria-Geral
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          className="w-full gap-2 mt-1"
+                          onClick={() => handleEncaminharValidacao(fyId)}
+                          disabled={isEncaminhando}
+                        >
+                          {isEncaminhando ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Send className="h-4 w-4" />
+                          )}
+                          Encaminhar para Validação da Chefe da Secretaria
+                        </Button>
+                      )}
                     </div>
                   );
                 })}
