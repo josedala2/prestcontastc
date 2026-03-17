@@ -154,7 +154,14 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     }
   }, [refreshNotifications]);
 
-  const submit = useCallback((entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => {
+  const getUploadedDocs = useCallback((entityId: string, fiscalYearId: string): string[] => {
+    const entry = submissions.find(
+      (s) => s.entityId === entityId && s.fiscalYearId === fiscalYearId
+    );
+    return entry?.uploadedDocIds || [];
+  }, [submissions]);
+
+  const submit = useCallback((entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string, uploadedDocIds?: string[]) => {
     setSubmissions((prev) => {
       const existing = prev.findIndex(
         (s) => s.entityId === entityId && s.fiscalYearId === fiscalYearId
@@ -164,6 +171,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
         fiscalYearId,
         status: "pendente",
         submittedAt: new Date().toISOString(),
+        uploadedDocIds,
       };
       if (existing >= 0) {
         const updated = [...prev];
