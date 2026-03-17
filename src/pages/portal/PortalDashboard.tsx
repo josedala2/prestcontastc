@@ -230,6 +230,82 @@ const PortalDashboard = () => {
           </div>
         </div>
 
+        {/* Solicitações de Elementos em Falta */}
+        {(() => {
+          const solicitacoes = notifications.filter(
+            (n) => n.entityId === entityId && n.type === "solicitacao_elementos"
+          );
+          const pendentes = solicitacoes.filter((s) => !s.read);
+          return (
+            <div className={cn(
+              "bg-card rounded-lg border card-shadow p-5 animate-fade-in lg:col-span-2",
+              pendentes.length > 0 ? "border-amber-300 dark:border-amber-700" : "border-border"
+            )}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <FileQuestion className="h-4 w-4 text-amber-600" />
+                  Solicitações de Elementos
+                  {pendentes.length > 0 && (
+                    <Badge variant="destructive" className="text-[10px] ml-1">{pendentes.length} pendente{pendentes.length !== 1 ? "s" : ""}</Badge>
+                  )}
+                </h2>
+                <Link to="/portal/solicitacoes" className="text-xs text-primary hover:underline flex items-center gap-1">
+                  Ver todas <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+              {solicitacoes.length === 0 ? (
+                <div className="text-center py-8">
+                  <CheckCircle className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Sem solicitações de elementos</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {solicitacoes.slice(0, 3).map((sol) => {
+                    const deadline = sol.deadline ? new Date(sol.deadline) : null;
+                    const daysLeft = deadline ? Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
+                    return (
+                      <Link
+                        key={sol.id}
+                        to="/portal/solicitacoes"
+                        className={cn(
+                          "block p-3 rounded-lg transition-colors",
+                          sol.read ? "bg-muted/30 hover:bg-muted/50" : "bg-amber-50 hover:bg-amber-100/70 dark:bg-amber-950/20 dark:hover:bg-amber-950/30"
+                        )}
+                      >
+                        <p className="text-sm font-medium text-foreground truncate">{sol.message}</p>
+                        <div className="flex items-center gap-3 mt-1.5">
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(sol.createdAt).toLocaleDateString("pt-AO", { day: "2-digit", month: "short", year: "numeric" })}
+                          </span>
+                          {daysLeft !== null && (
+                            <span className={cn(
+                              "text-[10px] font-semibold",
+                              daysLeft < 0 ? "text-destructive" : daysLeft <= 3 ? "text-destructive" : "text-amber-600"
+                            )}>
+                              {daysLeft < 0 ? `${Math.abs(daysLeft)}d atraso` : `${daysLeft}d restantes`}
+                            </span>
+                          )}
+                          <Badge variant={sol.read ? "secondary" : "outline"} className={cn(
+                            "text-[9px] ml-auto",
+                            !sol.read && "border-amber-300 text-amber-700"
+                          )}>
+                            {sol.read ? "Respondido" : "Pendente"}
+                          </Badge>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                  {solicitacoes.length > 3 && (
+                    <Link to="/portal/solicitacoes" className="block text-center text-xs text-primary hover:underline py-2">
+                      + {solicitacoes.length - 3} mais solicitações
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {/* Pedidos de Esclarecimento pendentes */}
         <div className="bg-card rounded-lg border border-border card-shadow p-5 animate-fade-in lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
