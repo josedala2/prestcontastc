@@ -199,7 +199,7 @@ const Exercicios = () => {
                   <div className="p-2 border-b border-border bg-muted/30">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <Checkbox
-                        checked={selectedEntityIds.length === mockEntities.length}
+                        checked={selectedEntityIds.length === allEntities.length}
                         onCheckedChange={(checked) => {
                           setSelectedEntityIds(checked ? mockEntities.map((e) => e.id) : []);
                         }}
