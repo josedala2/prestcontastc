@@ -121,7 +121,8 @@ export function SecretariaValidacaoTab() {
 
   useEffect(() => {
     fetchProcessos();
-  }, [fetchProcessos]);
+    fetchNotificacoes();
+  }, [fetchProcessos, fetchNotificacoes]);
 
   useEffect(() => {
     if (selectedProcesso) {
