@@ -69,7 +69,14 @@ const GestaoProcessos = () => {
 
   const createProcesso = async () => {
     const cat = CATEGORIAS_ENTIDADE.find(c => c.id === newProcess.categoria_entidade);
-    const numero = `PC-${newProcess.ano_gerencia}-${String(processos.length + 1).padStart(4, "0")}`;
+
+    let numero: string;
+    try {
+      numero = await gerarNumeroProcesso(newProcess.ano_gerencia);
+    } catch (err: any) {
+      toast({ title: "Erro ao gerar número", description: err.message, variant: "destructive" });
+      return;
+    }
 
     const { data, error } = await supabase.from("processos").insert({
       numero_processo: numero,
