@@ -22,7 +22,8 @@ import { AtividadesTimeline } from "@/components/AtividadesTimeline";
 import { saveAs } from "file-saver";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, Clock, FileText, Building2,
-  User, Calendar, AlertTriangle, History, Send, Download, Loader2, Upload, Trash2, Eye
+  User, Calendar, AlertTriangle, History, Send, Download, Loader2, Upload, Trash2, Eye,
+  Zap, Scale, Gavel, Receipt, FileCheck, Search, MailCheck, Archive
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 interface ProcessoDocumento {
