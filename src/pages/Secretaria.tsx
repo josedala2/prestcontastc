@@ -32,7 +32,7 @@ import { useSubmissions } from "@/contexts/SubmissionContext";
 import { SecretariaVistoTab } from "@/components/secretaria/SecretariaVistoTab";
 
 const Secretaria = () => {
-  const { recepcionar, rejeitar, submissions } = useSubmissions();
+  const { recepcionar, rejeitar, submissions, getUploadedDocs } = useSubmissions();
 
   // Merge: mock "submetido" + dynamically submitted via Portal ("pendente" in SubmissionContext)
   const submetidos = useMemo(() => {
