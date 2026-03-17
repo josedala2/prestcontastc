@@ -149,6 +149,23 @@ const Secretaria = () => {
     // Update shared submission status to "recepcionado" with entity info for email
     const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
     recepcionar(selectedFy.entityId, fiscalYearId, selectedEntity.name, `entidade@${selectedEntity.nif}.ao`);
+
+    // Gerar atividades automáticas para o evento de submissão
+    const checklistIncompleta = !allRequiredChecked;
+    const canal = "portal" as const; // Secretaria recebe do portal
+    try {
+      const numAtividades = await gerarAtividadesParaEvento("expediente_submetido", fiscalYearId, {
+        canal,
+        categoriaEntidade: selectedEntity.category || "resolucao_1_17",
+        checklistIncompleta,
+      });
+      if (numAtividades > 0) {
+        console.log(`${numAtividades} atividades geradas para ${selectedEntity.name}`);
+      }
+    } catch (err) {
+      console.error("Erro ao gerar atividades:", err);
+    }
+
     setConfirmDialogOpen(false);
     setSelectedId(null);
     setCheckedDocs({});
