@@ -157,74 +157,78 @@ export const roleSidebarSections: Record<UserRole, string[]> = {
 
 // Sidebar items hidden per role (paths)
 export const roleHiddenPaths: Record<UserRole, string[]> = {
-  "Representante da Entidade": [],
+  "Representante da Entidade": ["/gestao-processos", "/atividades"],
   "Técnico da Secretaria-Geral": [
     "/dashboard", "/exercicios", "/importacao", "/plano-contas", "/validacoes",
     "/configuracoes", "/portal", "/tecnico", "/processos-visto",
-    "/submissoes/manual", "/auditoria",
+    "/submissoes/manual", "/auditoria", "/gestao-processos", "/atividades",
   ],
   "Chefe da Secretaria-Geral": [
     "/exercicios", "/importacao", "/plano-contas", "/validacoes",
     "/configuracoes", "/portal", "/tecnico", "/processos-visto",
-    "/submissoes/manual",
+    "/submissoes/manual", "/gestao-processos", "/atividades",
   ],
   "Técnico da Contadoria Geral": [
     "/exercicios", "/importacao", "/plano-contas", "/validacoes",
     "/configuracoes", "/portal", "/tecnico", "/secretaria",
     "/processos-visto", "/submissoes/manual", "/actas-recepcao", "/auditoria", "/anexos",
+    "/gestao-processos", "/atividades",
   ],
   "Escrivão dos Autos": [
     "/exercicios", "/importacao", "/plano-contas", "/validacoes",
     "/configuracoes", "/portal", "/tecnico", "/secretaria",
     "/processos-visto", "/submissoes/manual", "/relatorios", "/mapas",
-    "/anexos", "/esclarecimentos", "/auditoria",
+    "/anexos", "/esclarecimentos", "/auditoria", "/gestao-processos", "/atividades",
   ],
   "Chefe de Divisão": [
     "/exercicios", "/importacao", "/plano-contas", "/validacoes",
     "/configuracoes", "/portal", "/tecnico", "/secretaria",
     "/processos-visto", "/submissoes/manual", "/actas-recepcao",
-    "/esclarecimentos", "/auditoria",
+    "/esclarecimentos", "/auditoria", "/gestao-processos", "/atividades",
   ],
   "Chefe de Secção": [
     "/exercicios", "/importacao", "/plano-contas", "/validacoes",
     "/configuracoes", "/portal", "/tecnico", "/secretaria",
     "/processos-visto", "/submissoes/manual", "/actas-recepcao",
-    "/anexos", "/esclarecimentos", "/auditoria",
+    "/anexos", "/esclarecimentos", "/auditoria", "/gestao-processos", "/atividades",
   ],
-  "Técnico de Análise": [],
+  "Técnico de Análise": ["/gestao-processos", "/atividades"],
   "Coordenador de Equipa": [
     "/exercicios", "/importacao", "/plano-contas", "/validacoes",
     "/configuracoes", "/portal", "/tecnico", "/secretaria",
     "/processos-visto", "/submissoes/manual", "/actas-recepcao",
+    "/gestao-processos", "/atividades",
   ],
   "Diretor dos Serviços Técnicos": [
     "/importacao", "/plano-contas", "/validacoes",
     "/configuracoes", "/portal", "/tecnico", "/secretaria",
     "/processos-visto", "/submissoes/manual", "/actas-recepcao",
+    "/gestao-processos", "/atividades",
   ],
   "Juiz Relator": [
     "/importacao", "/plano-contas", "/validacoes",
     "/configuracoes", "/portal", "/tecnico", "/secretaria",
     "/submissoes/manual", "/esclarecimentos", "/actas-recepcao",
+    "/gestao-processos", "/atividades",
   ],
   "Juiz Adjunto": [
     "/exercicios", "/importacao", "/plano-contas", "/validacoes",
     "/configuracoes", "/portal", "/tecnico", "/secretaria",
     "/processos-visto", "/submissoes/manual", "/actas-recepcao",
-    "/anexos", "/esclarecimentos", "/auditoria",
+    "/anexos", "/esclarecimentos", "/auditoria", "/gestao-processos", "/atividades",
   ],
   "Ministério Público": [
     "/exercicios", "/importacao", "/plano-contas", "/validacoes",
     "/configuracoes", "/portal", "/tecnico", "/secretaria",
     "/processos-visto", "/submissoes/manual", "/actas-recepcao",
-    "/anexos", "/esclarecimentos",
+    "/anexos", "/esclarecimentos", "/gestao-processos", "/atividades",
   ],
   "Técnico da Secção de Custas e Emolumentos": [
     "/exercicios", "/importacao", "/plano-contas", "/validacoes",
     "/configuracoes", "/portal", "/tecnico", "/secretaria",
     "/processos-visto", "/submissoes/manual", "/actas-recepcao",
     "/relatorios", "/mapas", "/anexos", "/documentos-obrigatorios",
-    "/esclarecimentos", "/auditoria",
+    "/esclarecimentos", "/auditoria", "/gestao-processos", "/atividades",
   ],
   "Oficial de Diligências": [
     "/exercicios", "/importacao", "/plano-contas", "/validacoes",
@@ -232,15 +236,17 @@ export const roleHiddenPaths: Record<UserRole, string[]> = {
     "/processos-visto", "/submissoes/manual", "/submissoes",
     "/actas-recepcao", "/relatorios", "/mapas", "/anexos",
     "/documentos-obrigatorios", "/esclarecimentos", "/auditoria",
+    "/gestao-processos", "/atividades",
   ],
   "Presidente da Câmara": [
     "/importacao", "/plano-contas", "/validacoes",
     "/configuracoes", "/portal", "/tecnico", "/secretaria",
-    "/submissoes/manual", "/esclarecimentos",
+    "/submissoes/manual", "/esclarecimentos", "/gestao-processos", "/atividades",
   ],
   "Presidente do Tribunal de Contas": [
     "/importacao", "/plano-contas", "/validacoes",
     "/portal", "/tecnico", "/secretaria", "/submissoes/manual",
+    "/gestao-processos", "/atividades",
   ],
   "Administrador do Sistema": [],
 };
