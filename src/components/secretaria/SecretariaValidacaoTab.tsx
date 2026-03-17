@@ -324,7 +324,55 @@ export function SecretariaValidacaoTab() {
         />
       </div>
 
-      {!isChefe && (
+      {/* Notificações de Encaminhamento */}
+      {isChefe && notificacoes.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <Bell className="h-4 w-4 text-primary" />
+              Notificações de Encaminhamento
+              {unreadCount > 0 && (
+                <Badge variant="destructive" className="text-[10px] h-5">
+                  {unreadCount} pendente{unreadCount !== 1 ? "s" : ""}
+                </Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1 max-h-48 overflow-y-auto">
+            {notificacoes.slice(0, 10).map((n) => (
+              <button
+                key={n.id}
+                onClick={() => handleMarkAsRead(n.id)}
+                className={cn(
+                  "w-full text-left px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors flex items-start gap-2.5",
+                  !n.read && "bg-primary/5"
+                )}
+              >
+                <div className={cn(
+                  "mt-0.5 p-1 rounded-full shrink-0",
+                  !n.read ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                )}>
+                  <Send className="h-3.5 w-3.5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={cn("text-xs leading-snug", !n.read ? "font-medium text-foreground" : "text-muted-foreground")}>
+                    {n.message}
+                  </p>
+                  {n.detail && (
+                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{n.detail}</p>
+                  )}
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    {new Date(n.created_at).toLocaleDateString("pt-AO", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
+                {!n.read && <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />}
+              </button>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+
         <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
           <CardContent className="py-4 flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 text-amber-600" />
