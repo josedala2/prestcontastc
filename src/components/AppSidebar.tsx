@@ -23,6 +23,7 @@ import {
   ClipboardCheck,
   AlertTriangle,
   UserCheck,
+  GitBranch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth, roleHiddenPaths, roleSidebarSections } from "@/contexts/AuthContext";
@@ -59,9 +60,10 @@ const navSections: { label: string; items: NavEntry[] }[] = [
         children: [
           { title: "Recepção", icon: Inbox, path: "/submissoes" },
           { title: "Submeter por Entidade", icon: FilePlus, path: "/submissoes/manual" },
-          { title: "Submissão de Visto", icon: ShieldCheck, path: "/processos-visto" },
+      { title: "Submissão de Visto", icon: ShieldCheck, path: "/processos-visto" },
         ],
       },
+      { title: "Gestão de Processos", icon: GitBranch, path: "/gestao-processos" },
     ],
   },
   {

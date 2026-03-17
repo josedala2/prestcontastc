@@ -20,7 +20,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/dashboard", "/entidades", "/exercicios", "/importacao", "/plano-contas",
     "/validacoes", "/relatorios", "/mapas", "/anexos", "/actas-recepcao",
     "/documentos-obrigatorios", "/auditoria", "/esclarecimentos", "/configuracoes",
-    "/submissoes", "/processos-visto", "/secretaria", "/portal", "/tecnico",
+    "/submissoes", "/processos-visto", "/gestao-processos", "/secretaria", "/portal", "/tecnico",
   ],
   "Técnico Validador": [
     "/tecnico", "/tecnico/prestacao-contas", "/tecnico/exercicios",
@@ -30,11 +30,11 @@ export const rolePermissions: Record<UserRole, string[]> = {
   "Auditor / Fiscal TCA": [
     "/dashboard", "/entidades", "/exercicios", "/relatorios", "/mapas",
     "/anexos", "/auditoria", "/documentos-obrigatorios", "/actas-recepcao",
-    "/esclarecimentos", "/submissoes", "/processos-visto",
+    "/esclarecimentos", "/submissoes", "/processos-visto", "/gestao-processos",
   ],
   "Secretaria": [
     "/secretaria", "/submissoes", "/actas-recepcao", "/entidades",
-    "/relatorios", "/mapas", "/anexos",
+    "/relatorios", "/mapas", "/anexos", "/gestao-processos",
   ],
   "Preparador / Contabilista": [
     "/portal", "/portal/exercicios", "/portal/prestacao-contas",

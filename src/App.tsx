@@ -39,6 +39,8 @@ import PortalSolicitacaoVisto from "./pages/portal/PortalSolicitacaoVisto";
 import TecnicoDashboard from "./pages/tecnico/TecnicoDashboard";
 import TecnicoPrestacaoContas from "./pages/tecnico/TecnicoPrestacaoContas";
 import ProcessosVisto from "./pages/ProcessosVisto";
+import GestaoProcessos from "./pages/GestaoProcessos";
+import ProcessoDetalhePage from "./pages/ProcessoDetalhe";
 import ActasRecepcao from "./pages/ActasRecepcao";
 import Secretaria from "./pages/Secretaria";
 import NotFound from "./pages/NotFound";
@@ -78,6 +80,8 @@ const App = () => (
           <Route path="/submissoes/manual" element={<ProtectedRoute allowedRoles={["Administrador"]}><SubmissaoManual /></ProtectedRoute>} />
           <Route path="/submissoes/:id" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><SubmissaoDetalhe /></ProtectedRoute>} />
           <Route path="/processos-visto" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA"]}><ProcessosVisto /></ProtectedRoute>} />
+          <Route path="/gestao-processos" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><GestaoProcessos /></ProtectedRoute>} />
+          <Route path="/gestao-processos/:id" element={<ProtectedRoute allowedRoles={["Administrador", "Auditor / Fiscal TCA", "Secretaria"]}><ProcessoDetalhePage /></ProtectedRoute>} />
           
           {/* Secretaria */}
           <Route path="/secretaria" element={<ProtectedRoute allowedRoles={["Administrador", "Secretaria"]}><Secretaria /></ProtectedRoute>} />

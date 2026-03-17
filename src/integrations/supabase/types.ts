@@ -190,6 +190,211 @@ export type Database = {
         }
         Relationships: []
       }
+      processo_documentos: {
+        Row: {
+          caminho_ficheiro: string | null
+          created_at: string
+          estado: string
+          id: string
+          nome_ficheiro: string
+          obrigatorio: boolean
+          observacoes: string | null
+          processo_id: string
+          tipo_documento: string
+          validado_em: string | null
+          validado_por: string | null
+          versao: number
+        }
+        Insert: {
+          caminho_ficheiro?: string | null
+          created_at?: string
+          estado?: string
+          id?: string
+          nome_ficheiro: string
+          obrigatorio?: boolean
+          observacoes?: string | null
+          processo_id: string
+          tipo_documento: string
+          validado_em?: string | null
+          validado_por?: string | null
+          versao?: number
+        }
+        Update: {
+          caminho_ficheiro?: string | null
+          created_at?: string
+          estado?: string
+          id?: string
+          nome_ficheiro?: string
+          obrigatorio?: boolean
+          observacoes?: string | null
+          processo_id?: string
+          tipo_documento?: string
+          validado_em?: string | null
+          validado_por?: string | null
+          versao?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "processo_documentos_processo_id_fkey"
+            columns: ["processo_id"]
+            isOneToOne: false
+            referencedRelation: "processos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      processo_historico: {
+        Row: {
+          acao: string
+          created_at: string
+          documentos_alterados: string[] | null
+          documentos_gerados: string[] | null
+          estado_anterior: string | null
+          estado_seguinte: string | null
+          etapa_anterior: number | null
+          etapa_seguinte: number | null
+          executado_por: string
+          id: string
+          observacoes: string | null
+          perfil_executor: string | null
+          processo_id: string
+        }
+        Insert: {
+          acao: string
+          created_at?: string
+          documentos_alterados?: string[] | null
+          documentos_gerados?: string[] | null
+          estado_anterior?: string | null
+          estado_seguinte?: string | null
+          etapa_anterior?: number | null
+          etapa_seguinte?: number | null
+          executado_por: string
+          id?: string
+          observacoes?: string | null
+          perfil_executor?: string | null
+          processo_id: string
+        }
+        Update: {
+          acao?: string
+          created_at?: string
+          documentos_alterados?: string[] | null
+          documentos_gerados?: string[] | null
+          estado_anterior?: string | null
+          estado_seguinte?: string | null
+          etapa_anterior?: number | null
+          etapa_seguinte?: number | null
+          executado_por?: string
+          id?: string
+          observacoes?: string | null
+          perfil_executor?: string | null
+          processo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "processo_historico_processo_id_fkey"
+            columns: ["processo_id"]
+            isOneToOne: false
+            referencedRelation: "processos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      processos: {
+        Row: {
+          ano_gerencia: number
+          canal_entrada: string
+          categoria_entidade: string
+          completude_documental: number
+          coordenador_equipa: string | null
+          created_at: string
+          data_conclusao: string | null
+          data_submissao: string
+          divisao_competente: string | null
+          entity_id: string
+          entity_name: string
+          estado: string
+          etapa_atual: number
+          id: string
+          juiz_adjunto: string | null
+          juiz_relator: string | null
+          numero_processo: string
+          observacoes: string | null
+          periodo_gerencia: string | null
+          portador_contacto: string | null
+          portador_documento: string | null
+          portador_nome: string | null
+          resolucao_aplicavel: string | null
+          responsavel_atual: string | null
+          seccao_competente: string | null
+          submetido_por: string
+          tecnico_analise: string | null
+          updated_at: string
+          urgencia: string
+        }
+        Insert: {
+          ano_gerencia: number
+          canal_entrada?: string
+          categoria_entidade?: string
+          completude_documental?: number
+          coordenador_equipa?: string | null
+          created_at?: string
+          data_conclusao?: string | null
+          data_submissao?: string
+          divisao_competente?: string | null
+          entity_id: string
+          entity_name: string
+          estado?: string
+          etapa_atual?: number
+          id?: string
+          juiz_adjunto?: string | null
+          juiz_relator?: string | null
+          numero_processo: string
+          observacoes?: string | null
+          periodo_gerencia?: string | null
+          portador_contacto?: string | null
+          portador_documento?: string | null
+          portador_nome?: string | null
+          resolucao_aplicavel?: string | null
+          responsavel_atual?: string | null
+          seccao_competente?: string | null
+          submetido_por?: string
+          tecnico_analise?: string | null
+          updated_at?: string
+          urgencia?: string
+        }
+        Update: {
+          ano_gerencia?: number
+          canal_entrada?: string
+          categoria_entidade?: string
+          completude_documental?: number
+          coordenador_equipa?: string | null
+          created_at?: string
+          data_conclusao?: string | null
+          data_submissao?: string
+          divisao_competente?: string | null
+          entity_id?: string
+          entity_name?: string
+          estado?: string
+          etapa_atual?: number
+          id?: string
+          juiz_adjunto?: string | null
+          juiz_relator?: string | null
+          numero_processo?: string
+          observacoes?: string | null
+          periodo_gerencia?: string | null
+          portador_contacto?: string | null
+          portador_documento?: string | null
+          portador_nome?: string | null
+          resolucao_aplicavel?: string | null
+          responsavel_atual?: string | null
+          seccao_competente?: string | null
+          submetido_por?: string
+          tecnico_analise?: string | null
+          updated_at?: string
+          urgencia?: string
+        }
+        Relationships: []
+      }
       submission_notifications: {
         Row: {
           created_at: string
