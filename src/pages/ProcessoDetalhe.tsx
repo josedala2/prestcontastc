@@ -368,9 +368,16 @@ const ProcessoDetalhe = () => {
                   <Send className="h-4 w-4 text-primary" /> Acções da Etapa
                 </CardTitle>
                 {!canAct && (
-                  <p className="text-xs text-amber-600 mt-1">
-                    ⚠ O seu perfil ({user?.role}) não tem permissão para agir nesta etapa. Responsável: {currentStage?.responsavelPerfil}
-                  </p>
+                  <div className="flex items-start gap-2 mt-2 p-2 rounded-md bg-amber-50 border border-amber-200">
+                    <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-medium text-amber-800">Sem permissão nesta etapa</p>
+                      <p className="text-[11px] text-amber-600">
+                        O seu perfil <strong>{user?.role}</strong> não pode agir na etapa actual.
+                        Responsável: <strong>{currentStage?.responsavelPerfil}</strong>
+                      </p>
+                    </div>
+                  </div>
                 )}
               </CardHeader>
               <CardContent className="space-y-4">
@@ -381,29 +388,36 @@ const ProcessoDetalhe = () => {
                     ))}
                   </div>
                 )}
-                <Textarea
-                  placeholder="Observações para o registo de tramitação..."
-                  value={observacoes}
-                  onChange={e => setObservacoes(e.target.value)}
-                  rows={2}
-                  disabled={!canAct}
-                />
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={returnToPrevious} disabled={advancing || processo.etapa_atual <= 1 || !canAct}>
-                    <ArrowLeft className="h-4 w-4 mr-2" /> Devolver
-                  </Button>
-                  <Button onClick={advanceStage} disabled={advancing || processo.etapa_atual >= 18 || !canAct} className="flex-1">
-                    {advancing ? (
-                      <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> A processar...</span>
-                    ) : processo.etapa_atual >= 18 ? "Processo Concluído" : (
-                      <>
-                        Avançar para: {WORKFLOW_STAGES.find(s => s.id === processo.etapa_atual + 1)?.nome}
-                        {currentStage?.documentosGerados?.length ? ` (+ ${currentStage.documentosGerados.length} doc${currentStage.documentosGerados.length > 1 ? "s" : ""})` : ""}
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </>
-                    )}
-                  </Button>
-                </div>
+                {canAct ? (
+                  <>
+                    <Textarea
+                      placeholder="Observações para o registo de tramitação..."
+                      value={observacoes}
+                      onChange={e => setObservacoes(e.target.value)}
+                      rows={2}
+                    />
+                    <div className="flex gap-3">
+                      <Button variant="outline" onClick={returnToPrevious} disabled={advancing || processo.etapa_atual <= 1}>
+                        <ArrowLeft className="h-4 w-4 mr-2" /> Devolver
+                      </Button>
+                      <Button onClick={advanceStage} disabled={advancing || processo.etapa_atual >= 18} className="flex-1">
+                        {advancing ? (
+                          <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> A processar...</span>
+                        ) : processo.etapa_atual >= 18 ? "Processo Concluído" : (
+                          <>
+                            Avançar para: {WORKFLOW_STAGES.find(s => s.id === processo.etapa_atual + 1)?.nome}
+                            {currentStage?.documentosGerados?.length ? ` (+ ${currentStage.documentosGerados.length} doc${currentStage.documentosGerados.length > 1 ? "s" : ""})` : ""}
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-xs text-muted-foreground text-center py-2">
+                    Aguardando acção do perfil responsável para esta etapa.
+                  </p>
+                )}
               </CardContent>
             </Card>
           )}
