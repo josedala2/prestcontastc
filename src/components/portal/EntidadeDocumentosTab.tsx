@@ -97,7 +97,7 @@ const formatSize = (bytes: number) => {
 interface Props {
   disabled?: boolean;
   tipologia?: EntityTipologia;
-  onComplianceChange?: (allRequiredUploaded: boolean, uploadedCount: number, requiredCount: number) => void;
+  onComplianceChange?: (allRequiredUploaded: boolean, uploadedCount: number, requiredCount: number, uploadedDocIds: string[]) => void;
 }
 
 export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica", onComplianceChange }: Props) {
