@@ -634,7 +634,18 @@ const ProcessoDetalhe = () => {
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <Send className="h-4 w-4 text-primary" /> Acções da Etapa
                 </CardTitle>
-                {!canAct && (
+                {isReadOnly && (
+                  <div className="flex items-start gap-2 mt-2 p-2 rounded-md bg-blue-50 border border-blue-200">
+                    <Eye className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-medium text-blue-800">Modo de leitura</p>
+                      <p className="text-[11px] text-blue-600">
+                        O processo foi submetido ao Juiz (etapa {processo.etapa_atual}). O seu perfil <strong>{user?.role}</strong> tem apenas acesso de consulta a partir desta fase.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {!effectiveCanAct && !isReadOnly && (
                   <div className="flex items-start gap-2 mt-2 p-2 rounded-md bg-amber-50 border border-amber-200">
                     <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                     <div>
