@@ -29,25 +29,25 @@ interface TecnicoLayoutProps {
   children: ReactNode;
 }
 
-const tecnicoNav = [
-  { title: "Painel", icon: LayoutDashboard, path: "/tecnico" },
-  { title: "Prestação de Contas", icon: FileBarChart, path: "/tecnico/prestacao-contas" },
-  { title: "Exercícios", icon: FileBarChart, path: "/tecnico/exercicios" },
-  { title: "Documentos", icon: Paperclip, path: "/tecnico/documentos" },
-  { title: "Mapas/Modelos", icon: Map, path: "/tecnico/mapas" },
-  { title: "Esclarecimentos", icon: MessageSquare, path: "/tecnico/esclarecimentos" },
-  { title: "Validações", icon: ShieldCheck, path: "/tecnico/validacoes" },
+const buildNav = (prefix: string) => [
+  { title: "Painel", icon: LayoutDashboard, path: prefix },
+  { title: "Prestação de Contas", icon: FileBarChart, path: `${prefix}/prestacao-contas` },
+  { title: "Exercícios", icon: FileBarChart, path: `${prefix}/exercicios` },
+  { title: "Documentos", icon: Paperclip, path: `${prefix}/documentos` },
+  { title: "Mapas/Modelos", icon: Map, path: `${prefix}/mapas` },
+  { title: "Esclarecimentos", icon: MessageSquare, path: `${prefix}/esclarecimentos` },
+  { title: "Validações", icon: ShieldCheck, path: `${prefix}/validacoes` },
 ];
 
-const routeTitles: Record<string, string> = {
-  "/tecnico": "Painel do Técnico",
-  "/tecnico/prestacao-contas": "Prestação de Contas — Modelo CC-2",
-  "/tecnico/exercicios": "Exercícios Fiscais",
-  "/tecnico/documentos": "Documentos & Anexos",
-  "/tecnico/mapas": "Mapas e Modelos",
-  "/tecnico/esclarecimentos": "Pedidos de Esclarecimento",
-  "/tecnico/validacoes": "Estado das Validações",
-};
+const buildRouteTitles = (prefix: string): Record<string, string> => ({
+  [prefix]: prefix === "/contadoria" ? "Painel da Contadoria Geral" : "Painel do Técnico",
+  [`${prefix}/prestacao-contas`]: "Prestação de Contas — Modelo CC-2",
+  [`${prefix}/exercicios`]: "Exercícios Fiscais",
+  [`${prefix}/documentos`]: "Documentos & Anexos",
+  [`${prefix}/mapas`]: "Mapas e Modelos",
+  [`${prefix}/esclarecimentos`]: "Pedidos de Esclarecimento",
+  [`${prefix}/validacoes`]: "Estado das Validações",
+});
 
 export function TecnicoLayout({ children }: TecnicoLayoutProps) {
   const location = useLocation();
