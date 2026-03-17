@@ -316,7 +316,7 @@ export default function EscrivaoRegistoAutuacao() {
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
-                      <ScrollText className="h-4 w-4 text-primary" />
+                      <ClipboardCheck className="h-4 w-4 text-primary" />
                       Atividades de Autuação
                       <Badge variant="outline" className="ml-auto text-[10px]">
                         {Object.values(completedSteps).filter(Boolean).length}/{steps.length} concluídas
