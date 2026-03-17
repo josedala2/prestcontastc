@@ -131,8 +131,9 @@ export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica",
   const allRequiredDone = uploadedRequiredCount === requiredDocs.length;
 
   useEffect(() => {
-    onComplianceChange?.(allRequiredDone, uploadedRequiredCount, requiredDocs.length);
-  }, [allRequiredDone, uploadedRequiredCount, requiredDocs.length, onComplianceChange]);
+    const uploadedIds = Object.keys(uploadedDocs);
+    onComplianceChange?.(allRequiredDone, uploadedRequiredCount, requiredDocs.length, uploadedIds);
+  }, [allRequiredDone, uploadedRequiredCount, requiredDocs.length, onComplianceChange, uploadedDocs]);
 
   return (
     <div className="space-y-6">
