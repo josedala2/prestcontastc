@@ -211,14 +211,14 @@ const Dashboard = () => {
         description="Painel de Fiscalização — Tribunal de Contas de Angola"
       />
 
-      {/* KPI Cards */}
+      {/* KPI Cards — powered by RPC estatisticas_dashboard */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-        <KPICard icon={<FileText />} label="Total Processos" value={stats.total} color="text-primary" bg="bg-primary/10" />
+        <KPICard icon={<FileText />} label="Total Processos" value={rpcStats?.total_processos ?? stats.total} color="text-primary" bg="bg-primary/10" />
         <KPICard icon={<GitBranch />} label="Em Tramitação" value={stats.emTramitacao} color="text-purple-600" bg="bg-purple-100" />
-        <KPICard icon={<AlertTriangle />} label="Urgentes" value={stats.urgentes} color="text-orange-600" bg="bg-orange-100" />
-        <KPICard icon={<CheckCircle2 />} label="Conta em Termos" value={stats.contaEmTermos} color="text-green-600" bg="bg-green-100" />
-        <KPICard icon={<Bell />} label="Notificações" value={stats.unreadNotifs} color="text-blue-600" bg="bg-blue-100" />
-        <KPICard icon={<Activity />} label="Actas Emitidas" value={actas.length} color="text-amber-600" bg="bg-amber-100" />
+        <KPICard icon={<AlertTriangle />} label="Atividades Atrasadas" value={rpcStats?.atividades_atrasadas ?? 0} color="text-orange-600" bg="bg-orange-100" />
+        <KPICard icon={<CheckCircle2 />} label="Pareceres" value={rpcStats?.total_pareceres ?? pareceres.length} color="text-green-600" bg="bg-green-100" />
+        <KPICard icon={<Bell />} label="Submissões Pendentes" value={rpcStats?.submissions_pendentes ?? 0} color="text-blue-600" bg="bg-blue-100" />
+        <KPICard icon={<Activity />} label="Actas Emitidas" value={rpcStats?.total_actas ?? actas.length} color="text-amber-600" bg="bg-amber-100" />
       </div>
 
       {/* Row 1: Bar chart + Pie charts */}
