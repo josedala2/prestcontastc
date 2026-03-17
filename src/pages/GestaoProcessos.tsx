@@ -316,7 +316,7 @@ const GestaoProcessos = () => {
                         <SelectContent>
                           {(() => {
                             const tipologias = CATEGORIA_TIPOLOGIA_MAP[newProcess.categoria_entidade] || [];
-                            const filtered = mockEntities.filter(e => tipologias.includes(e.tipologia));
+                            const filtered = allEntities.filter(e => tipologias.includes(e.tipologia));
                             if (filtered.length === 0) return <SelectItem value="_none" disabled>Nenhuma entidade nesta categoria</SelectItem>;
                             return filtered.map(e => (
                               <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
