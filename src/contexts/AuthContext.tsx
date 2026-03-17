@@ -290,7 +290,7 @@ export const roleDefaultRoute: Record<UserRole, string> = {
   "Representante da Entidade": "/portal",
   "Técnico da Secretaria-Geral": "/secretaria",
   "Chefe da Secretaria-Geral": "/secretaria",
-  "Técnico da Contadoria Geral": "/dashboard",
+  "Técnico da Contadoria Geral": "/contadoria",
   "Escrivão dos Autos": "/dashboard",
   "Chefe de Divisão": "/dashboard",
   "Chefe de Secção": "/dashboard",
