@@ -58,7 +58,7 @@ const CHECKLIST_ITEMS = [
 
 export default function ContadoriaVerificacao() {
   const { user } = useAuth();
-  const { avancarEtapaProcesso } = useBackendFunctions();
+  // avancarEtapaProcesso imported directly
 
   const [processos, setProcessos] = useState<Processo[]>([]);
   const [selectedProcesso, setSelectedProcesso] = useState<Processo | null>(null);
