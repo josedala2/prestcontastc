@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/ui-custom/PageElements";
 import { supabase } from "@/integrations/supabase/client";
 import { WORKFLOW_STAGES, WORKFLOW_ESTADOS, CATEGORIAS_ENTIDADE, type Processo } from "@/types/workflow";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
+import { gerarNumeroProcesso } from "@/hooks/useBackendFunctions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
