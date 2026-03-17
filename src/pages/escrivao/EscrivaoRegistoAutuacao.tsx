@@ -225,11 +225,10 @@ export default function EscrivaoRegistoAutuacao() {
   };
 
   const steps: Step[] = [
+    { id: "validar", label: "Validar Documentação", description: "Verificar e validar os documentos anexos ao processo", icon: ClipboardCheck, action: handleValidarDocumentos },
     { id: "registar", label: "Registar e Autuar Processo", description: "Iniciar o registo formal e autuação", icon: BookOpen, action: handleRegistarAutuar },
     { id: "numero", label: "Gerar Número Único", description: "Atribuir número definitivo ao processo", icon: Hash, action: handleGerarNumero },
-    { id: "pesquisa", label: "Confirmar Pesquisa de Conta", description: "Verificar existência de contas anteriores", icon: Search, action: handlePesquisaConta },
     { id: "capa", label: "Gerar Capa do Processo", description: "Criar documento de capa oficial", icon: FileText, action: handleGerarCapa },
-    { id: "termos", label: "Preparar Termos Processuais", description: "Gerar Termo de Abertura e Autuação", icon: ScrollText, action: handleTermos },
   ];
 
   const allStepsDone = steps.every((s) => completedSteps[s.id]);
