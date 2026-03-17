@@ -499,6 +499,132 @@ export async function generateNotaRemessa(
   return doc.output("blob");
 }
 
+// ==================== RELATÓRIO DE VERIFICAÇÃO DOCUMENTAL ====================
+export interface ChecklistItem {
+  label: string;
+  obrigatorio: boolean;
+  verificado: boolean;
+  observacao?: string;
+}
+
+export async function generateRelatorioVerificacao(
+  data: ProcessoDocData,
+  executadoPor: string,
+  checklist: ChecklistItem[],
+  documentosAnexos?: { tipo: string; ficheiro: string; estado: string }[]
+): Promise<Blob> {
+  const doc = new jsPDF();
+  const brasao = await loadImage(brasaoImg);
+
+  let y = addHeader(doc, brasao, "RELATÓRIO DE VERIFICAÇÃO DOCUMENTAL");
+
+  y += 3;
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Ref.: RVD-${data.numeroProcesso.replace("PC-", "")}`, 25, y);
+  y += 5;
+  doc.text(`Data: ${new Date().toLocaleDateString("pt-AO", { day: "numeric", month: "long", year: "numeric" })}`, 25, y);
+  y += 10;
+
+  autoTable(doc, {
+    startY: y,
+    head: [["Campo", "Valor"]],
+    body: [
+      ["Número do Processo", data.numeroProcesso],
+      ["Entidade", data.entityName],
+      ["Exercício / Gerência", String(data.anoGerencia)],
+      ["Categoria", data.categoriaEntidade],
+      ["Canal de Entrada", data.canalEntrada === "portal" ? "Portal Electrónico" : "Presencial"],
+      ["Data de Submissão", new Date(data.dataSubmissao).toLocaleDateString("pt-AO")],
+      ["Técnico Responsável", executadoPor],
+    ],
+    theme: "grid",
+    headStyles: { fillColor: [45, 55, 72], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8 },
+    columnStyles: { 0: { fontStyle: "bold", cellWidth: 50 } },
+    margin: { left: 25, right: 25 },
+  });
+  y = (doc as any).lastAutoTable.finalY + 8;
+
+  if (documentosAnexos && documentosAnexos.length > 0) {
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("1. Documentos Anexos ao Processo", 25, y);
+    y += 5;
+    autoTable(doc, {
+      startY: y,
+      head: [["Tipo de Documento", "Ficheiro", "Estado"]],
+      body: documentosAnexos.map((d) => [d.tipo, d.ficheiro, d.estado === "validado" ? "Validado ✓" : "Pendente"]),
+      theme: "grid",
+      headStyles: { fillColor: [60, 80, 60], textColor: 255, fontSize: 8 },
+      bodyStyles: { fontSize: 8 },
+      margin: { left: 25, right: 25 },
+    });
+    y = (doc as any).lastAutoTable.finalY + 8;
+  }
+
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.text(documentosAnexos ? "2. Checklist de Conformidade — Resolução nº 1/17" : "1. Checklist de Conformidade — Resolução nº 1/17", 25, y);
+  y += 5;
+
+  const verificados = checklist.filter((c) => c.verificado).length;
+  const obrigatorios = checklist.filter((c) => c.obrigatorio);
+  const obrigatoriosVerificados = obrigatorios.filter((c) => c.verificado).length;
+
+  autoTable(doc, {
+    startY: y,
+    head: [["#", "Documento", "Obrig.", "Verif.", "Observações"]],
+    body: checklist.map((item, i) => [
+      String(i + 1), item.label, item.obrigatorio ? "Sim" : "Não", item.verificado ? "✓" : "✗", item.observacao || "—",
+    ]),
+    theme: "grid",
+    headStyles: { fillColor: [45, 55, 72], textColor: 255, fontSize: 8 },
+    bodyStyles: { fontSize: 8 },
+    columnStyles: { 0: { cellWidth: 10 }, 2: { cellWidth: 18, halign: "center" as const }, 3: { cellWidth: 16, halign: "center" as const } },
+    didParseCell: (hookData: any) => {
+      if (hookData.section === "body" && hookData.column.index === 3) {
+        if (hookData.cell.raw === "✓") hookData.cell.styles.textColor = [0, 120, 0];
+        else hookData.cell.styles.textColor = [200, 0, 0];
+      }
+    },
+    margin: { left: 25, right: 25 },
+  });
+  y = (doc as any).lastAutoTable.finalY + 8;
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.text("Resumo da Verificação", 25, y); y += 6;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text(`Total de itens: ${checklist.length}`, 30, y); y += 5;
+  doc.text(`Itens verificados: ${verificados} de ${checklist.length}`, 30, y); y += 5;
+  doc.text(`Obrigatórios verificados: ${obrigatoriosVerificados} de ${obrigatorios.length}`, 30, y); y += 5;
+  const completude = Math.round((verificados / checklist.length) * 100);
+  doc.text(`Completude documental: ${completude}%`, 30, y); y += 10;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  const conclusao = obrigatoriosVerificados === obrigatorios.length
+    ? "PARECER FAVORÁVEL — Todos os documentos obrigatórios foram verificados. O processo encontra-se em condições de prosseguir para a etapa de Registo e Autuação."
+    : "PARECER COM RESERVAS — Nem todos os documentos obrigatórios foram verificados. Recomenda-se a solicitação dos elementos em falta.";
+  const conclusaoLines = doc.splitTextToSize(conclusao, 160);
+  doc.text(conclusaoLines, 25, y);
+  y += conclusaoLines.length * 5 + 20;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text("O Técnico da Contadoria Geral", 55, y, { align: "center" });
+  doc.text("O Chefe da Contadoria", 155, y, { align: "center" });
+  doc.line(20, y + 15, 90, y + 15);
+  doc.line(120, y + 15, 190, y + 15);
+  doc.text("(assinatura e carimbo)", 55, y + 20, { align: "center" });
+  doc.text("(assinatura e carimbo)", 155, y + 20, { align: "center" });
+
+  addFooter(doc, executadoPor);
+  return doc.output("blob");
+}
+
 // ==================== FACTORY: get generator by document name ====================
 export type DocumentType =
   | "Acta de Recebimento"
