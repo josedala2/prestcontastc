@@ -21,8 +21,10 @@ import {
 import { toast } from "sonner";
 import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
+import { generateNotaRemessa, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { useAuth } from "@/contexts/AuthContext";
 import { WORKFLOW_STAGES } from "@/types/workflow";
+import { saveAs } from "file-saver";
 
 interface ProcessoValidacao {
   id: string;
