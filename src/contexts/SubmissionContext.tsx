@@ -315,6 +315,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
         markAsRead,
         markAllAsRead,
         getStatus,
+        getUploadedDocs,
         submit,
         recepcionar,
         rejeitar,
