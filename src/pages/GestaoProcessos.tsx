@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
@@ -6,6 +6,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { WORKFLOW_STAGES, WORKFLOW_ESTADOS, CATEGORIAS_ENTIDADE, type Processo } from "@/types/workflow";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { gerarNumeroProcesso } from "@/hooks/useBackendFunctions";
+import { mockEntities } from "@/data/mockData";
+import { EntityTipologia } from "@/types";
+
+// Mapping: workflow category → entity tipologias
+const CATEGORIA_TIPOLOGIA_MAP: Record<string, EntityTipologia[]> = {
+  categoria_1: ["orgao_soberania"],
+  categoria_2: ["admin_central", "admin_local", "instituto_admin"],
+  categoria_3: ["servico_estrangeiro"],
+  categoria_4: ["orgao_autonomo", "instituto_publico", "fundo_autonomo", "servico_autonomo", "empresa_publica"],
+};
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
