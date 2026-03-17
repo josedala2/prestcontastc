@@ -121,6 +121,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
   ],
   "Técnico da Secção de Custas e Emolumentos": [
     "/dashboard", "/gestao-processos", "/submissoes", "/entidades",
+    "/custas/emolumentos",
   ],
   "Oficial de Diligências": [
     "/dashboard", "/gestao-processos", "/entidades",
