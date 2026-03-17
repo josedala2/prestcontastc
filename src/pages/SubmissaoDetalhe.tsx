@@ -379,8 +379,8 @@ const SubmissaoDetalhe = () => {
           <div className="flex items-center gap-3 p-4 rounded-lg bg-success/10 border border-success/20">
             <CheckCircle className="h-5 w-5 shrink-0 text-success" />
             <div className="flex-1">
-              <p className="text-sm font-semibold text-foreground">Nota de Remessa Emitida</p>
-              <p className="text-xs text-muted-foreground">A documentação foi verificada e a nota de remessa foi gerada com sucesso.</p>
+              <p className="text-sm font-semibold text-foreground">Processo Autuado com Sucesso</p>
+              <p className="text-xs text-muted-foreground">A documentação foi verificada e o processo foi autuado.</p>
             </div>
             <div className="flex items-center gap-2">
               {generatedActaFilePath && (
@@ -394,7 +394,7 @@ const SubmissaoDetalhe = () => {
                       setPdfPreviewUrl(data.publicUrl);
                     }}
                   >
-                    <Eye className="h-3.5 w-3.5" /> Visualizar Nota
+                    <Eye className="h-3.5 w-3.5" /> Visualizar Acta
                   </Button>
                   <Button
                     variant="outline"
@@ -423,13 +423,135 @@ const SubmissaoDetalhe = () => {
             </div>
           </div>
 
-          {/* Remeter para Chefe da Secretaria-Geral */}
+          {/* Visualizar Processo Completo */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <FolderOpen className="h-4 w-4 text-primary" />
+                  Processo Completo
+                </CardTitle>
+                <Badge variant="outline" className="text-[10px]">
+                  {(generatedActaFilePath ? 1 : 0) + submissionDocs.length} documento(s)
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Visualize todos os documentos do processo, desde a capa até ao último documento submetido.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="max-h-[400px]">
+                <div className="space-y-2">
+                  {/* Acta de Recepção */}
+                  {generatedActaFilePath && (
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/20">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center">
+                          <Stamp className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Acta de Recepção</p>
+                          <p className="text-[10px] text-muted-foreground">{actaNumero} · Documento oficial</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0"
+                          title="Visualizar"
+                          onClick={() => {
+                            const { data } = supabase.storage.from("actas-recepcao").getPublicUrl(generatedActaFilePath);
+                            setPdfPreviewUrl(data.publicUrl);
+                          }}
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0"
+                          title="Descarregar"
+                          onClick={async () => {
+                            const { data, error } = await supabase.storage.from("actas-recepcao").download(generatedActaFilePath);
+                            if (error || !data) return;
+                            const url = URL.createObjectURL(data);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = generatedActaFileName || "acta.pdf";
+                            a.click();
+                            URL.revokeObjectURL(url);
+                          }}
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Documentos submetidos pela entidade */}
+                  {submissionDocs.map((doc, idx) => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-md bg-muted flex items-center justify-center">
+                          <File className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{doc.doc_label}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {doc.file_name} · {(doc.file_size / 1024).toFixed(0)} KB
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0"
+                          title="Visualizar"
+                          onClick={() => {
+                            const { data } = supabase.storage.from("submission-documents").getPublicUrl(doc.file_path);
+                            if (doc.file_name.toLowerCase().endsWith(".pdf")) {
+                              setPdfPreviewUrl(data.publicUrl);
+                            } else {
+                              setDocPreview({ label: doc.doc_label, category: doc.doc_category });
+                              setDocPreviewUrl(data.publicUrl);
+                            }
+                          }}
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0"
+                          title="Descarregar"
+                          onClick={() => handleDownloadDoc(doc)}
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {submissionDocs.length === 0 && !generatedActaFilePath && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <FolderOpen className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                      <p className="text-sm">Nenhum documento encontrado no processo.</p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+
+          {/* Remeter para Chefe de Divisão */}
           {!remetido ? (
             <div className="flex items-center gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
               <Send className="h-5 w-5 shrink-0 text-primary" />
               <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground">Remessa para Validação da Chefe da Secretaria</p>
-                <p className="text-xs text-muted-foreground">Envie o processo para a Chefe da Secretaria-Geral proceder à validação documental.</p>
+                <p className="text-sm font-semibold text-foreground">Remessa para o Chefe de Divisão</p>
+                <p className="text-xs text-muted-foreground">Envie o processo autuado para o Chefe de Divisão competente.</p>
               </div>
               <Button
                 size="sm"
@@ -438,20 +560,20 @@ const SubmissaoDetalhe = () => {
                   const fiscalYearId = `${entity.id}-${periodo}`;
                   remeterParaTecnico(entity.id, fiscalYearId, entity.name, `entidade@${entity.nif}.ao`);
                   setRemetido(true);
-                  toast.success(`Processo encaminhado para a Chefe da Secretaria-Geral — ${entity.name} — ${periodo}`);
+                  toast.success(`Processo encaminhado para o Chefe de Divisão — ${entity.name} — ${periodo}`);
                 }}
               >
-                <Send className="h-3.5 w-3.5" /> Remeter para Chefe
+                <Send className="h-3.5 w-3.5" /> Remeter para Chefe de Divisão
               </Button>
             </div>
           ) : (
             <div className="flex items-center gap-3 p-4 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
               <ShieldCheck className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
               <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground">Processo em Validação pela Chefe da Secretaria</p>
-                <p className="text-xs text-muted-foreground">O processo foi encaminhado para a Chefe da Secretaria-Geral e aguarda validação documental.</p>
+                <p className="text-sm font-semibold text-foreground">Processo Encaminhado ao Chefe de Divisão</p>
+                <p className="text-xs text-muted-foreground">O processo autuado foi encaminhado para o Chefe de Divisão competente para prosseguimento da tramitação.</p>
               </div>
-              <Badge variant="secondary" className="text-xs">Em Validação</Badge>
+              <Badge variant="secondary" className="text-xs">Em Tramitação</Badge>
             </div>
           )}
 
