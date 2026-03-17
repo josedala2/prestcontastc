@@ -353,7 +353,7 @@ const SubmissaoDetalhe = () => {
             {!allRequiredChecked ? (
               <p className="text-xs text-warning flex items-center gap-1">
                 <AlertTriangle className="h-3.5 w-3.5" />
-                Todos os documentos obrigatórios devem ser verificados para emitir a acta.
+                Todos os documentos obrigatórios devem ser verificados para emitir a nota de remessa.
               </p>
             ) : <div />}
             <div className="flex gap-3">
