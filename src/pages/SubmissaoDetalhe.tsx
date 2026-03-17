@@ -296,7 +296,7 @@ const SubmissaoDetalhe = () => {
                             size="sm"
                             className="h-7 w-7 p-0"
                             title={`Visualizar ${item.label}`}
-                            onClick={() => setDocPreview({ label: item.label, category: item.category })}
+                            onClick={() => handleOpenDocPreview(item.label, item.category, item.id)}
                           >
                             <Eye className="h-3.5 w-3.5" />
                           </Button>
