@@ -65,6 +65,7 @@ export function PortalLayout({ children }: PortalLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pageTitle = routeTitles[location.pathname] || "Portal";
   const { entity, setEntityId } = usePortalEntity();
+  const { entities: allEntities } = useEntities();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useSubmissions();
   const { logout } = useAuth();
   const entityNotifications = notifications.filter((n) => n.entityId === entity.id);
