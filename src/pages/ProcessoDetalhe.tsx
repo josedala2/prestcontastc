@@ -300,6 +300,18 @@ const ProcessoDetalhe = () => {
         perfil_executor: user?.role || null,
         observacoes: observacoes || null,
       } as any);
+
+      // Internal notification for the previous responsible
+      await supabase.from("submission_notifications").insert({
+        entity_id: processo.entity_id,
+        entity_name: processo.entity_name,
+        fiscal_year_id: `fy-${processo.ano_gerencia}`,
+        fiscal_year: String(processo.ano_gerencia),
+        type: "rejeitado",
+        message: `Processo ${processo.numero_processo} devolvido para etapa ${prevStage}: ${prevStageInfo?.nome}`,
+        detail: `O processo da entidade ${processo.entity_name} (${processo.numero_processo}) foi devolvido da etapa ${processo.etapa_atual} para a etapa ${prevStage}. Responsável: ${prevStageInfo?.responsavelPerfil || "—"}.${observacoes ? ` Motivo: ${observacoes}` : ""}`,
+      } as any);
+
       toast({ title: "Processo devolvido", description: `Devolvido para: ${prevStageInfo?.nome}` });
       setObservacoes("");
       loadData();
