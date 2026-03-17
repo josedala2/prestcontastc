@@ -75,6 +75,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
   "Escrivão dos Autos": [
     "/dashboard", "/gestao-processos", "/entidades", "/submissoes",
     "/actas-recepcao", "/documentos-obrigatorios", "/escrivao/registo-autuacao",
+    "/escrivao/cumprimento-despachos",
   ],
   "Chefe de Divisão": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
