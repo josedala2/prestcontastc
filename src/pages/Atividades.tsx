@@ -132,10 +132,7 @@ export default function Atividades() {
     return () => { supabase.removeChannel(channel); };
   }, [fetchAtividades]);
 
-  const perfis = useMemo(() => {
-    const set = new Set(atividades.map(a => a.perfil_responsavel));
-    return Array.from(set).sort();
-  }, [atividades]);
+  const perfis = PERFIS_WORKFLOW;
 
   const filtered = useMemo(() => {
     return atividades.filter(a => {
