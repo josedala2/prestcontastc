@@ -257,26 +257,28 @@ const ProcessoDetalhe = () => {
       if (docs) generatedDocs = docs;
     }
 
-    const { error } = await supabase.from("processos").update({
-      etapa_atual: nextStage,
-      estado: newEstado,
-      responsavel_atual: nextStageInfo?.responsavelPerfil || null,
-      updated_at: new Date().toISOString(),
-    } as any).eq("id", processo.id);
+    try {
+      // Use RPC to advance stage atomically
+      const result = await avancarEtapaProcesso({
+        processoId: processo.id,
+        novaEtapa: nextStage,
+        novoEstado: newEstado,
+        executadoPor: user?.displayName || "Sistema",
+        perfilExecutor: user?.role || undefined,
+        observacoes: observacoes || undefined,
+        documentosGerados: generatedDocs.length > 0 ? generatedDocs : (currentStageInfo?.documentosGerados?.length ? currentStageInfo.documentosGerados : undefined),
+      });
 
-    if (!error) {
-      await supabase.from("processo_historico").insert({
-        processo_id: processo.id,
-        etapa_anterior: currentStageId,
-        etapa_seguinte: nextStage,
-        estado_anterior: processo.estado,
-        estado_seguinte: newEstado,
-        acao: `Processo avançado para: ${nextStageInfo?.nome}`,
-        executado_por: user?.displayName || "Sistema",
-        perfil_executor: user?.role || null,
-        observacoes: observacoes || null,
-        documentos_gerados: generatedDocs.length > 0 ? generatedDocs : (currentStageInfo?.documentosGerados?.length ? currentStageInfo.documentosGerados : null),
-      } as any);
+      if (!result.success) {
+        toast({ title: "Erro", description: "Falha ao avançar processo via RPC", variant: "destructive" });
+        setAdvancing(false);
+        return;
+      }
+
+      // Update responsavel_atual (not handled by RPC)
+      await supabase.from("processos").update({
+        responsavel_atual: nextStageInfo?.responsavelPerfil || null,
+      } as any).eq("id", processo.id);
 
       // Internal notification for the next responsible
       await supabase.from("submission_notifications").insert({
@@ -292,11 +294,11 @@ const ProcessoDetalhe = () => {
       // Gerar atividades automáticas conforme a etapa de destino
       try {
         let evento: string | null = null;
-        if (nextStage === 4) evento = "validacao_aprovada";        // Contadoria
-        else if (nextStage === 9) evento = "analise_concluida";    // Coordenador consolida
-        else if (nextStage === 12) evento = "submissao_juiz";      // Juiz Relator
-        else if (nextStage === 13) evento = "decisao_juiz";        // Custas e Emolumentos
-        else if (nextStage === 18) evento = "pagamento_recebido";  // Arquivamento
+        if (nextStage === 4) evento = "validacao_aprovada";
+        else if (nextStage === 9) evento = "analise_concluida";
+        else if (nextStage === 12) evento = "submissao_juiz";
+        else if (nextStage === 13) evento = "decisao_juiz";
+        else if (nextStage === 18) evento = "pagamento_recebido";
 
         if (evento) {
           const n = await gerarAtividadesParaEvento(evento, processo.id, {
@@ -314,8 +316,8 @@ const ProcessoDetalhe = () => {
       setObservacoes("");
       refreshNotifications();
       loadData();
-    } else {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
     }
     setAdvancing(false);
   };
