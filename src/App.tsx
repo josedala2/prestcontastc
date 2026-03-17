@@ -38,7 +38,6 @@ import PortalSolicitacoes from "./pages/portal/PortalSolicitacoes";
 import PortalSolicitacaoVisto from "./pages/portal/PortalSolicitacaoVisto";
 import TecnicoDashboard from "./pages/tecnico/TecnicoDashboard";
 import TecnicoPrestacaoContas from "./pages/tecnico/TecnicoPrestacaoContas";
-import ContadoriaDashboard from "./pages/contadoria/ContadoriaDashboard";
 import ProcessosVisto from "./pages/ProcessosVisto";
 import GestaoProcessos from "./pages/GestaoProcessos";
 import ProcessoDetalhePage from "./pages/ProcessoDetalhe";
