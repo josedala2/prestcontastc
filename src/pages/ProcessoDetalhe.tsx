@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { roleStagePermissions } from "@/contexts/AuthContext";
+import { roleStagePermissions, type UserRole } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { WORKFLOW_STAGES, WORKFLOW_ESTADOS, CATEGORIAS_ENTIDADE, type Processo, type ProcessoHistorico } from "@/types/workflow";
@@ -486,6 +486,23 @@ const ProcessoDetalhe = () => {
   const categoria = CATEGORIAS_ENTIDADE.find(c => c.id === processo.categoria_entidade);
   const canAct = canActOnStage(processo.etapa_atual);
 
+  // After submission to judge (stage ≥ 12), pre-judicial profiles become read-only
+  const PRE_JUDICIAL_ROLES: UserRole[] = [
+    "Técnico da Secretaria-Geral",
+    "Chefe da Secretaria-Geral",
+    "Técnico da Contadoria Geral",
+    "Escrivão dos Autos",
+    "Chefe de Divisão",
+    "Chefe de Secção",
+    "Técnico de Análise",
+    "Coordenador de Equipa",
+    "Diretor dos Serviços Técnicos",
+  ];
+  const isPostJudicial = processo.etapa_atual >= 12;
+  const isPreJudicialRole = user?.role ? PRE_JUDICIAL_ROLES.includes(user.role as UserRole) : false;
+  const isReadOnly = isPostJudicial && isPreJudicialRole;
+  const effectiveCanAct = canAct && !isReadOnly;
+
   return (
     <AppLayout>
       {/* Header */}
@@ -617,7 +634,18 @@ const ProcessoDetalhe = () => {
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <Send className="h-4 w-4 text-primary" /> Acções da Etapa
                 </CardTitle>
-                {!canAct && (
+                {isReadOnly && (
+                  <div className="flex items-start gap-2 mt-2 p-2 rounded-md bg-blue-50 border border-blue-200">
+                    <Eye className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-medium text-blue-800">Modo de leitura</p>
+                      <p className="text-[11px] text-blue-600">
+                        O processo foi submetido ao Juiz (etapa {processo.etapa_atual}). O seu perfil <strong>{user?.role}</strong> tem apenas acesso de consulta a partir desta fase.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {!effectiveCanAct && !isReadOnly && (
                   <div className="flex items-start gap-2 mt-2 p-2 rounded-md bg-amber-50 border border-amber-200">
                     <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                     <div>
@@ -638,7 +666,7 @@ const ProcessoDetalhe = () => {
                     ))}
                   </div>
                 )}
-                {canAct ? (
+                {effectiveCanAct ? (
                   <>
                     {/* Event action buttons */}
                     {STAGE_EVENTS[processo.etapa_atual] && (
@@ -705,7 +733,7 @@ const ProcessoDetalhe = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Upload section */}
-              {canAct && processo.estado !== "arquivado" && (
+              {effectiveCanAct && processo.estado !== "arquivado" && (
                 <div className="p-3 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 space-y-3">
                   <p className="text-xs font-semibold text-primary flex items-center gap-1">
                     <Upload className="h-3.5 w-3.5" /> Anexar Documentos à Etapa Actual
@@ -793,7 +821,7 @@ const ProcessoDetalhe = () => {
                             <Download className="h-3.5 w-3.5" />
                           </Button>
                         )}
-                        {canAct && doc.estado === "anexado" && (
+                        {effectiveCanAct && doc.estado === "anexado" && (
                           <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => deleteAttachment(doc.id, doc.caminho_ficheiro)}>
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
