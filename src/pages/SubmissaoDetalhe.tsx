@@ -80,26 +80,26 @@ const SubmissaoDetalhe = () => {
     setCheckedDocs((prev) => ({ ...prev, [docId]: !prev[docId] }));
   };
 
-  // Map checklist categories to submission doc_ids
-  const DOC_CATEGORY_MAP: Record<string, string> = {
-    c1: "relatorio_gestao",
-    c2: "balanco",
-    c3: "dem_resultados",
-    c4: "fluxo_caixa",
-    c5: "balancete_analitico",
-    c6: "parecer_fiscal",
-    c7: "parecer_auditor",
-    c8: "modelos",
-    c9: "comprov_impostos",
-    c10: "comprov_seguranca",
-    c11: "inventario",
-    c12: "dem_resultados",
-    c13: "modelos",
+  // Map checklist IDs to submission doc_ids from EntidadeDocumentosTab
+  const DOC_CATEGORY_MAP: Record<string, string[]> = {
+    c1: ["relatorio_gestao"],
+    c2: ["balanco"],
+    c3: ["dem_resultados"],
+    c4: ["fluxo_caixa"],
+    c5: ["balancete_analitico"],
+    c6: ["parecer_fiscal"],
+    c7: ["parecer_auditor"],
+    c8: ["modelos"],
+    c9: ["comprov_impostos"],
+    c10: ["comprov_seguranca"],
+    c11: ["inventario"],
+    c12: ["extractos", "folhas_caixa"],
+    c13: ["reconciliacoes", "ordens_saque"],
   };
 
   const findSubmissionDoc = (checklistId: string): SubmissionDoc | undefined => {
-    const docId = DOC_CATEGORY_MAP[checklistId];
-    return submissionDocs.find(d => d.doc_id === docId);
+    const docIds = DOC_CATEGORY_MAP[checklistId] || [];
+    return submissionDocs.find(d => docIds.includes(d.doc_id));
   };
 
   const handleOpenDocPreview = async (label: string, category: string, checklistId: string) => {
@@ -249,12 +249,18 @@ const SubmissaoDetalhe = () => {
                   <FileText className="h-4 w-4 text-primary" />
                   Verificação Documental (Resolução 1/17)
                 </CardTitle>
-                <Badge variant={allRequiredChecked ? "default" : "secondary"}>
-                  {checkedCount}/{submissionChecklist.length} verificados
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-[10px] gap-1">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    {submissionChecklist.filter(i => findSubmissionDoc(i.id)).length}/{submissionChecklist.length} carregados
+                  </Badge>
+                  <Badge variant={allRequiredChecked ? "default" : "secondary"}>
+                    {checkedCount}/{submissionChecklist.length} verificados
+                  </Badge>
+                </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                Confirme a existência de cada documento antes de emitir a acta de recepção.
+                Confirme a existência de cada documento antes de emitir a acta de recepção. Os documentos sinalizados a verde foram carregados pela entidade.
               </p>
             </CardHeader>
             <CardContent>
@@ -274,7 +280,18 @@ const SubmissaoDetalhe = () => {
                     const isChecked = !!checkedDocs[item.id];
                     const subDoc = findSubmissionDoc(item.id);
                     return (
-                      <TableRow key={item.id} className={isChecked ? "bg-success/5" : ""}>
+                      <TableRow
+                        key={item.id}
+                        className={
+                          isChecked
+                            ? "bg-success/5"
+                            : subDoc
+                              ? "bg-green-50/50 dark:bg-green-950/10"
+                              : item.required
+                                ? "bg-destructive/5"
+                                : ""
+                        }
+                      >
                         <TableCell>
                           <Checkbox checked={isChecked} onCheckedChange={() => handleToggleDoc(item.id)} />
                         </TableCell>
@@ -288,12 +305,17 @@ const SubmissaoDetalhe = () => {
                         </TableCell>
                         <TableCell className="text-center">
                           {subDoc ? (
-                            <span className="flex items-center justify-center gap-1 text-xs text-green-700 dark:text-green-400">
-                              <CheckCircle className="h-3 w-3" />
-                              <span className="max-w-[120px] truncate" title={subDoc.file_name}>{subDoc.file_name}</span>
+                            <span className="flex items-center justify-center gap-1.5 text-xs">
+                              <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                              <span className="text-green-700 dark:text-green-400 font-medium max-w-[140px] truncate" title={subDoc.file_name}>
+                                {subDoc.file_name}
+                              </span>
                             </span>
                           ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
+                            <span className="flex items-center justify-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+                              <AlertTriangle className="h-3.5 w-3.5" />
+                              Não carregado
+                            </span>
                           )}
                         </TableCell>
                         <TableCell className="text-center">
