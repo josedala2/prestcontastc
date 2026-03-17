@@ -88,7 +88,7 @@ const SubmissaoManual = () => {
                   <SelectValue placeholder="Seleccionar entidade..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockEntities.map((e) => (
+                  {allEntities.map((e) => (
                     <SelectItem key={e.id} value={e.id}>
                       <span className="flex items-center gap-2">
                         <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
