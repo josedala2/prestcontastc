@@ -185,7 +185,59 @@ export default function EscrivaoRegistoAutuacao() {
     }
   };
 
-  // ——— Step 6: Remeter para o Chefe da Divisão ———
+  // ——— Step 4: Gerar Capa do Processo ———
+  const handleGerarCapa = async () => {
+    if (!selectedProcesso) return;
+    setCurrentStep("capa");
+    setActing(true);
+    try {
+      const docData: ProcessoDocData = {
+        numeroProcesso: selectedProcesso.numero_processo,
+        entityName: selectedProcesso.entity_name,
+        anoGerencia: selectedProcesso.ano_gerencia,
+        categoriaEntidade: selectedProcesso.categoria_entidade,
+        canalEntrada: "portal",
+        dataSubmissao: selectedProcesso.data_submissao,
+        responsavelAtual: executadoPor,
+        submetidoPor: "sistema",
+        etapaAtual: 5,
+        estado: selectedProcesso.estado,
+      };
+
+      const capaBlob = await generateCapaProcesso(docData, executadoPor);
+      const sanitized = selectedProcesso.numero_processo.replace(/[^a-zA-Z0-9-]/g, "_");
+      const fileName = `Capa_Processo_${sanitized}.pdf`;
+      const filePath = `${selectedProcesso.id}/${fileName}`;
+
+      await supabase.storage.from("processo-documentos").upload(filePath, capaBlob, {
+        contentType: "application/pdf",
+        upsert: true,
+      });
+
+      await supabase.from("processo_documentos").insert({
+        processo_id: selectedProcesso.id,
+        tipo_documento: "Capa do Processo",
+        nome_ficheiro: fileName,
+        caminho_ficheiro: filePath,
+        estado: "validado",
+        obrigatorio: true,
+        validado_por: executadoPor,
+        validado_em: new Date().toISOString(),
+      } as any);
+
+      saveAs(capaBlob, fileName);
+
+      setCompletedSteps((prev) => ({ ...prev, capa: true }));
+      toast.success("Capa do processo gerada e descarregada");
+    } catch (err: any) {
+      toast.error(`Erro: ${err.message}`);
+    } finally {
+      setActing(false);
+      setCurrentStep(null);
+    }
+  };
+
+  // ——— Step 5: Remeter para o Chefe da Divisão ———
   const handleRemeter = async () => {
     if (!selectedProcesso) return;
     setActing(true);
