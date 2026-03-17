@@ -98,8 +98,8 @@ const SubmissaoDetalhe = () => {
   };
 
   const findSubmissionDoc = (checklistId: string): SubmissionDoc | undefined => {
-    const docId = DOC_CATEGORY_MAP[checklistId];
-    return submissionDocs.find(d => d.doc_id === docId);
+    const docIds = DOC_CATEGORY_MAP[checklistId] || [];
+    return submissionDocs.find(d => docIds.includes(d.doc_id));
   };
 
   const handleOpenDocPreview = async (label: string, category: string, checklistId: string) => {
