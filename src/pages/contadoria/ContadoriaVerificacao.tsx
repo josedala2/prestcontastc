@@ -12,7 +12,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { TecnicoLayout } from "@/components/TecnicoLayout";
 import { toast } from "sonner";
-import { FileText, Download, CheckCircle2, XCircle, ClipboardCheck, Send, ArrowLeft, Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { FileText, Download, CheckCircle2, XCircle, ClipboardCheck, Send, ArrowLeft, Eye, AlertTriangle, Mail } from "lucide-react";
 import { CATEGORIAS_ENTIDADE } from "@/types/workflow";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { generateRelatorioVerificacao, type ProcessoDocData, type ChecklistItem } from "@/lib/workflowDocGenerator";
@@ -70,6 +72,9 @@ export default function ContadoriaVerificacao() {
   const [loading, setLoading] = useState(true);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [solicitarDialogOpen, setSolicitarDialogOpen] = useState(false);
+  const [elementosSelecionados, setElementosSelecionados] = useState<Record<string, boolean>>({});
+  const [mensagemSolicitacao, setMensagemSolicitacao] = useState("");
   const [motivoRejeicao, setMotivoRejeicao] = useState("");
   const [acting, setActing] = useState(false);
 
@@ -268,6 +273,58 @@ export default function ContadoriaVerificacao() {
       setMotivoRejeicao("");
       setSelectedProcesso(null);
       fetchProcessos();
+    } catch (err: any) {
+      toast.error(`Erro: ${err.message}`);
+    } finally {
+      setActing(false);
+    }
+  };
+
+  // Solicitar elementos em falta
+  const uncheckedItems = CHECKLIST_ITEMS.filter((i) => !checkedItems[i.id]);
+
+  const handleSolicitarElementos = async () => {
+    if (!selectedProcesso) return;
+    const selected = CHECKLIST_ITEMS.filter((i) => elementosSelecionados[i.id]);
+    if (selected.length === 0) {
+      toast.error("Seleccione pelo menos um elemento em falta");
+      return;
+    }
+    setActing(true);
+    try {
+      const listaElementos = selected.map((i) => `• ${i.label}`).join("\n");
+      const detalhe = mensagemSolicitacao.trim()
+        ? `${listaElementos}\n\nObservações: ${mensagemSolicitacao.trim()}`
+        : listaElementos;
+
+      await supabase.from("submission_notifications").insert({
+        entity_id: selectedProcesso.entity_id,
+        entity_name: selectedProcesso.entity_name,
+        fiscal_year_id: `${selectedProcesso.entity_id}-${selectedProcesso.ano_gerencia}`,
+        fiscal_year: String(selectedProcesso.ano_gerencia),
+        type: "solicitacao_elementos",
+        message: `Solicitação de elementos em falta — Processo ${selectedProcesso.numero_processo}`,
+        detail: detalhe,
+        deadline: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+      } as any);
+
+      // Log in processo_historico
+      await supabase.from("processo_historico").insert({
+        processo_id: selectedProcesso.id,
+        etapa_anterior: 4,
+        etapa_seguinte: 4,
+        estado_anterior: selectedProcesso.estado,
+        estado_seguinte: selectedProcesso.estado,
+        acao: `Solicitação de ${selected.length} elemento(s) em falta à entidade`,
+        executado_por: executadoPor,
+        perfil_executor: "Técnico da Contadoria Geral",
+        observacoes: detalhe,
+      } as any);
+
+      toast.success(`Solicitação de ${selected.length} elemento(s) enviada à entidade ${selectedProcesso.entity_name}`);
+      setSolicitarDialogOpen(false);
+      setElementosSelecionados({});
+      setMensagemSolicitacao("");
     } catch (err: any) {
       toast.error(`Erro: ${err.message}`);
     } finally {
@@ -490,6 +547,22 @@ export default function ContadoriaVerificacao() {
                     Devolver à Secretaria
                   </Button>
                   <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      // Pre-select unchecked items
+                      const preSelected: Record<string, boolean> = {};
+                      uncheckedItems.forEach((i) => { preSelected[i.id] = true; });
+                      setElementosSelecionados(preSelected);
+                      setSolicitarDialogOpen(true);
+                    }}
+                    disabled={acting || uncheckedItems.length === 0}
+                    className="border-amber-500 text-amber-700 hover:bg-amber-50"
+                  >
+                    <AlertTriangle className="h-4 w-4 mr-1" />
+                    Solicitar Elementos ({uncheckedItems.length})
+                  </Button>
+                  <Button
                     size="sm"
                     onClick={() => setApproveDialogOpen(true)}
                     disabled={!allRequiredChecked || acting}
@@ -550,6 +623,61 @@ export default function ContadoriaVerificacao() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {/* Solicitar elementos dialog */}
+      <Dialog open={solicitarDialogOpen} onOpenChange={setSolicitarDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-amber-600" />
+              Solicitar Elementos em Falta
+            </DialogTitle>
+            <DialogDescription>
+              Seleccione os documentos em falta para notificar a entidade <strong>{selectedProcesso?.entity_name}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 max-h-[300px] overflow-y-auto">
+            {CHECKLIST_ITEMS.map((item) => (
+              <div key={item.id} className="flex items-center gap-2 py-1">
+                <Checkbox
+                  id={`elem-${item.id}`}
+                  checked={!!elementosSelecionados[item.id]}
+                  onCheckedChange={() =>
+                    setElementosSelecionados((prev) => ({ ...prev, [item.id]: !prev[item.id] }))
+                  }
+                />
+                <Label htmlFor={`elem-${item.id}`} className="text-sm cursor-pointer flex-1">
+                  {item.label}
+                  {item.obrigatorio && (
+                    <Badge variant="destructive" className="ml-2 text-[9px]">Obrigatório</Badge>
+                  )}
+                </Label>
+              </div>
+            ))}
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs">Observações adicionais (opcional)</Label>
+            <Textarea
+              placeholder="Indique informações adicionais sobre os elementos solicitados..."
+              value={mensagemSolicitacao}
+              onChange={(e) => setMensagemSolicitacao(e.target.value)}
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setSolicitarDialogOpen(false)} disabled={acting}>
+              Cancelar
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSolicitarElementos}
+              disabled={acting || Object.values(elementosSelecionados).filter(Boolean).length === 0}
+              className="bg-amber-600 hover:bg-amber-700 text-white"
+            >
+              {acting ? "A enviar..." : `Enviar Solicitação (${Object.values(elementosSelecionados).filter(Boolean).length})`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </TecnicoLayout>
   );
 }
