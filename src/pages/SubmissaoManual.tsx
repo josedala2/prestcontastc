@@ -16,7 +16,7 @@ import {
 import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
 import { EntidadeDocumentosTab } from "@/components/portal/EntidadeDocumentosTab";
 import { useSubmissions } from "@/contexts/SubmissionContext";
-import { mockEntities } from "@/data/mockData";
+import { useEntities } from "@/hooks/useEntities";
 import { generateCC2Template } from "@/lib/cc2TemplateGenerator";
 import {
   ArrowLeft, FileSpreadsheet, CheckCircle, Upload, FileUp, X, Download,
