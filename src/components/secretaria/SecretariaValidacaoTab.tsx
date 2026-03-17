@@ -218,7 +218,7 @@ export function SecretariaValidacaoTab() {
         console.error("Erro ao criar notificação:", err);
       }
 
-      toast.success(`Processo ${processo.numero_processo} encaminhado para a Contadoria Geral`);
+      toast.success(`Nota de Remessa gerada e processo ${processo.numero_processo} encaminhado para a Contadoria Geral`);
       // Remove from local list
       setProcessos((prev) => prev.filter((p) => p.id !== processo.id));
       setApprovedProcessos((prev) => prev.filter((id) => id !== processo.id));
