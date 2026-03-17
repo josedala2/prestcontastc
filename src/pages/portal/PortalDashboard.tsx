@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils";
 
 const PortalDashboard = () => {
   const { entity, entityId } = usePortalEntity();
-  const { unreadCount } = useSubmissions();
+  const { unreadCount, notifications } = useSubmissions();
   const entityExercicios = mockFiscalYears.filter((fy) => fy.entityId === entityId);
   const activeExercicio = entityExercicios.find((fy) => fy.year === 2024);
   const pendingClarifications = mockClarifications.filter(
