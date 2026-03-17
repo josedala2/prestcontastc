@@ -73,7 +73,9 @@ export function TecnicoLayout({ children }: TecnicoLayoutProps) {
             TRIBUNAL DE CONTAS DE ANGOLA
           </span>
           <span className="text-header-foreground/40 hidden sm:inline">|</span>
-          <span className="text-[12px] text-header-foreground/80 hidden sm:inline">Técnico Validador</span>
+          <span className="text-[12px] text-header-foreground/80 hidden sm:inline">
+            {isContadoria ? "Contadoria Geral" : "Técnico Validador"}
+          </span>
         </div>
         <div className="flex items-center gap-3">
           {/* Entity selector */}
