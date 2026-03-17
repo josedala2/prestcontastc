@@ -8,24 +8,39 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { generateWorkflowDocument, type ProcessoDocData } from "@/lib/workflowDocGenerator";
+import { saveAs } from "file-saver";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, Clock, FileText, Building2,
-  User, Calendar, ChevronRight, AlertTriangle, History, Send
+  User, Calendar, AlertTriangle, History, Send, Download, Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface ProcessoDocumento {
+  id: string;
+  processo_id: string;
+  tipo_documento: string;
+  nome_ficheiro: string;
+  caminho_ficheiro: string | null;
+  estado: string;
+  obrigatorio: boolean;
+  versao: number;
+  created_at: string;
+}
 
 const ProcessoDetalhe = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, canActOnStage } = useAuth();
   const [processo, setProcesso] = useState<Processo | null>(null);
   const [historico, setHistorico] = useState<ProcessoHistorico[]>([]);
+  const [documentos, setDocumentos] = useState<ProcessoDocumento[]>([]);
   const [loading, setLoading] = useState(true);
   const [observacoes, setObservacoes] = useState("");
   const [advancing, setAdvancing] = useState(false);
+  const [generatingDoc, setGeneratingDoc] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) loadData();
@@ -33,22 +48,116 @@ const ProcessoDetalhe = () => {
 
   const loadData = async () => {
     setLoading(true);
-    const [procRes, histRes] = await Promise.all([
+    const [procRes, histRes, docsRes] = await Promise.all([
       supabase.from("processos").select("*").eq("id", id).single(),
       supabase.from("processo_historico").select("*").eq("processo_id", id).order("created_at", { ascending: false }),
+      supabase.from("processo_documentos").select("*").eq("processo_id", id).order("created_at", { ascending: false }),
     ]);
     if (procRes.data) setProcesso(procRes.data as any);
     if (histRes.data) setHistorico(histRes.data as any[]);
+    if (docsRes.data) setDocumentos(docsRes.data as any[]);
     setLoading(false);
+  };
+
+  const buildDocData = (): ProcessoDocData | null => {
+    if (!processo) return null;
+    const cat = CATEGORIAS_ENTIDADE.find(c => c.id === processo.categoria_entidade);
+    return {
+      numeroProcesso: processo.numero_processo,
+      entityName: processo.entity_name,
+      anoGerencia: processo.ano_gerencia,
+      categoriaEntidade: cat?.nome || processo.categoria_entidade,
+      canalEntrada: processo.canal_entrada,
+      dataSubmissao: processo.data_submissao,
+      responsavelAtual: processo.responsavel_atual || "",
+      submetidoPor: processo.submetido_por,
+      juizRelator: processo.juiz_relator || undefined,
+      tecnicoAnalise: processo.tecnico_analise || undefined,
+      portadorNome: processo.portador_nome || undefined,
+      portadorDocumento: processo.portador_documento || undefined,
+      observacoes: processo.observacoes || undefined,
+      etapaAtual: processo.etapa_atual,
+      estado: processo.estado,
+    };
+  };
+
+  const generateAndSaveDocument = async (docType: string) => {
+    if (!processo) return;
+    setGeneratingDoc(docType);
+    try {
+      const docData = buildDocData();
+      if (!docData) return;
+      const result = await generateWorkflowDocument(docType, docData, user?.displayName || "Sistema");
+      if (!result) {
+        toast({ title: "Documento não suportado", description: `"${docType}" ainda não tem modelo definido.`, variant: "destructive" });
+        return;
+      }
+
+      // Save to processo_documentos table
+      await supabase.from("processo_documentos").insert({
+        processo_id: processo.id,
+        tipo_documento: docType,
+        nome_ficheiro: result.fileName,
+        estado: "gerado",
+        obrigatorio: false,
+        versao: 1,
+      } as any);
+
+      // Download
+      saveAs(result.blob, result.fileName);
+      toast({ title: "Documento gerado", description: `${docType} — ${result.fileName}` });
+      loadData();
+    } catch (err: any) {
+      toast({ title: "Erro ao gerar", description: err.message, variant: "destructive" });
+    } finally {
+      setGeneratingDoc(null);
+    }
+  };
+
+  const autoGenerateStageDocuments = async (stageId: number) => {
+    const stage = WORKFLOW_STAGES.find(s => s.id === stageId);
+    if (!stage || stage.documentosGerados.length === 0 || !processo) return;
+
+    const docData = buildDocData();
+    if (!docData) return;
+
+    const generated: string[] = [];
+    for (const docType of stage.documentosGerados) {
+      try {
+        const result = await generateWorkflowDocument(docType, docData, user?.displayName || "Sistema");
+        if (result) {
+          await supabase.from("processo_documentos").insert({
+            processo_id: processo.id,
+            tipo_documento: docType,
+            nome_ficheiro: result.fileName,
+            estado: "gerado",
+            obrigatorio: false,
+            versao: 1,
+          } as any);
+          saveAs(result.blob, result.fileName);
+          generated.push(docType);
+        }
+      } catch { /* continue */ }
+    }
+    return generated;
   };
 
   const advanceStage = async () => {
     if (!processo || processo.etapa_atual >= 18) return;
     setAdvancing(true);
 
-    const nextStage = processo.etapa_atual + 1;
+    const currentStageId = processo.etapa_atual;
+    const nextStage = currentStageId + 1;
     const nextStageInfo = WORKFLOW_STAGES.find(s => s.id === nextStage);
+    const currentStageInfo = WORKFLOW_STAGES.find(s => s.id === currentStageId);
     const newEstado = nextStage === 18 ? "arquivado" : nextStage >= 12 ? "em_decisao" : nextStage >= 8 ? "em_analise" : "em_validacao";
+
+    // Auto-generate documents for the CURRENT stage before advancing
+    let generatedDocs: string[] = [];
+    if (currentStageInfo?.documentosGerados?.length) {
+      const docs = await autoGenerateStageDocuments(currentStageId);
+      if (docs) generatedDocs = docs;
+    }
 
     const { error } = await supabase.from("processos").update({
       etapa_atual: nextStage,
@@ -60,7 +169,7 @@ const ProcessoDetalhe = () => {
     if (!error) {
       await supabase.from("processo_historico").insert({
         processo_id: processo.id,
-        etapa_anterior: processo.etapa_atual,
+        etapa_anterior: currentStageId,
         etapa_seguinte: nextStage,
         estado_anterior: processo.estado,
         estado_seguinte: newEstado,
@@ -68,10 +177,11 @@ const ProcessoDetalhe = () => {
         executado_por: user?.displayName || "Sistema",
         perfil_executor: user?.role || null,
         observacoes: observacoes || null,
-        documentos_gerados: nextStageInfo?.documentosGerados?.length ? nextStageInfo.documentosGerados : null,
+        documentos_gerados: generatedDocs.length > 0 ? generatedDocs : (currentStageInfo?.documentosGerados?.length ? currentStageInfo.documentosGerados : null),
       } as any);
 
-      toast({ title: "Processo avançado", description: `Transitou para: ${nextStageInfo?.nome}` });
+      const docMsg = generatedDocs.length > 0 ? ` | Documentos gerados: ${generatedDocs.join(", ")}` : "";
+      toast({ title: "Processo avançado", description: `Transitou para: ${nextStageInfo?.nome}${docMsg}` });
       setObservacoes("");
       loadData();
     } else {
@@ -83,7 +193,6 @@ const ProcessoDetalhe = () => {
   const returnToPrevious = async () => {
     if (!processo || processo.etapa_atual <= 1) return;
     setAdvancing(true);
-
     const prevStage = processo.etapa_atual - 1;
     const prevStageInfo = WORKFLOW_STAGES.find(s => s.id === prevStage);
 
@@ -106,7 +215,6 @@ const ProcessoDetalhe = () => {
         perfil_executor: user?.role || null,
         observacoes: observacoes || null,
       } as any);
-
       toast({ title: "Processo devolvido", description: `Devolvido para: ${prevStageInfo?.nome}` });
       setObservacoes("");
       loadData();
@@ -125,6 +233,7 @@ const ProcessoDetalhe = () => {
   const currentStage = WORKFLOW_STAGES.find(s => s.id === processo.etapa_atual);
   const estadoInfo = WORKFLOW_ESTADOS.find(e => e.value === processo.estado);
   const categoria = CATEGORIAS_ENTIDADE.find(c => c.id === processo.categoria_entidade);
+  const canAct = canActOnStage(processo.etapa_atual);
 
   return (
     <AppLayout>
@@ -169,7 +278,6 @@ const ProcessoDetalhe = () => {
 
                   return (
                     <div key={stage.id} className="flex gap-3 mb-1 last:mb-0">
-                      {/* Connector */}
                       <div className="flex flex-col items-center">
                         <div className={cn(
                           "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 shrink-0",
@@ -180,13 +288,9 @@ const ProcessoDetalhe = () => {
                           {isCompleted ? <CheckCircle2 className="h-4 w-4" /> : stage.id}
                         </div>
                         {idx < WORKFLOW_STAGES.length - 1 && (
-                          <div className={cn(
-                            "w-0.5 h-6 my-0.5",
-                            isCompleted ? "bg-green-500" : "bg-muted-foreground/20"
-                          )} />
+                          <div className={cn("w-0.5 h-6 my-0.5", isCompleted ? "bg-green-500" : "bg-muted-foreground/20")} />
                         )}
                       </div>
-                      {/* Content */}
                       <div className={cn(
                         "flex-1 pb-2 pt-0.5",
                         isCurrent && "bg-primary/5 rounded-lg px-3 py-2 -mt-0.5 border border-primary/20",
@@ -207,7 +311,17 @@ const ProcessoDetalhe = () => {
                             <p className="text-xs text-muted-foreground">{stage.descricao}</p>
                             <p className="text-xs mt-1"><span className="font-semibold">Responsável:</span> {stage.responsavelPerfil}</p>
                             {stage.documentosGerados.length > 0 && (
-                              <p className="text-xs mt-0.5"><span className="font-semibold">Documentos:</span> {stage.documentosGerados.join(", ")}</p>
+                              <div className="mt-1">
+                                <span className="text-xs font-semibold">Documentos a gerar:</span>
+                                <div className="flex flex-wrap gap-1 mt-0.5">
+                                  {stage.documentosGerados.map((d, i) => (
+                                    <Badge key={i} variant="secondary" className="text-[10px] cursor-pointer hover:bg-primary/20" onClick={() => generateAndSaveDocument(d)}>
+                                      {generatingDoc === d ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Download className="h-3 w-3 mr-1" />}
+                                      {d}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
                             )}
                           </div>
                         )}
@@ -226,6 +340,11 @@ const ProcessoDetalhe = () => {
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <Send className="h-4 w-4 text-primary" /> Acções da Etapa
                 </CardTitle>
+                {!canAct && (
+                  <p className="text-xs text-amber-600 mt-1">
+                    ⚠ O seu perfil ({user?.role}) não tem permissão para agir nesta etapa. Responsável: {currentStage?.responsavelPerfil}
+                  </p>
+                )}
               </CardHeader>
               <CardContent className="space-y-4">
                 {currentStage && (
@@ -240,19 +359,62 @@ const ProcessoDetalhe = () => {
                   value={observacoes}
                   onChange={e => setObservacoes(e.target.value)}
                   rows={2}
+                  disabled={!canAct}
                 />
                 <div className="flex gap-3">
-                  <Button variant="outline" onClick={returnToPrevious} disabled={advancing || processo.etapa_atual <= 1}>
+                  <Button variant="outline" onClick={returnToPrevious} disabled={advancing || processo.etapa_atual <= 1 || !canAct}>
                     <ArrowLeft className="h-4 w-4 mr-2" /> Devolver
                   </Button>
-                  <Button onClick={advanceStage} disabled={advancing || processo.etapa_atual >= 18} className="flex-1">
-                    {processo.etapa_atual >= 18 ? "Processo Concluído" : (
+                  <Button onClick={advanceStage} disabled={advancing || processo.etapa_atual >= 18 || !canAct} className="flex-1">
+                    {advancing ? (
+                      <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> A processar...</span>
+                    ) : processo.etapa_atual >= 18 ? "Processo Concluído" : (
                       <>
                         Avançar para: {WORKFLOW_STAGES.find(s => s.id === processo.etapa_atual + 1)?.nome}
+                        {currentStage?.documentosGerados?.length ? ` (+ ${currentStage.documentosGerados.length} doc${currentStage.documentosGerados.length > 1 ? "s" : ""})` : ""}
                         <ArrowRight className="h-4 w-4 ml-2" />
                       </>
                     )}
                   </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Generated Documents */}
+          {documentos.length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-primary" /> Documentos Gerados ({documentos.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {documentos.map(doc => (
+                    <div key={doc.id} className="flex items-center justify-between p-2 rounded-md border border-border hover:bg-accent/30 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded bg-primary/10 flex items-center justify-center">
+                          <FileText className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium">{doc.tipo_documento}</p>
+                          <p className="text-[10px] text-muted-foreground">{doc.nome_ficheiro} — {new Date(doc.created_at).toLocaleString("pt-AO")}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className={cn("text-[10px]",
+                          doc.estado === "gerado" && "bg-green-50 text-green-700",
+                          doc.estado === "pendente" && "bg-amber-50 text-amber-700"
+                        )}>
+                          {doc.estado === "gerado" ? "Gerado" : "Pendente"}
+                        </Badge>
+                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => generateAndSaveDocument(doc.tipo_documento)}>
+                          <Download className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
