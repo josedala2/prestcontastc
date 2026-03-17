@@ -201,7 +201,7 @@ const Exercicios = () => {
                       <Checkbox
                         checked={selectedEntityIds.length === allEntities.length}
                         onCheckedChange={(checked) => {
-                          setSelectedEntityIds(checked ? mockEntities.map((e) => e.id) : []);
+                          setSelectedEntityIds(checked ? allEntities.map((e) => e.id) : []);
                         }}
                       />
                       <span className="text-sm font-medium">Seleccionar Todas ({mockEntities.length})</span>
