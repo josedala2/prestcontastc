@@ -65,6 +65,8 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/gestao-processos", "/mapas", "/relatorios", "/anexos", "/dashboard",
   ],
   "Técnico da Contadoria Geral": [
+    "/contadoria", "/contadoria/verificacao", "/contadoria/documentos",
+    "/contadoria/esclarecimentos", "/contadoria/processos",
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
     "/documentos-obrigatorios", "/esclarecimentos", "/mapas", "/relatorios",
   ],
