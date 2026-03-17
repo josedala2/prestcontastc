@@ -328,27 +328,29 @@ const ProcessoDetalhe = () => {
     const prevStage = processo.etapa_atual - 1;
     const prevStageInfo = WORKFLOW_STAGES.find(s => s.id === prevStage);
 
-    const { error } = await supabase.from("processos").update({
-      etapa_atual: prevStage,
-      estado: "pendente_correccao",
-      responsavel_atual: prevStageInfo?.responsavelPerfil || null,
-      updated_at: new Date().toISOString(),
-    } as any).eq("id", processo.id);
+    try {
+      // Use RPC to return to previous stage atomically
+      const result = await avancarEtapaProcesso({
+        processoId: processo.id,
+        novaEtapa: prevStage,
+        novoEstado: "pendente_correccao",
+        executadoPor: user?.displayName || "Sistema",
+        perfilExecutor: user?.role || undefined,
+        observacoes: observacoes || undefined,
+      });
 
-    if (!error) {
-      await supabase.from("processo_historico").insert({
-        processo_id: processo.id,
-        etapa_anterior: processo.etapa_atual,
-        etapa_seguinte: prevStage,
-        estado_anterior: processo.estado,
-        estado_seguinte: "pendente_correccao",
-        acao: `Processo devolvido para: ${prevStageInfo?.nome}`,
-        executado_por: user?.displayName || "Sistema",
-        perfil_executor: user?.role || null,
-        observacoes: observacoes || null,
-      } as any);
+      if (!result.success) {
+        toast({ title: "Erro", description: "Falha ao devolver processo via RPC", variant: "destructive" });
+        setAdvancing(false);
+        return;
+      }
 
-      // Internal notification for the previous responsible
+      // Update responsavel_atual
+      await supabase.from("processos").update({
+        responsavel_atual: prevStageInfo?.responsavelPerfil || null,
+      } as any).eq("id", processo.id);
+
+      // Internal notification
       await supabase.from("submission_notifications").insert({
         entity_id: processo.entity_id,
         entity_name: processo.entity_name,
@@ -363,6 +365,8 @@ const ProcessoDetalhe = () => {
       setObservacoes("");
       refreshNotifications();
       loadData();
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
     }
     setAdvancing(false);
   };
