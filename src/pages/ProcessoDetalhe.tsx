@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { generateWorkflowDocument, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
+import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
 import { AtividadesTimeline } from "@/components/AtividadesTimeline";
 import { saveAs } from "file-saver";
 import {
