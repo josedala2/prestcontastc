@@ -79,7 +79,7 @@ const Secretaria = () => {
 
   const handleEncaminharValidacao = async (fyId: string) => {
     const fy = submetidos.find((f) => f.id === fyId) || mockFiscalYears.find((f) => f.id === fyId);
-    const entity = fy ? mockEntities.find((e) => e.id === fy.entityId) : null;
+    const entity = fy ? allEntities.find((e) => e.id === fy.entityId) : null;
     if (!fy || !entity) return;
 
     setEncaminhando(fyId);
