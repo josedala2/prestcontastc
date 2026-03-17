@@ -308,7 +308,7 @@ const GestaoProcessos = () => {
                       <Select
                         value={newProcess.entity_id || ""}
                         onValueChange={v => {
-                          const ent = mockEntities.find(e => e.id === v);
+                          const ent = allEntities.find(e => e.id === v);
                           if (ent) setNewProcess(p => ({ ...p, entity_id: ent.id, entity_name: ent.name }));
                         }}
                       >
