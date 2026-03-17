@@ -539,6 +539,16 @@ const SubmissaoDetalhe = () => {
                     >
                       <SortIcon className="h-3.5 w-3.5" />
                     </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1.5 text-xs"
+                      disabled={exportingZip || allDocs.length === 0}
+                      onClick={handleExportZip}
+                    >
+                      {exportingZip ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Archive className="h-3.5 w-3.5" />}
+                      {exportingZip ? "A gerar..." : "Exportar ZIP"}
+                    </Button>
                   </div>
 
                   {/* Document list */}
