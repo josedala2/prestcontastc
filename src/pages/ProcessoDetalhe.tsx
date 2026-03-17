@@ -821,7 +821,7 @@ const ProcessoDetalhe = () => {
                             <Download className="h-3.5 w-3.5" />
                           </Button>
                         )}
-                        {canAct && doc.estado === "anexado" && (
+                        {effectiveCanAct && doc.estado === "anexado" && (
                           <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => deleteAttachment(doc.id, doc.caminho_ficheiro)}>
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
