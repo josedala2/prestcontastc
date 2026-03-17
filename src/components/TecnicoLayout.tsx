@@ -101,7 +101,7 @@ export function TecnicoLayout({ children }: TecnicoLayoutProps) {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80 max-h-[400px] overflow-auto">
-              {mockEntities.map((e) => {
+              {allEntities.map((e) => {
                 const eName = e.name.split(" - ")[1] || e.name;
                 return (
                   <DropdownMenuItem
