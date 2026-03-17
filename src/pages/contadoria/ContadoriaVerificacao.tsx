@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { TecnicoLayout } from "@/components/TecnicoLayout";
 import { toast } from "sonner";
 import { FileText, Download, CheckCircle2, XCircle, ClipboardCheck, Send, ArrowLeft, Eye } from "lucide-react";
-import { CATEGORIAS_EntIDADE } from "@/types/workflow";
+import { CATEGORIAS_ENTIDADE } from "@/types/workflow";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 
 interface Processo {
