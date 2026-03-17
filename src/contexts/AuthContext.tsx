@@ -80,7 +80,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
   "Chefe de Divisão": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
     "/relatorios", "/mapas", "/anexos", "/documentos-obrigatorios",
-    "/chefe-divisao/processos",
+    "/chefe-divisao/processos", "/chefe-divisao/validacao",
   ],
   "Chefe de Secção": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
