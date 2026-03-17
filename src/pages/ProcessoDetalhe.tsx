@@ -486,6 +486,23 @@ const ProcessoDetalhe = () => {
   const categoria = CATEGORIAS_ENTIDADE.find(c => c.id === processo.categoria_entidade);
   const canAct = canActOnStage(processo.etapa_atual);
 
+  // After submission to judge (stage ≥ 12), pre-judicial profiles become read-only
+  const PRE_JUDICIAL_ROLES: UserRole[] = [
+    "Técnico da Secretaria-Geral",
+    "Chefe da Secretaria-Geral",
+    "Técnico da Contadoria Geral",
+    "Escrivão dos Autos",
+    "Chefe de Divisão",
+    "Chefe de Secção",
+    "Técnico de Análise",
+    "Coordenador de Equipa",
+    "Diretor dos Serviços Técnicos",
+  ];
+  const isPostJudicial = processo.etapa_atual >= 12;
+  const isPreJudicialRole = user?.role ? PRE_JUDICIAL_ROLES.includes(user.role as UserRole) : false;
+  const isReadOnly = isPostJudicial && isPreJudicialRole;
+  const effectiveCanAct = canAct && !isReadOnly;
+
   return (
     <AppLayout>
       {/* Header */}
