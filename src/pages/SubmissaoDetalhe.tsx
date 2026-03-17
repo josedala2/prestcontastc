@@ -267,6 +267,7 @@ const SubmissaoDetalhe = () => {
                 <TableBody>
                   {submissionChecklist.map((item) => {
                     const isChecked = !!checkedDocs[item.id];
+                    const subDoc = findSubmissionDoc(item.id);
                     return (
                       <TableRow key={item.id} className={isChecked ? "bg-success/5" : ""}>
                         <TableCell>
@@ -278,6 +279,16 @@ const SubmissaoDetalhe = () => {
                             <Badge variant="destructive" className="text-[10px]">Obrigatório</Badge>
                           ) : (
                             <Badge variant="outline" className="text-[10px]">Opcional</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {subDoc ? (
+                            <span className="flex items-center justify-center gap-1 text-xs text-green-700 dark:text-green-400">
+                              <CheckCircle className="h-3 w-3" />
+                              <span className="max-w-[120px] truncate" title={subDoc.file_name}>{subDoc.file_name}</span>
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
                           )}
                         </TableCell>
                         <TableCell className="text-center">
@@ -296,7 +307,7 @@ const SubmissaoDetalhe = () => {
                             variant="ghost"
                             size="sm"
                             className="h-7 w-7 p-0"
-                            title={`Visualizar ${item.label}`}
+                            title={subDoc ? `Visualizar ${subDoc.file_name}` : `Visualizar ${item.label}`}
                             onClick={() => handleOpenDocPreview(item.label, item.category, item.id)}
                           >
                             <Eye className="h-3.5 w-3.5" />
