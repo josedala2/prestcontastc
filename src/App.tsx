@@ -45,6 +45,7 @@ import ActasRecepcao from "./pages/ActasRecepcao";
 import Secretaria from "./pages/Secretaria";
 import Atividades from "./pages/Atividades";
 import ContadoriaVerificacao from "./pages/contadoria/ContadoriaVerificacao";
+import EscrivaoRegistoAutuacao from "./pages/escrivao/EscrivaoRegistoAutuacao";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
