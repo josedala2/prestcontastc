@@ -249,12 +249,18 @@ const SubmissaoDetalhe = () => {
                   <FileText className="h-4 w-4 text-primary" />
                   Verificação Documental (Resolução 1/17)
                 </CardTitle>
-                <Badge variant={allRequiredChecked ? "default" : "secondary"}>
-                  {checkedCount}/{submissionChecklist.length} verificados
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-[10px] gap-1">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    {submissionChecklist.filter(i => findSubmissionDoc(i.id)).length}/{submissionChecklist.length} carregados
+                  </Badge>
+                  <Badge variant={allRequiredChecked ? "default" : "secondary"}>
+                    {checkedCount}/{submissionChecklist.length} verificados
+                  </Badge>
+                </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                Confirme a existência de cada documento antes de emitir a acta de recepção.
+                Confirme a existência de cada documento antes de emitir a acta de recepção. Os documentos sinalizados a verde foram carregados pela entidade.
               </p>
             </CardHeader>
             <CardContent>
