@@ -166,7 +166,7 @@ const SubmissaoDetalhe = () => {
     try {
       await supabase.storage
         .from("actas-recepcao")
-        .upload(filePath, blob, { contentType: "application/pdf" });
+        .upload(filePath, blob, { contentType: "application/pdf", upsert: true });
 
       const fiscalYearId = `${entity.id}-${periodo}`;
       await supabase.from("actas_recepcao").insert({
@@ -178,6 +178,9 @@ const SubmissaoDetalhe = () => {
         file_path: filePath,
         file_name: fileName,
       } as any);
+
+      setGeneratedActaFilePath(filePath);
+      setGeneratedActaFileName(fileName);
     } catch (err) {
       console.error("Error persisting acta:", err);
     }
