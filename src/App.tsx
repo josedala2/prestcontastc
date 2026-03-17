@@ -194,6 +194,84 @@ const App = () => (
               <ChefeDivisaoProcessos />
             </ProtectedRoute>
           } />
+          <Route path="/chefe-divisao/validacao" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Chefe de Divisão"]}>
+              <ValidacaoChefeDivisao />
+            </ProtectedRoute>
+          } />
+
+          {/* Chefe de Secção */}
+          <Route path="/chefe-seccao/distribuicao" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Chefe de Secção"]}>
+              <ChefeSeccaoDistribuicao />
+            </ProtectedRoute>
+          } />
+          <Route path="/chefe-seccao/validacao" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Chefe de Secção"]}>
+              <ValidacaoChefeSeccao />
+            </ProtectedRoute>
+          } />
+
+          {/* Análise Técnica */}
+          <Route path="/analise-tecnica" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico de Análise"]}>
+              <AnaliseTecnicaPage />
+            </ProtectedRoute>
+          } />
+
+          {/* DST - Controle Qualidade */}
+          <Route path="/dst/controle-qualidade" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Diretor dos Serviços Técnicos"]}>
+              <ControleQualidadeDST />
+            </ProtectedRoute>
+          } />
+
+          {/* Juiz Relator */}
+          <Route path="/juiz/decisao" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Juiz Relator", "Juiz Adjunto", "Presidente da Câmara"]}>
+              <DecisaoJuizRelator />
+            </ProtectedRoute>
+          } />
+          <Route path="/juiz/arquivamento" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Juiz Relator", "Presidente da Câmara"]}>
+              <Arquivamento />
+            </ProtectedRoute>
+          } />
+
+          {/* Custas e Emolumentos */}
+          <Route path="/custas/emolumentos" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secção de Custas e Emolumentos"]}>
+              <CobrancaEmolumentos />
+            </ProtectedRoute>
+          } />
+
+          {/* Ministério Público */}
+          <Route path="/ministerio-publico/despacho" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Ministério Público"]}>
+              <DespachoMinisterioPublico />
+            </ProtectedRoute>
+          } />
+
+          {/* Escrivão - Cumprimento */}
+          <Route path="/escrivao/cumprimento-despachos" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Escrivão dos Autos"]}>
+              <CumprimentoDespachos />
+            </ProtectedRoute>
+          } />
+
+          {/* Ofício de Remessa */}
+          <Route path="/secretaria/oficio-remessa" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secretaria-Geral"]}>
+              <OficioRemessa />
+            </ProtectedRoute>
+          } />
+
+          {/* Oficial de Diligências */}
+          <Route path="/diligencias/expediente-saida" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Oficial de Diligências"]}>
+              <ExpedienteSaida />
+            </ProtectedRoute>
+          } />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
