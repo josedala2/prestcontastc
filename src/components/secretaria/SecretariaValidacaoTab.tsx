@@ -158,6 +158,21 @@ export function SecretariaValidacaoTab() {
         console.error("Erro ao gerar atividades:", err);
       }
 
+      // Notificação automática para a Contadoria Geral
+      try {
+        await supabase.from("submission_notifications").insert({
+          entity_id: processo.entity_id,
+          entity_name: processo.entity_name,
+          fiscal_year_id: `${processo.entity_id}-${processo.ano_gerencia}`,
+          fiscal_year: String(processo.ano_gerencia),
+          type: "encaminhamento_contadoria",
+          message: `Processo ${processo.numero_processo} de ${processo.entity_name} (${processo.ano_gerencia}) encaminhado para verificação documental`,
+          detail: `A Chefe da Secretaria-Geral aprovou a validação documental e encaminhou o processo para a Contadoria Geral. Aguarda verificação detalhada pelo Técnico da Contadoria.`,
+        } as any);
+      } catch (err) {
+        console.error("Erro ao criar notificação:", err);
+      }
+
       toast.success(`Processo ${processo.numero_processo} encaminhado para a Contadoria Geral`);
       // Remove from local list
       setProcessos((prev) => prev.filter((p) => p.id !== processo.id));
