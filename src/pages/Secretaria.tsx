@@ -767,7 +767,7 @@ const Secretaria = () => {
                 </div>
               ) : (
                 submetidos.filter((fy) => !actasGeradas.includes(fy.id)).map((fy) => {
-                  const entity = mockEntities.find((e) => e.id === fy.entityId);
+                  const entity = allEntities.find((e) => e.id === fy.entityId);
                   return (
                     <button
                       key={fy.id}
