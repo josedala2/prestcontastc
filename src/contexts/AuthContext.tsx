@@ -34,7 +34,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
   ],
   "Secretaria": [
     "/secretaria", "/submissoes", "/actas-recepcao", "/entidades",
-    "/relatorios", "/mapas", "/anexos",
+    "/relatorios", "/mapas", "/anexos", "/gestao-processos",
   ],
   "Preparador / Contabilista": [
     "/portal", "/portal/exercicios", "/portal/prestacao-contas",
