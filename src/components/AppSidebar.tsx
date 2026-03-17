@@ -99,6 +99,7 @@ const navSections: { label: string; items: NavEntry[] }[] = [
       { title: "Técnico Validador", icon: UserCheck, path: "/tecnico" },
       { title: "Secretaria", icon: ClipboardCheck, path: "/secretaria" },
       { title: "Registo e Autuação", icon: FileText, path: "/escrivao/registo-autuacao" },
+      { title: "Divisão Competente", icon: GitBranch, path: "/chefe-divisao/processos" },
     ],
   },
   {
