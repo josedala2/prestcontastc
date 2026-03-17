@@ -59,6 +59,7 @@ const TIPO_ICONS: Record<DocumentoTribunalTipo, React.ReactNode> = {
 };
 
 export function DocumentosTribunal({ exercicioId, entidadeId, readOnly = false }: DocumentosTribunalProps) {
+  const { findById } = useEntities();
   const [documentos, setDocumentos] = useState<DocumentoTribunal[]>(
     mockDocumentosTribunal.filter((d) => d.exercicioId === exercicioId && d.entidadeId === entidadeId)
   );
