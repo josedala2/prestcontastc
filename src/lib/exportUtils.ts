@@ -675,22 +675,12 @@ export async function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = fa
   y = addField("Exerc\u00EDcio:", String(data.exercicioYear), y);
   y = addField("Per\u00EDodo:", `${data.periodoInicio} a ${data.periodoFim}`, y);
 
-  // ── 2. Dados Financeiros ──
+  // ── 2. DOCUMENTAÇÃO VERIFICADA ──
   y += 4;
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(0, 0, 0);
-  doc.text("2. DADOS FINANCEIROS", marginLeft, y);
-  y += 6;
-  y = addField("Total D\u00E9bito:", `${formatKz(data.totalDebito)} Kz`, y);
-  y = addField("Total Cr\u00E9dito:", `${formatKz(data.totalCredito)} Kz`, y);
-
-  // ── 3. Documentação Verificada ──
-  y += 4;
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(0, 0, 0);
-  doc.text("3. DOCUMENTA\u00C7\u00C3O VERIFICADA", marginLeft, y);
+  doc.text("2. DOCUMENTA\u00C7\u00C3O VERIFICADA", marginLeft, y);
   y += 3;
 
   const docsChecked = data.documentosVerificados.filter(d => d.checked);
@@ -699,12 +689,11 @@ export async function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = fa
   autoTable(doc, {
     startY: y,
     margin: { left: marginLeft, right: marginRight },
-    head: [["N\u00BA", "Documento", "Obrigat\u00F3rio", "Estado"]],
+    head: [["N\u00BA", "Documento", "Obrigat\u00F3rio"]],
     body: data.documentosVerificados.map((d, i) => [
       String(i + 1),
       d.label,
       d.required ? "Sim" : "N\u00E3o",
-      d.checked ? "\u2713 Verificado" : "\u2717 Em falta",
     ]),
     headStyles: {
       fillColor: [60, 60, 60],
@@ -717,19 +706,6 @@ export async function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = fa
     columnStyles: {
       0: { cellWidth: 10, halign: "center" },
       2: { cellWidth: 22, halign: "center" },
-      3: { cellWidth: 25, halign: "center" },
-    },
-    didParseCell: (hookData: any) => {
-      if (hookData.column.index === 3 && hookData.section === "body") {
-        const val = hookData.cell.raw as string;
-        if (val.startsWith("\u2713")) {
-          hookData.cell.styles.textColor = [39, 174, 96];
-          hookData.cell.styles.fontStyle = "bold";
-        } else {
-          hookData.cell.styles.textColor = [220, 53, 69];
-          hookData.cell.styles.fontStyle = "bold";
-        }
-      }
     },
   });
 
