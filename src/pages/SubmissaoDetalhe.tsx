@@ -47,7 +47,8 @@ interface SubmissionDoc {
 const SubmissaoDetalhe = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const entity = mockEntities.find((e) => e.id === id) || mockEntities[0];
+  const { entities: allEntities } = useEntities();
+  const entity = allEntities.find((e) => e.id === id) || allEntities[0];
   const periodo = "2024";
 
   const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
