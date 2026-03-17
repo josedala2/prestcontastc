@@ -621,9 +621,14 @@ const ProcessoDetalhe = () => {
                           {doc.estado === "gerado" ? "Gerado" : doc.estado === "anexado" ? "Anexado" : "Pendente"}
                         </Badge>
                         {doc.caminho_ficheiro ? (
-                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => downloadAttachment(doc.caminho_ficheiro!, doc.nome_ficheiro)}>
-                            <Eye className="h-3.5 w-3.5" />
-                          </Button>
+                          <>
+                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title="Pré-visualizar" onClick={() => openPreview(doc)}>
+                              <Eye className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title="Descarregar" onClick={() => downloadAttachment(doc.caminho_ficheiro!, doc.nome_ficheiro)}>
+                              <Download className="h-3.5 w-3.5" />
+                            </Button>
+                          </>
                         ) : (
                           <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => generateAndSaveDocument(doc.tipo_documento)}>
                             <Download className="h-3.5 w-3.5" />
