@@ -15,6 +15,8 @@ import { toast } from "sonner";
 import { FileText, Download, CheckCircle2, XCircle, ClipboardCheck, Send, ArrowLeft, Eye } from "lucide-react";
 import { CATEGORIAS_ENTIDADE } from "@/types/workflow";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
+import { generateRelatorioVerificacao, type ProcessoDocData, type ChecklistItem } from "@/lib/workflowDocGenerator";
+import { saveAs } from "file-saver";
 
 interface Processo {
   id: string;
@@ -142,13 +144,70 @@ export default function ContadoriaVerificacao() {
     if (!selectedProcesso) return;
     setActing(true);
     try {
+      // Build checklist data for the report
+      const checklistData: ChecklistItem[] = CHECKLIST_ITEMS.map((item) => ({
+        label: item.label,
+        obrigatorio: item.obrigatorio,
+        verificado: !!checkedItems[item.id],
+        observacao: observacoes[item.id] || undefined,
+      }));
+
+      const docData: ProcessoDocData = {
+        numeroProcesso: selectedProcesso.numero_processo,
+        entityName: selectedProcesso.entity_name,
+        anoGerencia: selectedProcesso.ano_gerencia,
+        categoriaEntidade: selectedProcesso.categoria_entidade,
+        canalEntrada: "portal",
+        dataSubmissao: selectedProcesso.data_submissao,
+        responsavelAtual: executadoPor,
+        submetidoPor: "sistema",
+        etapaAtual: selectedProcesso.etapa_atual,
+        estado: selectedProcesso.estado,
+      };
+
+      const docsAnexos = documentos.map((d) => ({
+        tipo: d.tipo_documento,
+        ficheiro: d.nome_ficheiro,
+        estado: d.estado,
+      }));
+
+      // Generate Relatório de Verificação Documental PDF
+      const relatorioBlob = await generateRelatorioVerificacao(docData, executadoPor, checklistData, docsAnexos);
+
+      const sanitized = selectedProcesso.numero_processo.replace(/[^a-zA-Z0-9-]/g, "_");
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const relatorioFileName = `Relatorio_Verificacao_${sanitized}_${timestamp}.pdf`;
+      const relatorioPath = `${selectedProcesso.id}/${relatorioFileName}`;
+
+      // Upload to storage
+      await supabase.storage.from("processo-documentos").upload(relatorioPath, relatorioBlob, {
+        contentType: "application/pdf",
+        upsert: true,
+      });
+
+      // Register in processo_documentos
+      await supabase.from("processo_documentos").insert({
+        processo_id: selectedProcesso.id,
+        tipo_documento: "Relatório de Verificação Documental",
+        nome_ficheiro: relatorioFileName,
+        caminho_ficheiro: relatorioPath,
+        estado: "validado",
+        obrigatorio: true,
+        validado_por: executadoPor,
+        validado_em: new Date().toISOString(),
+      } as any);
+
+      // Download for user
+      saveAs(relatorioBlob, relatorioFileName);
+
+      // Advance workflow
       await avancarEtapaProcesso({
         processoId: selectedProcesso.id,
         novaEtapa: 5,
         novoEstado: "verificado",
         executadoPor,
         perfilExecutor: "Técnico da Contadoria Geral",
-        observacoes: `Verificação documental concluída — ${checkedCount}/${CHECKLIST_ITEMS.length} itens verificados. Processo apto para registo e autuação.`,
+        observacoes: `Verificação documental concluída — ${checkedCount}/${CHECKLIST_ITEMS.length} itens verificados. Relatório de Verificação gerado.`,
         documentosGerados: ["Relatório de Verificação Documental"],
       });
 
@@ -165,7 +224,7 @@ export default function ContadoriaVerificacao() {
         console.error("Erro ao gerar atividades:", err);
       }
 
-      toast.success(`Verificação concluída — ${selectedProcesso.numero_processo} encaminhado para Registo e Autuação`);
+      toast.success(`Relatório de Verificação gerado — ${selectedProcesso.numero_processo} encaminhado para Registo e Autuação`);
       setApproveDialogOpen(false);
       setSelectedProcesso(null);
       fetchProcessos();
