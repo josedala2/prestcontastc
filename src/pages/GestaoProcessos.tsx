@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
@@ -6,6 +6,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { WORKFLOW_STAGES, WORKFLOW_ESTADOS, CATEGORIAS_ENTIDADE, type Processo } from "@/types/workflow";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { gerarNumeroProcesso } from "@/hooks/useBackendFunctions";
+import { mockEntities } from "@/data/mockData";
+import { EntityTipologia } from "@/types";
+
+// Mapping: workflow category → entity tipologias
+const CATEGORIA_TIPOLOGIA_MAP: Record<string, EntityTipologia[]> = {
+  categoria_1: ["orgao_soberania"],
+  categoria_2: ["admin_central", "admin_local", "instituto_admin"],
+  categoria_3: ["servico_estrangeiro"],
+  categoria_4: ["orgao_autonomo", "instituto_publico", "fundo_autonomo", "servico_autonomo", "empresa_publica"],
+};
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -280,19 +290,9 @@ const GestaoProcessos = () => {
                   <DialogTitle>Registar Novo Processo</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 mt-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Nome da Entidade *</Label>
-                      <Input value={newProcess.entity_name} onChange={e => setNewProcess(p => ({ ...p, entity_name: e.target.value }))} />
-                    </div>
-                    <div>
-                      <Label>Código da Entidade</Label>
-                      <Input value={newProcess.entity_id} onChange={e => setNewProcess(p => ({ ...p, entity_id: e.target.value }))} placeholder="Auto-gerado se vazio" />
-                    </div>
-                  </div>
                   <div>
                     <Label>Categoria da Entidade *</Label>
-                    <Select value={newProcess.categoria_entidade} onValueChange={v => setNewProcess(p => ({ ...p, categoria_entidade: v }))}>
+                    <Select value={newProcess.categoria_entidade} onValueChange={v => setNewProcess(p => ({ ...p, categoria_entidade: v, entity_name: "", entity_id: "" }))}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {CATEGORIAS_ENTIDADE.map(c => (
@@ -300,6 +300,34 @@ const GestaoProcessos = () => {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Nome da Entidade *</Label>
+                      <Select
+                        value={newProcess.entity_id || ""}
+                        onValueChange={v => {
+                          const ent = mockEntities.find(e => e.id === v);
+                          if (ent) setNewProcess(p => ({ ...p, entity_id: ent.id, entity_name: ent.name }));
+                        }}
+                      >
+                        <SelectTrigger><SelectValue placeholder="Seleccione a entidade" /></SelectTrigger>
+                        <SelectContent>
+                          {(() => {
+                            const tipologias = CATEGORIA_TIPOLOGIA_MAP[newProcess.categoria_entidade] || [];
+                            const filtered = mockEntities.filter(e => tipologias.includes(e.tipologia));
+                            if (filtered.length === 0) return <SelectItem value="_none" disabled>Nenhuma entidade nesta categoria</SelectItem>;
+                            return filtered.map(e => (
+                              <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
+                            ));
+                          })()}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Código da Entidade</Label>
+                      <Input value={newProcess.entity_id} readOnly placeholder="Auto-preenchido" className="bg-muted/30" />
+                    </div>
                   </div>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
