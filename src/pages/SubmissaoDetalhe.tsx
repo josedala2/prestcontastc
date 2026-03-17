@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
@@ -21,9 +21,20 @@ import { useSubmissions } from "@/contexts/SubmissionContext";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 import {
   ArrowLeft, CheckCircle, XCircle, FileText, Eye, Stamp, Pencil,
-  AlertTriangle, Undo2, Building2, X, Send, BarChart3,
+  AlertTriangle, Undo2, Building2, X, Send, BarChart3, Download,
 } from "lucide-react";
 import { toast } from "sonner";
+
+interface SubmissionDoc {
+  id: string;
+  doc_id: string;
+  doc_label: string;
+  doc_category: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  content_type: string | null;
+}
 
 const SubmissaoDetalhe = () => {
   const { id } = useParams<{ id: string }>();
