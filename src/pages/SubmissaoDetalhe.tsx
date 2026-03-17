@@ -421,13 +421,13 @@ const SubmissaoDetalhe = () => {
             </div>
           </div>
 
-          {/* Remeter para Técnico */}
+          {/* Remeter para Chefe da Secretaria-Geral */}
           {!remetido ? (
             <div className="flex items-center gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
               <Send className="h-5 w-5 shrink-0 text-primary" />
               <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground">Remessa para Validação Técnica</p>
-                <p className="text-xs text-muted-foreground">Envie o processo para o Técnico Validador proceder à análise das contas (Modelo CC-2).</p>
+                <p className="text-sm font-semibold text-foreground">Remessa para Validação da Chefe da Secretaria</p>
+                <p className="text-xs text-muted-foreground">Envie o processo para a Chefe da Secretaria-Geral proceder à validação documental.</p>
               </div>
               <Button
                 size="sm"
@@ -436,20 +436,20 @@ const SubmissaoDetalhe = () => {
                   const fiscalYearId = `${entity.id}-${periodo}`;
                   remeterParaTecnico(entity.id, fiscalYearId, entity.name, `entidade@${entity.nif}.ao`);
                   setRemetido(true);
-                  toast.success(`Processo remetido para o Técnico Validador — ${entity.name} — ${periodo}`);
+                  toast.success(`Processo encaminhado para a Chefe da Secretaria-Geral — ${entity.name} — ${periodo}`);
                 }}
               >
-                <Send className="h-3.5 w-3.5" /> Remeter para Técnico
+                <Send className="h-3.5 w-3.5" /> Remeter para Chefe
               </Button>
             </div>
           ) : (
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
-              <BarChart3 className="h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
+              <ShieldCheck className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
               <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground">Processo em Análise Técnica</p>
-                <p className="text-xs text-muted-foreground">O processo foi remetido para o Técnico Validador e encontra-se em análise no módulo CC-2.</p>
+                <p className="text-sm font-semibold text-foreground">Processo em Validação pela Chefe da Secretaria</p>
+                <p className="text-xs text-muted-foreground">O processo foi encaminhado para a Chefe da Secretaria-Geral e aguarda validação documental.</p>
               </div>
-              <Badge variant="secondary" className="text-xs">Em Análise</Badge>
+              <Badge variant="secondary" className="text-xs">Em Validação</Badge>
             </div>
           )}
 
