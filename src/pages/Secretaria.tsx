@@ -66,6 +66,91 @@ const Secretaria = () => {
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [motivoRejeicao, setMotivoRejeicao] = useState("");
+  const [encaminhados, setEncaminhados] = useState<string[]>([]);
+  const [encaminhando, setEncaminhando] = useState<string | null>(null);
+
+  const handleEncaminharValidacao = async (fyId: string) => {
+    const fy = submetidos.find((f) => f.id === fyId) || mockFiscalYears.find((f) => f.id === fyId);
+    const entity = fy ? mockEntities.find((e) => e.id === fy.entityId) : null;
+    if (!fy || !entity) return;
+
+    setEncaminhando(fyId);
+    try {
+      // Check if a processo already exists for this entity/year
+      const { data: existingProcessos } = await supabase
+        .from("processos")
+        .select("id, etapa_atual")
+        .eq("entity_id", entity.id)
+        .eq("ano_gerencia", fy.year)
+        .limit(1);
+
+      let processoId: string;
+
+      if (existingProcessos && existingProcessos.length > 0) {
+        processoId = existingProcessos[0].id;
+        // Advance to etapa 3 (Validação da Secretaria)
+        if (existingProcessos[0].etapa_atual < 3) {
+          await avancarEtapaProcesso({
+            processoId,
+            novaEtapa: 3,
+            novoEstado: "em_validacao",
+            executadoPor: "Técnico da Secretaria-Geral",
+            perfilExecutor: "Técnico da Secretaria-Geral",
+            observacoes: "Encaminhado para validação da Chefe da Secretaria-Geral",
+            documentosGerados: ["Acta de Recepção"],
+          });
+        }
+      } else {
+        // Create new processo
+        const numero = await gerarNumeroProcesso(fy.year);
+        const { data: newProc, error } = await supabase.from("processos").insert({
+          numero_processo: numero,
+          entity_id: entity.id,
+          entity_name: entity.name,
+          categoria_entidade: entity.tipologia || "categoria_1",
+          ano_gerencia: fy.year,
+          canal_entrada: "portal",
+          etapa_atual: 3,
+          estado: "em_validacao",
+          responsavel_atual: "Chefe da Secretaria-Geral",
+          submetido_por: "Técnico da Secretaria-Geral",
+          observacoes: "Encaminhado para validação da Chefe da Secretaria-Geral",
+        } as any).select("id").single();
+        if (error) throw error;
+        processoId = newProc!.id;
+
+        // Record history
+        await supabase.from("processo_historico").insert({
+          processo_id: processoId,
+          etapa_anterior: 1,
+          etapa_seguinte: 3,
+          estado_anterior: "submetido",
+          estado_seguinte: "em_validacao",
+          acao: "Recepção concluída e encaminhado para validação da Chefe da Secretaria-Geral",
+          executado_por: "Técnico da Secretaria-Geral",
+          perfil_executor: "Técnico da Secretaria-Geral",
+          documentos_gerados: ["Acta de Recepção"],
+        } as any);
+      }
+
+      // Generate activities for validation event
+      try {
+        await gerarAtividadesParaEvento("validacao_aprovada", processoId, {
+          categoriaEntidade: entity.tipologia || "resolucao_1_17",
+        });
+      } catch (err) {
+        console.error("Erro ao gerar atividades de validação:", err);
+      }
+
+      setEncaminhados((prev) => [...prev, fyId]);
+      toast.success(`Processo encaminhado para validação da Chefe da Secretaria-Geral — ${entity.name} ${fy.year}`);
+    } catch (err: any) {
+      console.error("Erro ao encaminhar:", err);
+      toast.error(`Erro ao encaminhar: ${err.message}`);
+    } finally {
+      setEncaminhando(null);
+    }
+  };
 
   const selectedFy = submetidos.find((fy) => fy.id === selectedId);
   const selectedEntity = selectedFy ? mockEntities.find((e) => e.id === selectedFy.entityId) : null;
