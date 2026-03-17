@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { generateWorkflowDocument, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
+import { AtividadesTimeline } from "@/components/AtividadesTimeline";
 import { saveAs } from "file-saver";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, Clock, FileText, Building2,
