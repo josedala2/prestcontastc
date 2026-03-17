@@ -186,7 +186,7 @@ const Exercicios = () => {
                     <SelectValue placeholder="Seleccione a entidade" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockEntities.map((e) => (
+                    {allEntities.map((e) => (
                       <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
                     ))}
                   </SelectContent>
