@@ -41,8 +41,10 @@ const TecnicoDashboard = () => {
   return (
     <TecnicoLayout>
       <PageHeader
-        title="Painel do Técnico Validador"
-        description="Visão geral dos processos de prestação de contas atribuídos para análise."
+        title={isContadoria ? "Painel da Contadoria Geral" : "Painel do Técnico Validador"}
+        description={isContadoria
+          ? "Verificação documental detalhada dos processos encaminhados pela Secretaria (Etapa 4)."
+          : "Visão geral dos processos de prestação de contas atribuídos para análise."}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
