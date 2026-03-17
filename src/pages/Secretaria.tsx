@@ -37,6 +37,10 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Secretaria = () => {
   const { recepcionar, rejeitar, submissions, getUploadedDocs } = useSubmissions();
+  const { user } = useAuth();
+  const isChefe = user?.role === "Chefe da Secretaria-Geral" ||
+    user?.role === "Administrador do Sistema" ||
+    user?.role === "Presidente do Tribunal de Contas";
 
   // Merge: mock "submetido" + dynamically submitted via Portal ("pendente" in SubmissionContext)
   const submetidos = useMemo(() => {
