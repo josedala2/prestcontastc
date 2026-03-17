@@ -12,7 +12,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { TecnicoLayout } from "@/components/TecnicoLayout";
 import { toast } from "sonner";
-import { FileText, Download, CheckCircle2, XCircle, ClipboardCheck, Send, ArrowLeft, Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { FileText, Download, CheckCircle2, XCircle, ClipboardCheck, Send, ArrowLeft, Eye, AlertTriangle, Mail } from "lucide-react";
 import { CATEGORIAS_ENTIDADE } from "@/types/workflow";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { generateRelatorioVerificacao, type ProcessoDocData, type ChecklistItem } from "@/lib/workflowDocGenerator";
