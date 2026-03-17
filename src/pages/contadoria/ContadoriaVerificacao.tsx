@@ -547,6 +547,22 @@ export default function ContadoriaVerificacao() {
                     Devolver à Secretaria
                   </Button>
                   <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      // Pre-select unchecked items
+                      const preSelected: Record<string, boolean> = {};
+                      uncheckedItems.forEach((i) => { preSelected[i.id] = true; });
+                      setElementosSelecionados(preSelected);
+                      setSolicitarDialogOpen(true);
+                    }}
+                    disabled={acting || uncheckedItems.length === 0}
+                    className="border-amber-500 text-amber-700 hover:bg-amber-50"
+                  >
+                    <AlertTriangle className="h-4 w-4 mr-1" />
+                    Solicitar Elementos ({uncheckedItems.length})
+                  </Button>
+                  <Button
                     size="sm"
                     onClick={() => setApproveDialogOpen(true)}
                     disabled={!allRequiredChecked || acting}
