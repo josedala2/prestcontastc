@@ -488,7 +488,7 @@ export function SecretariaValidacaoTab() {
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 p-3 rounded-md bg-green-50 dark:bg-green-950/20 border border-green-200 text-sm text-green-800 dark:text-green-200">
                           <CheckCircle className="h-4 w-4" />
-                          Validação aprovada. Pronto para encaminhar à Contadoria Geral.
+                          Validação aprovada. Gere a Nota de Remessa e encaminhe à Contadoria Geral.
                         </div>
                         <Button
                           className="w-full gap-2"
@@ -498,9 +498,9 @@ export function SecretariaValidacaoTab() {
                           {encaminhando ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
-                            <Send className="h-4 w-4" />
+                            <FileText className="h-4 w-4" />
                           )}
-                          Encaminhar para a Contadoria Geral
+                          Gerar Nota de Remessa e Encaminhar
                         </Button>
                       </div>
                     ) : (
