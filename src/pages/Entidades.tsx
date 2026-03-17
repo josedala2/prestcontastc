@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
-import { mockEntities } from "@/data/mockData";
+import { useEntities } from "@/hooks/useEntities";
 import { Entity, TIPOLOGIA_LABELS, TIPOLOGIA_GROUPS, RESOLUCAO_LABELS } from "@/types";
 import { SelectGroup, SelectLabel } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus, Pencil, Trash2, Building2, Search, MapPin } from "lucide-react";
 
 const Entidades = () => {
-  const [entities, setEntities] = useState<Entity[]>(mockEntities);
+  const { entities: dbEntities, loading } = useEntities();
+  const [entities, setEntities] = useState<Entity[]>([]);
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    if (dbEntities.length > 0) setEntities(dbEntities);
+  }, [dbEntities]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Entity | null>(null);
   const [form, setForm] = useState({
