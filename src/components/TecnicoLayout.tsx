@@ -13,6 +13,7 @@ import {
   Building2,
   ChevronDown,
   UserCheck,
+  ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,19 +30,28 @@ interface TecnicoLayoutProps {
   children: ReactNode;
 }
 
-const buildNav = (prefix: string) => [
-  { title: "Painel", icon: LayoutDashboard, path: prefix },
-  { title: "Prestação de Contas", icon: FileBarChart, path: `${prefix}/prestacao-contas` },
-  { title: "Exercícios", icon: FileBarChart, path: `${prefix}/exercicios` },
-  { title: "Documentos", icon: Paperclip, path: `${prefix}/documentos` },
-  { title: "Mapas/Modelos", icon: Map, path: `${prefix}/mapas` },
-  { title: "Esclarecimentos", icon: MessageSquare, path: `${prefix}/esclarecimentos` },
-  { title: "Validações", icon: ShieldCheck, path: `${prefix}/validacoes` },
-];
+const buildNav = (prefix: string) => {
+  const base = [
+    { title: "Painel", icon: LayoutDashboard, path: prefix },
+    { title: "Prestação de Contas", icon: FileBarChart, path: `${prefix}/prestacao-contas` },
+  ];
+  if (prefix === "/contadoria") {
+    base.push({ title: "Verificação Documental", icon: ClipboardCheck, path: `${prefix}/verificacao` });
+  }
+  return [
+    ...base,
+    { title: "Exercícios", icon: FileBarChart, path: `${prefix}/exercicios` },
+    { title: "Documentos", icon: Paperclip, path: `${prefix}/documentos` },
+    { title: "Mapas/Modelos", icon: Map, path: `${prefix}/mapas` },
+    { title: "Esclarecimentos", icon: MessageSquare, path: `${prefix}/esclarecimentos` },
+    { title: "Validações", icon: ShieldCheck, path: `${prefix}/validacoes` },
+  ];
+};
 
 const buildRouteTitles = (prefix: string): Record<string, string> => ({
   [prefix]: prefix === "/contadoria" ? "Painel da Contadoria Geral" : "Painel do Técnico",
   [`${prefix}/prestacao-contas`]: "Prestação de Contas — Modelo CC-2",
+  [`${prefix}/verificacao`]: "Verificação Documental",
   [`${prefix}/exercicios`]: "Exercícios Fiscais",
   [`${prefix}/documentos`]: "Documentos & Anexos",
   [`${prefix}/mapas`]: "Mapas e Modelos",
