@@ -12,6 +12,9 @@ import { Badge } from "@/components/ui/badge";
 
 const TecnicoDashboard = () => {
   const navigate = useNavigate();
+  const location = window.location.pathname;
+  const prefix = location.startsWith("/contadoria") ? "/contadoria" : "/tecnico";
+  const isContadoria = prefix === "/contadoria";
   const { submissions } = useSubmissions();
   const [rpcStats, setRpcStats] = useState<any>(null);
   const [perfilStats, setPerfilStats] = useState<any>(null);
