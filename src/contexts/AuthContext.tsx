@@ -72,7 +72,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
   ],
   "Escrivão dos Autos": [
     "/dashboard", "/gestao-processos", "/entidades", "/submissoes",
-    "/actas-recepcao", "/documentos-obrigatorios",
+    "/actas-recepcao", "/documentos-obrigatorios", "/escrivao/registo-autuacao",
   ],
   "Chefe de Divisão": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
@@ -141,7 +141,7 @@ export const roleSidebarSections: Record<UserRole, string[]> = {
   "Técnico da Secretaria-Geral": ["Principal", "Relatórios", "Dossiê"],
   "Chefe da Secretaria-Geral": ["Principal", "Relatórios", "Dossiê"],
   "Técnico da Contadoria Geral": ["Principal", "Relatórios", "Dossiê"],
-  "Escrivão dos Autos": ["Principal", "Dossiê"],
+  "Escrivão dos Autos": ["Principal", "Dossiê", "Acesso Externo"],
   "Chefe de Divisão": ["Principal", "Relatórios", "Dossiê"],
   "Chefe de Secção": ["Principal", "Relatórios", "Dossiê"],
   "Técnico de Análise": [],
