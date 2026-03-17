@@ -365,8 +365,8 @@ function BalancoCharts({
     return v.toLocaleString();
   };
 
-  const renderCustomLabel = ({ name, percent }: { name: string; percent: number }) =>
-    percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : "";
+  const renderCustomLabel = ({ name, percent }: { name?: string; percent?: number }) =>
+    (percent ?? 0) > 0.05 ? `${((percent ?? 0) * 100).toFixed(0)}%` : "";
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
