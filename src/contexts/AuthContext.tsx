@@ -85,6 +85,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
   "Chefe de Secção": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
     "/relatorios", "/mapas", "/documentos-obrigatorios",
+    "/chefe-seccao/distribuicao", "/chefe-seccao/validacao",
   ],
   "Técnico de Análise": [
     "/tecnico", "/tecnico/prestacao-contas", "/tecnico/exercicios",
