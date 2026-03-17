@@ -16,7 +16,7 @@ import {
 import { StatCard } from "@/components/ui-custom/PageElements";
 import {
   CheckCircle, XCircle, Clock, FileText, Eye, Send, Loader2,
-  Undo2, ShieldCheck, ArrowRight, Inbox, AlertTriangle, Lock,
+  Undo2, ShieldCheck, ArrowRight, Inbox, AlertTriangle, Lock, Bell,
 } from "lucide-react";
 import { toast } from "sonner";
 import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
