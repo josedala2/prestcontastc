@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { TecnicoLayout } from "@/components/TecnicoLayout";
+import { AppLayout } from "@/components/AppLayout";
 import { toast } from "sonner";
 import { BookOpen, Hash, FileText, Send, CheckCircle2, Loader2, ArrowRight, ClipboardCheck, Eye, Download } from "lucide-react";
 import { generateCapaProcesso, type ProcessoDocData } from "@/lib/workflowDocGenerator";
