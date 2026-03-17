@@ -377,8 +377,8 @@ const SubmissaoDetalhe = () => {
           <div className="flex items-center gap-3 p-4 rounded-lg bg-success/10 border border-success/20">
             <CheckCircle className="h-5 w-5 shrink-0 text-success" />
             <div className="flex-1">
-              <p className="text-sm font-semibold text-foreground">Acta de Recepção Emitida</p>
-              <p className="text-xs text-muted-foreground">A documentação foi verificada e a acta de recepção foi gerada com sucesso.</p>
+              <p className="text-sm font-semibold text-foreground">Nota de Remessa Emitida</p>
+              <p className="text-xs text-muted-foreground">A documentação foi verificada e a nota de remessa foi gerada com sucesso.</p>
             </div>
             <div className="flex items-center gap-2">
               {generatedActaFilePath && (
