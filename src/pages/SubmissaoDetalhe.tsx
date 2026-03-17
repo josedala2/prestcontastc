@@ -188,7 +188,7 @@ const SubmissaoDetalhe = () => {
     const fiscalYearId = `${entity.id}-${periodo}`;
     recepcionar(entity.id, fiscalYearId, entity.name, `entidade@${entity.nif}.ao`);
     setConfirmDialogOpen(false);
-    toast.success(`Nota de Remessa gerada — ${entity.name} — ${periodo}`);
+    toast.success(`Processo autuado — ${entity.name} — ${periodo}`);
   };
 
   const handleConfirmRejeicao = () => {

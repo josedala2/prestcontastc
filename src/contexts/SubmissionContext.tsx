@@ -293,8 +293,8 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
 
     const year = fiscalYearId.split("-").pop() || fiscalYearId;
     sendNotification(entityId, fiscalYearId, "em_analise",
-      `Processo do exercício ${year} encaminhado para validação da Chefe da Secretaria`,
-      "O processo foi encaminhado pela Secretaria para a Chefe da Secretaria-Geral para validação documental. Poderá acompanhar o estado no portal.",
+      `Processo do exercício ${year} encaminhado para o Chefe de Divisão`,
+      "O processo foi autuado e encaminhado para o Chefe de Divisão competente para prosseguimento da tramitação. Poderá acompanhar o estado no portal.",
       entityName, entityEmail
     );
   }, [submissions, upsertSubmission, sendNotification]);
