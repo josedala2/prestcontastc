@@ -485,47 +485,60 @@ const SubmissaoDetalhe = () => {
       </Dialog>
 
       {/* Document Preview Dialog */}
-      <Dialog open={!!docPreview} onOpenChange={() => setDocPreview(null)}>
-        <DialogContent className="max-w-3xl h-[70vh]">
+      <Dialog open={!!docPreview} onOpenChange={() => { setDocPreview(null); setDocPreviewUrl(null); }}>
+        <DialogContent className="max-w-4xl h-[80vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
               {docPreview?.label}
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 flex flex-col items-center justify-center gap-4 border rounded-lg bg-muted/30 p-8 overflow-auto">
-            <div className="w-full max-w-md space-y-4">
-              <div className="flex items-center gap-3 p-3 rounded-md bg-background border">
-                <FileText className="h-8 w-8 text-primary shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{docPreview?.label}</p>
-                  <p className="text-xs text-muted-foreground">Categoria: {docPreview?.category}</p>
-                </div>
-                <Badge variant="outline" className="shrink-0">Submetido</Badge>
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {docPreviewLoading ? (
+              <div className="flex-1 flex items-center justify-center">
+                <p className="text-sm text-muted-foreground animate-pulse">A carregar documento...</p>
               </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="p-3 rounded-md bg-background border">
-                  <p className="text-xs text-muted-foreground mb-1">Entidade</p>
-                  <p className="font-medium">{entity.name}</p>
+            ) : docPreviewUrl ? (
+              <>
+                <div className="flex items-center justify-between mb-3 px-1">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-[10px]">Submetido</Badge>
+                    <span className="text-xs text-muted-foreground">{entity.name} · Exercício {periodo}</span>
+                  </div>
+                  <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => window.open(docPreviewUrl, "_blank")}>
+                    <Download className="h-3 w-3" /> Descarregar
+                  </Button>
                 </div>
-                <div className="p-3 rounded-md bg-background border">
-                  <p className="text-xs text-muted-foreground mb-1">Exercício</p>
-                  <p className="font-medium">{periodo}</p>
-                </div>
-                <div className="p-3 rounded-md bg-background border">
-                  <p className="text-xs text-muted-foreground mb-1">Data de Submissão</p>
-                  <p className="font-medium">{now.toLocaleDateString("pt-AO")}</p>
-                </div>
-                <div className="p-3 rounded-md bg-background border">
-                  <p className="text-xs text-muted-foreground mb-1">Formato</p>
-                  <p className="font-medium">PDF / Digital</p>
-                </div>
+                {docPreviewUrl.match(/\.(pdf)$/i) || docPreviewUrl.includes(".pdf") ? (
+                  <iframe
+                    src={docPreviewUrl}
+                    className="flex-1 w-full rounded-lg border"
+                    title="Document Preview"
+                  />
+                ) : docPreviewUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                  <div className="flex-1 flex items-center justify-center overflow-auto bg-muted/30 rounded-lg border p-4">
+                    <img src={docPreviewUrl} alt={docPreview?.label} className="max-w-full max-h-full object-contain" />
+                  </div>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center gap-3 bg-muted/30 rounded-lg border p-8">
+                    <FileText className="h-12 w-12 text-primary/40" />
+                    <p className="text-sm text-muted-foreground">
+                      Pré-visualização não disponível para este tipo de ficheiro.
+                    </p>
+                    <Button variant="outline" size="sm" className="gap-1.5" onClick={() => window.open(docPreviewUrl, "_blank")}>
+                      <Download className="h-3.5 w-3.5" /> Descarregar Ficheiro
+                    </Button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center gap-4 border rounded-lg bg-muted/30 p-8">
+                <Building2 className="h-10 w-10 text-primary/40" />
+                <p className="text-sm text-muted-foreground text-center">
+                  Documento não encontrado. A entidade ainda não submeteu este ficheiro.
+                </p>
               </div>
-              <div className="p-4 rounded-md bg-primary/5 border border-primary/20 text-center">
-                <Building2 className="h-10 w-10 mx-auto mb-2 text-primary/40" />
-                <p className="text-sm text-muted-foreground">Pré-visualização do documento disponível após integração com o sistema de armazenamento.</p>
-              </div>
-            </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
