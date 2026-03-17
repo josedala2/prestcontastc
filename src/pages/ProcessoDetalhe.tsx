@@ -495,44 +495,110 @@ const ProcessoDetalhe = () => {
             </Card>
           )}
 
-          {/* Generated Documents */}
-          {documentos.length > 0 && (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-primary" /> Documentos Gerados ({documentos.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+          {/* Documents (Generated + Uploaded) */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" /> Documentos do Processo ({documentos.filter(d => d.estado !== "removido").length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Upload section */}
+              {canAct && processo.estado !== "arquivado" && (
+                <div className="p-3 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 space-y-3">
+                  <p className="text-xs font-semibold text-primary flex items-center gap-1">
+                    <Upload className="h-3.5 w-3.5" /> Anexar Documentos à Etapa Actual
+                  </p>
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1 space-y-1">
+                      <label className="text-[10px] text-muted-foreground font-medium">Tipo de documento</label>
+                      <Select value={uploadTipoDoc} onValueChange={setUploadTipoDoc}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Documento Digitalizado">Documento Digitalizado</SelectItem>
+                          <SelectItem value="Comprovativo">Comprovativo</SelectItem>
+                          <SelectItem value="Extracto Bancário">Extracto Bancário</SelectItem>
+                          <SelectItem value="Relatório">Relatório</SelectItem>
+                          <SelectItem value="Ofício">Ofício</SelectItem>
+                          <SelectItem value="Despacho">Despacho</SelectItem>
+                          <SelectItem value="Parecer">Parecer</SelectItem>
+                          <SelectItem value="Certidão">Certidão</SelectItem>
+                          <SelectItem value="Outro">Outro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 text-xs"
+                      disabled={uploading}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      {uploading ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Upload className="h-3.5 w-3.5 mr-1" />}
+                      {uploading ? "A enviar..." : "Escolher ficheiros"}
+                    </Button>
+                  </div>
+                  <Input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.tif,.tiff"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                  <p className="text-[10px] text-muted-foreground">PDF, Word, Excel, Imagens — até 50 MB por ficheiro</p>
+                </div>
+              )}
+
+              {/* Document list */}
+              {documentos.filter(d => d.estado !== "removido").length === 0 ? (
+                <p className="text-sm text-muted-foreground py-4 text-center">Nenhum documento anexado</p>
+              ) : (
                 <div className="space-y-2">
-                  {documentos.map(doc => (
+                  {documentos.filter(d => d.estado !== "removido").map(doc => (
                     <div key={doc.id} className="flex items-center justify-between p-2 rounded-md border border-border hover:bg-accent/30 transition-colors">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded bg-primary/10 flex items-center justify-center">
-                          <FileText className="h-4 w-4 text-primary" />
+                        <div className={cn("h-8 w-8 rounded flex items-center justify-center",
+                          doc.estado === "anexado" ? "bg-blue-100" : "bg-primary/10"
+                        )}>
+                          <FileText className={cn("h-4 w-4", doc.estado === "anexado" ? "text-blue-600" : "text-primary")} />
                         </div>
                         <div>
                           <p className="text-xs font-medium">{doc.tipo_documento}</p>
                           <p className="text-[10px] text-muted-foreground">{doc.nome_ficheiro} — {new Date(doc.created_at).toLocaleString("pt-AO")}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         <Badge variant="outline" className={cn("text-[10px]",
                           doc.estado === "gerado" && "bg-green-50 text-green-700",
+                          doc.estado === "anexado" && "bg-blue-50 text-blue-700",
                           doc.estado === "pendente" && "bg-amber-50 text-amber-700"
                         )}>
-                          {doc.estado === "gerado" ? "Gerado" : "Pendente"}
+                          {doc.estado === "gerado" ? "Gerado" : doc.estado === "anexado" ? "Anexado" : "Pendente"}
                         </Badge>
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => generateAndSaveDocument(doc.tipo_documento)}>
-                          <Download className="h-3.5 w-3.5" />
-                        </Button>
+                        {doc.caminho_ficheiro ? (
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => downloadAttachment(doc.caminho_ficheiro!, doc.nome_ficheiro)}>
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                        ) : (
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => generateAndSaveDocument(doc.tipo_documento)}>
+                            <Download className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                        {canAct && doc.estado === "anexado" && (
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => deleteAttachment(doc.id, doc.caminho_ficheiro)}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              )}
+            </CardContent>
+          </Card>
 
           {/* History */}
           <Card>
