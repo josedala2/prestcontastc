@@ -23,6 +23,7 @@ import {
   Stamp,
   Eye,
   XCircle,
+  FileQuestion,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
