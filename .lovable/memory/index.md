@@ -25,16 +25,28 @@ Sistema de Prestação de Contas do Tribunal de Contas de Angola (TCA)
 - estatisticas_dashboard(): Aggregated KPIs for dashboard
 - estatisticas_por_perfil(p_perfil): Activity stats per role
 - has_role(_user_id, _role): Security definer role check
-- update_updated_at_column(): Generic trigger for updated_at
-- audit_processo_changes(): Auto-audit trigger on processos
 
-## Frontend Hooks
-- src/hooks/useBackendFunctions.ts: Wrappers for all RPC functions
+## Workflow Pages (ALL 18 STAGES NOW IMPLEMENTED)
+- Etapa 1-3: Secretaria (SubmissaoDetalhe, Secretaria)
+- Etapa 4: Contadoria (ContadoriaVerificacao)
+- Etapa 5: Escrivão (EscrivaoRegistoAutuacao)
+- Etapa 6: Chefe de Divisão (ChefeDivisaoProcessos)
+- Etapa 7: Chefe de Secção (ChefeSeccaoDistribuicao)
+- Etapa 8: Análise Técnica (AnaliseTecnicaPage)
+- Etapa 9: Validação Chefe Secção (ValidacaoChefeSeccao)
+- Etapa 10: Validação Chefe Divisão (ValidacaoChefeDivisao)
+- Etapa 11: DST (ControleQualidadeDST)
+- Etapa 12: Juiz Relator (DecisaoJuizRelator)
+- Etapa 13: Custas (CobrancaEmolumentos)
+- Etapa 14: Min. Público (DespachoMinisterioPublico)
+- Etapa 15: Escrivão Cumprimento (CumprimentoDespachos)
+- Etapa 16: Ofício Remessa (OficioRemessa)
+- Etapa 17: Oficial Diligências (ExpedienteSaida)
+- Etapa 18: Arquivamento (Arquivamento)
 
-## Workflow
-- 18 stages defined in src/types/workflow.ts
-- 4 entity categories with distinct document checklists
-- AtividadesTimeline component in ProcessoDetalhe
+## Generic Component
+- WorkflowStagePage: Reusable component for all stage pages (list + detail + action)
+- Located at src/components/workflow/WorkflowStagePage.tsx
 
 ## Design
 - Institutional/governmental style
