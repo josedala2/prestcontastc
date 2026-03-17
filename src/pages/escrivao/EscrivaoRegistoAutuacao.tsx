@@ -6,11 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { AppLayout } from "@/components/AppLayout";
 import { toast } from "sonner";
-import { BookOpen, Hash, FileText, Send, CheckCircle2, Loader2, ArrowRight, ClipboardCheck, Eye, Download } from "lucide-react";
+import { BookOpen, FileText, CheckCircle2, Loader2, Lock } from "lucide-react";
 import { generateCapaProcesso, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { saveAs } from "file-saver";
@@ -29,14 +28,6 @@ interface Processo {
   responsavel_atual: string | null;
 }
 
-interface Step {
-  id: string;
-  label: string;
-  description: string;
-  icon: typeof BookOpen;
-  action: () => Promise<void>;
-}
-
 export default function EscrivaoRegistoAutuacao() {
   const { user } = useAuth();
   const executadoPor = user?.displayName || "Escrivão dos Autos";
@@ -45,9 +36,8 @@ export default function EscrivaoRegistoAutuacao() {
   const [selectedProcesso, setSelectedProcesso] = useState<Processo | null>(null);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
-  const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>({});
-  const [currentStep, setCurrentStep] = useState<string | null>(null);
-  const [remeterDialogOpen, setRemeterDialogOpen] = useState(false);
+  const [autuarDialogOpen, setAutuarDialogOpen] = useState(false);
+  const [autuado, setAutuado] = useState(false);
 
   useEffect(() => {
     fetchProcessos();
@@ -64,135 +54,26 @@ export default function EscrivaoRegistoAutuacao() {
     setLoading(false);
   };
 
-  const resetSteps = () => {
-    setCompletedSteps({});
-    setCurrentStep(null);
-  };
-
-  // ——— Step 1: Registar e Autuar Processo ———
-  const handleRegistarAutuar = async () => {
+  // ——— Autuar: faz tudo de uma vez ———
+  const handleAutuar = async () => {
     if (!selectedProcesso) return;
-    setCurrentStep("registar");
     setActing(true);
     try {
-      await supabase.from("processo_historico").insert({
-        processo_id: selectedProcesso.id,
-        etapa_anterior: 5,
-        etapa_seguinte: 5,
-        estado_anterior: selectedProcesso.estado,
-        estado_seguinte: "em_autuacao",
-        acao: "Registo e autuação do processo iniciado",
-        executado_por: executadoPor,
-        perfil_executor: "Escrivão dos Autos",
-        observacoes: "Processo registado e em fase de autuação",
-      } as any);
-
-      await supabase.from("processos").update({
-        estado: "em_autuacao",
-      } as any).eq("id", selectedProcesso.id);
-
-      setSelectedProcesso({ ...selectedProcesso, estado: "em_autuacao" });
-      setCompletedSteps((prev) => ({ ...prev, registar: true }));
-      toast.success("Processo registado e em autuação");
-    } catch (err: any) {
-      toast.error(`Erro: ${err.message}`);
-    } finally {
-      setActing(false);
-      setCurrentStep(null);
-    }
-  };
-
-  // ——— Step 2: Gerar Número Único ———
-  const handleGerarNumero = async () => {
-    if (!selectedProcesso) return;
-    setCurrentStep("numero");
-    setActing(true);
-    try {
-      const { data: novoNumero, error } = await supabase.rpc("gerar_numero_processo", {
+      // 1. Gerar Número Único
+      const { data: novoNumero, error: numError } = await supabase.rpc("gerar_numero_processo", {
         p_ano: selectedProcesso.ano_gerencia,
       });
-      if (error) throw error;
-
+      if (numError) throw numError;
       const numero = novoNumero as string;
 
       await supabase.from("processos").update({
         numero_processo: numero,
+        estado: "em_autuacao",
       } as any).eq("id", selectedProcesso.id);
 
-      await supabase.from("processo_historico").insert({
-        processo_id: selectedProcesso.id,
-        etapa_anterior: 5,
-        etapa_seguinte: 5,
-        estado_anterior: "em_autuacao",
-        estado_seguinte: "em_autuacao",
-        acao: `Número único do processo gerado: ${numero}`,
-        executado_por: executadoPor,
-        perfil_executor: "Escrivão dos Autos",
-      } as any);
-
-      setSelectedProcesso({ ...selectedProcesso, numero_processo: numero });
-      setCompletedSteps((prev) => ({ ...prev, numero: true }));
-      toast.success(`Número do processo gerado: ${numero}`);
-    } catch (err: any) {
-      toast.error(`Erro: ${err.message}`);
-    } finally {
-      setActing(false);
-      setCurrentStep(null);
-    }
-  };
-
-  // ——— Step 2: Validar Documentação ———
-  const [documentos, setDocumentos] = useState<any[]>([]);
-  const [docsLoading, setDocsLoading] = useState(false);
-
-  const fetchDocumentos = async (processoId: string) => {
-    setDocsLoading(true);
-    const { data } = await supabase
-      .from("processo_documentos")
-      .select("*")
-      .eq("processo_id", processoId)
-      .order("created_at", { ascending: true });
-    setDocumentos((data as any[]) || []);
-    setDocsLoading(false);
-  };
-
-  const handleValidarDocumentos = async () => {
-    if (!selectedProcesso) return;
-    setCurrentStep("validar");
-    setActing(true);
-    try {
-      await fetchDocumentos(selectedProcesso.id);
-
-      await supabase.from("processo_historico").insert({
-        processo_id: selectedProcesso.id,
-        etapa_anterior: 5,
-        etapa_seguinte: 5,
-        estado_anterior: selectedProcesso.estado,
-        estado_seguinte: "em_autuacao",
-        acao: "Documentação do processo verificada e validada pelo Escrivão",
-        executado_por: executadoPor,
-        perfil_executor: "Escrivão dos Autos",
-        observacoes: `${documentos.length || 0} documento(s) anexo(s) verificados`,
-      } as any);
-
-      setCompletedSteps((prev) => ({ ...prev, validar: true }));
-      toast.success("Documentação validada com sucesso");
-    } catch (err: any) {
-      toast.error(`Erro: ${err.message}`);
-    } finally {
-      setActing(false);
-      setCurrentStep(null);
-    }
-  };
-
-  // ——— Step 4: Gerar Capa do Processo ———
-  const handleGerarCapa = async () => {
-    if (!selectedProcesso) return;
-    setCurrentStep("capa");
-    setActing(true);
-    try {
+      // 2. Gerar Capa do Processo
       const docData: ProcessoDocData = {
-        numeroProcesso: selectedProcesso.numero_processo,
+        numeroProcesso: numero,
         entityName: selectedProcesso.entity_name,
         anoGerencia: selectedProcesso.ano_gerencia,
         categoriaEntidade: selectedProcesso.categoria_entidade,
@@ -201,11 +82,11 @@ export default function EscrivaoRegistoAutuacao() {
         responsavelAtual: executadoPor,
         submetidoPor: "sistema",
         etapaAtual: 5,
-        estado: selectedProcesso.estado,
+        estado: "em_autuacao",
       };
 
       const capaBlob = await generateCapaProcesso(docData, executadoPor);
-      const sanitized = selectedProcesso.numero_processo.replace(/[^a-zA-Z0-9-]/g, "_");
+      const sanitized = numero.replace(/[^a-zA-Z0-9-]/g, "_");
       const fileName = `Capa_Processo_${sanitized}.pdf`;
       const filePath = `${selectedProcesso.id}/${fileName}`;
 
@@ -227,21 +108,20 @@ export default function EscrivaoRegistoAutuacao() {
 
       saveAs(capaBlob, fileName);
 
-      setCompletedSteps((prev) => ({ ...prev, capa: true }));
-      toast.success("Capa do processo gerada e descarregada");
-    } catch (err: any) {
-      toast.error(`Erro: ${err.message}`);
-    } finally {
-      setActing(false);
-      setCurrentStep(null);
-    }
-  };
+      // 3. Registar histórico de autuação
+      await supabase.from("processo_historico").insert({
+        processo_id: selectedProcesso.id,
+        etapa_anterior: 5,
+        etapa_seguinte: 5,
+        estado_anterior: selectedProcesso.estado,
+        estado_seguinte: "em_autuacao",
+        acao: `Processo autuado: número ${numero} atribuído, capa gerada`,
+        executado_por: executadoPor,
+        perfil_executor: "Escrivão dos Autos",
+        observacoes: "Autuação completa — número único, capa do processo e nota de remessa gerados",
+      } as any);
 
-  // ——— Step 5: Remeter para o Chefe da Divisão ———
-  const handleRemeter = async () => {
-    if (!selectedProcesso) return;
-    setActing(true);
-    try {
+      // 4. Avançar para Etapa 6 — Chefe de Divisão
       await avancarEtapaProcesso({
         processoId: selectedProcesso.id,
         novaEtapa: 6,
@@ -249,13 +129,14 @@ export default function EscrivaoRegistoAutuacao() {
         executadoPor,
         perfilExecutor: "Escrivão dos Autos",
         observacoes: "Processo autuado e remetido ao Chefe de Divisão competente",
-        documentosGerados: ["Capa do Processo", "Termo de Abertura", "Termo de Autuação"],
+        documentosGerados: ["Capa do Processo", "Nota de Remessa"],
       });
 
       await supabase.from("processos").update({
         responsavel_atual: "Chefe de Divisão",
       } as any).eq("id", selectedProcesso.id);
 
+      // 5. Gerar atividades
       try {
         await gerarAtividadesParaEvento("autuacao_concluida", selectedProcesso.id, {
           categoriaEntidade: selectedProcesso.categoria_entidade,
@@ -264,26 +145,19 @@ export default function EscrivaoRegistoAutuacao() {
         console.error("Erro ao gerar atividades:", err);
       }
 
-      toast.success(`Processo ${selectedProcesso.numero_processo} remetido ao Chefe de Divisão`);
-      setRemeterDialogOpen(false);
-      setSelectedProcesso(null);
-      resetSteps();
+      setSelectedProcesso({ ...selectedProcesso, numero_processo: numero, estado: "em_analise", etapa_atual: 6 });
+      setAutuado(true);
+      setAutuarDialogOpen(false);
+      toast.success(`Processo ${numero} autuado e enviado ao Chefe de Divisão`);
       fetchProcessos();
     } catch (err: any) {
-      toast.error(`Erro: ${err.message}`);
+      toast.error(`Erro na autuação: ${err.message}`);
     } finally {
       setActing(false);
     }
   };
 
-  const steps: Step[] = [
-    { id: "validar", label: "Validar Documentação", description: "Verificar e validar os documentos anexos ao processo", icon: ClipboardCheck, action: handleValidarDocumentos },
-    { id: "registar", label: "Registar e Autuar Processo", description: "Iniciar o registo formal e autuação", icon: BookOpen, action: handleRegistarAutuar },
-    { id: "numero", label: "Gerar Número Único", description: "Atribuir número definitivo ao processo", icon: Hash, action: handleGerarNumero },
-    { id: "capa", label: "Gerar Capa do Processo", description: "Criar documento de capa oficial", icon: FileText, action: handleGerarCapa },
-  ];
-
-  const allStepsDone = steps.every((s) => completedSteps[s.id]);
+  const isLocked = autuado || (selectedProcesso && selectedProcesso.etapa_atual > 5);
 
   return (
     <AppLayout>
@@ -313,7 +187,7 @@ export default function EscrivaoRegistoAutuacao() {
                     {processos.map((p) => (
                       <button
                         key={p.id}
-                        onClick={() => { setSelectedProcesso(p); resetSteps(); }}
+                        onClick={() => { setSelectedProcesso(p); setAutuado(false); }}
                         className={`w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors ${
                           selectedProcesso?.id === p.id ? "bg-primary/5 border-l-2 border-primary" : ""
                         }`}
@@ -364,105 +238,92 @@ export default function EscrivaoRegistoAutuacao() {
                   </CardContent>
                 </Card>
 
-                {/* Steps */}
+                {/* Autuar action or locked state */}
                 <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <ClipboardCheck className="h-4 w-4 text-primary" />
-                      Atividades de Autuação
-                      <Badge variant="outline" className="ml-auto text-[10px]">
-                        {Object.values(completedSteps).filter(Boolean).length}/{steps.length} concluídas
-                      </Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {steps.map((step, idx) => {
-                      const done = completedSteps[step.id];
-                      const isActive = currentStep === step.id;
-                      const prevDone = idx === 0 || completedSteps[steps[idx - 1].id];
-                      const canExecute = !done && prevDone && !acting;
-                      const Icon = step.icon;
-
-                      return (
-                        <div key={step.id}>
-                          <div className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                            done ? "bg-primary/5" : isActive ? "bg-muted" : ""
-                          }`}>
-                            <div className={`flex items-center justify-center h-8 w-8 rounded-full shrink-0 ${
-                              done
-                                ? "bg-primary text-primary-foreground"
-                                : isActive
-                                ? "bg-muted-foreground/20 text-foreground"
-                                : "bg-muted text-muted-foreground"
-                            }`}>
-                              {done ? (
-                                <CheckCircle2 className="h-4 w-4" />
-                              ) : isActive ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Icon className="h-4 w-4" />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className={`text-sm font-medium ${done ? "text-primary" : "text-foreground"}`}>
-                                {idx + 1}. {step.label}
-                              </p>
-                              <p className="text-xs text-muted-foreground">{step.description}</p>
-                            </div>
-                            <Button
-                              size="sm"
-                              variant={done ? "ghost" : "default"}
-                              disabled={!canExecute}
-                              onClick={step.action}
-                              className="shrink-0"
-                            >
-                              {done ? (
-                                <><CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Concluído</>
-                              ) : isActive ? (
-                                <><Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> A executar...</>
-                              ) : (
-                                <><ArrowRight className="h-3.5 w-3.5 mr-1" /> Executar</>
-                              )}
-                            </Button>
-                          </div>
-                          {idx < steps.length - 1 && <Separator className="my-1" />}
+                  <CardContent className="py-8">
+                    {isLocked ? (
+                      <div className="flex flex-col items-center gap-4 text-center">
+                        <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center">
+                          <CheckCircle2 className="h-8 w-8 text-green-600" />
                         </div>
-                      );
-                    })}
+                        <div>
+                          <h3 className="text-lg font-semibold text-foreground">Processo Autuado</h3>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Este processo foi autuado e enviado ao Chefe de Divisão.
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Número atribuído: <strong>{selectedProcesso.numero_processo}</strong>
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground text-xs mt-2">
+                          <Lock className="h-3.5 w-3.5" />
+                          Processo bloqueado — apenas o Chefe de Divisão pode dar seguimento
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-5 text-center">
+                        <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                          <FileText className="h-8 w-8 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-foreground">Autuação do Processo</h3>
+                          <p className="text-sm text-muted-foreground mt-1 max-w-md">
+                            Ao autuar, o sistema irá automaticamente:
+                          </p>
+                          <ul className="text-sm text-muted-foreground mt-2 space-y-1 text-left inline-block">
+                            <li className="flex items-center gap-2">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
+                              Atribuir um número único ao processo
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
+                              Gerar a capa oficial do processo (PDF)
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
+                              Enviar para o Chefe de Divisão (Etapa 6)
+                            </li>
+                          </ul>
+                        </div>
+                        <Button
+                          size="lg"
+                          onClick={() => setAutuarDialogOpen(true)}
+                          disabled={acting}
+                          className="mt-2 px-8"
+                        >
+                          {acting ? (
+                            <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> A autuar...</>
+                          ) : (
+                            <><FileText className="h-4 w-4 mr-2" /> Autuar</>
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
-
-                {/* Final action: Remeter */}
-                <div className="flex justify-end">
-                  <Button
-                    size="sm"
-                    onClick={() => setRemeterDialogOpen(true)}
-                    disabled={!allStepsDone || acting}
-                  >
-                    <Send className="h-4 w-4 mr-1" />
-                    Remeter para o Chefe de Divisão
-                  </Button>
-                </div>
               </>
             )}
           </div>
         </div>
       </div>
 
-      {/* Remeter dialog */}
-      <AlertDialog open={remeterDialogOpen} onOpenChange={setRemeterDialogOpen}>
+      {/* Confirm dialog */}
+      <AlertDialog open={autuarDialogOpen} onOpenChange={setAutuarDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remeter Processo</AlertDialogTitle>
+            <AlertDialogTitle>Confirmar Autuação</AlertDialogTitle>
             <AlertDialogDescription>
-              O processo <strong>{selectedProcesso?.numero_processo}</strong> será encaminhado ao Chefe de Divisão competente para distribuição.
-              Todas as {steps.length} atividades foram concluídas com sucesso.
+              O processo <strong>{selectedProcesso?.numero_processo}</strong> da entidade{" "}
+              <strong>{selectedProcesso?.entity_name}</strong> será autuado, receberá um número único,
+              será gerada a capa oficial e encaminhado ao Chefe de Divisão.
+              <br /><br />
+              Após a autuação, o processo ficará <strong>bloqueado</strong> para o Escrivão.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={acting}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRemeter} disabled={acting}>
-              {acting ? "A processar..." : "Confirmar Remessa"}
+            <AlertDialogAction onClick={handleAutuar} disabled={acting}>
+              {acting ? "A processar..." : "Confirmar e Autuar"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
