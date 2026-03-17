@@ -102,7 +102,7 @@ function EntidadeView({
   const StatusIcon = STATUS_CONFIG[submissionStatus].icon;
 
   const handleSubmit = () => {
-    submit(entityId, fiscalYearId, entityName);
+    submit(entityId, fiscalYearId, entityName, undefined, docsCompliance.uploadedDocIds);
     toast.success("Prestação de contas submetida com sucesso! Aguarda recepção pela Secretaria.");
   };
 
