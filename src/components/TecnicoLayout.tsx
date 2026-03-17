@@ -29,15 +29,23 @@ interface TecnicoLayoutProps {
   children: ReactNode;
 }
 
-const buildNav = (prefix: string) => [
-  { title: "Painel", icon: LayoutDashboard, path: prefix },
-  { title: "Prestação de Contas", icon: FileBarChart, path: `${prefix}/prestacao-contas` },
-  { title: "Exercícios", icon: FileBarChart, path: `${prefix}/exercicios` },
-  { title: "Documentos", icon: Paperclip, path: `${prefix}/documentos` },
-  { title: "Mapas/Modelos", icon: Map, path: `${prefix}/mapas` },
-  { title: "Esclarecimentos", icon: MessageSquare, path: `${prefix}/esclarecimentos` },
-  { title: "Validações", icon: ShieldCheck, path: `${prefix}/validacoes` },
-];
+const buildNav = (prefix: string) => {
+  const base = [
+    { title: "Painel", icon: LayoutDashboard, path: prefix },
+    { title: "Prestação de Contas", icon: FileBarChart, path: `${prefix}/prestacao-contas` },
+  ];
+  if (prefix === "/contadoria") {
+    base.push({ title: "Verificação Documental", icon: ClipboardCheck, path: `${prefix}/verificacao` });
+  }
+  return [
+    ...base,
+    { title: "Exercícios", icon: FileBarChart, path: `${prefix}/exercicios` },
+    { title: "Documentos", icon: Paperclip, path: `${prefix}/documentos` },
+    { title: "Mapas/Modelos", icon: Map, path: `${prefix}/mapas` },
+    { title: "Esclarecimentos", icon: MessageSquare, path: `${prefix}/esclarecimentos` },
+    { title: "Validações", icon: ShieldCheck, path: `${prefix}/validacoes` },
+  ];
+};
 
 const buildRouteTitles = (prefix: string): Record<string, string> => ({
   [prefix]: prefix === "/contadoria" ? "Painel da Contadoria Geral" : "Painel do Técnico",
