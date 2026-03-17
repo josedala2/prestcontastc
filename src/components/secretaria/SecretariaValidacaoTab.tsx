@@ -136,14 +136,57 @@ export function SecretariaValidacaoTab() {
   const handleEncaminharContadoria = async (processo: ProcessoValidacao) => {
     setEncaminhando(true);
     try {
+      // Generate Nota de Remessa PDF
+      const docData: ProcessoDocData = {
+        numeroProcesso: processo.numero_processo,
+        entityName: processo.entity_name,
+        anoGerencia: processo.ano_gerencia,
+        categoriaEntidade: processo.categoria_entidade,
+        canalEntrada: "portal",
+        dataSubmissao: processo.data_submissao,
+        responsavelAtual: "Chefe da Secretaria-Geral",
+        submetidoPor: "Técnico da Secretaria-Geral",
+        etapaAtual: 4,
+        estado: "em_analise",
+      };
+      const executadoPor = user?.displayName || "Chefe da Secretaria-Geral";
+      const notaBlob = await generateNotaRemessa(docData, executadoPor, "Contadoria Geral");
+
+      // Upload to storage
+      const sanitized = processo.numero_processo.replace(/[^a-zA-Z0-9-]/g, "_");
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const fileName = `Nota_Remessa_${sanitized}_${timestamp}.pdf`;
+      const filePath = `${processo.id}/${fileName}`;
+
+      await supabase.storage.from("processo-documentos").upload(filePath, notaBlob, {
+        contentType: "application/pdf",
+        upsert: true,
+      });
+
+      // Register document in processo_documentos
+      await supabase.from("processo_documentos").insert({
+        processo_id: processo.id,
+        tipo_documento: "Nota de Remessa",
+        nome_ficheiro: fileName,
+        caminho_ficheiro: filePath,
+        estado: "validado",
+        obrigatorio: true,
+        validado_por: executadoPor,
+        validado_em: new Date().toISOString(),
+      } as any);
+
+      // Download for user
+      saveAs(notaBlob, fileName);
+
+      // Advance workflow
       await avancarEtapaProcesso({
         processoId: processo.id,
         novaEtapa: 4,
         novoEstado: "em_analise",
-        executadoPor: user?.displayName || "Chefe da Secretaria-Geral",
+        executadoPor,
         perfilExecutor: "Chefe da Secretaria-Geral",
-        observacoes: "Encaminhado para verificação documental pela Contadoria Geral",
-        documentosGerados: [],
+        observacoes: "Nota de Remessa gerada. Encaminhado para verificação documental pela Contadoria Geral.",
+        documentosGerados: ["Nota de Remessa"],
       });
 
       // Update responsavel
