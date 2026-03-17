@@ -395,6 +395,48 @@ export type Database = {
         }
         Relationships: []
       }
+      submission_documents: {
+        Row: {
+          content_type: string | null
+          created_at: string
+          doc_category: string
+          doc_id: string
+          doc_label: string
+          entity_id: string
+          file_name: string
+          file_path: string
+          file_size: number
+          fiscal_year_id: string
+          id: string
+        }
+        Insert: {
+          content_type?: string | null
+          created_at?: string
+          doc_category: string
+          doc_id: string
+          doc_label: string
+          entity_id: string
+          file_name: string
+          file_path: string
+          file_size?: number
+          fiscal_year_id: string
+          id?: string
+        }
+        Update: {
+          content_type?: string | null
+          created_at?: string
+          doc_category?: string
+          doc_id?: string
+          doc_label?: string
+          entity_id?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          fiscal_year_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
       submission_notifications: {
         Row: {
           created_at: string

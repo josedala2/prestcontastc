@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
@@ -21,9 +21,20 @@ import { useSubmissions } from "@/contexts/SubmissionContext";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
 import {
   ArrowLeft, CheckCircle, XCircle, FileText, Eye, Stamp, Pencil,
-  AlertTriangle, Undo2, Building2, X, Send, BarChart3,
+  AlertTriangle, Undo2, Building2, X, Send, BarChart3, Download,
 } from "lucide-react";
 import { toast } from "sonner";
+
+interface SubmissionDoc {
+  id: string;
+  doc_id: string;
+  doc_label: string;
+  doc_category: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  content_type: string | null;
+}
 
 const SubmissaoDetalhe = () => {
   const { id } = useParams<{ id: string }>();
@@ -39,7 +50,25 @@ const SubmissaoDetalhe = () => {
   const [remetido, setRemetido] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [docPreview, setDocPreview] = useState<{ label: string; category: string } | null>(null);
+  const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
+  const [docPreviewLoading, setDocPreviewLoading] = useState(false);
+  const [submissionDocs, setSubmissionDocs] = useState<SubmissionDoc[]>([]);
   const { recepcionar, rejeitar, remeterParaTecnico, getStatus } = useSubmissions();
+
+  const fiscalYearId = `${entity.id}-${periodo}`;
+
+  // Load uploaded documents from DB
+  useEffect(() => {
+    const loadDocs = async () => {
+      const { data } = await supabase
+        .from("submission_documents")
+        .select("*")
+        .eq("entity_id", entity.id)
+        .eq("fiscal_year_id", fiscalYearId);
+      if (data) setSubmissionDocs(data as any);
+    };
+    loadDocs();
+  }, [entity.id, fiscalYearId]);
 
   const requiredItems = submissionChecklist.filter((c) => c.required);
   const allRequiredChecked = requiredItems.every((item) => checkedDocs[item.id]);
@@ -47,6 +76,55 @@ const SubmissaoDetalhe = () => {
 
   const handleToggleDoc = (docId: string) => {
     setCheckedDocs((prev) => ({ ...prev, [docId]: !prev[docId] }));
+  };
+
+  // Map checklist categories to submission doc_ids
+  const DOC_CATEGORY_MAP: Record<string, string> = {
+    c1: "relatorio_gestao",
+    c2: "balanco",
+    c3: "dem_resultados",
+    c4: "fluxo_caixa",
+    c5: "balancete_analitico",
+    c6: "parecer_fiscal",
+    c7: "parecer_auditor",
+    c8: "modelos",
+    c9: "comprov_impostos",
+    c10: "comprov_seguranca",
+    c11: "inventario",
+    c12: "dem_resultados",
+    c13: "modelos",
+  };
+
+  const findSubmissionDoc = (checklistId: string): SubmissionDoc | undefined => {
+    const docId = DOC_CATEGORY_MAP[checklistId];
+    return submissionDocs.find(d => d.doc_id === docId);
+  };
+
+  const handleOpenDocPreview = async (label: string, category: string, checklistId: string) => {
+    const subDoc = findSubmissionDoc(checklistId);
+    if (subDoc) {
+      setDocPreviewLoading(true);
+      setDocPreview({ label, category });
+      try {
+        const { data } = supabase.storage
+          .from("submission-documents")
+          .getPublicUrl(subDoc.file_path);
+        setDocPreviewUrl(data.publicUrl);
+      } catch {
+        setDocPreviewUrl(null);
+      }
+      setDocPreviewLoading(false);
+    } else {
+      setDocPreview({ label, category });
+      setDocPreviewUrl(null);
+    }
+  };
+
+  const handleDownloadDoc = async (subDoc: SubmissionDoc) => {
+    const { data } = supabase.storage
+      .from("submission-documents")
+      .getPublicUrl(subDoc.file_path);
+    window.open(data.publicUrl, "_blank");
   };
 
   const now = new Date();
@@ -181,6 +259,7 @@ const SubmissaoDetalhe = () => {
                     <TableHead className="w-10">✓</TableHead>
                     <TableHead>Documento</TableHead>
                     <TableHead className="text-center">Obrigatório</TableHead>
+                    <TableHead className="text-center">Ficheiro</TableHead>
                     <TableHead className="text-center">Estado</TableHead>
                     <TableHead className="text-center w-24">Acções</TableHead>
                   </TableRow>
@@ -188,6 +267,7 @@ const SubmissaoDetalhe = () => {
                 <TableBody>
                   {submissionChecklist.map((item) => {
                     const isChecked = !!checkedDocs[item.id];
+                    const subDoc = findSubmissionDoc(item.id);
                     return (
                       <TableRow key={item.id} className={isChecked ? "bg-success/5" : ""}>
                         <TableCell>
@@ -199,6 +279,16 @@ const SubmissaoDetalhe = () => {
                             <Badge variant="destructive" className="text-[10px]">Obrigatório</Badge>
                           ) : (
                             <Badge variant="outline" className="text-[10px]">Opcional</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {subDoc ? (
+                            <span className="flex items-center justify-center gap-1 text-xs text-green-700 dark:text-green-400">
+                              <CheckCircle className="h-3 w-3" />
+                              <span className="max-w-[120px] truncate" title={subDoc.file_name}>{subDoc.file_name}</span>
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
                           )}
                         </TableCell>
                         <TableCell className="text-center">
@@ -217,8 +307,8 @@ const SubmissaoDetalhe = () => {
                             variant="ghost"
                             size="sm"
                             className="h-7 w-7 p-0"
-                            title={`Visualizar ${item.label}`}
-                            onClick={() => setDocPreview({ label: item.label, category: item.category })}
+                            title={subDoc ? `Visualizar ${subDoc.file_name}` : `Visualizar ${item.label}`}
+                            onClick={() => handleOpenDocPreview(item.label, item.category, item.id)}
                           >
                             <Eye className="h-3.5 w-3.5" />
                           </Button>
@@ -407,47 +497,60 @@ const SubmissaoDetalhe = () => {
       </Dialog>
 
       {/* Document Preview Dialog */}
-      <Dialog open={!!docPreview} onOpenChange={() => setDocPreview(null)}>
-        <DialogContent className="max-w-3xl h-[70vh]">
+      <Dialog open={!!docPreview} onOpenChange={() => { setDocPreview(null); setDocPreviewUrl(null); }}>
+        <DialogContent className="max-w-4xl h-[80vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
               {docPreview?.label}
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 flex flex-col items-center justify-center gap-4 border rounded-lg bg-muted/30 p-8 overflow-auto">
-            <div className="w-full max-w-md space-y-4">
-              <div className="flex items-center gap-3 p-3 rounded-md bg-background border">
-                <FileText className="h-8 w-8 text-primary shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{docPreview?.label}</p>
-                  <p className="text-xs text-muted-foreground">Categoria: {docPreview?.category}</p>
-                </div>
-                <Badge variant="outline" className="shrink-0">Submetido</Badge>
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {docPreviewLoading ? (
+              <div className="flex-1 flex items-center justify-center">
+                <p className="text-sm text-muted-foreground animate-pulse">A carregar documento...</p>
               </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="p-3 rounded-md bg-background border">
-                  <p className="text-xs text-muted-foreground mb-1">Entidade</p>
-                  <p className="font-medium">{entity.name}</p>
+            ) : docPreviewUrl ? (
+              <>
+                <div className="flex items-center justify-between mb-3 px-1">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-[10px]">Submetido</Badge>
+                    <span className="text-xs text-muted-foreground">{entity.name} · Exercício {periodo}</span>
+                  </div>
+                  <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => window.open(docPreviewUrl, "_blank")}>
+                    <Download className="h-3 w-3" /> Descarregar
+                  </Button>
                 </div>
-                <div className="p-3 rounded-md bg-background border">
-                  <p className="text-xs text-muted-foreground mb-1">Exercício</p>
-                  <p className="font-medium">{periodo}</p>
-                </div>
-                <div className="p-3 rounded-md bg-background border">
-                  <p className="text-xs text-muted-foreground mb-1">Data de Submissão</p>
-                  <p className="font-medium">{now.toLocaleDateString("pt-AO")}</p>
-                </div>
-                <div className="p-3 rounded-md bg-background border">
-                  <p className="text-xs text-muted-foreground mb-1">Formato</p>
-                  <p className="font-medium">PDF / Digital</p>
-                </div>
+                {docPreviewUrl.match(/\.(pdf)$/i) || docPreviewUrl.includes(".pdf") ? (
+                  <iframe
+                    src={docPreviewUrl}
+                    className="flex-1 w-full rounded-lg border"
+                    title="Document Preview"
+                  />
+                ) : docPreviewUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                  <div className="flex-1 flex items-center justify-center overflow-auto bg-muted/30 rounded-lg border p-4">
+                    <img src={docPreviewUrl} alt={docPreview?.label} className="max-w-full max-h-full object-contain" />
+                  </div>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center gap-3 bg-muted/30 rounded-lg border p-8">
+                    <FileText className="h-12 w-12 text-primary/40" />
+                    <p className="text-sm text-muted-foreground">
+                      Pré-visualização não disponível para este tipo de ficheiro.
+                    </p>
+                    <Button variant="outline" size="sm" className="gap-1.5" onClick={() => window.open(docPreviewUrl, "_blank")}>
+                      <Download className="h-3.5 w-3.5" /> Descarregar Ficheiro
+                    </Button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center gap-4 border rounded-lg bg-muted/30 p-8">
+                <Building2 className="h-10 w-10 text-primary/40" />
+                <p className="text-sm text-muted-foreground text-center">
+                  Documento não encontrado. A entidade ainda não submeteu este ficheiro.
+                </p>
               </div>
-              <div className="p-4 rounded-md bg-primary/5 border border-primary/20 text-center">
-                <Building2 className="h-10 w-10 mx-auto mb-2 text-primary/40" />
-                <p className="text-sm text-muted-foreground">Pré-visualização do documento disponível após integração com o sistema de armazenamento.</p>
-              </div>
-            </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

@@ -162,6 +162,8 @@ function EntidadeView({
           <EntidadeDocumentosTab
             disabled={isSubmitted && !canResubmit}
             tipologia={entityTipologia}
+            entityId={entityId}
+            fiscalYearId={`${entityId}-${periodo}`}
             onComplianceChange={(allDone, uploaded, required, uploadedDocIds) => setDocsCompliance({ allDone, uploaded, required, uploadedDocIds })}
           />
           <ActasRecepcaoList entityId={entityId} fiscalYear={periodo} />

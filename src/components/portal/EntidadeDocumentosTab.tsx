@@ -1,13 +1,14 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-  Upload, FileText, CheckCircle, AlertTriangle, Trash2, Paperclip,
+  Upload, FileText, CheckCircle, AlertTriangle, Trash2, Paperclip, Download, Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 import { EntityTipologia, TIPOLOGIA_RESOLUCAO, RESOLUCAO_LABELS, ResolucaoCategoria } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DocRequirement {
   id: string;
@@ -87,6 +88,8 @@ export const DOCUMENT_REQUIREMENTS = DOCS_RESOLUCAO_1_17;
 interface UploadedDoc {
   name: string;
   size: number;
+  filePath?: string;
+  contentType?: string;
 }
 
 const formatSize = (bytes: number) => {
@@ -97,25 +100,113 @@ const formatSize = (bytes: number) => {
 interface Props {
   disabled?: boolean;
   tipologia?: EntityTipologia;
+  entityId?: string;
+  fiscalYearId?: string;
   onComplianceChange?: (allRequiredUploaded: boolean, uploadedCount: number, requiredCount: number, uploadedDocIds: string[]) => void;
 }
 
-export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica", onComplianceChange }: Props) {
+export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica", entityId, fiscalYearId, onComplianceChange }: Props) {
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, UploadedDoc>>({});
+  const [uploading, setUploading] = useState<string | null>(null);
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const resolucao = TIPOLOGIA_RESOLUCAO[tipologia];
   const resolucaoInfo = RESOLUCAO_LABELS[resolucao];
   const documentRequirements = getDocumentRequirements(tipologia);
 
-  const handleDocUpload = (docId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  // Load existing uploads from DB
+  useEffect(() => {
+    if (!entityId || !fiscalYearId) return;
+    const load = async () => {
+      const { data } = await supabase
+        .from("submission_documents")
+        .select("*")
+        .eq("entity_id", entityId)
+        .eq("fiscal_year_id", fiscalYearId);
+      if (data && data.length > 0) {
+        const docs: Record<string, UploadedDoc> = {};
+        data.forEach((d: any) => {
+          docs[d.doc_id] = {
+            name: d.file_name,
+            size: d.file_size,
+            filePath: d.file_path,
+            contentType: d.content_type,
+          };
+        });
+        setUploadedDocs(docs);
+      }
+    };
+    load();
+  }, [entityId, fiscalYearId]);
+
+  const handleDocUpload = async (docId: string, docLabel: string, docCategory: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploadedDocs((prev) => ({ ...prev, [docId]: { name: file.name, size: file.size } }));
-    toast.success(`"${file.name}" carregado com sucesso.`);
+
+    // If we have entity context, upload to Storage
+    if (entityId && fiscalYearId) {
+      setUploading(docId);
+      const filePath = `${entityId}/${fiscalYearId}/${docId}/${file.name}`;
+      
+      try {
+        // Remove old file if replacing
+        const oldDoc = uploadedDocs[docId];
+        if (oldDoc?.filePath) {
+          await supabase.storage.from("submission-documents").remove([oldDoc.filePath]);
+        }
+
+        // Upload to storage
+        const { error: uploadError } = await supabase.storage
+          .from("submission-documents")
+          .upload(filePath, file, { contentType: file.type, upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        // Upsert DB record
+        await supabase.from("submission_documents").upsert({
+          entity_id: entityId,
+          fiscal_year_id: fiscalYearId,
+          doc_id: docId,
+          doc_label: docLabel,
+          doc_category: docCategory,
+          file_name: file.name,
+          file_path: filePath,
+          file_size: file.size,
+          content_type: file.type,
+        } as any, { onConflict: "entity_id,fiscal_year_id,doc_id" });
+
+        setUploadedDocs((prev) => ({
+          ...prev,
+          [docId]: { name: file.name, size: file.size, filePath, contentType: file.type },
+        }));
+        toast.success(`"${file.name}" carregado com sucesso.`);
+      } catch (err: any) {
+        console.error("Upload error:", err);
+        toast.error(`Erro ao carregar "${file.name}": ${err.message}`);
+      } finally {
+        setUploading(null);
+      }
+    } else {
+      // Fallback: local-only (no Storage)
+      setUploadedDocs((prev) => ({ ...prev, [docId]: { name: file.name, size: file.size } }));
+      toast.success(`"${file.name}" carregado com sucesso.`);
+    }
   };
 
-  const removeDoc = (docId: string) => {
+  const removeDoc = async (docId: string) => {
+    const doc = uploadedDocs[docId];
+    if (doc?.filePath && entityId && fiscalYearId) {
+      try {
+        await supabase.storage.from("submission-documents").remove([doc.filePath]);
+        await supabase.from("submission_documents")
+          .delete()
+          .eq("entity_id", entityId)
+          .eq("fiscal_year_id", fiscalYearId)
+          .eq("doc_id", docId);
+      } catch (err) {
+        console.error("Delete error:", err);
+      }
+    }
     setUploadedDocs((prev) => {
       const next = { ...prev };
       delete next[docId];
@@ -176,6 +267,7 @@ export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica",
         <CardContent className="space-y-2">
           {documentRequirements.map((doc) => {
             const uploaded = uploadedDocs[doc.id];
+            const isUploading = uploading === doc.id;
             return (
               <div
                 key={doc.id}
@@ -202,6 +294,9 @@ export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica",
                       {uploaded.name} · {formatSize(uploaded.size)}
                     </p>
                   )}
+                  {isUploading && (
+                    <p className="text-[10px] text-primary animate-pulse">A carregar...</p>
+                  )}
                 </div>
 
                 {doc.required && !uploaded && (
@@ -216,8 +311,8 @@ export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica",
                   type="file"
                   accept={doc.accept}
                   className="hidden"
-                  disabled={disabled}
-                  onChange={(e) => handleDocUpload(doc.id, e)}
+                  disabled={disabled || isUploading}
+                  onChange={(e) => handleDocUpload(doc.id, doc.label, "documento", e)}
                 />
 
                 {uploaded ? (
@@ -226,7 +321,7 @@ export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica",
                       variant="ghost"
                       size="sm"
                       className="text-xs gap-1 h-7 px-2"
-                      disabled={disabled}
+                      disabled={disabled || isUploading}
                       onClick={() => inputRefs.current[doc.id]?.click()}
                     >
                       <Upload className="h-3 w-3" /> Substituir
@@ -235,7 +330,7 @@ export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica",
                       variant="ghost"
                       size="sm"
                       className="text-xs h-7 px-2 text-destructive"
-                      disabled={disabled}
+                      disabled={disabled || isUploading}
                       onClick={() => removeDoc(doc.id)}
                     >
                       <Trash2 className="h-3 w-3" />
@@ -246,7 +341,7 @@ export function EntidadeDocumentosTab({ disabled, tipologia = "empresa_publica",
                     variant="outline"
                     size="sm"
                     className="text-xs gap-1 shrink-0"
-                    disabled={disabled}
+                    disabled={disabled || isUploading}
                     onClick={() => inputRefs.current[doc.id]?.click()}
                   >
                     <Upload className="h-3 w-3" /> Carregar
