@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
+import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { EntityProfilePanel } from "@/components/secretaria/EntityProfilePanel";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { SecretariaVistoTab } from "@/components/secretaria/SecretariaVistoTab";
