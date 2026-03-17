@@ -65,6 +65,7 @@ const Dashboard = () => {
   const [historico, setHistorico] = useState<HistoricoDB[]>([]);
   const [actas, setActas] = useState<any[]>([]);
   const [pareceres, setPareceres] = useState<any[]>([]);
+  const [rpcStats, setRpcStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -80,6 +81,16 @@ const Dashboard = () => {
       setHistorico((histRes.data as any[]) || []);
       setActas(actasRes.data || []);
       setPareceres(parecRes.data || []);
+
+      // Load RPC stats
+      try {
+        const backendStats = await obterEstatisticasDashboard();
+        setRpcStats(backendStats);
+        console.log("[Dashboard] RPC estatisticas_dashboard:", backendStats);
+      } catch (err) {
+        console.error("[Dashboard] Erro ao carregar RPC stats:", err);
+      }
+
       setLoading(false);
     };
     load();
