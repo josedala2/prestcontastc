@@ -202,12 +202,28 @@ const ProcessoDetalhe = () => {
     }
   };
 
-  const downloadAttachment = async (filePath: string, fileName: string) => {
+  const getFilePublicUrl = (filePath: string) => {
     const { data } = supabase.storage.from("processo-documentos").getPublicUrl(filePath);
-    if (data?.publicUrl) {
-      window.open(data.publicUrl, "_blank");
-    }
+    return data?.publicUrl || null;
   };
+
+  const downloadAttachment = async (filePath: string, fileName: string) => {
+    const url = getFilePublicUrl(filePath);
+    if (url) window.open(url, "_blank");
+  };
+
+  const openPreview = (doc: ProcessoDocumento) => {
+    if (!doc.caminho_ficheiro) return;
+    const url = getFilePublicUrl(doc.caminho_ficheiro);
+    setPreviewUrl(url);
+    setPreviewDoc(doc);
+  };
+
+  const isPdfFile = (fileName: string) =>
+    fileName.toLowerCase().endsWith(".pdf");
+
+  const isImageFile = (fileName: string) =>
+    /\.(jpg|jpeg|png|gif|webp|tif|tiff)$/i.test(fileName);
 
   const deleteAttachment = async (docId: string, filePath: string | null) => {
     if (filePath) {
