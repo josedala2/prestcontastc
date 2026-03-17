@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import {
-  ESTADO_LABELS, PRIORIDADE_LABELS, atualizarEstadoAtividade,
+  ESTADO_LABELS, PRIORIDADE_LABELS, EVENTO_LABELS, PERFIS_WORKFLOW, atualizarEstadoAtividade,
   type AtividadeEstado, type AtividadePrioridade,
 } from "@/lib/atividadeEngine";
 import { WORKFLOW_STAGES } from "@/types/workflow";
@@ -132,10 +132,7 @@ export default function Atividades() {
     return () => { supabase.removeChannel(channel); };
   }, [fetchAtividades]);
 
-  const perfis = useMemo(() => {
-    const set = new Set(atividades.map(a => a.perfil_responsavel));
-    return Array.from(set).sort();
-  }, [atividades]);
+  const perfis = PERFIS_WORKFLOW;
 
   const filtered = useMemo(() => {
     return atividades.filter(a => {
