@@ -443,6 +443,48 @@ export type Database = {
         }
         Relationships: []
       }
+      submissions: {
+        Row: {
+          created_at: string
+          entity_id: string
+          fiscal_year_id: string
+          id: string
+          motivo_rejeicao: string | null
+          recepcionado_at: string | null
+          rejeitado_at: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          uploaded_doc_ids: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          fiscal_year_id: string
+          id?: string
+          motivo_rejeicao?: string | null
+          recepcionado_at?: string | null
+          rejeitado_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          uploaded_doc_ids?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          fiscal_year_id?: string
+          id?: string
+          motivo_rejeicao?: string | null
+          recepcionado_at?: string | null
+          rejeitado_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          uploaded_doc_ids?: string[] | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
