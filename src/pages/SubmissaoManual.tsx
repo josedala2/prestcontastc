@@ -33,8 +33,9 @@ const SubmissaoManual = () => {
   const [activeTab, setActiveTab] = useState("balancete");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { submit } = useSubmissions();
+  const { entities: allEntities } = useEntities();
 
-  const entity = mockEntities.find((e) => e.id === selectedEntityId);
+  const entity = allEntities.find((e) => e.id === selectedEntityId);
   const fiscalYearId = entity ? `${entity.id}-${periodo}` : "";
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
