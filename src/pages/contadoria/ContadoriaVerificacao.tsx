@@ -72,6 +72,9 @@ export default function ContadoriaVerificacao() {
   const [loading, setLoading] = useState(true);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [solicitarDialogOpen, setSolicitarDialogOpen] = useState(false);
+  const [elementosSelecionados, setElementosSelecionados] = useState<Record<string, boolean>>({});
+  const [mensagemSolicitacao, setMensagemSolicitacao] = useState("");
   const [motivoRejeicao, setMotivoRejeicao] = useState("");
   const [acting, setActing] = useState(false);
 
