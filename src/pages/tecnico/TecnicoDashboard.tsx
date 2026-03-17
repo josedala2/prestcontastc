@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { TecnicoLayout } from "@/components/TecnicoLayout";
 import { PageHeader, StatCard } from "@/components/ui-custom/PageElements";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,12 +6,32 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { mockEntities } from "@/data/mockData";
+import { obterEstatisticasDashboard, obterEstatisticasPorPerfil } from "@/hooks/useBackendFunctions";
 import { FileBarChart, CheckCircle, Clock, AlertTriangle, ArrowRight, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const TecnicoDashboard = () => {
   const navigate = useNavigate();
   const { submissions } = useSubmissions();
+  const [rpcStats, setRpcStats] = useState<any>(null);
+  const [perfilStats, setPerfilStats] = useState<any>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [dashboard, perfil] = await Promise.all([
+          obterEstatisticasDashboard(),
+          obterEstatisticasPorPerfil("Técnico de Análise"),
+        ]);
+        setRpcStats(dashboard);
+        setPerfilStats(perfil);
+        console.log("[TecnicoDashboard] RPC stats:", dashboard, perfil);
+      } catch (err) {
+        console.error("[TecnicoDashboard] Erro RPC:", err);
+      }
+    };
+    load();
+  }, []);
 
   const emAnalise = submissions.filter((s) => s.status === "em_analise");
 
@@ -23,9 +44,9 @@ const TecnicoDashboard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard title="Em Análise" value={emAnalise.length} subtitle="processos atribuídos" icon={<Clock className="h-5 w-5" />} variant="warning" />
-        <StatCard title="Entidades" value={mockEntities.length} subtitle="entidades no sistema" icon={<FileBarChart className="h-5 w-5" />} variant="primary" />
-        <StatCard title="Concluídos" value={0} subtitle="pareceres emitidos" icon={<CheckCircle className="h-5 w-5" />} variant="success" />
-        <StatCard title="Alertas" value={0} subtitle="pendentes" icon={<AlertTriangle className="h-5 w-5" />} variant="default" />
+        <StatCard title="Total Processos" value={rpcStats?.total_processos ?? 0} subtitle="no sistema" icon={<FileBarChart className="h-5 w-5" />} variant="primary" />
+        <StatCard title="Concluídas" value={perfilStats?.concluidas ?? 0} subtitle="atividades do perfil" icon={<CheckCircle className="h-5 w-5" />} variant="success" />
+        <StatCard title="Atrasadas" value={perfilStats?.atrasadas ?? 0} subtitle="atividades atrasadas" icon={<AlertTriangle className="h-5 w-5" />} variant="default" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
