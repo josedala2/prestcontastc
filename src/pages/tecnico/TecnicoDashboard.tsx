@@ -11,6 +11,7 @@ import { FileBarChart, CheckCircle, Clock, AlertTriangle, ArrowRight, BarChart3 
 import { Badge } from "@/components/ui/badge";
 
 const TecnicoDashboard = () => {
+  const { entities: allEntities } = useEntities();
   const navigate = useNavigate();
   const location = window.location.pathname;
   const prefix = location.startsWith("/contadoria") ? "/contadoria" : "/tecnico";
