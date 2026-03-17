@@ -50,7 +50,25 @@ const SubmissaoDetalhe = () => {
   const [remetido, setRemetido] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [docPreview, setDocPreview] = useState<{ label: string; category: string } | null>(null);
+  const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
+  const [docPreviewLoading, setDocPreviewLoading] = useState(false);
+  const [submissionDocs, setSubmissionDocs] = useState<SubmissionDoc[]>([]);
   const { recepcionar, rejeitar, remeterParaTecnico, getStatus } = useSubmissions();
+
+  const fiscalYearId = `${entity.id}-${periodo}`;
+
+  // Load uploaded documents from DB
+  useEffect(() => {
+    const loadDocs = async () => {
+      const { data } = await supabase
+        .from("submission_documents")
+        .select("*")
+        .eq("entity_id", entity.id)
+        .eq("fiscal_year_id", fiscalYearId);
+      if (data) setSubmissionDocs(data as any);
+    };
+    loadDocs();
+  }, [entity.id, fiscalYearId]);
 
   const requiredItems = submissionChecklist.filter((c) => c.required);
   const allRequiredChecked = requiredItems.every((item) => checkedDocs[item.id]);
