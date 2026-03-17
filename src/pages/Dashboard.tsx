@@ -221,32 +221,8 @@ const Dashboard = () => {
         <KPICard icon={<Activity />} label="Actas Emitidas" value={rpcStats?.total_actas ?? actas.length} color="text-amber-600" bg="bg-amber-100" />
       </div>
 
-      {/* Row 1: Bar chart + Pie charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        {/* Processos por etapa */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <GitBranch className="h-4 w-4 text-primary" /> Processos por Etapa do Workflow
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {etapaData.length === 0 ? (
-              <EmptyState message="Sem processos registados" />
-            ) : (
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={etapaData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(213, 15%, 85%)" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(213, 20%, 45%)" }} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "hsl(213, 20%, 45%)" }} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="value" fill="hsl(213, 100%, 18%)" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-
+      {/* Row 1: Pie charts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         {/* Estado dos processos */}
         <Card>
           <CardHeader className="pb-2">
@@ -285,28 +261,8 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Row 2: Area chart + Canal + Categories */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        {/* Evolução mensal */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-primary" /> Evolução Mensal
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={mensalData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(213, 15%, 85%)" />
-                <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(213, 20%, 45%)" }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "hsl(213, 20%, 45%)" }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="value" stroke="hsl(213, 100%, 18%)" fill="hsl(213, 100%, 18%)" fillOpacity={0.15} strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
+      {/* Row 2: Canal + Categories */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Canal de entrada */}
         <Card>
           <CardHeader className="pb-2">
@@ -530,55 +486,31 @@ const Dashboard = () => {
         <DashboardNotificacoesPanel />
       </div>
 
-      {/* Bottom: Pareceres + Actas summary */}
-      {(pareceres.length > 0 || actas.length > 0) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          {pareceres.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold">📋 Pareceres Emitidos ({pareceres.length})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {pareceres.slice(0, 5).map((p: any) => (
-                    <div key={p.id} className="flex items-center justify-between p-2 rounded bg-muted/30">
-                      <div>
-                        <p className="text-xs font-medium">{p.entity_name}</p>
-                        <p className="text-[10px] text-muted-foreground">Exercício {p.fiscal_year} — {p.tecnico_nome}</p>
-                      </div>
-                      <Badge variant="outline" className={cn("text-[10px]",
-                        p.parecer_final?.includes("Termos") ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                      )}>
-                        {p.parecer_final}
-                      </Badge>
+      {/* Bottom: Pareceres summary */}
+      {pareceres.length > 0 && (
+        <div className="grid grid-cols-1 gap-6 mt-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold">📋 Pareceres Emitidos ({pareceres.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {pareceres.slice(0, 5).map((p: any) => (
+                  <div key={p.id} className="flex items-center justify-between p-2 rounded bg-muted/30">
+                    <div>
+                      <p className="text-xs font-medium">{p.entity_name}</p>
+                      <p className="text-[10px] text-muted-foreground">Exercício {p.fiscal_year} — {p.tecnico_nome}</p>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          {actas.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold">📄 Actas de Recepção ({actas.length})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {actas.slice(0, 5).map((a: any) => (
-                    <div key={a.id} className="flex items-center justify-between p-2 rounded bg-muted/30">
-                      <div>
-                        <p className="text-xs font-medium">{a.entity_name}</p>
-                        <p className="text-[10px] text-muted-foreground">{a.acta_numero} — {a.fiscal_year}</p>
-                      </div>
-                      <span className="text-[10px] text-muted-foreground">
-                        {new Date(a.created_at).toLocaleDateString("pt-AO")}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                    <Badge variant="outline" className={cn("text-[10px]",
+                      p.parecer_final?.includes("Termos") ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                    )}>
+                      {p.parecer_final}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </AppLayout>
