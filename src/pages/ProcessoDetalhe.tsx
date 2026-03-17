@@ -640,6 +640,30 @@ const ProcessoDetalhe = () => {
                 )}
                 {canAct ? (
                   <>
+                    {/* Event action buttons */}
+                    {STAGE_EVENTS[processo.etapa_atual] && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                          <Zap className="h-3.5 w-3.5" /> Disparar Evento de Workflow
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {STAGE_EVENTS[processo.etapa_atual].map((ev) => (
+                            <Button
+                              key={ev.evento}
+                              variant={ev.variant || "outline"}
+                              size="sm"
+                              className="text-xs gap-1.5"
+                              disabled={!!firingEvent || advancing}
+                              onClick={() => dispatchEvent(ev.evento)}
+                            >
+                              {firingEvent === ev.evento ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : ev.icon}
+                              {ev.label}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <Separator />
                     <Textarea
                       placeholder="Observações para o registo de tramitação..."
                       value={observacoes}
@@ -647,10 +671,10 @@ const ProcessoDetalhe = () => {
                       rows={2}
                     />
                     <div className="flex gap-3">
-                      <Button variant="outline" onClick={returnToPrevious} disabled={advancing || processo.etapa_atual <= 1}>
+                      <Button variant="outline" onClick={returnToPrevious} disabled={advancing || firingEvent !== null || processo.etapa_atual <= 1}>
                         <ArrowLeft className="h-4 w-4 mr-2" /> Devolver
                       </Button>
-                      <Button onClick={advanceStage} disabled={advancing || processo.etapa_atual >= 18} className="flex-1">
+                      <Button onClick={advanceStage} disabled={advancing || firingEvent !== null || processo.etapa_atual >= 18} className="flex-1">
                         {advancing ? (
                           <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> A processar...</span>
                         ) : processo.etapa_atual >= 18 ? "Processo Concluído" : (
