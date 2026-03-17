@@ -53,7 +53,11 @@ export function TecnicoLayout({ children }: TecnicoLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const pageTitle = routeTitles[location.pathname] || "Técnico";
+  const prefix = location.pathname.startsWith("/contadoria") ? "/contadoria" : "/tecnico";
+  const isContadoria = prefix === "/contadoria";
+  const tecnicoNav = buildNav(prefix);
+  const routeTitles = buildRouteTitles(prefix);
+  const pageTitle = routeTitles[location.pathname] || (isContadoria ? "Contadoria Geral" : "Técnico");
   const { entity, setEntityId } = usePortalEntity();
   const { user, logout } = useAuth();
 
