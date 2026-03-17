@@ -80,21 +80,21 @@ const SubmissaoDetalhe = () => {
     setCheckedDocs((prev) => ({ ...prev, [docId]: !prev[docId] }));
   };
 
-  // Map checklist categories to submission doc_ids
-  const DOC_CATEGORY_MAP: Record<string, string> = {
-    c1: "relatorio_gestao",
-    c2: "balanco",
-    c3: "dem_resultados",
-    c4: "fluxo_caixa",
-    c5: "balancete_analitico",
-    c6: "parecer_fiscal",
-    c7: "parecer_auditor",
-    c8: "modelos",
-    c9: "comprov_impostos",
-    c10: "comprov_seguranca",
-    c11: "inventario",
-    c12: "dem_resultados",
-    c13: "modelos",
+  // Map checklist IDs to submission doc_ids from EntidadeDocumentosTab
+  const DOC_CATEGORY_MAP: Record<string, string[]> = {
+    c1: ["relatorio_gestao"],
+    c2: ["balanco"],
+    c3: ["dem_resultados"],
+    c4: ["fluxo_caixa"],
+    c5: ["balancete_analitico"],
+    c6: ["parecer_fiscal"],
+    c7: ["parecer_auditor"],
+    c8: ["modelos"],
+    c9: ["comprov_impostos"],
+    c10: ["comprov_seguranca"],
+    c11: ["inventario"],
+    c12: ["extractos", "folhas_caixa"],
+    c13: ["reconciliacoes", "ordens_saque"],
   };
 
   const findSubmissionDoc = (checklistId: string): SubmissionDoc | undefined => {
