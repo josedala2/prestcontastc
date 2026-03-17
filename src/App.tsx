@@ -176,6 +176,13 @@ const App = () => (
             </ProtectedRoute>
           } />
 
+          {/* Chefe de Divisão */}
+          <Route path="/chefe-divisao/processos" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Chefe de Divisão"]}>
+              <ChefeDivisaoProcessos />
+            </ProtectedRoute>
+          } />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
