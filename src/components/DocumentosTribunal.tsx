@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { mockDocumentosTribunal, mockEntities } from "@/data/mockData";
+import { mockDocumentosTribunal } from "@/data/mockData";
+import { useEntities } from "@/hooks/useEntities";
 import { exportDocumentoTribunalPdf } from "@/lib/exportUtils";
 import {
   DocumentoTribunal,
