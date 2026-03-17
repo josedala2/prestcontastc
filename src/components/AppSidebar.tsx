@@ -64,6 +64,7 @@ const navSections: { label: string; items: NavEntry[] }[] = [
         ],
       },
       { title: "Gestão de Processos", icon: GitBranch, path: "/gestao-processos" },
+      { title: "Atividades", icon: ClipboardCheck, path: "/atividades" },
     ],
   },
   {

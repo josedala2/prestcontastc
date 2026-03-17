@@ -53,6 +53,143 @@ export type Database = {
         }
         Relationships: []
       }
+      atividade_historico: {
+        Row: {
+          atividade_id: string
+          created_at: string
+          estado_anterior: string | null
+          estado_novo: string
+          executado_por: string
+          id: string
+          observacoes: string | null
+          perfil_executor: string | null
+        }
+        Insert: {
+          atividade_id: string
+          created_at?: string
+          estado_anterior?: string | null
+          estado_novo: string
+          executado_por: string
+          id?: string
+          observacoes?: string | null
+          perfil_executor?: string | null
+        }
+        Update: {
+          atividade_id?: string
+          created_at?: string
+          estado_anterior?: string | null
+          estado_novo?: string
+          executado_por?: string
+          id?: string
+          observacoes?: string | null
+          perfil_executor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atividade_historico_atividade_id_fkey"
+            columns: ["atividade_id"]
+            isOneToOne: false
+            referencedRelation: "atividades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      atividades: {
+        Row: {
+          acao_esperada: string | null
+          canal_submissao: string | null
+          categoria_entidade: string | null
+          created_at: string
+          data_conclusao: string | null
+          data_criacao: string
+          data_inicio: string | null
+          dependencia_atividade_id: string | null
+          descricao: string | null
+          documentos_gerados: string[] | null
+          documentos_necessarios: string[] | null
+          estado: string
+          etapa_fluxo: number
+          id: string
+          observacoes: string | null
+          ordem: number
+          perfil_responsavel: string
+          prazo: string | null
+          prioridade: string
+          processo_id: string | null
+          tipo_evento: string | null
+          titulo: string
+          updated_at: string
+          utilizador_responsavel: string | null
+        }
+        Insert: {
+          acao_esperada?: string | null
+          canal_submissao?: string | null
+          categoria_entidade?: string | null
+          created_at?: string
+          data_conclusao?: string | null
+          data_criacao?: string
+          data_inicio?: string | null
+          dependencia_atividade_id?: string | null
+          descricao?: string | null
+          documentos_gerados?: string[] | null
+          documentos_necessarios?: string[] | null
+          estado?: string
+          etapa_fluxo?: number
+          id?: string
+          observacoes?: string | null
+          ordem?: number
+          perfil_responsavel: string
+          prazo?: string | null
+          prioridade?: string
+          processo_id?: string | null
+          tipo_evento?: string | null
+          titulo: string
+          updated_at?: string
+          utilizador_responsavel?: string | null
+        }
+        Update: {
+          acao_esperada?: string | null
+          canal_submissao?: string | null
+          categoria_entidade?: string | null
+          created_at?: string
+          data_conclusao?: string | null
+          data_criacao?: string
+          data_inicio?: string | null
+          dependencia_atividade_id?: string | null
+          descricao?: string | null
+          documentos_gerados?: string[] | null
+          documentos_necessarios?: string[] | null
+          estado?: string
+          etapa_fluxo?: number
+          id?: string
+          observacoes?: string | null
+          ordem?: number
+          perfil_responsavel?: string
+          prazo?: string | null
+          prioridade?: string
+          processo_id?: string | null
+          tipo_evento?: string | null
+          titulo?: string
+          updated_at?: string
+          utilizador_responsavel?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atividades_dependencia_atividade_id_fkey"
+            columns: ["dependencia_atividade_id"]
+            isOneToOne: false
+            referencedRelation: "atividades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atividades_processo_id_fkey"
+            columns: ["processo_id"]
+            isOneToOne: false
+            referencedRelation: "processos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       element_request_files: {
         Row: {
           content_type: string | null
