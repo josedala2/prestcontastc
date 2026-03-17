@@ -367,7 +367,7 @@ const SubmissaoDetalhe = () => {
                 <Eye className="h-4 w-4" /> Visualizar PDF
               </Button>
               <Button disabled={!allRequiredChecked} onClick={() => setConfirmDialogOpen(true)} className="gap-2">
-                <FileText className="h-4 w-4" /> Confirmar e Gerar Nota de Remessa
+                <FileText className="h-4 w-4" /> Confirmar e Autuar
               </Button>
             </div>
           </div>
