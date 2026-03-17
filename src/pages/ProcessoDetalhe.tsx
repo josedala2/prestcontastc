@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { roleStagePermissions } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { WORKFLOW_STAGES, WORKFLOW_ESTADOS, CATEGORIAS_ENTIDADE, type Processo, type ProcessoHistorico } from "@/types/workflow";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -45,6 +46,8 @@ const ProcessoDetalhe = () => {
   const [generatingDoc, setGeneratingDoc] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadTipoDoc, setUploadTipoDoc] = useState("Documento Digitalizado");
+  const [previewDoc, setPreviewDoc] = useState<ProcessoDocumento | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -199,12 +202,28 @@ const ProcessoDetalhe = () => {
     }
   };
 
-  const downloadAttachment = async (filePath: string, fileName: string) => {
+  const getFilePublicUrl = (filePath: string) => {
     const { data } = supabase.storage.from("processo-documentos").getPublicUrl(filePath);
-    if (data?.publicUrl) {
-      window.open(data.publicUrl, "_blank");
-    }
+    return data?.publicUrl || null;
   };
+
+  const downloadAttachment = async (filePath: string, fileName: string) => {
+    const url = getFilePublicUrl(filePath);
+    if (url) window.open(url, "_blank");
+  };
+
+  const openPreview = (doc: ProcessoDocumento) => {
+    if (!doc.caminho_ficheiro) return;
+    const url = getFilePublicUrl(doc.caminho_ficheiro);
+    setPreviewUrl(url);
+    setPreviewDoc(doc);
+  };
+
+  const isPdfFile = (fileName: string) =>
+    fileName.toLowerCase().endsWith(".pdf");
+
+  const isImageFile = (fileName: string) =>
+    /\.(jpg|jpeg|png|gif|webp|tif|tiff)$/i.test(fileName);
 
   const deleteAttachment = async (docId: string, filePath: string | null) => {
     if (filePath) {
@@ -602,9 +621,14 @@ const ProcessoDetalhe = () => {
                           {doc.estado === "gerado" ? "Gerado" : doc.estado === "anexado" ? "Anexado" : "Pendente"}
                         </Badge>
                         {doc.caminho_ficheiro ? (
-                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => downloadAttachment(doc.caminho_ficheiro!, doc.nome_ficheiro)}>
-                            <Eye className="h-3.5 w-3.5" />
-                          </Button>
+                          <>
+                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title="Pré-visualizar" onClick={() => openPreview(doc)}>
+                              <Eye className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title="Descarregar" onClick={() => downloadAttachment(doc.caminho_ficheiro!, doc.nome_ficheiro)}>
+                              <Download className="h-3.5 w-3.5" />
+                            </Button>
+                          </>
                         ) : (
                           <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => generateAndSaveDocument(doc.tipo_documento)}>
                             <Download className="h-3.5 w-3.5" />
@@ -739,6 +763,56 @@ const ProcessoDetalhe = () => {
           )}
         </div>
       </div>
+
+      {/* Inline PDF/Image Preview Dialog */}
+      <Dialog open={!!previewDoc} onOpenChange={(open) => { if (!open) { setPreviewDoc(null); setPreviewUrl(null); } }}>
+        <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-sm">
+              <FileText className="h-4 w-4 text-primary" />
+              <span className="truncate">{previewDoc?.nome_ficheiro}</span>
+              <Badge variant="outline" className="text-[10px] ml-2">{previewDoc?.tipo_documento}</Badge>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0 rounded-lg border overflow-hidden bg-muted/30">
+            {previewUrl && previewDoc && isPdfFile(previewDoc.nome_ficheiro) ? (
+              <iframe
+                src={previewUrl}
+                className="w-full h-full"
+                title={`Pré-visualização: ${previewDoc.nome_ficheiro}`}
+              />
+            ) : previewUrl && previewDoc && isImageFile(previewDoc.nome_ficheiro) ? (
+              <div className="w-full h-full flex items-center justify-center p-4 overflow-auto">
+                <img
+                  src={previewUrl}
+                  alt={previewDoc.nome_ficheiro}
+                  className="max-w-full max-h-full object-contain rounded"
+                />
+              </div>
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-muted-foreground">
+                <FileText className="h-12 w-12 opacity-30" />
+                <p className="text-sm">Pré-visualização não disponível para este formato.</p>
+                {previewDoc?.caminho_ficheiro && (
+                  <Button size="sm" variant="outline" onClick={() => downloadAttachment(previewDoc.caminho_ficheiro!, previewDoc.nome_ficheiro)}>
+                    <Download className="h-3.5 w-3.5 mr-1.5" /> Descarregar Ficheiro
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="flex items-center justify-between pt-2">
+            <p className="text-xs text-muted-foreground">
+              {previewDoc && new Date(previewDoc.created_at).toLocaleString("pt-AO")}
+            </p>
+            {previewDoc?.caminho_ficheiro && (
+              <Button size="sm" variant="outline" onClick={() => downloadAttachment(previewDoc.caminho_ficheiro!, previewDoc.nome_ficheiro)}>
+                <Download className="h-3.5 w-3.5 mr-1.5" /> Descarregar
+              </Button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };
