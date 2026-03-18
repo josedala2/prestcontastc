@@ -29,7 +29,7 @@ const Relatorios = () => {
 
   // ── ACTIVO NÃO CORRENTE (Classe 1) ──
   // Contas: 11-14 (bruto) menos 18 (amortizações) e 19 (provisões)
-  const activoNCBruto = mockTrialBalance.filter(
+  const activoNCBruto = trialBalance.filter(
     (l) => ["11", "12", "13", "14"].includes(l.accountCode)
   );
   const activoNCContra = mockTrialBalance.filter(
