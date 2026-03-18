@@ -26,7 +26,7 @@ import { Label } from "@/components/ui/label";
 import {
   CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2,
   FileText, Inbox, BarChart3, CalendarCheck, Eye, X, Undo2, ShieldCheck,
-  TrendingUp, ArrowRight, Bell, Activity, PieChart, Send, Lock, Loader2,
+  TrendingUp, ArrowRight, Bell, Activity, PieChart, Send, Lock, Loader2, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
