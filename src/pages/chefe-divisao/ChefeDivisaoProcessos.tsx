@@ -200,10 +200,60 @@ export default function ChefeDivisaoProcessos() {
 
   const getDocIcon = (nome: string) => {
     const ext = nome.split(".").pop()?.toLowerCase();
-    if (ext === "pdf") return <FileText className="h-4 w-4 text-red-500" />;
-    if (ext === "xlsx" || ext === "xls") return <FileSpreadsheet className="h-4 w-4 text-green-600" />;
-    if (["jpg", "jpeg", "png", "gif"].includes(ext || "")) return <FileImage className="h-4 w-4 text-blue-500" />;
-    return <File className="h-4 w-4 text-muted-foreground" />;
+    if (ext === "pdf") return <FileText className="h-5 w-5 text-destructive" />;
+    if (ext === "xlsx" || ext === "xls") return <FileSpreadsheet className="h-5 w-5 text-emerald-600" />;
+    if (["jpg", "jpeg", "png", "gif"].includes(ext || "")) return <FileImage className="h-5 w-5 text-sky-500" />;
+    return <File className="h-5 w-5 text-muted-foreground" />;
+  };
+
+  const getExtLabel = (nome: string) => {
+    const ext = nome.split(".").pop()?.toUpperCase() || "???";
+    const colors: Record<string, string> = {
+      PDF: "bg-destructive/10 text-destructive border-destructive/20",
+      XLSX: "bg-emerald-500/10 text-emerald-700 border-emerald-500/20",
+      XLS: "bg-emerald-500/10 text-emerald-700 border-emerald-500/20",
+      PNG: "bg-sky-500/10 text-sky-700 border-sky-500/20",
+      JPG: "bg-sky-500/10 text-sky-700 border-sky-500/20",
+      JPEG: "bg-sky-500/10 text-sky-700 border-sky-500/20",
+    };
+    return (
+      <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-bold border ${colors[ext] || "bg-muted text-muted-foreground border-border"}`}>
+        {ext}
+      </span>
+    );
+  };
+
+  const getEstadoIndicator = (estado: string) => {
+    if (estado === "validado") {
+      return (
+        <div className="flex items-center gap-1.5">
+          <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+          <span className="text-[10px] font-semibold text-emerald-700">Validado</span>
+        </div>
+      );
+    }
+    if (estado === "pendente") {
+      return (
+        <div className="flex items-center gap-1.5">
+          <Clock className="h-3.5 w-3.5 text-amber-500" />
+          <span className="text-[10px] font-semibold text-amber-600">Pendente</span>
+        </div>
+      );
+    }
+    if (estado === "rejeitado") {
+      return (
+        <div className="flex items-center gap-1.5">
+          <AlertCircle className="h-3.5 w-3.5 text-destructive" />
+          <span className="text-[10px] font-semibold text-destructive">Rejeitado</span>
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center gap-1.5">
+        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+        <span className="text-[10px] font-semibold text-muted-foreground capitalize">{estado}</span>
+      </div>
+    );
   };
 
   const handleSelectProcesso = (p: Processo) => {
