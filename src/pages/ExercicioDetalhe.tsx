@@ -64,7 +64,7 @@ const ExercicioDetalhe = () => {
 
   const daysLeft = Math.ceil((new Date(fy.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   const isOverdue = daysLeft < 0 && !["conforme", "nao_conforme", "submetido", "em_analise", "com_pedidos"].includes(fy.status);
-  const clarifications = mockClarifications.filter((c) => c.exercicioId === fy.id);
+  const clarifications: any[] = []; // TODO: load from DB
   const validationsByLevel = {
     completude: mockValidations.filter((v) => v.level === "completude"),
     consistencia: mockValidations.filter((v) => v.level === "consistencia"),
