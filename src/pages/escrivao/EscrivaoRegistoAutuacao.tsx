@@ -89,6 +89,14 @@ export default function EscrivaoRegistoAutuacao() {
   const [exportingZip, setExportingZip] = useState(false);
   const [docFilter, setDocFilter] = useState<"todos" | "submissao" | "processo">("todos");
 
+  // Upload new document state
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadTipo, setUploadTipo] = useState("");
+  const [uploadObservacoes, setUploadObservacoes] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     fetchProcessos();
   }, []);
