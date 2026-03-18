@@ -137,18 +137,18 @@ export default function ChefeDivisaoProcessos() {
   const handlePreview = async (doc: DocItem) => {
     if (!doc.caminho_ficheiro) return;
     const bucket = "processo-documentos";
-    const { data } = await supabase.storage.from(bucket).createSignedUrl(doc.caminho_ficheiro, 300);
-    if (data?.signedUrl) {
-      setPreviewUrl(data.signedUrl);
+    const { data } = supabase.storage.from(bucket).getPublicUrl(doc.caminho_ficheiro);
+    if (data?.publicUrl) {
+      setPreviewUrl(data.publicUrl);
       setPreviewName(doc.nome_ficheiro);
     }
   };
 
-  const handleDownload = async (doc: DocItem) => {
+  const handleDownload = (doc: DocItem) => {
     if (!doc.caminho_ficheiro) return;
-    const { data } = await supabase.storage.from("processo-documentos").createSignedUrl(doc.caminho_ficheiro, 300);
-    if (data?.signedUrl) {
-      window.open(data.signedUrl, "_blank");
+    const { data } = supabase.storage.from("processo-documentos").getPublicUrl(doc.caminho_ficheiro);
+    if (data?.publicUrl) {
+      window.open(data.publicUrl, "_blank");
     }
   };
 
@@ -512,9 +512,26 @@ export default function ChefeDivisaoProcessos() {
                 <Eye className="h-4 w-4 text-primary" /> {previewName}
               </DialogTitle>
             </DialogHeader>
-            <div className="flex-1 overflow-hidden rounded-lg border h-full">
+            <div className="flex-1 overflow-hidden rounded-lg border h-full flex flex-col">
               {previewUrl && (
-                <iframe src={previewUrl} className="w-full h-full min-h-[60vh]" title={previewName} />
+                <>
+                  <object data={previewUrl} type="application/pdf" className="w-full flex-1 min-h-[55vh]">
+                    <div className="flex flex-col items-center justify-center h-full gap-4 p-8">
+                      <FileText className="h-12 w-12 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground text-center">
+                        Não foi possível pré-visualizar o documento no navegador.
+                      </p>
+                      <Button variant="outline" onClick={() => window.open(previewUrl, "_blank")} className="gap-2">
+                        <Download className="h-4 w-4" /> Abrir numa nova aba
+                      </Button>
+                    </div>
+                  </object>
+                  <div className="flex justify-end p-2 border-t">
+                    <Button variant="ghost" size="sm" onClick={() => window.open(previewUrl, "_blank")} className="gap-1.5 text-xs">
+                      <Download className="h-3.5 w-3.5" /> Abrir numa nova aba
+                    </Button>
+                  </div>
+                </>
               )}
             </div>
           </DialogContent>
