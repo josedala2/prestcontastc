@@ -158,7 +158,9 @@ export default function EscrivaoRegistoAutuacao() {
       .order("created_at", { ascending: true });
 
     if (procDocs) {
-      for (const d of procDocs as any[]) {
+      const baseOrdem = docs.length;
+      for (let i = 0; i < (procDocs as any[]).length; i++) {
+        const d = (procDocs as any[])[i];
         docs.push({
           id: d.id,
           nome: d.nome_ficheiro,
@@ -168,6 +170,7 @@ export default function EscrivaoRegistoAutuacao() {
           bucket: "processo-documentos",
           data: d.created_at,
           estado: d.estado,
+          ordem: baseOrdem + i,
         });
       }
     }
