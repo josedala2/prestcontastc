@@ -493,10 +493,24 @@ export default function EscrivaoRegistoAutuacao() {
                 {/* Documents panel */}
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <FileArchive className="h-4 w-4 text-primary" />
-                      Dossiê do Processo ({allDocs.length} documento{allDocs.length !== 1 ? "s" : ""})
-                    </CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <FileArchive className="h-4 w-4 text-primary" />
+                        Dossiê do Processo ({allDocs.length} documento{allDocs.length !== 1 ? "s" : ""})
+                      </CardTitle>
+                      {allDocs.length > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs gap-1.5"
+                          onClick={handleExportZip}
+                          disabled={exportingZip}
+                        >
+                          {exportingZip ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <PackageOpen className="h-3.5 w-3.5" />}
+                          {exportingZip ? "A exportar..." : "Exportar ZIP"}
+                        </Button>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent>
                     {/* Filter bar with visual indicator */}
