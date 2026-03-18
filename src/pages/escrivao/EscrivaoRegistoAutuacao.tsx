@@ -759,6 +759,16 @@ export default function EscrivaoRegistoAutuacao() {
                                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDownloadDoc(doc)}>
                                       <Download className="h-3.5 w-3.5" />
                                     </Button>
+                                    {canDeleteDoc(doc) && (
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                        onClick={() => { setDocToDelete(doc); setDeleteDocDialogOpen(true); }}
+                                      >
+                                        <X className="h-3.5 w-3.5" />
+                                      </Button>
+                                    )}
                                   </div>
                                 </div>
                               ))}
