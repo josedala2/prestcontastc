@@ -23,8 +23,10 @@ import {
   AlertTriangle,
   Scale,
   LayoutGrid,
+  GitBranch,
 } from "lucide-react";
 import { MenuPerfilMatrix } from "@/components/configuracoes/MenuPerfilMatrix";
+import { WorkflowDesigner } from "@/components/configuracoes/WorkflowDesigner";
 import { cn } from "@/lib/utils";
 
 interface ValidationRule {
@@ -144,6 +146,9 @@ const Configuracoes = () => {
         <TabsList className="mb-4">
           <TabsTrigger value="regras">Regras de Validação</TabsTrigger>
           <TabsTrigger value="prazos">Prazos & Notificações</TabsTrigger>
+          <TabsTrigger value="workflow">
+            <GitBranch className="h-3.5 w-3.5 mr-1" /> Workflow
+          </TabsTrigger>
           <TabsTrigger value="menus">Menus & Perfis</TabsTrigger>
           <TabsTrigger value="sistema">Sistema</TabsTrigger>
         </TabsList>
@@ -286,6 +291,11 @@ const Configuracoes = () => {
               </div>
             </div>
           </div>
+        </TabsContent>
+
+        {/* Workflow Designer */}
+        <TabsContent value="workflow">
+          <WorkflowDesigner />
         </TabsContent>
 
         {/* Menu ↔ Perfil Matrix */}
