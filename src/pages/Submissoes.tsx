@@ -9,11 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEntities } from "@/hooks/useEntities";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye, Search, Building2, Calendar, ChevronLeft, ChevronRight, Inbox, Stamp, BarChart3, CalendarCheck } from "lucide-react";
 
 interface SubmissaoRow {
   id: string;
+  entityId: string;
+  fiscalYearId: string;
+  processId?: string;
   entityName: string;
   nif: string;
   provincia?: string;
@@ -42,8 +46,11 @@ const estadoVariant: Record<string, "default" | "secondary" | "destructive" | "o
 
 const ITEMS_PER_PAGE = 10;
 
+const extractExercise = (fiscalYearId?: string | null) => fiscalYearId?.split("-").pop() || "2024";
+
 const Submissoes = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { entities } = useEntities();
   const [submissoes, setSubmissoes] = useState<SubmissaoRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +62,15 @@ const Submissoes = () => {
     loadSubmissoes();
   }, [entities]);
 
+  const handleOpenSubmission = (submissao: SubmissaoRow) => {
+    if (user?.role === "Escrivão dos Autos" && submissao.processId) {
+      navigate(`/escrivao/registo-autuacao?processoId=${submissao.processId}`);
+      return;
+    }
+
+    navigate(`/submissoes/${submissao.id}`);
+  };
+
   const loadSubmissoes = async () => {
     if (entities.length === 0) return;
     setLoading(true);
@@ -64,15 +80,32 @@ const Submissoes = () => {
       .select("*")
       .order("created_at", { ascending: false });
 
+    const { data: processos } = await supabase
+      .from("processos")
+      .select("id, entity_id, ano_gerencia")
+      .order("created_at", { ascending: false });
+
+    const processosByEntityYear = new Map(
+      ((processos as Array<{ id: string; entity_id: string; ano_gerencia: number }> | null) || []).map((processo) => [
+        `${processo.entity_id}::${processo.ano_gerencia}`,
+        processo.id,
+      ])
+    );
+
     if (subs) {
       const rows: SubmissaoRow[] = subs.map((s: any) => {
-        const ent = entities.find(e => e.id === s.entity_id);
+        const ent = entities.find((e) => e.id === s.entity_id);
+        const exercicio = extractExercise(s.fiscal_year_id);
+
         return {
           id: s.id,
+          entityId: s.entity_id,
+          fiscalYearId: s.fiscal_year_id,
+          processId: processosByEntityYear.get(`${s.entity_id}::${exercicio}`),
           entityName: ent?.name || s.entity_id,
           nif: ent?.nif || "",
           provincia: ent?.provincia,
-          exercicio: s.fiscal_year_id?.split("-")[0] || "2024",
+          exercicio,
           dataSubmissao: s.submitted_at
             ? new Date(s.submitted_at).toLocaleDateString("pt-AO")
             : new Date(s.created_at).toLocaleDateString("pt-AO"),
@@ -229,7 +262,7 @@ const Submissoes = () => {
                         size="sm"
                         variant="outline"
                         className="gap-1.5 text-xs"
-                        onClick={() => navigate(`/submissoes/${s.id}`)}
+                        onClick={() => handleOpenSubmission(s)}
                       >
                         <Eye className="h-3.5 w-3.5" />
                         Ver
