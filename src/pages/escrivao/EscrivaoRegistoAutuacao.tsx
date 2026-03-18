@@ -462,6 +462,40 @@ export default function EscrivaoRegistoAutuacao() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
+                    {/* Visual indicator: docs by origin */}
+                    {!loadingDocs && allDocs.length > 0 && (
+                      <div className="flex items-center gap-4 mb-4 p-3 rounded-lg bg-muted/50 border border-border">
+                        <div className="flex items-center gap-2">
+                          <div className="h-3 w-3 rounded-full bg-blue-500" />
+                          <span className="text-xs text-muted-foreground">Entidade</span>
+                          <span className="text-sm font-bold text-foreground">{submissionDocs.length}</span>
+                        </div>
+                        <div className="h-4 w-px bg-border" />
+                        <div className="flex items-center gap-2">
+                          <div className="h-3 w-3 rounded-full bg-amber-500" />
+                          <span className="text-xs text-muted-foreground">Tribunal</span>
+                          <span className="text-sm font-bold text-foreground">{processoDocs.length}</span>
+                        </div>
+                        <div className="h-4 w-px bg-border" />
+                        {/* Mini bar chart */}
+                        <div className="flex-1 flex items-center gap-1">
+                          {allDocs.length > 0 && (
+                            <>
+                              <div
+                                className="h-2.5 rounded-l-full bg-blue-500 transition-all"
+                                style={{ width: `${(submissionDocs.length / allDocs.length) * 100}%`, minWidth: submissionDocs.length > 0 ? '8px' : '0' }}
+                              />
+                              <div
+                                className="h-2.5 rounded-r-full bg-amber-500 transition-all"
+                                style={{ width: `${(processoDocs.length / allDocs.length) * 100}%`, minWidth: processoDocs.length > 0 ? '8px' : '0' }}
+                              />
+                            </>
+                          )}
+                        </div>
+                        <span className="text-xs font-medium text-muted-foreground">{allDocs.length} total</span>
+                      </div>
+                    )}
+
                     {loadingDocs ? (
                       <div className="flex items-center justify-center py-6">
                         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
