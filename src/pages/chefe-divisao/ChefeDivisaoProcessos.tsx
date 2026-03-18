@@ -575,12 +575,28 @@ export default function ChefeDivisaoProcessos() {
             </div>
             <div className="flex-1 overflow-hidden rounded-lg border h-full flex flex-col bg-muted/20">
               {previewUrl && previewMime === "application/pdf" ? (
-                <embed
+                <object
                   key={previewUrl}
-                  src={previewUrl}
+                  data={previewUrl}
                   type="application/pdf"
                   className="w-full flex-1 min-h-[55vh]"
-                />
+                >
+                  <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+                    <FileText className="h-12 w-12 text-muted-foreground/40" />
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-foreground">O navegador não suporta pré-visualização de PDF embutida</p>
+                      <p className="text-xs text-muted-foreground">O documento será aberto numa nova aba automaticamente.</p>
+                    </div>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => previewUrl && window.open(previewUrl, "_blank", "noopener,noreferrer")}
+                    >
+                      <Download className="h-3.5 w-3.5" /> Abrir PDF em nova aba
+                    </Button>
+                  </div>
+                </object>
               ) : previewUrl ? (
                 <iframe
                   key={previewUrl}
