@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PortalLayout } from "@/components/PortalLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
-import { mockClarifications } from "@/data/mockData";
+// Esclarecimentos are loaded dynamically
 import { ClarificationRequest } from "@/types";
 import { getEntityShortName } from "@/data/mockData";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";

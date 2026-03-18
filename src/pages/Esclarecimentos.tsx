@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
-import { mockClarifications, mockFiscalYears } from "@/data/mockData";
+import { getEntityShortName } from "@/data/mockData";
 import { ClarificationRequest } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
