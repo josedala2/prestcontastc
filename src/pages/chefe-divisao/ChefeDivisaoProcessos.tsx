@@ -18,8 +18,12 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
   ArrowLeft, Building2, Users, Send, CheckCircle2, Loader2, FolderOpen,
-  Calendar, GitBranch, UserCheck, ClipboardList, Search,
+  Calendar, GitBranch, UserCheck, ClipboardList, Search, FileText, Eye,
+  Download, File, FileSpreadsheet, FileImage,
 } from "lucide-react";
 
 interface Processo {
