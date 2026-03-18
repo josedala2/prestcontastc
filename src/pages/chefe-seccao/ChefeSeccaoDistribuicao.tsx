@@ -116,6 +116,7 @@ interface Processo {
 }
 
 export default function ChefeSeccaoDistribuicao() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const divisao = user?.divisao || "3ª Divisão";
 
