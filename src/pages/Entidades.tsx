@@ -37,18 +37,42 @@ const Entidades = () => {
       e.nif.includes(search)
   );
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editing) {
-      setEntities((prev) =>
-        prev.map((e) => (e.id === editing.id ? { ...e, ...form } : e))
-      );
+      const { error } = await supabase.from("entities").update({
+        name: form.name,
+        nif: form.nif,
+        tutela: form.tutela || null,
+        contacto: form.contacto || null,
+        morada: form.morada || null,
+        tipologia: form.tipologia,
+        provincia: form.provincia || null,
+      }).eq("id", editing.id);
+      if (!error) {
+        setEntities((prev) =>
+          prev.map((e) => (e.id === editing.id ? { ...e, ...form } : e))
+        );
+      }
     } else {
-      const newEntity: Entity = {
-        id: Date.now().toString(),
-        ...form,
-        createdAt: new Date().toISOString().split("T")[0],
-      };
-      setEntities((prev) => [...prev, newEntity]);
+      const newId = Date.now().toString();
+      const { error } = await supabase.from("entities").insert({
+        id: newId,
+        name: form.name,
+        nif: form.nif,
+        tutela: form.tutela || null,
+        contacto: form.contacto || null,
+        morada: form.morada || null,
+        tipologia: form.tipologia,
+        provincia: form.provincia || null,
+      });
+      if (!error) {
+        const newEntity: Entity = {
+          id: newId,
+          ...form,
+          createdAt: new Date().toISOString().split("T")[0],
+        };
+        setEntities((prev) => [...prev, newEntity]);
+      }
     }
     setDialogOpen(false);
     setForm({ name: "", nif: "", tutela: "", contacto: "", morada: "", tipologia: "orgao_autonomo", provincia: "" });
