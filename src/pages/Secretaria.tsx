@@ -307,14 +307,14 @@ const Secretaria = () => {
   const recentNotifications = notifications.slice(0, 5);
   const unreadNotifCount = notifications.filter((n) => !n.read).length;
 
-  const totalEntidades = new Set(mockFiscalYears.map((fy) => fy.entityId)).size;
-  const conformeCount = mockFiscalYears.filter((fy) => fy.status === "conforme").length;
-  const naoConformeCount = mockFiscalYears.filter((fy) => fy.status === "nao_conforme").length;
-  const rascunhoCount = mockFiscalYears.filter((fy) => fy.status === "rascunho").length;
-  const comPedidosCount = mockFiscalYears.filter((fy) => fy.status === "com_pedidos").length;
+  const totalEntidades = new Set(allFYs.map((fy) => fy.entityId)).size;
+  const conformeCount = allFYs.filter((fy) => fy.status === "conforme").length;
+  const naoConformeCount = allFYs.filter((fy) => fy.status === "nao_conforme").length;
+  const rascunhoCount = allFYs.filter((fy) => fy.status === "rascunho").length;
+  const comPedidosCount = allFYs.filter((fy) => fy.status === "com_pedidos").length;
 
   // Deadlines
-  const deadlinesSoon = mockFiscalYears
+  const deadlinesSoon = allFYs
     .filter((fy) => !["conforme", "nao_conforme"].includes(fy.status))
     .map((fy) => ({
       ...fy,
