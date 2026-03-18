@@ -59,7 +59,7 @@ const Relatorios = () => {
   const totalProvisoesCD = provisoesCDLines.reduce((s, l) => s + l.balance, 0);
 
   // Classe 4 — Meios Monetários: 41-45, 48, menos 49
-  const meiosMonetariosLines = mockTrialBalance.filter(
+  const meiosMonetariosLines = trialBalance.filter(
     (l) => ["41", "42", "43", "44", "45", "48", "49"].includes(l.accountCode)
   );
   const totalMeiosMonetarios = meiosMonetariosLines.reduce((s, l) => s + l.balance, 0);
