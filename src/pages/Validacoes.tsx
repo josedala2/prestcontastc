@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
-import { mockValidations } from "@/data/mockData";
+import { defaultValidations as mockValidations } from "@/lib/dataUtils";
 import { ValidationResult, VALIDATION_LEVEL_LABELS } from "@/types";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, CheckCircle, XCircle, AlertTriangle, Filter, ShieldCheck, Calculator, Scale } from "lucide-react";

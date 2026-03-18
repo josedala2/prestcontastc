@@ -1,6 +1,6 @@
 import { PortalLayout } from "@/components/PortalLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
-import { mockValidations } from "@/data/mockData";
+import { defaultValidations as mockValidations } from "@/lib/dataUtils";
 import { VALIDATION_LEVEL_LABELS, ValidationResult } from "@/types";
 import { Progress } from "@/components/ui/progress";
 import {

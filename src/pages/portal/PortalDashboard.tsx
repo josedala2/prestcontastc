@@ -1,6 +1,6 @@
 import { PortalLayout } from "@/components/PortalLayout";
 import { PageHeader, StatCard, StatusBadge } from "@/components/ui-custom/PageElements";
-import { submissionChecklist } from "@/data/mockData";
+import { submissionChecklist } from "@/lib/dataUtils";
 import { STATUS_LABELS } from "@/types";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";

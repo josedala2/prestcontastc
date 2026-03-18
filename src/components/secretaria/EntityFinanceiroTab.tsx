@@ -1,7 +1,7 @@
 import { FinancialIndicators } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatKz } from "@/data/mockData";
+import { formatKz } from "@/lib/dataUtils";
 import { TrendingUp, TrendingDown, BarChart3 } from "lucide-react";
 
 interface EntityFinanceiroTabProps {

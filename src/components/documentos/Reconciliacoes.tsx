@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Trash2, Save, AlertTriangle, CheckCircle } from "lucide-react";
-import { formatKz } from "@/data/mockData";
+import { formatKz } from "@/lib/dataUtils";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 

@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Trash2, Save } from "lucide-react";
-import { formatKz } from "@/data/mockData";
+import { formatKz } from "@/lib/dataUtils";
 import { toast } from "sonner";
 
 interface ContaBancaria {
