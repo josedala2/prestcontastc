@@ -99,6 +99,7 @@ export default function ChefeDivisaoProcessos() {
   const [loadingDocs, setLoadingDocs] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewName, setPreviewName] = useState("");
+  const [previewMime, setPreviewMime] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProcessos();
