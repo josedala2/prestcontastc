@@ -302,6 +302,77 @@ export default function ChefeDivisaoProcessos() {
             </CardContent>
           </Card>
 
+          {/* Documentos do Processo */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" />
+                Documentos do Processo ({documentos.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingDocs ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : documentos.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">Nenhum documento associado a este processo.</p>
+              ) : (
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-xs w-10">#</TableHead>
+                        <TableHead className="text-xs">Documento</TableHead>
+                        <TableHead className="text-xs">Tipo</TableHead>
+                        <TableHead className="text-xs">Estado</TableHead>
+                        <TableHead className="text-xs">Data</TableHead>
+                        <TableHead className="text-xs text-right">Acções</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {documentos.map((doc, idx) => (
+                        <TableRow key={doc.id}>
+                          <TableCell className="text-xs text-muted-foreground font-mono">{idx + 1}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {getDocIcon(doc.nome_ficheiro)}
+                              <span className="text-xs font-medium truncate max-w-[200px]">{doc.nome_ficheiro}</span>
+                              {idx === 0 && doc.tipo_documento === "Capa do Processo" && (
+                                <Badge className="text-[9px] bg-primary/10 text-primary border-primary/20" variant="outline">CAPA</Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-[10px]">{doc.tipo_documento}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={doc.estado === "validado" ? "default" : "secondary"} className="text-[10px]">
+                              {doc.estado}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            {new Date(doc.created_at).toLocaleDateString("pt-AO")}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handlePreview(doc)} title="Visualizar">
+                                <Eye className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleDownload(doc)} title="Descarregar">
+                                <Download className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Assignment Form */}
           <Card>
             <CardHeader>
