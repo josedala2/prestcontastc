@@ -95,6 +95,9 @@ export default function EscrivaoRegistoAutuacao() {
   const [uploadTipo, setUploadTipo] = useState("");
   const [uploadObservacoes, setUploadObservacoes] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [deleteDocDialogOpen, setDeleteDocDialogOpen] = useState(false);
+  const [docToDelete, setDocToDelete] = useState<DocItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -504,6 +507,44 @@ export default function EscrivaoRegistoAutuacao() {
     }
   };
 
+  const handleDeleteDocument = async () => {
+    if (!selectedProcesso || !docToDelete) return;
+    setDeleting(true);
+    try {
+      // Remove from storage
+      if (docToDelete.caminho) {
+        await supabase.storage.from(docToDelete.bucket).remove([docToDelete.caminho]);
+      }
+
+      // Remove from DB
+      await supabase.from("processo_documentos").delete().eq("id", docToDelete.id);
+
+      // Log in history
+      await supabase.from("processo_historico").insert({
+        processo_id: selectedProcesso.id,
+        etapa_anterior: selectedProcesso.etapa_atual,
+        etapa_seguinte: selectedProcesso.etapa_atual,
+        estado_anterior: selectedProcesso.estado,
+        estado_seguinte: selectedProcesso.estado,
+        acao: `Documento removido: ${docToDelete.tipo} — ${docToDelete.nome}`,
+        executado_por: executadoPor,
+        perfil_executor: "Escrivão dos Autos",
+      } as any);
+
+      toast.success(`Documento "${docToDelete.tipo}" removido`);
+      setDocToDelete(null);
+      setDeleteDocDialogOpen(false);
+      fetchAllDocuments(selectedProcesso);
+    } catch (err: any) {
+      toast.error(`Erro ao remover: ${err.message}`);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const canDeleteDoc = (doc: DocItem) =>
+    !isLocked && doc.origem === "processo" && doc.estado === "pendente";
+
   const isLocked = autuado || (selectedProcesso && selectedProcesso.etapa_atual > 5);
 
   const submissionDocs = allDocs.filter(d => d.origem === "submissao");
@@ -718,6 +759,16 @@ export default function EscrivaoRegistoAutuacao() {
                                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDownloadDoc(doc)}>
                                       <Download className="h-3.5 w-3.5" />
                                     </Button>
+                                    {canDeleteDoc(doc) && (
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                        onClick={() => { setDocToDelete(doc); setDeleteDocDialogOpen(true); }}
+                                      >
+                                        <X className="h-3.5 w-3.5" />
+                                      </Button>
+                                    )}
                                   </div>
                                 </div>
                               ))}
@@ -949,6 +1000,34 @@ export default function EscrivaoRegistoAutuacao() {
                 <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> A processar...</>
               ) : (
                 "Confirmar e Autuar"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete document confirm dialog */}
+      <AlertDialog open={deleteDocDialogOpen} onOpenChange={setDeleteDocDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover Documento</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem a certeza que pretende remover o documento <strong>{docToDelete?.tipo}</strong> ({docToDelete?.nome})?
+              <br /><br />
+              Esta acção é irreversível. O ficheiro será eliminado do processo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteDocument}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> A remover...</>
+              ) : (
+                "Confirmar Remoção"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
