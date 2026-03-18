@@ -41,32 +41,29 @@ const Secretaria = () => {
   const { recepcionar, rejeitar, submissions, getUploadedDocs } = useSubmissions();
   const { entities: allEntities } = useEntities();
   const { user } = useAuth();
+  const { allFiscalYears: allFYs } = useFiscalYears();
   const isChefe = user?.role === "Chefe da Secretaria-Geral" ||
     user?.role === "Administrador do Sistema" ||
     user?.role === "Presidente do Tribunal de Contas";
 
-  // Merge: mock "submetido" + dynamically submitted via Portal ("pendente" in SubmissionContext)
+  // Merge: DB fiscal years with status "submetido" + dynamically submitted via Portal
   const submetidos = useMemo(() => {
-    // Start with mock data that has status "submetido"
-    const fromMock = mockFiscalYears.filter((fy) => fy.status === "submetido");
+    const fromDB = allFYs.filter((fy) => fy.status === "submetido");
     
-    // Add fiscal years that were dynamically submitted via Portal
     const dynamicSubmissions = submissions.filter((s) => s.status === "pendente");
     const dynamicFys = dynamicSubmissions
       .map((s) => {
-        // Find the fiscal year in mockData (it may have status "rascunho")
-        const fy = mockFiscalYears.find(
+        const fy = allFYs.find(
           (f) => f.entityId === s.entityId && `${f.entityId}-${f.year}` === s.fiscalYearId
         );
         if (!fy) return null;
-        // Don't duplicate if already in fromMock
-        if (fromMock.some((m) => m.id === fy.id)) return null;
+        if (fromDB.some((m) => m.id === fy.id)) return null;
         return { ...fy, status: "submetido" as const, submittedAt: s.submittedAt || new Date().toISOString() };
       })
-      .filter(Boolean) as typeof fromMock;
+      .filter(Boolean) as typeof fromDB;
 
-    return [...fromMock, ...dynamicFys];
-  }, [submissions]);
+    return [...fromDB, ...dynamicFys];
+  }, [submissions, allFYs]);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
