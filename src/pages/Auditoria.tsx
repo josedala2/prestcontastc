@@ -24,13 +24,18 @@ const actionTypeColors: Record<string, string> = {
 };
 
 const Auditoria = () => {
+  const { logs: auditLog, loading } = useAuditLog();
+
   return (
     <AppLayout>
       <PageHeader title="Trilha de Auditoria" description="Registo imutável de todas as acções críticas no sistema (WORM)" />
 
+      {loading ? (
+        <div className="flex items-center justify-center h-32"><p className="text-muted-foreground">A carregar...</p></div>
+      ) : (
       <div className="bg-card rounded-lg border border-border card-shadow overflow-hidden animate-fade-in">
         <div className="divide-y divide-border">
-          {mockAuditLog.map((log, index) => (
+          {auditLog.map((log, index) => (
             <div key={log.id} className="p-4 flex items-start gap-4 hover:bg-muted/30 transition-colors">
               <div className="relative">
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center ${actionTypeColors[log.actionType || "edicao"]}`}>
