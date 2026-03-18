@@ -1,26 +1,19 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { PortalLayout } from "@/components/PortalLayout";
 import { StatusBadge } from "@/components/ui-custom/PageElements";
-import { mockFiscalYears, mockEntities } from "@/data/mockData";
 import { STATUS_LABELS } from "@/types";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
+import { useFiscalYears } from "@/hooks/useFiscalYears";
 import { AnaliseFinanceira } from "@/components/AnaliseFinanceiraReadonly";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowLeft,
-  Clock,
-  AlertTriangle,
-  CheckCircle,
-} from "lucide-react";
+import { ArrowLeft, Clock, AlertTriangle, CheckCircle } from "lucide-react";
 
 const PortalExercicioDetalhe = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { entityId } = usePortalEntity();
-
-  const entityExercicios = mockFiscalYears.filter((fy) => fy.entityId === entityId);
+  const { entity, entityId } = usePortalEntity();
+  const { fiscalYears: entityExercicios } = useFiscalYears(entityId);
   const fy = entityExercicios.find((f) => f.id === id);
-  const entity = mockEntities.find((e) => e.id === entityId);
 
   if (!fy) {
     return (

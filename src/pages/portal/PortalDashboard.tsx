@@ -1,12 +1,13 @@
 import { PortalLayout } from "@/components/PortalLayout";
 import { PageHeader, StatCard, StatusBadge } from "@/components/ui-custom/PageElements";
-import { mockFiscalYears, mockClarifications, submissionChecklist } from "@/data/mockData";
+import { submissionChecklist } from "@/data/mockData";
 import { STATUS_LABELS } from "@/types";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { useSubmissions } from "@/contexts/SubmissionContext";
+import { useFiscalYears } from "@/hooks/useFiscalYears";
 import { NotificacoesPanel } from "@/components/portal/NotificacoesPanel";
 import { ProcessoTimeline } from "@/components/portal/ProcessoTimeline";
 import {
@@ -31,11 +32,8 @@ import { cn } from "@/lib/utils";
 const PortalDashboard = () => {
   const { entity, entityId } = usePortalEntity();
   const { unreadCount, notifications } = useSubmissions();
-  const entityExercicios = mockFiscalYears.filter((fy) => fy.entityId === entityId);
+  const { fiscalYears: entityExercicios, loading } = useFiscalYears(entityId);
   const activeExercicio = entityExercicios.find((fy) => fy.year === 2024);
-  const pendingClarifications = mockClarifications.filter(
-    (cr) => cr.entityId === entityId && cr.status === "pendente"
-  );
   const entityUnread = unreadCount(entityId);
 
   const today = new Date();
@@ -45,7 +43,6 @@ const PortalDashboard = () => {
 
   const checklistDone = Math.round((activeExercicio?.checklistProgress || 0) / 100 * submissionChecklist.length);
 
-  // Short name for display
   const shortName = entity.name.split(" - ")[1] || entity.name;
 
   return (
@@ -114,10 +111,10 @@ const PortalDashboard = () => {
         />
         <StatCard
           title="Esclarecimentos"
-          value={pendingClarifications.length}
+          value={0}
           subtitle="pendentes de resposta"
           icon={<MessageSquare className="h-5 w-5" />}
-          variant={pendingClarifications.length > 0 ? "warning" : "success"}
+          variant="success"
         />
         <StatCard
           title="Notificações"
@@ -127,6 +124,7 @@ const PortalDashboard = () => {
           variant={entityUnread > 0 ? "warning" : "success"}
         />
       </div>
+
       {/* Process Timeline */}
       <div className="mb-6">
         <ProcessoTimeline fiscalYear="2024" />
@@ -143,29 +141,33 @@ const PortalDashboard = () => {
               Ver todos <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="space-y-3">
-            {entityExercicios.map((fy) => (
-              <div key={fy.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-foreground">{fy.year}</p>
-                    <StatusBadge
-                      status={STATUS_LABELS[fy.status].label}
-                      variant={STATUS_LABELS[fy.status].color as any}
-                    />
+          {loading ? (
+            <p className="text-sm text-muted-foreground text-center py-4">A carregar...</p>
+          ) : (
+            <div className="space-y-3">
+              {entityExercicios.map((fy) => (
+                <div key={fy.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-foreground">{fy.year}</p>
+                      <StatusBadge
+                        status={STATUS_LABELS[fy.status].label}
+                        variant={STATUS_LABELS[fy.status].color as any}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">Prazo: {fy.deadline}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">Prazo: {fy.deadline}</p>
+                  <div className="w-20">
+                    <Progress value={fy.checklistProgress} className="h-1.5" />
+                    <p className="text-[10px] text-muted-foreground text-right mt-0.5">{fy.checklistProgress}%</p>
+                  </div>
                 </div>
-                <div className="w-20">
-                  <Progress value={fy.checklistProgress} className="h-1.5" />
-                  <p className="text-[10px] text-muted-foreground text-right mt-0.5">{fy.checklistProgress}%</p>
-                </div>
-              </div>
-            ))}
-            {entityExercicios.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">Sem exercícios registados.</p>
-            )}
-          </div>
+              ))}
+              {entityExercicios.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">Sem exercícios registados.</p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Solicitações de Visto */}
@@ -178,8 +180,6 @@ const PortalDashboard = () => {
               Ver todas <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
-
-          {/* Mini resumo */}
           <div className="grid grid-cols-4 gap-2 mb-4">
             {[
               { label: "Total", value: 4, color: "text-foreground" },
@@ -193,8 +193,6 @@ const PortalDashboard = () => {
               </div>
             ))}
           </div>
-
-          {/* Últimas solicitações */}
           <div className="space-y-2">
             {[
               { id: "SV-2025-001", tipo: "Prestação de Serviços", estado: "pendente" as const, valor: "18.500.000,00 Kz" },
@@ -306,7 +304,7 @@ const PortalDashboard = () => {
           );
         })()}
 
-        {/* Pedidos de Esclarecimento pendentes */}
+        {/* Pedidos de Esclarecimento */}
         <div className="bg-card rounded-lg border border-border card-shadow p-5 animate-fade-in lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -316,37 +314,11 @@ const PortalDashboard = () => {
               Ver todos <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
-          {pendingClarifications.length === 0 ? (
-            <div className="text-center py-8">
-              <CheckCircle className="h-8 w-8 text-success mx-auto mb-2 opacity-50" />
-              <p className="text-sm text-muted-foreground">Sem pedidos pendentes</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {pendingClarifications.map((cr) => {
-                const daysLeft = Math.ceil(
-                  (new Date(cr.deadline).getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-                );
-                return (
-                  <Link
-                    key={cr.id}
-                    to="/portal/esclarecimentos"
-                    className="block p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                  >
-                    <p className="text-sm font-medium text-foreground">{cr.subject}</p>
-                    <div className="flex items-center gap-3 mt-1.5">
-                      <span className="text-[10px] text-muted-foreground">Criado: {cr.createdAt}</span>
-                      <span className={`text-[10px] font-semibold ${daysLeft < 0 ? "text-destructive" : "text-warning"}`}>
-                        {daysLeft < 0 ? `${Math.abs(daysLeft)}d atraso` : `${daysLeft}d restantes`}
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
+          <div className="text-center py-8">
+            <CheckCircle className="h-8 w-8 text-success mx-auto mb-2 opacity-50" />
+            <p className="text-sm text-muted-foreground">Sem pedidos pendentes</p>
+          </div>
         </div>
-
       </div>
 
       {/* Notifications Panel */}
