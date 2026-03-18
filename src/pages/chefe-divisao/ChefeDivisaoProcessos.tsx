@@ -99,6 +99,7 @@ export default function ChefeDivisaoProcessos() {
   const [loadingDocs, setLoadingDocs] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewName, setPreviewName] = useState("");
+  const [previewMime, setPreviewMime] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProcessos();
@@ -156,7 +157,14 @@ export default function ChefeDivisaoProcessos() {
 
       if (error) throw error;
 
-      const objectUrl = URL.createObjectURL(data);
+      const fileExtension = doc.nome_ficheiro.split(".").pop()?.toLowerCase();
+      const mimeType = fileExtension === "pdf"
+        ? "application/pdf"
+        : data.type || "application/octet-stream";
+      const previewBlob = new Blob([data], { type: mimeType });
+      const objectUrl = URL.createObjectURL(previewBlob);
+
+      setPreviewMime(mimeType);
       setPreviewUrl(objectUrl);
       setPreviewName(doc.nome_ficheiro);
     } catch (error) {
@@ -552,6 +560,7 @@ export default function ChefeDivisaoProcessos() {
             if (!open) {
               setPreviewUrl(null);
               setPreviewName("");
+              setPreviewMime(null);
             }
           }}
         >
@@ -560,20 +569,38 @@ export default function ChefeDivisaoProcessos() {
               <DialogTitle className="text-sm flex items-center gap-2">
                 <Eye className="h-4 w-4 text-primary" /> {previewName}
               </DialogTitle>
-              <DialogDescription className="sr-only">
-                Pré-visualização online do documento seleccionado do processo.
+              <DialogDescription className="text-xs text-muted-foreground">
+                Pré-visualização online do documento seleccionado do processo. Se o navegador não renderizar o PDF no painel, use “Abrir em nova aba”.
               </DialogDescription>
             </div>
             <div className="flex-1 overflow-hidden rounded-lg border h-full flex flex-col bg-muted/20">
-              {previewUrl && (
+              {previewUrl && previewMime === "application/pdf" ? (
+                <embed
+                  key={previewUrl}
+                  src={previewUrl}
+                  type="application/pdf"
+                  className="w-full flex-1 min-h-[55vh]"
+                />
+              ) : previewUrl ? (
                 <iframe
                   key={previewUrl}
-                  src={`${previewUrl}#toolbar=1&navpanes=0&scrollbar=1`}
+                  src={previewUrl}
                   className="w-full flex-1 min-h-[55vh]"
                   title={previewName}
                   style={{ border: "none" }}
                 />
-              )}
+              ) : null}
+            </div>
+            <div className="flex items-center justify-end gap-2 border-t border-border px-3 py-2 bg-background">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => previewUrl && window.open(previewUrl, "_blank", "noopener,noreferrer")}
+                disabled={!previewUrl}
+              >
+                <Download className="h-3.5 w-3.5" /> Abrir em nova aba
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
