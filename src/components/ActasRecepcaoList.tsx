@@ -60,25 +60,38 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
     fetchActas();
   }, [entityId, fiscalYear]);
 
-  const getPublicUrl = (filePath: string) => {
-    const { data } = supabase.storage.from("actas-recepcao").getPublicUrl(filePath);
-    return data.publicUrl;
+  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+
+  const downloadBlob = async (filePath: string): Promise<Blob | null> => {
+    const { data, error } = await supabase.storage.from("actas-recepcao").download(filePath);
+    if (error || !data) return null;
+    return data;
   };
 
-  const handlePreview = (acta: Acta) => {
+  const handlePreview = async (acta: Acta) => {
+    const blob = await downloadBlob(acta.file_path);
+    if (!blob) { toast.error("Erro ao carregar acta."); return; }
+    if (previewBlobUrl) URL.revokeObjectURL(previewBlobUrl);
+    const url = URL.createObjectURL(blob);
+    setPreviewBlobUrl(url);
     setPreviewActa(acta);
   };
 
-  const handlePrint = (filePath: string) => {
-    const url = getPublicUrl(filePath);
+  const handlePrint = async (filePath: string) => {
+    const blob = await downloadBlob(filePath);
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
     const printWindow = window.open(url, "_blank");
     printWindow?.addEventListener("load", () => {
       printWindow.print();
     });
   };
 
-  const handleOpenNewTab = (filePath: string) => {
-    window.open(getPublicUrl(filePath), "_blank", "noopener,noreferrer");
+  const handleOpenNewTab = async (filePath: string) => {
+    const blob = await downloadBlob(filePath);
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const handleDownload = async (filePath: string, fileName: string) => {
@@ -249,7 +262,7 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
       )}
 
       {/* PDF Preview Dialog */}
-      <Dialog open={!!previewActa} onOpenChange={() => setPreviewActa(null)}>
+      <Dialog open={!!previewActa} onOpenChange={() => { if (previewBlobUrl) URL.revokeObjectURL(previewBlobUrl); setPreviewBlobUrl(null); setPreviewActa(null); }}>
         <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
           <DialogHeader>
             <div className="flex items-center justify-between pr-6">
@@ -285,9 +298,9 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
               </div>
             </div>
           </DialogHeader>
-          {previewActa && (
+          {previewActa && previewBlobUrl && (
             <iframe
-              src={getPublicUrl(previewActa.file_path)}
+              src={previewBlobUrl}
               className="w-full flex-1 min-h-0 rounded-lg border"
               title="PDF Preview"
             />

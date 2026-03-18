@@ -152,10 +152,11 @@ const SubmissaoDetalhe = () => {
       setDocPreviewLoading(true);
       setDocPreview({ label, category });
       try {
-        const { data } = supabase.storage
+        const { data, error } = await supabase.storage
           .from("submission-documents")
-          .getPublicUrl(subDoc.file_path);
-        setDocPreviewUrl(data.publicUrl);
+          .download(subDoc.file_path);
+        if (error || !data) { setDocPreviewUrl(null); }
+        else { setDocPreviewUrl(URL.createObjectURL(data)); }
       } catch {
         setDocPreviewUrl(null);
       }
@@ -167,10 +168,18 @@ const SubmissaoDetalhe = () => {
   };
 
   const handleDownloadDoc = async (subDoc: SubmissionDoc) => {
-    const { data } = supabase.storage
-      .from("submission-documents")
-      .getPublicUrl(subDoc.file_path);
-    window.open(data.publicUrl, "_blank");
+    try {
+      const { data, error } = await supabase.storage.from("submission-documents").download(subDoc.file_path);
+      if (error || !data) return;
+      const url = URL.createObjectURL(data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = subDoc.file_name;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error("Erro ao descarregar documento.");
+    }
   };
 
   const now = new Date();
@@ -431,9 +440,10 @@ const SubmissaoDetalhe = () => {
                     variant="outline"
                     size="sm"
                     className="gap-1.5"
-                    onClick={() => {
-                      const { data } = supabase.storage.from("actas-recepcao").getPublicUrl(generatedActaFilePath);
-                      setPdfPreviewUrl(data.publicUrl);
+                    onClick={async () => {
+                      const { data, error } = await supabase.storage.from("actas-recepcao").download(generatedActaFilePath);
+                      if (error || !data) return;
+                      setPdfPreviewUrl(URL.createObjectURL(data));
                     }}
                   >
                     <Eye className="h-3.5 w-3.5" /> Visualizar Acta
@@ -568,7 +578,7 @@ const SubmissaoDetalhe = () => {
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Visualizar"
-                            onClick={() => { const { data } = supabase.storage.from("actas-recepcao").getPublicUrl(generatedActaFilePath!); setPdfPreviewUrl(data.publicUrl); }}>
+                            onClick={async () => { const { data, error } = await supabase.storage.from("actas-recepcao").download(generatedActaFilePath!); if (error || !data) return; setPdfPreviewUrl(URL.createObjectURL(data)); }}>
                             <Eye className="h-3.5 w-3.5" />
                           </Button>
                           <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Descarregar"
@@ -597,10 +607,12 @@ const SubmissaoDetalhe = () => {
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Visualizar"
-                            onClick={() => {
-                              const { data } = supabase.storage.from("submission-documents").getPublicUrl(item.doc!.file_path);
-                              if (item.doc!.file_name.toLowerCase().endsWith(".pdf")) { setPdfPreviewUrl(data.publicUrl); }
-                              else { setDocPreview({ label: item.doc!.doc_label, category: item.doc!.doc_category }); setDocPreviewUrl(data.publicUrl); }
+                            onClick={async () => {
+                              const { data, error } = await supabase.storage.from("submission-documents").download(item.doc!.file_path);
+                              if (error || !data) return;
+                              const blobUrl = URL.createObjectURL(data);
+                              if (item.doc!.file_name.toLowerCase().endsWith(".pdf")) { setPdfPreviewUrl(blobUrl); }
+                              else { setDocPreview({ label: item.doc!.doc_label, category: item.doc!.doc_category }); setDocPreviewUrl(blobUrl); }
                             }}>
                             <Eye className="h-3.5 w-3.5" />
                           </Button>
