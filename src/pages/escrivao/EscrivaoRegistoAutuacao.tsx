@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
@@ -52,6 +53,8 @@ interface DocItem {
 
 export default function EscrivaoRegistoAutuacao() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const processoIdFromUrl = searchParams.get("processoId");
   const executadoPor = user?.displayName || "Escrivão dos Autos";
 
   const [processos, setProcessos] = useState<Processo[]>([]);
@@ -142,6 +145,17 @@ export default function EscrivaoRegistoAutuacao() {
       setAllDocs([]);
     }
   }, [selectedProcesso, fetchAllDocuments]);
+
+  useEffect(() => {
+    if (!processoIdFromUrl || processos.length === 0 || selectedProcesso?.id === processoIdFromUrl) return;
+
+    const processoFromUrl = processos.find((processo) => processo.id === processoIdFromUrl);
+    if (processoFromUrl) {
+      setSelectedProcesso(processoFromUrl);
+      setAutuado(false);
+      setAutuacaoResult(null);
+    }
+  }, [processoIdFromUrl, processos, selectedProcesso?.id]);
 
   const handleViewDoc = async (doc: DocItem) => {
     if (!doc.caminho) return;
