@@ -22,7 +22,9 @@ import {
   Building2,
   AlertTriangle,
   Scale,
+  LayoutGrid,
 } from "lucide-react";
+import { MenuPerfilMatrix } from "@/components/configuracoes/MenuPerfilMatrix";
 import { cn } from "@/lib/utils";
 
 interface ValidationRule {
@@ -142,6 +144,7 @@ const Configuracoes = () => {
         <TabsList className="mb-4">
           <TabsTrigger value="regras">Regras de Validação</TabsTrigger>
           <TabsTrigger value="prazos">Prazos & Notificações</TabsTrigger>
+          <TabsTrigger value="menus">Menus & Perfis</TabsTrigger>
           <TabsTrigger value="sistema">Sistema</TabsTrigger>
         </TabsList>
 
@@ -283,6 +286,11 @@ const Configuracoes = () => {
               </div>
             </div>
           </div>
+        </TabsContent>
+
+        {/* Menu ↔ Perfil Matrix */}
+        <TabsContent value="menus">
+          <MenuPerfilMatrix />
         </TabsContent>
 
         {/* System */}
