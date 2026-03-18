@@ -807,7 +807,7 @@ const Secretaria = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 {actasGeradas.map((fyId) => {
-                  const fy = mockFiscalYears.find((f) => f.id === fyId);
+                  const fy = allFYs.find((f) => f.id === fyId) || submetidos.find((f) => f.id === fyId);
                   if (!fy) return null;
                   const isEncaminhado = encaminhados.includes(fyId);
                   const isEncaminhando = encaminhando === fyId;
