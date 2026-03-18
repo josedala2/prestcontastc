@@ -543,33 +543,34 @@ export default function ChefeDivisaoProcessos() {
         </AlertDialog>
 
         {/* Document Preview Dialog */}
-        <Dialog open={!!previewUrl} onOpenChange={() => { setPreviewUrl(null); setPreviewName(""); }}>
+        <Dialog
+          open={!!previewUrl}
+          onOpenChange={(open) => {
+            if (!open && previewUrl?.startsWith("blob:")) {
+              URL.revokeObjectURL(previewUrl);
+            }
+            if (!open) {
+              setPreviewUrl(null);
+              setPreviewName("");
+            }
+          }}
+        >
           <DialogContent className="max-w-4xl h-[80vh]">
             <DialogHeader>
               <DialogTitle className="text-sm flex items-center gap-2">
                 <Eye className="h-4 w-4 text-primary" /> {previewName}
               </DialogTitle>
             </DialogHeader>
-            <div className="flex-1 overflow-hidden rounded-lg border h-full flex flex-col">
+            <div className="flex-1 overflow-hidden rounded-lg border h-full flex flex-col bg-muted/20">
               {previewUrl && (
-                <>
-                  <object data={previewUrl} type="application/pdf" className="w-full flex-1 min-h-[55vh]">
-                    <div className="flex flex-col items-center justify-center h-full gap-4 p-8">
-                      <FileText className="h-12 w-12 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground text-center">
-                        Não foi possível pré-visualizar o documento no navegador.
-                      </p>
-                      <Button variant="outline" onClick={() => window.open(previewUrl, "_blank")} className="gap-2">
-                        <Download className="h-4 w-4" /> Abrir numa nova aba
-                      </Button>
-                    </div>
-                  </object>
-                  <div className="flex justify-end p-2 border-t">
-                    <Button variant="ghost" size="sm" onClick={() => window.open(previewUrl, "_blank")} className="gap-1.5 text-xs">
-                      <Download className="h-3.5 w-3.5" /> Abrir numa nova aba
-                    </Button>
+                <object data={previewUrl} type="application/pdf" className="w-full flex-1 min-h-[55vh]">
+                  <div className="flex flex-col items-center justify-center h-full gap-4 p-8">
+                    <FileText className="h-12 w-12 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground text-center">
+                      Não foi possível pré-visualizar este documento inline.
+                    </p>
                   </div>
-                </>
+                </object>
               )}
             </div>
           </DialogContent>
