@@ -7,7 +7,7 @@ const STEPS = [
   { key: "submetido", label: "Submetido", description: "Prestação de contas enviada ao Tribunal", icon: Send },
   { key: "recepcionado", label: "Recepcionado", description: "Documentação verificada pela Secretaria", icon: ClipboardCheck },
   { key: "em_analise", label: "Em Análise", description: "Análise técnica em curso", icon: FileSearch },
-  { key: "parecer", label: "Parecer Emitido", description: "Parecer técnico finalizado", icon: Scale },
+  { key: "parecer", label: "Decisão Proferida", description: "Decisão do Tribunal proferida", icon: Scale },
 ] as const;
 
 function getActiveStep(submissionStatus: string, hasParecer: boolean): number {
