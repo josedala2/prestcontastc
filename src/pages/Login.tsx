@@ -35,7 +35,14 @@ const DIVISOES = ["3ª Divisão", "4ª Divisão", "5ª Divisão", "6ª Divisão"
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login, signup } = useAuth();
+  const { login, signup, user } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user) {
+      navigate(roleDefaultRoute[user.role] || "/dashboard", { replace: true });
+    }
+  }, [user, navigate]);
 
   // Login state
   const [loginEmail, setLoginEmail] = useState("");
