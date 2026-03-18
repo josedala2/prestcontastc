@@ -57,7 +57,7 @@ const Importacao = () => {
   const handleExportPdf = () => {
     setExporting(true);
     try {
-      exportBalancetePdf(mockTrialBalance);
+      exportBalancetePdf(trialBalance);
       toast.success("Balancete exportado em PDF com sucesso.");
     } catch (e) {
       toast.error("Erro ao exportar.");
