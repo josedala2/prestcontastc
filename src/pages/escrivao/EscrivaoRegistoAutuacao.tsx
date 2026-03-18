@@ -105,6 +105,43 @@ export default function EscrivaoRegistoAutuacao() {
   const [previewLoading, setPreviewLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Drag & drop reorder state
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [reorderMode, setReorderMode] = useState(false);
+
+  const handleDragStart = (index: number) => {
+    setDragIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === index) return;
+    setDragOverIndex(index);
+  };
+
+  const handleDrop = (index: number) => {
+    if (dragIndex === null || dragIndex === index) {
+      setDragIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+    const newDocs = [...allDocs];
+    const [moved] = newDocs.splice(dragIndex, 1);
+    newDocs.splice(index, 0, moved);
+    // Re-assign ordem
+    const reordered = newDocs.map((d, i) => ({ ...d, ordem: i }));
+    setAllDocs(reordered);
+    setDragIndex(null);
+    setDragOverIndex(null);
+    toast.success("Ordem dos documentos actualizada");
+  };
+
+  const handleDragEnd = () => {
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
   useEffect(() => {
     fetchProcessos();
   }, []);
