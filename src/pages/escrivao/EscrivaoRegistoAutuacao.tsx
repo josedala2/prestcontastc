@@ -594,6 +594,7 @@ export default function EscrivaoRegistoAutuacao() {
       setShowUploadForm(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
       fetchAllDocuments(selectedProcesso);
+      fetchHistorico(selectedProcesso.id);
     } catch (err: any) {
       toast.error(`Erro ao anexar documento: ${err.message}`);
     } finally {
