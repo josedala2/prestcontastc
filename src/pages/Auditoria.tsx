@@ -1,6 +1,6 @@
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
-import { mockAuditLog } from "@/data/mockData";
+import { useAuditLog } from "@/hooks/useFinancialData";
 import { Clock, User, FileText, Upload, ShieldCheck, Pencil, Send, Download, CheckCircle } from "lucide-react";
 
 const actionTypeIcons: Record<string, React.ReactNode> = {
