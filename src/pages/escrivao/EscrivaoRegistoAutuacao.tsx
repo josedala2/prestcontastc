@@ -14,6 +14,7 @@ import { generateCapaProcesso, type ProcessoDocData } from "@/lib/workflowDocGen
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { PDFDocument } from "pdf-lib";
 import { saveAs } from "file-saver";
+import JSZip from "jszip";
 
 interface Processo {
   id: string;
