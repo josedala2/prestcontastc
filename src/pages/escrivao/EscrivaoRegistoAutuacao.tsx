@@ -1005,6 +1005,34 @@ export default function EscrivaoRegistoAutuacao() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Delete document confirm dialog */}
+      <AlertDialog open={deleteDocDialogOpen} onOpenChange={setDeleteDocDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover Documento</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem a certeza que pretende remover o documento <strong>{docToDelete?.tipo}</strong> ({docToDelete?.nome})?
+              <br /><br />
+              Esta acção é irreversível. O ficheiro será eliminado do processo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteDocument}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> A remover...</>
+              ) : (
+                "Confirmar Remoção"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
