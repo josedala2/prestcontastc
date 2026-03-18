@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
 import { formatKz } from "@/data/mockData";
 import { useEntities } from "@/hooks/useEntities";
+import { useFiscalYears } from "@/hooks/useFiscalYears";
 import { FiscalYear, STATUS_LABELS } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
