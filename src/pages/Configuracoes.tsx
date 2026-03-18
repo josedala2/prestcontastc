@@ -293,6 +293,11 @@ const Configuracoes = () => {
           </div>
         </TabsContent>
 
+        {/* Workflow Designer */}
+        <TabsContent value="workflow">
+          <WorkflowDesigner />
+        </TabsContent>
+
         {/* Menu ↔ Perfil Matrix */}
         <TabsContent value="menus">
           <MenuPerfilMatrix />
