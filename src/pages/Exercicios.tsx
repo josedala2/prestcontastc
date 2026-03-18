@@ -335,6 +335,15 @@ const Exercicios = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Resolução 1/17 Section */}
+      <div className="mb-6">
+        <AbrirExerciciosResolucao
+          allEntities={allEntities}
+          existingFiscalYears={fiscalYears}
+          onCreated={refreshFY}
+        />
+      </div>
+
       <div className="overflow-hidden rounded-lg border border-border bg-card">
         <Table>
           <TableHeader>
