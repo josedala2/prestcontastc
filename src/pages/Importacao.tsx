@@ -118,7 +118,7 @@ const Importacao = () => {
             <FileSpreadsheet className="h-5 w-5 text-success" />
             <div className="flex-1">
               <p className="text-sm font-medium text-foreground">Balancete importado</p>
-              <p className="text-xs text-muted-foreground">{mockTrialBalance.length} linhas carregadas • {versions.length} versão(ões) guardada(s)</p>
+              <p className="text-xs text-muted-foreground">{trialBalance.length} linhas carregadas • {versions.length} versão(ões) guardada(s)</p>
             </div>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setPreview(!preview)}>
               {preview ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
