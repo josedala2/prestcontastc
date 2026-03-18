@@ -279,16 +279,59 @@ const Secretaria = () => {
     toast.success(`Acta de recepção gerada e guardada — ${selectedFy.entityName} — ${selectedFy.year}`);
   };
 
-  const handleConfirmRejeicao = () => {
+  const handleConfirmRejeicao = async () => {
     if (!selectedFy || !selectedEntity || !motivoRejeicao.trim()) return;
     const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
+
+    // Build documentos em falta list
+    const docsEmFalta = submissionChecklist
+      .filter((item) => item.required && !checkedDocs[item.id])
+      .map((item) => item.label);
+
+    // Generate Acta de Devolução PDF
+    const devolucaoNumero = `AD-${new Date().getFullYear()}/${String(new Date().getMonth() + 1).padStart(2, "0")}/${String(submetidos.indexOf(selectedFy) + 1).padStart(3, "0")}`;
+    const devolucaoData = {
+      actaNumero: devolucaoNumero,
+      entityName: selectedEntity.name,
+      entityNif: selectedEntity.nif,
+      entityTutela: selectedEntity.tutela,
+      entityMorada: selectedEntity.morada,
+      exercicioYear: selectedFy.year,
+      periodoInicio: selectedFy.startDate,
+      periodoFim: selectedFy.endDate,
+      submittedAt: selectedFy.submittedAt || "",
+      motivoDevolucao: motivoRejeicao.trim(),
+      documentosEmFalta: docsEmFalta,
+      documentosVerificados: submissionChecklist.map((item) => ({
+        label: item.label,
+        required: item.required,
+        checked: !!checkedDocs[item.id],
+      })),
+    };
+
+    try {
+      const { blob, fileName } = await exportActaDevolucaoPdf(devolucaoData);
+      
+      // Upload PDF to storage
+      const filePath = `${selectedEntity.id}/${selectedFy.year}/${fileName}`;
+      await supabase.storage
+        .from("actas-recepcao")
+        .upload(filePath, blob, { contentType: "application/pdf" });
+
+      // Save file for download
+      const { saveAs } = await import("file-saver");
+      saveAs(blob, fileName);
+    } catch (err) {
+      console.error("Erro ao gerar acta de devolução:", err);
+    }
+
     rejeitar(selectedFy.entityId, fiscalYearId, motivoRejeicao.trim(), selectedEntity.name, `entidade@${selectedEntity.nif}.ao`);
     setActasGeradas((prev) => [...prev, selectedFy.id]);
     setRejectDialogOpen(false);
     setMotivoRejeicao("");
     setSelectedId(null);
     setCheckedDocs({});
-    toast.warning(`Submissão devolvida — ${selectedFy.entityName} — ${selectedFy.year}`);
+    toast.warning(`Submissão devolvida e Acta de Devolução gerada — ${selectedFy.entityName} — ${selectedFy.year}`);
   };
 
   // Dashboard stats
