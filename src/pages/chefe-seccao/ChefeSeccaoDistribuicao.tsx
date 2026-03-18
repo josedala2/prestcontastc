@@ -21,7 +21,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import {
   ArrowLeft, Users, Send, Loader2, Search, UserCheck, Crown, ClipboardList,
-  Building2, Calendar, GitBranch, CheckCircle2,
+  Building2, Calendar, GitBranch, CheckCircle2, FileSearch,
 } from "lucide-react";
 
 /* ── técnicos demo por divisão/secção ── */
