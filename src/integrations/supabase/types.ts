@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounts: {
+        Row: {
+          code: string
+          created_at: string
+          description: string
+          id: string
+          level: number
+          nature: string
+          parent_code: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description: string
+          id?: string
+          level?: number
+          nature?: string
+          parent_code?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string
+          id?: string
+          level?: number
+          nature?: string
+          parent_code?: string | null
+        }
+        Relationships: []
+      }
       actas_recepcao: {
         Row: {
           acta_numero: string
@@ -190,6 +220,138 @@ export type Database = {
           },
         ]
       }
+      audit_log: {
+        Row: {
+          action: string
+          action_type: string | null
+          created_at: string
+          detail: string | null
+          id: string
+          timestamp: string
+          username: string
+        }
+        Insert: {
+          action: string
+          action_type?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          timestamp?: string
+          username: string
+        }
+        Update: {
+          action?: string
+          action_type?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          timestamp?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      compliance_questions: {
+        Row: {
+          classification: string
+          created_at: string
+          id: string
+          norma: string
+          question: string
+          responsabilidade: string | null
+          score: number
+        }
+        Insert: {
+          classification?: string
+          created_at?: string
+          id: string
+          norma: string
+          question: string
+          responsabilidade?: string | null
+          score?: number
+        }
+        Update: {
+          classification?: string
+          created_at?: string
+          id?: string
+          norma?: string
+          question?: string
+          responsabilidade?: string | null
+          score?: number
+        }
+        Relationships: []
+      }
+      documentos_tribunal: {
+        Row: {
+          aprovado_por: string | null
+          assunto: string
+          conteudo: string
+          created_at: string
+          criado_por: string
+          emitido_at: string | null
+          entidade_id: string | null
+          estado: string
+          exercicio_id: string | null
+          hash_sha256: string | null
+          id: string
+          imutavel: boolean
+          juiz_relator: string | null
+          numero_documento: string
+          prazo_resposta: string | null
+          processo_id: string | null
+          resultado_acordao: string | null
+          selo_temporal: string | null
+          tipo: string
+          updated_at: string
+          versao: number
+        }
+        Insert: {
+          aprovado_por?: string | null
+          assunto: string
+          conteudo: string
+          created_at?: string
+          criado_por: string
+          emitido_at?: string | null
+          entidade_id?: string | null
+          estado?: string
+          exercicio_id?: string | null
+          hash_sha256?: string | null
+          id?: string
+          imutavel?: boolean
+          juiz_relator?: string | null
+          numero_documento: string
+          prazo_resposta?: string | null
+          processo_id?: string | null
+          resultado_acordao?: string | null
+          selo_temporal?: string | null
+          tipo: string
+          updated_at?: string
+          versao?: number
+        }
+        Update: {
+          aprovado_por?: string | null
+          assunto?: string
+          conteudo?: string
+          created_at?: string
+          criado_por?: string
+          emitido_at?: string | null
+          entidade_id?: string | null
+          estado?: string
+          exercicio_id?: string | null
+          hash_sha256?: string | null
+          id?: string
+          imutavel?: boolean
+          juiz_relator?: string | null
+          numero_documento?: string
+          prazo_resposta?: string | null
+          processo_id?: string | null
+          resultado_acordao?: string | null
+          selo_temporal?: string | null
+          tipo?: string
+          updated_at?: string
+          versao?: number
+        }
+        Relationships: []
+      }
       element_request_files: {
         Row: {
           content_type: string | null
@@ -294,6 +456,117 @@ export type Database = {
           provincia?: string | null
           tipologia?: string
           tutela?: string | null
+        }
+        Relationships: []
+      }
+      financial_indicators: {
+        Row: {
+          activo_correntes: number | null
+          activo_nao_correntes: number | null
+          activo_total: number | null
+          capital_proprio: number | null
+          ciclo_financeiro: number | null
+          ciclo_operacional: number | null
+          composicao_endividamento: number | null
+          created_at: string
+          custos_operacionais: number | null
+          endividamento_geral: number | null
+          entity_id: string
+          fiscal_year_id: string
+          giro_activo: number | null
+          id: string
+          imposto_rendimento: number | null
+          liquidez_corrente: number | null
+          liquidez_geral: number | null
+          liquidez_seca: number | null
+          margem_liquida: number | null
+          passivo_corrente: number | null
+          passivo_nao_corrente: number | null
+          passivo_total: number | null
+          prazo_medio_pagamento: number | null
+          prazo_medio_recebimento: number | null
+          prazo_medio_renovacao_estoque: number | null
+          proveitos_operacionais: number | null
+          resultado_antes_impostos: number | null
+          resultado_financeiro: number | null
+          resultado_liquido: number | null
+          resultado_nao_operacional: number | null
+          resultado_operacional: number | null
+          roa: number | null
+          roe: number | null
+          year: number
+        }
+        Insert: {
+          activo_correntes?: number | null
+          activo_nao_correntes?: number | null
+          activo_total?: number | null
+          capital_proprio?: number | null
+          ciclo_financeiro?: number | null
+          ciclo_operacional?: number | null
+          composicao_endividamento?: number | null
+          created_at?: string
+          custos_operacionais?: number | null
+          endividamento_geral?: number | null
+          entity_id: string
+          fiscal_year_id: string
+          giro_activo?: number | null
+          id?: string
+          imposto_rendimento?: number | null
+          liquidez_corrente?: number | null
+          liquidez_geral?: number | null
+          liquidez_seca?: number | null
+          margem_liquida?: number | null
+          passivo_corrente?: number | null
+          passivo_nao_corrente?: number | null
+          passivo_total?: number | null
+          prazo_medio_pagamento?: number | null
+          prazo_medio_recebimento?: number | null
+          prazo_medio_renovacao_estoque?: number | null
+          proveitos_operacionais?: number | null
+          resultado_antes_impostos?: number | null
+          resultado_financeiro?: number | null
+          resultado_liquido?: number | null
+          resultado_nao_operacional?: number | null
+          resultado_operacional?: number | null
+          roa?: number | null
+          roe?: number | null
+          year: number
+        }
+        Update: {
+          activo_correntes?: number | null
+          activo_nao_correntes?: number | null
+          activo_total?: number | null
+          capital_proprio?: number | null
+          ciclo_financeiro?: number | null
+          ciclo_operacional?: number | null
+          composicao_endividamento?: number | null
+          created_at?: string
+          custos_operacionais?: number | null
+          endividamento_geral?: number | null
+          entity_id?: string
+          fiscal_year_id?: string
+          giro_activo?: number | null
+          id?: string
+          imposto_rendimento?: number | null
+          liquidez_corrente?: number | null
+          liquidez_geral?: number | null
+          liquidez_seca?: number | null
+          margem_liquida?: number | null
+          passivo_corrente?: number | null
+          passivo_nao_corrente?: number | null
+          passivo_total?: number | null
+          prazo_medio_pagamento?: number | null
+          prazo_medio_recebimento?: number | null
+          prazo_medio_renovacao_estoque?: number | null
+          proveitos_operacionais?: number | null
+          resultado_antes_impostos?: number | null
+          resultado_financeiro?: number | null
+          resultado_liquido?: number | null
+          resultado_nao_operacional?: number | null
+          resultado_operacional?: number | null
+          roa?: number | null
+          roe?: number | null
+          year?: number
         }
         Relationships: []
       }
@@ -795,6 +1068,42 @@ export type Database = {
           submitted_at?: string | null
           updated_at?: string
           uploaded_doc_ids?: string[] | null
+        }
+        Relationships: []
+      }
+      trial_balance: {
+        Row: {
+          account_code: string
+          balance: number
+          created_at: string
+          credit: number
+          debit: number
+          description: string
+          entity_id: string
+          fiscal_year_id: string
+          id: string
+        }
+        Insert: {
+          account_code: string
+          balance?: number
+          created_at?: string
+          credit?: number
+          debit?: number
+          description: string
+          entity_id: string
+          fiscal_year_id: string
+          id?: string
+        }
+        Update: {
+          account_code?: string
+          balance?: number
+          created_at?: string
+          credit?: number
+          debit?: number
+          description?: string
+          entity_id?: string
+          fiscal_year_id?: string
+          id?: string
         }
         Relationships: []
       }
