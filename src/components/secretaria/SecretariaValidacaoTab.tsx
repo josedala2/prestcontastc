@@ -17,7 +17,7 @@ import {
 import { StatCard } from "@/components/ui-custom/PageElements";
 import {
   CheckCircle, XCircle, Clock, FileText, Eye, Send, Loader2,
-  Undo2, ShieldCheck, ArrowRight, Inbox, AlertTriangle, Lock, Bell,
+  Undo2, ShieldCheck, ArrowRight, Inbox, AlertTriangle, Lock, Bell, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
@@ -49,6 +49,19 @@ interface ProcessoDoc {
   nome_ficheiro: string;
   estado: string;
   obrigatorio: boolean;
+  caminho_ficheiro?: string | null;
+}
+
+interface SubmittedDoc {
+  id: string;
+  doc_id: string;
+  doc_label: string;
+  doc_category: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  content_type: string | null;
+  created_at: string;
 }
 
 export function SecretariaValidacaoTab() {
