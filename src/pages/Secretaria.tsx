@@ -488,20 +488,27 @@ const Secretaria = () => {
           <p className="text-xs text-muted-foreground">Confirme a existência de cada documento antes de emitir a acta de recepção.</p>
         </CardHeader>
         <CardContent>
+          {loadingDocs ? (
+            <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> A carregar documentos…
+            </div>
+          ) : (
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-10">✓</TableHead>
                 <TableHead>Documento</TableHead>
+                <TableHead>Ficheiro Submetido</TableHead>
                 <TableHead className="text-center">Obrigatório</TableHead>
                 <TableHead className="text-center">Estado</TableHead>
-                <TableHead className="text-center w-24">Acções</TableHead>
+                <TableHead className="text-center w-28">Acções</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {submissionChecklist.map((item) => {
                 const isChecked = !!checkedDocs[item.id];
                 const uploaded = isDocUploaded(item.id);
+                const submittedDoc = getSubmittedDocByChecklistId(item.id);
                 return (
                   <TableRow
                     key={item.id}
@@ -522,6 +529,22 @@ const Secretaria = () => {
                     </TableCell>
                     <TableCell className={`text-sm ${!uploaded ? "text-muted-foreground line-through" : ""}`}>
                       {item.label}
+                    </TableCell>
+                    <TableCell>
+                      {submittedDoc ? (
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-xs font-medium truncate max-w-[200px]" title={submittedDoc.file_name}>
+                            {submittedDoc.file_name}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {formatFileSize(submittedDoc.file_size)} · {new Date(submittedDoc.created_at).toLocaleDateString("pt-AO")}
+                          </span>
+                        </div>
+                      ) : uploaded ? (
+                        <span className="text-xs text-muted-foreground italic">Documento registado</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-center">
                       {item.required ? (
@@ -546,25 +569,49 @@ const Secretaria = () => {
                       )}
                     </TableCell>
                     <TableCell className="text-center">
-                      {uploaded ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0"
-                          title={`Visualizar ${item.label}`}
-                          onClick={handlePreviewPdf}
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                        </Button>
-                      ) : (
-                        <span className="text-muted-foreground text-xs">—</span>
-                      )}
+                      <div className="flex items-center justify-center gap-1">
+                        {submittedDoc ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0"
+                              title={`Visualizar ${submittedDoc.file_name}`}
+                              onClick={() => handleViewDoc(submittedDoc)}
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0"
+                              title={`Descarregar ${submittedDoc.file_name}`}
+                              onClick={() => handleViewDoc(submittedDoc)}
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                            </Button>
+                          </>
+                        ) : uploaded ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            title={`Visualizar ${item.label}`}
+                            onClick={handlePreviewPdf}
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">—</span>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
               })}
             </TableBody>
           </Table>
+          )}
         </CardContent>
       </Card>
 
