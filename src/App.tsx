@@ -52,6 +52,7 @@ import ValidacaoChefeDivisao from "./pages/chefe-divisao/ValidacaoChefeDivisao";
 import ChefeSeccaoDistribuicao from "./pages/chefe-seccao/ChefeSeccaoDistribuicao";
 import ValidacaoChefeSeccao from "./pages/chefe-seccao/ValidacaoChefeSeccao";
 import AnaliseTecnicaPage from "./pages/tecnico-analise/AnaliseTecnicaPage";
+import AmbienteAnalisePage from "./pages/tecnico-analise/AmbienteAnalisePage";
 import ControleQualidadeDST from "./pages/dst/ControleQualidadeDST";
 import DecisaoJuizRelator from "./pages/juiz/DecisaoJuizRelator";
 import Arquivamento from "./pages/juiz/Arquivamento";
@@ -225,6 +226,11 @@ const App = () => (
           <Route path="/analise-tecnica" element={
             <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico de Análise"]}>
               <AnaliseTecnicaPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/analise-tecnica/:id" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico de Análise", "Chefe de Divisão", "Chefe de Secção"]}>
+              <AmbienteAnalisePage />
             </ProtectedRoute>
           } />
 

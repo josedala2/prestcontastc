@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, DIVISOES_ESTRUTURA } from "@/contexts/AuthContext";
 import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
@@ -59,6 +60,7 @@ interface DocItem {
 type ActionMode = "seccao" | "tecnico" | null;
 
 export default function ChefeDivisaoProcessos() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const divisao = user?.divisao || "3ª Divisão";
   const divisaoNome = DIVISOES_ESTRUTURA[divisao]?.nome || divisao;
@@ -222,9 +224,7 @@ export default function ChefeDivisaoProcessos() {
       });
 
       toast.success(`Processo ${selectedProcesso.numero_processo} assumido como técnico.`);
-      setSelectedProcesso(null);
-      setConfirmTecnico(false);
-      fetchProcessos();
+      navigate(`/analise-tecnica/${selectedProcesso.id}`);
     } catch (err: any) {
       toast.error(`Erro: ${err.message}`);
     } finally {
