@@ -372,6 +372,40 @@ export default function EscrivaoRegistoAutuacao() {
     }
   };
 
+  const handleExportZip = async () => {
+    if (!selectedProcesso || allDocs.length === 0) return;
+    setExportingZip(true);
+    try {
+      const zip = new JSZip();
+      const entidadeFolder = zip.folder("01_Documentos_Entidade");
+      const tribunalFolder = zip.folder("02_Documentos_Tribunal");
+
+      let count = 0;
+      for (const doc of allDocs) {
+        if (!doc.caminho) continue;
+        const { data, error } = await supabase.storage.from(doc.bucket).download(doc.caminho);
+        if (error || !data) continue;
+        const folder = doc.origem === "submissao" ? entidadeFolder : tribunalFolder;
+        folder?.file(doc.nome, data);
+        count++;
+      }
+
+      if (count === 0) {
+        toast.error("Nenhum ficheiro disponível para exportar");
+        return;
+      }
+
+      const blob = await zip.generateAsync({ type: "blob" });
+      const sanitized = selectedProcesso.numero_processo.replace(/[^a-zA-Z0-9-]/g, "_");
+      saveAs(blob, `Dossie_${sanitized}_${selectedProcesso.ano_gerencia}.zip`);
+      toast.success(`Dossiê exportado — ${count} ficheiro(s)`);
+    } catch (err: any) {
+      toast.error(`Erro ao exportar: ${err.message}`);
+    } finally {
+      setExportingZip(false);
+    }
+  };
+
   const isLocked = autuado || (selectedProcesso && selectedProcesso.etapa_atual > 5);
 
   const submissionDocs = allDocs.filter(d => d.origem === "submissao");
