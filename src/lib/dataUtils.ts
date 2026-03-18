@@ -37,11 +37,9 @@ export const defaultValidations: ValidationResult[] = [
   { id: "v1", code: "COMP-001", level: "completude", type: "error", message: "Relatório de Gestão não carregado", detail: "Documento obrigatório para submissão — Art. 3º da Resolução 1/17", resolved: false },
   { id: "v2", code: "COMP-002", level: "completude", type: "error", message: "Parecer do Conselho Fiscal em falta", detail: "Obrigatório para todas as categorias — Art. 3º, nº 1, al. f)", resolved: false },
   { id: "v3", code: "COMP-003", level: "completude", type: "warning", message: "Certidão de Regularidade Fiscal não carregada", detail: "Documento opcional mas recomendado", resolved: false },
-  { id: "v4", code: "COER-001", level: "coerencia", type: "error", message: "Activo ≠ Passivo + Capital Próprio", detail: "Diferença de 125.430,00 Kz detectada entre o total do Activo e o somatório do Passivo com Capital Próprio", resolved: false },
-  { id: "v5", code: "COER-002", level: "coerencia", type: "warning", message: "Balanço N-1 difere do fecho do exercício anterior", detail: "Os saldos de abertura devem corresponder exactamente ao fecho do exercício anterior (Art. 15º)", resolved: false },
-  { id: "v6", code: "COER-003", level: "coerencia", type: "info", message: "Demonstração de Resultados reconciliada", detail: "O resultado líquido é consistente entre a DR e o Balanço Patrimonial", resolved: true },
-  { id: "v7", code: "CONF-001", level: "conformidade", type: "warning", message: "Modelo 4 — Mapa de Pessoal sem validação OGE", detail: "Recomenda-se cruzamento com os dados do OGE para verificação de encargos salariais (Art. 7º)", resolved: false },
-  { id: "v8", code: "CONF-002", level: "conformidade", type: "info", message: "Resolução aplicável identificada correctamente", detail: "Entidade enquadrada na Resolução 1/17 — Categoria 4 (Empresa Pública)", resolved: true },
+  { id: "v4", code: "COER-001", level: "consistencia", type: "error", message: "Activo ≠ Passivo + Capital Próprio", detail: "Diferença de 125.430,00 Kz detectada entre o total do Activo e o somatório do Passivo com Capital Próprio", resolved: false },
+  { id: "v5", code: "COER-002", level: "consistencia", type: "warning", message: "Balanço N-1 difere do fecho do exercício anterior", detail: "Os saldos de abertura devem corresponder exactamente ao fecho do exercício anterior (Art. 15º)", resolved: false },
+  { id: "v7", code: "CONF-001", level: "regras_tribunal", type: "warning", message: "Modelo 4 — Mapa de Pessoal sem validação OGE", detail: "Recomenda-se cruzamento com os dados do OGE para verificação de encargos salariais (Art. 7º)", resolved: false },
 ];
 
 // ─── Anexos padrão ───
