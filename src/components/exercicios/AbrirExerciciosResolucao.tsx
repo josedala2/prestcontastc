@@ -92,37 +92,37 @@ export function AbrirExerciciosResolucao({ resolucao, allEntities, existingFisca
 
   return (
     <>
-      <Card className="border-primary/20 bg-gradient-to-br from-card to-primary/5">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <BookOpen className="h-5 w-5 text-primary" />
+    <Card className="border-primary/20 bg-gradient-to-br from-card to-primary/5 flex flex-col">
+        <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
-            <div className="flex-1">
-              <CardTitle className="text-base font-serif">{resolucaoLabel.label}</CardTitle>
-              <CardDescription className="text-xs">{resolucaoLabel.descricao}</CardDescription>
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-sm sm:text-base font-serif leading-tight">{resolucaoLabel.label}</CardTitle>
+              <CardDescription className="text-[10px] sm:text-xs mt-0.5 line-clamp-2">{resolucaoLabel.descricao}</CardDescription>
             </div>
-            <Badge variant="secondary" className="text-xs">
-              {filteredEntities.length} entidade(s)
-            </Badge>
           </div>
+          <Badge variant="secondary" className="text-[10px] sm:text-xs self-start mt-1.5">
+            {filteredEntities.length} entidade(s)
+          </Badge>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2 mb-4">
+        <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6 flex-1 flex flex-col justify-end">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
             {tipologias.map(tip => {
               const count = filteredEntities.filter(e => e.tipologia === tip).length;
               if (count === 0) return null;
               return (
-                <Badge key={tip} variant="outline" className="text-[10px] gap-1">
-                  <Building2 className="h-3 w-3" />
-                  {TIPOLOGIA_LABELS[tip]} ({count})
+                <Badge key={tip} variant="outline" className="text-[9px] sm:text-[10px] gap-1 px-1.5 py-0.5">
+                  <Building2 className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                  <span className="truncate max-w-[120px] sm:max-w-none">{TIPOLOGIA_LABELS[tip]} ({count})</span>
                 </Badge>
               );
             })}
           </div>
-          <Button onClick={() => setDialogOpen(true)} className="w-full gap-2">
-            <BookOpen className="h-4 w-4" />
-            Abrir Exercícios — {resolucaoLabel.label}
+          <Button onClick={() => setDialogOpen(true)} className="w-full gap-2 text-xs sm:text-sm h-9 sm:h-10">
+            <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span className="truncate">Abrir Exercícios — {resolucaoLabel.label}</span>
           </Button>
         </CardContent>
       </Card>
