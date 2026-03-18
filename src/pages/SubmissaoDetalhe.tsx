@@ -607,10 +607,12 @@ const SubmissaoDetalhe = () => {
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Visualizar"
-                            onClick={() => {
-                              const { data } = supabase.storage.from("submission-documents").getPublicUrl(item.doc!.file_path);
-                              if (item.doc!.file_name.toLowerCase().endsWith(".pdf")) { setPdfPreviewUrl(data.publicUrl); }
-                              else { setDocPreview({ label: item.doc!.doc_label, category: item.doc!.doc_category }); setDocPreviewUrl(data.publicUrl); }
+                            onClick={async () => {
+                              const { data, error } = await supabase.storage.from("submission-documents").download(item.doc!.file_path);
+                              if (error || !data) return;
+                              const blobUrl = URL.createObjectURL(data);
+                              if (item.doc!.file_name.toLowerCase().endsWith(".pdf")) { setPdfPreviewUrl(blobUrl); }
+                              else { setDocPreview({ label: item.doc!.doc_label, category: item.doc!.doc_category }); setDocPreviewUrl(blobUrl); }
                             }}>
                             <Eye className="h-3.5 w-3.5" />
                           </Button>
