@@ -4,7 +4,7 @@ import { PortalLayout } from "@/components/PortalLayout";
 import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { PageHeader } from "@/components/ui-custom/PageElements";
-import { submissionChecklist } from "@/data/mockData";
+import { submissionChecklist } from "@/lib/dataUtils";
 import { Attachment } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";

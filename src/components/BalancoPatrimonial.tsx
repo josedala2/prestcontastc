@@ -1,4 +1,4 @@
-import { mockFinancialIndicators, formatKz } from "@/data/mockData";
+import { formatKz, defaultFinancialIndicators } from "@/lib/dataUtils";
 import { FinancialIndicators } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";

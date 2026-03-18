@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building2, Phone, MapPin, Calendar, Hash, Briefcase, Globe } from "lucide-react";
-import { mockFinancialIndicators, formatKz } from "@/data/mockData";
+import { formatKz, defaultFinancialIndicators } from "@/lib/dataUtils";
 import { useFiscalYears } from "@/hooks/useFiscalYears";
 import { EntityExerciciosTab } from "./EntityExerciciosTab";
 import { EntityFinanceiroTab } from "./EntityFinanceiroTab";

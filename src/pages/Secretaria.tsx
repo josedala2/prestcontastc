@@ -17,7 +17,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { submissionChecklist, formatKz } from "@/data/mockData";
+import { submissionChecklist, formatKz } from "@/lib/dataUtils";
 import { useFiscalYears } from "@/hooks/useFiscalYears";
 import { useEntities } from "@/hooks/useEntities";
 import { getDocumentRequirements } from "@/components/portal/EntidadeDocumentosTab";
