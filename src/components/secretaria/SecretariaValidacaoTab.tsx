@@ -158,18 +158,26 @@ export function SecretariaValidacaoTab() {
     }
   }, []);
 
-  const handleViewSubmittedDoc = (doc: SubmittedDoc) => {
-    const { data } = supabase.storage.from("submission-documents").getPublicUrl(doc.file_path);
-    if (data?.publicUrl) {
-      window.open(data.publicUrl, "_blank");
+  const handleViewSubmittedDoc = async (doc: SubmittedDoc) => {
+    try {
+      const { data, error } = await supabase.storage.from("submission-documents").download(doc.file_path);
+      if (error || !data) { toast.error("Erro ao abrir documento."); return; }
+      const url = URL.createObjectURL(data);
+      window.open(url, "_blank");
+    } catch {
+      toast.error("Erro ao abrir documento.");
     }
   };
 
-  const handleViewProcessoDoc = (doc: ProcessoDoc) => {
+  const handleViewProcessoDoc = async (doc: ProcessoDoc) => {
     if (!doc.caminho_ficheiro) return;
-    const { data } = supabase.storage.from("processo-documentos").getPublicUrl(doc.caminho_ficheiro);
-    if (data?.publicUrl) {
-      window.open(data.publicUrl, "_blank");
+    try {
+      const { data, error } = await supabase.storage.from("processo-documentos").download(doc.caminho_ficheiro);
+      if (error || !data) { toast.error("Erro ao abrir documento."); return; }
+      const url = URL.createObjectURL(data);
+      window.open(url, "_blank");
+    } catch {
+      toast.error("Erro ao abrir documento.");
     }
   };
 

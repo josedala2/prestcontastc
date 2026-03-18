@@ -298,9 +298,9 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
               </div>
             </div>
           </DialogHeader>
-          {previewActa && (
+          {previewActa && previewBlobUrl && (
             <iframe
-              src={getPublicUrl(previewActa.file_path)}
+              src={previewBlobUrl}
               className="w-full flex-1 min-h-0 rounded-lg border"
               title="PDF Preview"
             />

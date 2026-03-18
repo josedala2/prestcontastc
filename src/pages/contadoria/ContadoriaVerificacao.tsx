@@ -120,8 +120,14 @@ export default function ContadoriaVerificacao() {
 
   const handlePreviewDoc = async (doc: ProcessoDoc) => {
     if (!doc.caminho_ficheiro) return;
-    const { data } = supabase.storage.from("processo-documentos").getPublicUrl(doc.caminho_ficheiro);
-    if (data?.publicUrl) window.open(data.publicUrl, "_blank");
+    try {
+      const { data, error } = await supabase.storage.from("processo-documentos").download(doc.caminho_ficheiro);
+      if (error || !data) { toast.error("Erro ao abrir documento."); return; }
+      const url = URL.createObjectURL(data);
+      window.open(url, "_blank");
+    } catch {
+      toast.error("Erro ao abrir documento.");
+    }
   };
 
   const handleDownloadDoc = async (doc: ProcessoDoc) => {

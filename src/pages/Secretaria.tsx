@@ -456,10 +456,10 @@ const Secretaria = () => {
 
   const handleViewDoc = async (doc: SubmittedDoc) => {
     try {
-      const { data } = supabase.storage.from("submission-documents").getPublicUrl(doc.file_path);
-      if (data?.publicUrl) {
-        window.open(data.publicUrl, "_blank");
-      }
+      const { data, error } = await supabase.storage.from("submission-documents").download(doc.file_path);
+      if (error || !data) { toast.error("Erro ao abrir documento"); return; }
+      const url = URL.createObjectURL(data);
+      window.open(url, "_blank");
     } catch (err) {
       console.error("Error getting doc URL:", err);
       toast.error("Erro ao abrir documento");

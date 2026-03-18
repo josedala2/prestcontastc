@@ -309,21 +309,33 @@ const ProcessoDetalhe = () => {
     }
   };
 
-  const getFilePublicUrl = (filePath: string) => {
-    const { data } = supabase.storage.from("processo-documentos").getPublicUrl(filePath);
-    return data?.publicUrl || null;
-  };
-
   const downloadAttachment = async (filePath: string, fileName: string) => {
-    const url = getFilePublicUrl(filePath);
-    if (url) window.open(url, "_blank");
+    try {
+      const { data, error } = await supabase.storage.from("processo-documentos").download(filePath);
+      if (error || !data) return;
+      const url = URL.createObjectURL(data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast({ title: "Erro", description: "Erro ao descarregar ficheiro.", variant: "destructive" });
+    }
   };
 
-  const openPreview = (doc: ProcessoDocumento) => {
+  const openPreview = async (doc: ProcessoDocumento) => {
     if (!doc.caminho_ficheiro) return;
-    const url = getFilePublicUrl(doc.caminho_ficheiro);
-    setPreviewUrl(url);
-    setPreviewDoc(doc);
+    try {
+      const { data, error } = await supabase.storage.from("processo-documentos").download(doc.caminho_ficheiro);
+      if (error || !data) return;
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      const url = URL.createObjectURL(data);
+      setPreviewUrl(url);
+      setPreviewDoc(doc);
+    } catch {
+      toast({ title: "Erro", description: "Erro ao abrir documento.", variant: "destructive" });
+    }
   };
 
   const isPdfFile = (fileName: string) =>
