@@ -382,32 +382,9 @@ const ExercicioDetalhe = () => {
               <div className="relative">
                 <div className="absolute left-[15px] top-0 bottom-0 w-px bg-border" />
                 <div className="space-y-4">
-                  {[] as any[]}
-                  {/* Audit log loaded from backend - see Auditoria page */}
-                    <div key={entry.id} className="flex gap-4 relative">
-                      <div className={`z-10 w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                        entry.actionType === "importacao" ? "bg-primary/10 text-primary" :
-                        entry.actionType === "submissao" ? "bg-success/10 text-success" :
-                        entry.actionType === "aprovacao" ? "bg-success/10 text-success" :
-                        entry.actionType === "exportacao" ? "bg-info/10 text-info" :
-                        entry.actionType === "validacao" ? "bg-warning/10 text-warning" :
-                        "bg-muted text-muted-foreground"
-                      }`}>
-                        {entry.actionType === "importacao" && <Upload className="h-3.5 w-3.5" />}
-                        {entry.actionType === "submissao" && <Send className="h-3.5 w-3.5" />}
-                        {entry.actionType === "aprovacao" && <CheckCircle className="h-3.5 w-3.5" />}
-                        {entry.actionType === "exportacao" && <Download className="h-3.5 w-3.5" />}
-                        {entry.actionType === "validacao" && <Shield className="h-3.5 w-3.5" />}
-                        {entry.actionType === "edicao" && <FileText className="h-3.5 w-3.5" />}
-                        {entry.actionType === "upload" && <Paperclip className="h-3.5 w-3.5" />}
-                      </div>
-                      <div className="flex-1 pb-4">
-                        <p className="text-sm font-medium">{entry.action}</p>
-                        <p className="text-xs text-muted-foreground">{entry.detail}</p>
-                        <p className="text-[10px] text-muted-foreground mt-1">{entry.user} · {entry.timestamp}</p>
-                      </div>
-                    </div>
-                  ))}
+                  <p className="text-sm text-muted-foreground py-4 text-center">
+                    Consulte a página de <a href="/auditoria" className="text-primary underline">Auditoria</a> para a trilha completa.
+                  </p>
                 </div>
               </div>
             </CardContent>
