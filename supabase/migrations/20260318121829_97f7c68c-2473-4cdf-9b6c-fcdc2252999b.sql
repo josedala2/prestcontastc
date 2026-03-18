@@ -1,0 +1,1 @@
+CREATE POLICY "Allow all delete on processos" ON public.processos FOR DELETE TO public USING (true);
