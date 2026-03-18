@@ -574,15 +574,22 @@ export default function ChefeDivisaoProcessos() {
               </DialogDescription>
             </div>
             <div className="flex-1 overflow-hidden rounded-lg border h-full flex flex-col bg-muted/20">
-              {previewUrl && (
+              {previewUrl && previewMime === "application/pdf" ? (
+                <embed
+                  key={previewUrl}
+                  src={previewUrl}
+                  type="application/pdf"
+                  className="w-full flex-1 min-h-[55vh]"
+                />
+              ) : previewUrl ? (
                 <iframe
                   key={previewUrl}
-                  src={`${previewUrl}#toolbar=1&navpanes=0&scrollbar=1`}
+                  src={previewUrl}
                   className="w-full flex-1 min-h-[55vh]"
                   title={previewName}
                   style={{ border: "none" }}
                 />
-              )}
+              ) : null}
             </div>
           </DialogContent>
         </Dialog>
