@@ -29,7 +29,7 @@ import {
   TrendingUp, ArrowRight, Bell, Activity, PieChart, Send, Lock, Loader2, Download,
 } from "lucide-react";
 import { toast } from "sonner";
-import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
+import { exportActaRecepcaoPdf, exportActaDevolucaoPdf } from "@/lib/exportUtils";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { EntityProfilePanel } from "@/components/secretaria/EntityProfilePanel";
 import { useSubmissions } from "@/contexts/SubmissionContext";
@@ -279,16 +279,59 @@ const Secretaria = () => {
     toast.success(`Acta de recepção gerada e guardada — ${selectedFy.entityName} — ${selectedFy.year}`);
   };
 
-  const handleConfirmRejeicao = () => {
+  const handleConfirmRejeicao = async () => {
     if (!selectedFy || !selectedEntity || !motivoRejeicao.trim()) return;
     const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
+
+    // Build documentos em falta list
+    const docsEmFalta = submissionChecklist
+      .filter((item) => item.required && !checkedDocs[item.id])
+      .map((item) => item.label);
+
+    // Generate Acta de Devolução PDF
+    const devolucaoNumero = `AD-${new Date().getFullYear()}/${String(new Date().getMonth() + 1).padStart(2, "0")}/${String(submetidos.indexOf(selectedFy) + 1).padStart(3, "0")}`;
+    const devolucaoData = {
+      actaNumero: devolucaoNumero,
+      entityName: selectedEntity.name,
+      entityNif: selectedEntity.nif,
+      entityTutela: selectedEntity.tutela,
+      entityMorada: selectedEntity.morada,
+      exercicioYear: selectedFy.year,
+      periodoInicio: selectedFy.startDate,
+      periodoFim: selectedFy.endDate,
+      submittedAt: selectedFy.submittedAt || "",
+      motivoDevolucao: motivoRejeicao.trim(),
+      documentosEmFalta: docsEmFalta,
+      documentosVerificados: submissionChecklist.map((item) => ({
+        label: item.label,
+        required: item.required,
+        checked: !!checkedDocs[item.id],
+      })),
+    };
+
+    try {
+      const { blob, fileName } = await exportActaDevolucaoPdf(devolucaoData);
+      
+      // Upload PDF to storage
+      const filePath = `${selectedEntity.id}/${selectedFy.year}/${fileName}`;
+      await supabase.storage
+        .from("actas-recepcao")
+        .upload(filePath, blob, { contentType: "application/pdf" });
+
+      // Save file for download
+      const { saveAs } = await import("file-saver");
+      saveAs(blob, fileName);
+    } catch (err) {
+      console.error("Erro ao gerar acta de devolução:", err);
+    }
+
     rejeitar(selectedFy.entityId, fiscalYearId, motivoRejeicao.trim(), selectedEntity.name, `entidade@${selectedEntity.nif}.ao`);
     setActasGeradas((prev) => [...prev, selectedFy.id]);
     setRejectDialogOpen(false);
     setMotivoRejeicao("");
     setSelectedId(null);
     setCheckedDocs({});
-    toast.warning(`Submissão devolvida — ${selectedFy.entityName} — ${selectedFy.year}`);
+    toast.warning(`Submissão devolvida e Acta de Devolução gerada — ${selectedFy.entityName} — ${selectedFy.year}`);
   };
 
   // Dashboard stats
@@ -1059,17 +1102,16 @@ const Secretaria = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog de Rejeição / Devolução */}
       <AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
-        <AlertDialogContent className="max-w-lg">
+        <AlertDialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              Devolver Submissão
+              Devolver Submissão e Gerar Acta de Devolução
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-4">
-                <p>A submissão será devolvida à entidade para correção. Indique o motivo da devolução.</p>
+                <p>A submissão será devolvida à entidade para correção. Será gerada uma <strong className="text-foreground">Acta de Devolução</strong> com a fundamentação indicada.</p>
                 {selectedFy && selectedEntity && (
                   <div className="bg-muted/50 rounded-lg p-3 space-y-2 text-sm">
                     <div className="flex justify-between"><span className="text-muted-foreground">Entidade</span><span className="font-medium text-foreground">{selectedEntity.name}</span></div>
@@ -1077,19 +1119,41 @@ const Secretaria = () => {
                     <div className="flex justify-between"><span className="text-muted-foreground">Documentos verificados</span><span className="font-medium text-foreground">{checkedCount}/{submissionChecklist.length}</span></div>
                   </div>
                 )}
+
+                {/* Documentos em falta */}
+                {(() => {
+                  const emFalta = submissionChecklist.filter((item) => item.required && !checkedDocs[item.id]);
+                  if (emFalta.length === 0) return null;
+                  return (
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-foreground">
+                        Documentos obrigatórios em falta ({emFalta.length})
+                      </Label>
+                      <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3 space-y-1.5">
+                        {emFalta.map((item) => (
+                          <div key={item.id} className="flex items-center gap-2 text-sm text-destructive">
+                            <XCircle className="h-3.5 w-3.5 flex-shrink-0" />
+                            <span>{item.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 <div className="space-y-2">
                   <Label htmlFor="motivo-rejeicao" className="text-sm font-medium text-foreground">
-                    Motivo da devolução <span className="text-destructive">*</span>
+                    Fundamentação da devolução <span className="text-destructive">*</span>
                   </Label>
                   <Textarea
                     id="motivo-rejeicao"
                     placeholder="Ex: Faltam os modelos de prestação de contas nº 1 a 10 e o inventário de bens patrimoniais..."
                     value={motivoRejeicao}
                     onChange={(e) => setMotivoRejeicao(e.target.value)}
-                    className="min-h-[100px]"
-                    maxLength={500}
+                    className="min-h-[120px]"
+                    maxLength={1000}
                   />
-                  <p className="text-[10px] text-muted-foreground text-right">{motivoRejeicao.length}/500</p>
+                  <p className="text-[10px] text-muted-foreground text-right">{motivoRejeicao.length}/1000</p>
                 </div>
               </div>
             </AlertDialogDescription>
@@ -1101,8 +1165,8 @@ const Secretaria = () => {
               disabled={!motivoRejeicao.trim()}
               className="gap-2 bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              <Undo2 className="h-4 w-4" />
-              Confirmar Devolução
+              <FileText className="h-4 w-4" />
+              Devolver e Gerar Acta
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -793,3 +793,232 @@ export async function exportActaRecepcaoPdf(data: ActaRecepcaoData, preview = fa
     return { blob, fileName };
   }
 }
+
+// ─── Export Acta de Devolução PDF ───
+export interface ActaDevolucaoData {
+  actaNumero: string;
+  entityName: string;
+  entityNif: string;
+  entityTutela: string;
+  entityMorada: string;
+  exercicioYear: number;
+  periodoInicio: string;
+  periodoFim: string;
+  submittedAt: string;
+  motivoDevolucao: string;
+  documentosVerificados: { label: string; required: boolean; checked: boolean }[];
+  documentosEmFalta: string[];
+}
+
+export async function exportActaDevolucaoPdf(data: ActaDevolucaoData, preview?: false): Promise<{ blob: Blob; fileName: string }>;
+export async function exportActaDevolucaoPdf(data: ActaDevolucaoData, preview: true): Promise<string>;
+export async function exportActaDevolucaoPdf(data: ActaDevolucaoData, preview = false): Promise<string | { blob: Blob; fileName: string }> {
+  const brasaoBase64 = await loadBrasaoBase64();
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const centerX = pageWidth / 2;
+  const marginLeft = 20;
+  const marginRight = 20;
+  const textWidth = pageWidth - marginLeft - marginRight;
+
+  // ── Official header with brasão ──
+  let y = drawOfficialHeader(doc, brasaoBase64, pageWidth, `ACTA DE DEVOLU\u00C7\u00C3O N.\u00BA ${data.actaNumero}`);
+
+  // ── Subtitle ──
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 100, 100);
+  doc.text("Presta\u00E7\u00E3o de Contas \u2014 Resolu\u00E7\u00E3o n\u00BA 1/17 de 5 de Janeiro", centerX, y - 2, { align: "center" });
+  y += 6;
+
+  // ── Narrative paragraph ──
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+
+  const narrativeText = `Aos ${new Date().toLocaleDateString("pt-AO")}, procedeu-se \u00E0 devolu\u00E7\u00E3o da documenta\u00E7\u00E3o referente \u00E0 Presta\u00E7\u00E3o de Contas do exerc\u00EDcio financeiro de ${data.exercicioYear}, submetida pela entidade abaixo identificada, nos termos da Resolu\u00E7\u00E3o n.\u00BA 1/17, de 5 de Janeiro, pelos motivos a seguir fundamentados.`;
+  const narrativeLines = doc.splitTextToSize(narrativeText, textWidth);
+  doc.text(narrativeLines, marginLeft, y, { lineHeightFactor: 1.5 });
+  y += narrativeLines.length * 5 + 4;
+
+  // ── 1. Identificação da Entidade ──
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(0, 0, 0);
+  doc.text("1. IDENTIFICA\u00C7\u00C3O DA ENTIDADE", marginLeft, y);
+  y += 6;
+
+  const addField = (label: string, value: string, yPos: number) => {
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(80, 80, 80);
+    doc.text(label, marginLeft + 4, yPos);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0);
+    doc.text(value, 70, yPos);
+    return yPos + 5.5;
+  };
+
+  y = addField("Entidade:", data.entityName, y);
+  y = addField("NIF:", data.entityNif, y);
+  y = addField("Tutela:", data.entityTutela, y);
+  y = addField("Morada:", data.entityMorada, y);
+  y = addField("Exerc\u00EDcio:", String(data.exercicioYear), y);
+  y = addField("Per\u00EDodo:", `${data.periodoInicio} a ${data.periodoFim}`, y);
+
+  // ── 2. MOTIVO DA DEVOLUÇÃO ──
+  y += 4;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(0, 0, 0);
+  doc.text("2. FUNDAMENTA\u00C7\u00C3O DA DEVOLU\u00C7\u00C3O", marginLeft, y);
+  y += 6;
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(0, 0, 0);
+  const motivoLines = doc.splitTextToSize(data.motivoDevolucao, textWidth - 8);
+  doc.text(motivoLines, marginLeft + 4, y, { lineHeightFactor: 1.5 });
+  y += motivoLines.length * 5 + 4;
+
+  // ── 3. DOCUMENTOS EM FALTA ──
+  if (data.documentosEmFalta.length > 0) {
+    y += 2;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 0, 0);
+    doc.text("3. DOCUMENTOS EM FALTA / N\u00C3O CONFORMES", marginLeft, y);
+    y += 3;
+
+    autoTable(doc, {
+      startY: y,
+      margin: { left: marginLeft, right: marginRight },
+      head: [["N\u00BA", "Documento"]],
+      body: data.documentosEmFalta.map((d, i) => [String(i + 1), d]),
+      headStyles: {
+        fillColor: [180, 40, 40],
+        textColor: [255, 255, 255],
+        fontSize: 7,
+        fontStyle: "bold",
+      },
+      bodyStyles: { fontSize: 7, textColor: [40, 40, 40] },
+      alternateRowStyles: { fillColor: [255, 240, 240] },
+      columnStyles: {
+        0: { cellWidth: 10, halign: "center" },
+      },
+    });
+
+    y = (doc as any).lastAutoTable.finalY + 6;
+  }
+
+  // ── 4. DOCUMENTAÇÃO VERIFICADA ──
+  y += 2;
+  const sectionNum = data.documentosEmFalta.length > 0 ? "4" : "3";
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(0, 0, 0);
+  doc.text(`${sectionNum}. DOCUMENTA\u00C7\u00C3O VERIFICADA`, marginLeft, y);
+  y += 3;
+
+  const docsChecked = data.documentosVerificados.filter(d => d.checked);
+  const docsTotal = data.documentosVerificados.length;
+
+  autoTable(doc, {
+    startY: y,
+    margin: { left: marginLeft, right: marginRight },
+    head: [["N\u00BA", "Documento", "Obrigat\u00F3rio", "Estado"]],
+    body: data.documentosVerificados.map((d, i) => [
+      String(i + 1),
+      d.label,
+      d.required ? "Sim" : "N\u00E3o",
+      d.checked ? "Conforme" : "N\u00E3o conforme",
+    ]),
+    headStyles: {
+      fillColor: [60, 60, 60],
+      textColor: [255, 255, 255],
+      fontSize: 7,
+      fontStyle: "bold",
+    },
+    bodyStyles: { fontSize: 7, textColor: [40, 40, 40] },
+    alternateRowStyles: { fillColor: [245, 245, 248] },
+    columnStyles: {
+      0: { cellWidth: 10, halign: "center" },
+      2: { cellWidth: 22, halign: "center" },
+      3: { cellWidth: 25, halign: "center" },
+    },
+  });
+
+  y = (doc as any).lastAutoTable.finalY + 8;
+
+  // ── Resumo ──
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(180, 40, 40);
+  doc.text(`Resultado: DEVOLVIDO \u2014 ${docsChecked.length}/${docsTotal} documentos conformes`, marginLeft, y);
+  y += 5;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(80, 80, 80);
+  doc.text(`Devolu\u00E7\u00E3o emitida em ${new Date().toLocaleDateString("pt-AO")} \u00E0s ${new Date().toLocaleTimeString("pt-AO")}`, marginLeft, y);
+
+  // ── Assinaturas ──
+  y += 20;
+  const pageHeight = doc.internal.pageSize.getHeight();
+  if (y > pageHeight - 50) {
+    doc.addPage();
+    y = 30;
+  }
+
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.3);
+
+  const sig1x = marginLeft;
+  const sig2x = pageWidth / 2 + 10;
+  const sigWidth = pageWidth / 2 - marginRight - 10;
+
+  doc.line(sig1x, y, sig1x + sigWidth, y);
+  doc.line(sig2x, y, sig2x + sigWidth, y);
+
+  y += 5;
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(80, 80, 80);
+  doc.text("Funcion\u00E1rio da Secretaria", sig1x + sigWidth / 2, y, { align: "center" });
+  doc.text("Representante da Entidade", sig2x + sigWidth / 2, y, { align: "center" });
+
+  // ── Footer ──
+  doc.setFontSize(6);
+  doc.setTextColor(150, 150, 150);
+  doc.text(
+    `Documento gerado automaticamente em ${new Date().toLocaleDateString("pt-AO")} ${new Date().toLocaleTimeString("pt-AO")}`,
+    centerX,
+    pageHeight - 8,
+    { align: "center" }
+  );
+
+  // ── Watermark for preview ──
+  if (preview) {
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      const pageH = doc.internal.pageSize.getHeight();
+      doc.saveGraphicsState();
+      // @ts-ignore
+      doc.setGState(new (doc as any).GState({ opacity: 0.12 }));
+      doc.setTextColor(220, 50, 50);
+      doc.setFontSize(72);
+      doc.setFont("helvetica", "bold");
+      doc.text("RASCUNHO", centerX, pageH / 2, {
+        align: "center",
+        angle: 45,
+      });
+      doc.restoreGraphicsState();
+    }
+
+    return doc.output("datauristring");
+  } else {
+    const fileName = `Acta_Devolucao_${data.actaNumero.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
+    const blob = doc.output("blob");
+    return { blob, fileName };
+  }
+}
