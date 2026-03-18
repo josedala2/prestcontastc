@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { formatKz } from "@/lib/dataUtils";
-import { mockTrialBalance } from "@/data/mockData";
+import { useTrialBalance } from "@/hooks/useFinancialData";
 import { Button } from "@/components/ui/button";
 import { Upload, FileSpreadsheet, Eye, EyeOff, Save, RotateCcw, Download, Loader2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";

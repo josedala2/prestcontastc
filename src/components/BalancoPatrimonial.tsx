@@ -23,11 +23,12 @@ interface BalancoLine {
 }
 
 export function BalancoPatrimonial({ entityId, fiscalYearId, year }: BalancoPatrimonialProps) {
-  const indicators = mockFinancialIndicators.find(
+  const { indicators: allIndicators } = useFinancialIndicators(entityId);
+  const indicators = allIndicators.find(
     (fi) => fi.entityId === entityId && fi.fiscalYearId === fiscalYearId
   );
 
-  const prevIndicators = mockFinancialIndicators.find(
+  const prevIndicators = allIndicators.find(
     (fi) => fi.entityId === entityId && fi.year === year - 1
   );
 

@@ -68,6 +68,7 @@ const Auditoria = () => {
           ))}
         </div>
       </div>
+      )}
     </AppLayout>
   );
 };

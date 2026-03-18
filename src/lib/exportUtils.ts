@@ -5,7 +5,8 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { TrialBalanceLine, ValidationResult, DocumentoTribunal, DOCUMENTO_TIPO_LABELS, DOCUMENTO_ESTADO_LABELS } from "@/types";
 import { formatKz } from "@/lib/dataUtils";
-import { mockTrialBalance, mockValidations, mockAttachments, mockFiscalYears, mockAuditLog } from "@/data/mockData";
+import { supabase } from "@/integrations/supabase/client";
+import { defaultValidations as mockValidations, defaultAttachments as mockAttachments } from "@/lib/dataUtils";
 import { loadBrasaoBase64, drawOfficialHeader } from "./brasaoLoader";
 
 // ─── PDF Header helper ───
