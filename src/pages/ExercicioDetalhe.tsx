@@ -43,9 +43,11 @@ import {
 const ExercicioDetalhe = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { allFiscalYears } = useFiscalYears();
+  const { findById } = useEntities();
 
-  const fy = mockFiscalYears.find((f) => f.id === id);
-  const entity = fy ? mockEntities.find((e) => e.id === fy.entityId) : null;
+  const fy = allFiscalYears.find((f) => f.id === id);
+  const entity = fy ? findById(fy.entityId) : null;
 
   if (!fy) {
     return (
