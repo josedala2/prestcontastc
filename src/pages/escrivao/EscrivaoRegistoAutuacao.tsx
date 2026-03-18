@@ -95,6 +95,9 @@ export default function EscrivaoRegistoAutuacao() {
   const [uploadTipo, setUploadTipo] = useState("");
   const [uploadObservacoes, setUploadObservacoes] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [deleteDocDialogOpen, setDeleteDocDialogOpen] = useState(false);
+  const [docToDelete, setDocToDelete] = useState<DocItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
