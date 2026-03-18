@@ -146,6 +146,9 @@ const Configuracoes = () => {
         <TabsList className="mb-4">
           <TabsTrigger value="regras">Regras de Validação</TabsTrigger>
           <TabsTrigger value="prazos">Prazos & Notificações</TabsTrigger>
+          <TabsTrigger value="workflow">
+            <GitBranch className="h-3.5 w-3.5 mr-1" /> Workflow
+          </TabsTrigger>
           <TabsTrigger value="menus">Menus & Perfis</TabsTrigger>
           <TabsTrigger value="sistema">Sistema</TabsTrigger>
         </TabsList>
