@@ -1,0 +1,1 @@
+ALTER TABLE public.submissions ADD CONSTRAINT submissions_entity_fiscal_unique UNIQUE (entity_id, fiscal_year_id);
