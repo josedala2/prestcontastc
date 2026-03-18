@@ -32,7 +32,7 @@ const Relatorios = () => {
   const activoNCBruto = trialBalance.filter(
     (l) => ["11", "12", "13", "14"].includes(l.accountCode)
   );
-  const activoNCContra = mockTrialBalance.filter(
+  const activoNCContra = trialBalance.filter(
     (l) => ["18", "19"].includes(l.accountCode)
   );
   const activoNCLines = [...activoNCBruto, ...activoNCContra];
