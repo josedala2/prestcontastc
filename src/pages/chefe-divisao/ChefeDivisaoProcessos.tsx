@@ -428,34 +428,37 @@ export default function ChefeDivisaoProcessos() {
                     </TableHeader>
                     <TableBody>
                       {documentos.map((doc, idx) => (
-                        <TableRow key={doc.id}>
-                          <TableCell className="text-xs text-muted-foreground font-mono">{idx + 1}</TableCell>
+                        <TableRow key={doc.id} className="group">
+                          <TableCell className="text-xs text-muted-foreground font-mono w-8">{idx + 1}</TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2.5">
                               {getDocIcon(doc.nome_ficheiro)}
-                              <span className="text-xs font-medium truncate max-w-[200px]">{doc.nome_ficheiro}</span>
-                              {idx === 0 && doc.tipo_documento === "Capa do Processo" && (
-                                <Badge className="text-[9px] bg-primary/10 text-primary border-primary/20" variant="outline">CAPA</Badge>
-                              )}
+                              <div className="flex flex-col gap-0.5 min-w-0">
+                                <span className="text-xs font-medium truncate max-w-[220px]">{doc.nome_ficheiro}</span>
+                                <div className="flex items-center gap-1.5">
+                                  {getExtLabel(doc.nome_ficheiro)}
+                                  {idx === 0 && doc.tipo_documento === "Capa do Processo" && (
+                                    <Badge className="text-[8px] bg-primary/10 text-primary border-primary/20 px-1 py-0" variant="outline">CAPA</Badge>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline" className="text-[10px]">{doc.tipo_documento}</Badge>
+                            <Badge variant="outline" className="text-[10px] font-normal">{doc.tipo_documento}</Badge>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={doc.estado === "validado" ? "default" : "secondary"} className="text-[10px]">
-                              {doc.estado}
-                            </Badge>
+                            {getEstadoIndicator(doc.estado)}
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground">
                             {new Date(doc.created_at).toLocaleDateString("pt-AO")}
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-1">
-                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handlePreview(doc)} title="Visualizar">
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 opacity-70 group-hover:opacity-100" onClick={() => handlePreview(doc)} title="Visualizar">
                                 <Eye className="h-3.5 w-3.5" />
                               </Button>
-                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleDownload(doc)} title="Descarregar">
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 opacity-70 group-hover:opacity-100" onClick={() => handleDownload(doc)} title="Descarregar">
                                 <Download className="h-3.5 w-3.5" />
                               </Button>
                             </div>
