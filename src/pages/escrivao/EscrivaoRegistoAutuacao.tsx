@@ -630,6 +630,7 @@ export default function EscrivaoRegistoAutuacao() {
       setDocToDelete(null);
       setDeleteDocDialogOpen(false);
       fetchAllDocuments(selectedProcesso);
+      fetchHistorico(selectedProcesso.id);
     } catch (err: any) {
       toast.error(`Erro ao remover: ${err.message}`);
     } finally {
