@@ -503,6 +503,22 @@ export default function ChefeDivisaoProcessos() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Document Preview Dialog */}
+        <Dialog open={!!previewUrl} onOpenChange={() => { setPreviewUrl(null); setPreviewName(""); }}>
+          <DialogContent className="max-w-4xl h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="text-sm flex items-center gap-2">
+                <Eye className="h-4 w-4 text-primary" /> {previewName}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 overflow-hidden rounded-lg border h-full">
+              {previewUrl && (
+                <iframe src={previewUrl} className="w-full h-full min-h-[60vh]" title={previewName} />
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </AppLayout>
     );
   }
