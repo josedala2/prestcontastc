@@ -14,14 +14,15 @@ import { ComparacaoAnual } from "@/components/relatorios/ComparacaoAnual";
 
 const COLORS = ["hsl(210,70%,28%)", "hsl(170,50%,42%)", "hsl(38,92%,50%)", "hsl(0,72%,51%)", "hsl(280,60%,50%)", "hsl(150,50%,35%)"];
 
-// ─── Helper: filtrar contas por prefixo de código (nível 2 = 2 dígitos) ───
-const filterByPrefix = (prefix: string) =>
-  mockTrialBalance.filter((l) => l.accountCode.startsWith(prefix) && l.accountCode.length === 2);
-
-const filterByCode = (code: string) =>
-  mockTrialBalance.filter((l) => l.accountCode === code);
-
 const Relatorios = () => {
+  const { trialBalance: mockTrialBalance, loading: loadingTB } = useTrialBalance("1", "fy1");
+
+  // ─── Helper: filtrar contas por prefixo de código (nível 2 = 2 dígitos) ───
+  const filterByPrefix = (prefix: string) =>
+    mockTrialBalance.filter((l) => l.accountCode.startsWith(prefix) && l.accountCode.length === 2);
+
+  const filterByCode = (code: string) =>
+    mockTrialBalance.filter((l) => l.accountCode === code);
   // ══════════════════════════════════════════════════
   // BALANÇO PATRIMONIAL — conforme PGC Angola
   // ══════════════════════════════════════════════════

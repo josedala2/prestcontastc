@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { exportBalanceteExcel, exportBalancetePdf } from "@/lib/exportUtils";
 
 const Importacao = () => {
+  const { trialBalance: mockTrialBalance } = useTrialBalance("1", "fy1");
   const [uploaded, setUploaded] = useState(false);
   const [preview, setPreview] = useState(true);
   const [versions, setVersions] = useState<string[]>([]);

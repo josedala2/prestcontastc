@@ -290,13 +290,25 @@ export async function generateDossierZip(entityName = "ENDE, E.P.", year = 2024)
   const zip = new JSZip();
   const folder = zip.folder(`Dossie_${entityName.replace(/[^a-zA-Z0-9]/g, "_")}_${year}`)!;
 
+  // Load data from backend
+  const { data: tbData } = await supabase.from("trial_balance").select("*").eq("entity_id", "1").order("account_code");
+  const trialBalanceData = (tbData || []).map((r: any) => ({
+    accountCode: r.account_code, description: r.description,
+    debit: Number(r.debit), credit: Number(r.credit), balance: Number(r.balance),
+  }));
+
+  const { data: auditData } = await supabase.from("audit_log").select("*").order("timestamp", { ascending: false });
+  const auditLogData = (auditData || []).map((l: any) => ({
+    timestamp: new Date(l.timestamp).toLocaleString("pt-AO"), action: l.action, user: l.username, detail: l.detail || "",
+  }));
+
   // 1. Balancete PDF
   const balancetePdf = new jsPDF();
   addPdfHeader(balancetePdf, `Balancete — ${entityName}`, `Exercício Fiscal ${year}`);
   autoTable(balancetePdf, {
     startY: 40,
     head: [["Conta", "Descrição", "Débito (Kz)", "Crédito (Kz)", "Saldo (Kz)"]],
-    body: mockTrialBalance.map((l) => [
+    body: trialBalanceData.map((l: any) => [
       l.accountCode, l.description,
       l.debit > 0 ? formatKz(l.debit) : "—",
       l.credit > 0 ? formatKz(l.credit) : "—",
@@ -316,7 +328,7 @@ export async function generateDossierZip(entityName = "ENDE, E.P.", year = 2024)
     [`Balancete — ${entityName} — ${year}`],
     [],
     ["Conta", "Descrição", "Débito (Kz)", "Crédito (Kz)", "Saldo (Kz)"],
-    ...mockTrialBalance.map((l) => [l.accountCode, l.description, l.debit, l.credit, l.balance]),
+    ...trialBalanceData.map((l: any) => [l.accountCode, l.description, l.debit, l.credit, l.balance]),
   ];
   const wb1 = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb1, XLSX.utils.aoa_to_sheet(balanceteWsData), "Balancete");
@@ -350,7 +362,7 @@ export async function generateDossierZip(entityName = "ENDE, E.P.", year = 2024)
   autoTable(auditPdf, {
     startY: 40,
     head: [["Data/Hora", "Acção", "Utilizador", "Detalhes"]],
-    body: mockAuditLog.map((l) => [l.timestamp, l.action, l.user, l.detail]),
+    body: auditLogData.map((l: any) => [l.timestamp, l.action, l.user, l.detail]),
     theme: "grid",
     headStyles: { fillColor: [40, 38, 72], fontSize: 8 },
     bodyStyles: { fontSize: 7 },
@@ -361,7 +373,6 @@ export async function generateDossierZip(entityName = "ENDE, E.P.", year = 2024)
   // 5. Index / summary
   const indexPdf = new jsPDF();
   addPdfHeader(indexPdf, `Dossiê de Prestação de Contas`, `${entityName} — Exercício ${year}`);
-  const fy = mockFiscalYears.find((f) => f.entityName.includes(entityName.split(",")[0])) || mockFiscalYears[0];
   autoTable(indexPdf, {
     startY: 40,
     head: [["Item", "Valor"]],

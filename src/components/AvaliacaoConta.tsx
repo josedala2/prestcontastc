@@ -32,12 +32,9 @@ const CLASSIFICATION_LABELS: Record<string, { label: string; variant: string }> 
 };
 
 export function AvaliacaoConta({ entityId, fiscalYearId, year }: AvaliacaoContaProps) {
+  const { questions: complianceQuestions } = useComplianceQuestions();
   const [results, setResults] = useState<Record<string, QuestionStatus>>(() => {
-    const initial: Record<string, QuestionStatus> = {};
-    complianceQuestions.forEach((q) => {
-      initial[q.id] = "pending";
-    });
-    return initial;
+    return {};
   });
 
   const updateStatus = (questionId: string, status: QuestionStatus) => {

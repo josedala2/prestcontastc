@@ -382,7 +382,8 @@ const ExercicioDetalhe = () => {
               <div className="relative">
                 <div className="absolute left-[15px] top-0 bottom-0 w-px bg-border" />
                 <div className="space-y-4">
-                  {mockAuditLog.map((entry) => (
+                  {[] as any[]}
+                  {/* Audit log loaded from backend - see Auditoria page */}
                     <div key={entry.id} className="flex gap-4 relative">
                       <div className={`z-10 w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                         entry.actionType === "importacao" ? "bg-primary/10 text-primary" :
