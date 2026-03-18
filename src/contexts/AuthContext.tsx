@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export type UserRole =
   | "Representante da Entidade"
