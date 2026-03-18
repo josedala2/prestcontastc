@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,15 +7,35 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { AppLayout } from "@/components/AppLayout";
 import { toast } from "sonner";
-import { BookOpen, FileText, CheckCircle2, Loader2, Lock, Files, Eye, Download, FileArchive, PackageOpen } from "lucide-react";
+import { BookOpen, FileText, CheckCircle2, Loader2, Lock, Files, Eye, Download, FileArchive, PackageOpen, Plus, Upload, X, Tag } from "lucide-react";
 import { generateCapaProcesso, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { PDFDocument } from "pdf-lib";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
+
+const TIPO_DOCUMENTO_OPTIONS = [
+  "Ofício de Remessa",
+  "Despacho",
+  "Nota Interna",
+  "Relatório de Verificação",
+  "Termo de Notificação",
+  "Auto de Diligência",
+  "Parecer Técnico",
+  "Certidão",
+  "Declaração",
+  "Guia de Cobrança",
+  "Acta",
+  "Requerimento",
+  "Cópia Autenticada",
+  "Outro",
+];
 
 interface Processo {
   id: string;
@@ -68,6 +88,14 @@ export default function EscrivaoRegistoAutuacao() {
   const [loadingDocs, setLoadingDocs] = useState(false);
   const [exportingZip, setExportingZip] = useState(false);
   const [docFilter, setDocFilter] = useState<"todos" | "submissao" | "processo">("todos");
+
+  // Upload new document state
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadTipo, setUploadTipo] = useState("");
+  const [uploadObservacoes, setUploadObservacoes] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchProcessos();
@@ -420,6 +448,62 @@ export default function EscrivaoRegistoAutuacao() {
     }
   };
 
+  const handleUploadDocument = async () => {
+    if (!selectedProcesso || !uploadFile || !uploadTipo) return;
+    setUploading(true);
+    try {
+      const sanitizedName = uploadFile.name.replace(/[^a-zA-Z0-9À-ú._-]/g, "_");
+      const filePath = `${selectedProcesso.id}/${Date.now()}_${sanitizedName}`;
+
+      const { error: storageError } = await supabase.storage
+        .from("processo-documentos")
+        .upload(filePath, uploadFile, {
+          contentType: uploadFile.type,
+          upsert: false,
+        });
+
+      if (storageError) throw storageError;
+
+      await supabase.from("processo_documentos").insert({
+        processo_id: selectedProcesso.id,
+        tipo_documento: uploadTipo,
+        nome_ficheiro: uploadFile.name,
+        caminho_ficheiro: filePath,
+        estado: "pendente",
+        obrigatorio: false,
+        observacoes: uploadObservacoes || `Anexado pelo ${executadoPor}`,
+      } as any);
+
+      // Log in history
+      await supabase.from("processo_historico").insert({
+        processo_id: selectedProcesso.id,
+        etapa_anterior: selectedProcesso.etapa_atual,
+        etapa_seguinte: selectedProcesso.etapa_atual,
+        estado_anterior: selectedProcesso.estado,
+        estado_seguinte: selectedProcesso.estado,
+        acao: `Documento anexado: ${uploadTipo} — ${uploadFile.name}`,
+        executado_por: executadoPor,
+        perfil_executor: "Escrivão dos Autos",
+        observacoes: uploadObservacoes || null,
+        documentos_gerados: [uploadTipo],
+      } as any);
+
+      toast.success(`Documento "${uploadTipo}" anexado com sucesso`);
+
+      // Reset form & refresh docs
+      setUploadFile(null);
+      setUploadTipo("");
+      setUploadObservacoes("");
+      setShowUploadForm(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      fetchAllDocuments(selectedProcesso);
+    } catch (err: any) {
+      toast.error(`Erro ao anexar documento: ${err.message}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const isLocked = autuado || (selectedProcesso && selectedProcesso.etapa_atual > 5);
 
   const submissionDocs = allDocs.filter(d => d.origem === "submissao");
@@ -644,6 +728,112 @@ export default function EscrivaoRegistoAutuacao() {
                     )}
                   </CardContent>
                 </Card>
+
+                {/* Upload new document */}
+                {!isLocked && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <Plus className="h-4 w-4 text-primary" />
+                          Anexar Documento
+                        </CardTitle>
+                        <Button
+                          variant={showUploadForm ? "secondary" : "outline"}
+                          size="sm"
+                          className="h-7 text-xs gap-1.5"
+                          onClick={() => setShowUploadForm(!showUploadForm)}
+                        >
+                          {showUploadForm ? (
+                            <><X className="h-3.5 w-3.5" /> Cancelar</>
+                          ) : (
+                            <><Upload className="h-3.5 w-3.5" /> Novo Documento</>
+                          )}
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    {showUploadForm && (
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-xs font-semibold flex items-center gap-1.5">
+                              <Tag className="h-3.5 w-3.5" />
+                              Classificação do Documento *
+                            </Label>
+                            <Select value={uploadTipo} onValueChange={setUploadTipo}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccione o tipo de documento..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {TIPO_DOCUMENTO_OPTIONS.map((tipo) => (
+                                  <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-xs font-semibold flex items-center gap-1.5">
+                              <FileText className="h-3.5 w-3.5" />
+                              Ficheiro *
+                            </Label>
+                            <Input
+                              ref={fileInputRef}
+                              type="file"
+                              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                              onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                              className="text-xs"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs font-semibold">Observações (opcional)</Label>
+                          <Input
+                            placeholder="Descrição ou contexto do documento..."
+                            value={uploadObservacoes}
+                            onChange={(e) => setUploadObservacoes(e.target.value)}
+                            className="text-sm"
+                          />
+                        </div>
+
+                        {uploadFile && (
+                          <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border text-xs">
+                            <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <span className="truncate text-foreground font-medium">{uploadFile.name}</span>
+                            <span className="text-muted-foreground whitespace-nowrap">
+                              ({(uploadFile.size / 1024).toFixed(0)} KB)
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-5 w-5 ml-auto shrink-0"
+                              onClick={() => {
+                                setUploadFile(null);
+                                if (fileInputRef.current) fileInputRef.current.value = "";
+                              }}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
+
+                        <div className="flex justify-end">
+                          <Button
+                            size="sm"
+                            disabled={!uploadFile || !uploadTipo || uploading}
+                            onClick={handleUploadDocument}
+                            className="gap-1.5"
+                          >
+                            {uploading ? (
+                              <><Loader2 className="h-3.5 w-3.5 animate-spin" /> A enviar...</>
+                            ) : (
+                              <><Upload className="h-3.5 w-3.5" /> Anexar ao Processo</>
+                            )}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    )}
+                  </Card>
+                )}
 
                 {/* Autuar action or locked state */}
                 <Card>
