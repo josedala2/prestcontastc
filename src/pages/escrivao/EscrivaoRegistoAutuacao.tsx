@@ -463,37 +463,55 @@ export default function EscrivaoRegistoAutuacao() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {/* Visual indicator: docs by origin */}
+                    {/* Filter bar with visual indicator */}
                     {!loadingDocs && allDocs.length > 0 && (
-                      <div className="flex items-center gap-4 mb-4 p-3 rounded-lg bg-muted/50 border border-border">
-                        <div className="flex items-center gap-2">
-                          <div className="h-3 w-3 rounded-full bg-blue-500" />
-                          <span className="text-xs text-muted-foreground">Entidade</span>
-                          <span className="text-sm font-bold text-foreground">{submissionDocs.length}</span>
-                        </div>
+                      <div className="flex items-center gap-3 mb-4 p-3 rounded-lg bg-muted/50 border border-border">
+                        <button
+                          onClick={() => setDocFilter("todos")}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                            docFilter === "todos"
+                              ? "bg-primary text-primary-foreground shadow-sm"
+                              : "hover:bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          Todos
+                          <span className="font-bold">{allDocs.length}</span>
+                        </button>
+                        <button
+                          onClick={() => setDocFilter("submissao")}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                            docFilter === "submissao"
+                              ? "bg-blue-600 text-white shadow-sm"
+                              : "hover:bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          <div className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+                          Entidade
+                          <span className="font-bold">{submissionDocs.length}</span>
+                        </button>
+                        <button
+                          onClick={() => setDocFilter("processo")}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                            docFilter === "processo"
+                              ? "bg-amber-600 text-white shadow-sm"
+                              : "hover:bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          <div className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                          Tribunal
+                          <span className="font-bold">{processoDocs.length}</span>
+                        </button>
                         <div className="h-4 w-px bg-border" />
-                        <div className="flex items-center gap-2">
-                          <div className="h-3 w-3 rounded-full bg-amber-500" />
-                          <span className="text-xs text-muted-foreground">Tribunal</span>
-                          <span className="text-sm font-bold text-foreground">{processoDocs.length}</span>
-                        </div>
-                        <div className="h-4 w-px bg-border" />
-                        {/* Mini bar chart */}
                         <div className="flex-1 flex items-center gap-1">
-                          {allDocs.length > 0 && (
-                            <>
-                              <div
-                                className="h-2.5 rounded-l-full bg-blue-500 transition-all"
-                                style={{ width: `${(submissionDocs.length / allDocs.length) * 100}%`, minWidth: submissionDocs.length > 0 ? '8px' : '0' }}
-                              />
-                              <div
-                                className="h-2.5 rounded-r-full bg-amber-500 transition-all"
-                                style={{ width: `${(processoDocs.length / allDocs.length) * 100}%`, minWidth: processoDocs.length > 0 ? '8px' : '0' }}
-                              />
-                            </>
-                          )}
+                          <div
+                            className="h-2.5 rounded-l-full bg-blue-500 transition-all"
+                            style={{ width: `${(submissionDocs.length / allDocs.length) * 100}%`, minWidth: submissionDocs.length > 0 ? '8px' : '0' }}
+                          />
+                          <div
+                            className="h-2.5 rounded-r-full bg-amber-500 transition-all"
+                            style={{ width: `${(processoDocs.length / allDocs.length) * 100}%`, minWidth: processoDocs.length > 0 ? '8px' : '0' }}
+                          />
                         </div>
-                        <span className="text-xs font-medium text-muted-foreground">{allDocs.length} total</span>
                       </div>
                     )}
 
@@ -505,8 +523,7 @@ export default function EscrivaoRegistoAutuacao() {
                       <p className="text-sm text-muted-foreground text-center py-4">Nenhum documento encontrado</p>
                     ) : (
                       <div className="space-y-4">
-                        {/* Submission documents */}
-                        {submissionDocs.length > 0 && (
+                        {(docFilter === "todos" || docFilter === "submissao") && submissionDocs.length > 0 && (
                           <div>
                             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
                               Documentos Submetidos pela Entidade ({submissionDocs.length})
@@ -533,8 +550,7 @@ export default function EscrivaoRegistoAutuacao() {
                           </div>
                         )}
 
-                        {/* Process documents */}
-                        {processoDocs.length > 0 && (
+                        {(docFilter === "todos" || docFilter === "processo") && processoDocs.length > 0 && (
                           <div>
                             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
                               Documentos Gerados pelo Tribunal ({processoDocs.length})
