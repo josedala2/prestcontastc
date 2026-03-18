@@ -8,20 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { mockEntities, mockFiscalYears } from "@/data/mockData";
+import { useEntities } from "@/hooks/useEntities";
+import { useFiscalYears } from "@/hooks/useFiscalYears";
 import { Eye, Search, Building2, Calendar, ChevronLeft, ChevronRight, Inbox, Stamp, BarChart3, CalendarCheck } from "lucide-react";
-
-// Mock submission data
-const mockSubmissoes = mockEntities.map((e, i) => ({
-  id: e.id,
-  entityName: e.name,
-  nif: e.nif,
-  provincia: e.provincia,
-  tipologia: e.tipologia,
-  exercicio: "2024",
-  dataSubmissao: new Date(2025, 0 + i, 10 + i * 2).toLocaleDateString("pt-AO"),
-  estado: (["submetido", "em_analise", "aprovado", "rejeitado"] as const)[i % 4],
-}));
 
 const estadoLabels: Record<string, string> = {
   submetido: "Submetido",
