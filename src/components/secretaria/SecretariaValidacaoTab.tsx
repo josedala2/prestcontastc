@@ -17,7 +17,7 @@ import {
 import { StatCard } from "@/components/ui-custom/PageElements";
 import {
   CheckCircle, XCircle, Clock, FileText, Eye, Send, Loader2,
-  Undo2, ShieldCheck, ArrowRight, Inbox, AlertTriangle, Lock, Bell,
+  Undo2, ShieldCheck, ArrowRight, Inbox, AlertTriangle, Lock, Bell, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
@@ -49,6 +49,19 @@ interface ProcessoDoc {
   nome_ficheiro: string;
   estado: string;
   obrigatorio: boolean;
+  caminho_ficheiro?: string | null;
+}
+
+interface SubmittedDoc {
+  id: string;
+  doc_id: string;
+  doc_label: string;
+  doc_category: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  content_type: string | null;
+  created_at: string;
 }
 
 export function SecretariaValidacaoTab() {
@@ -61,6 +74,10 @@ export function SecretariaValidacaoTab() {
 
   // Notifications
   const [notificacoes, setNotificacoes] = useState<any[]>([]);
+
+  // Submitted documents (from portal)
+  const [submittedDocs, setSubmittedDocs] = useState<SubmittedDoc[]>([]);
+  const [loadingSubmittedDocs, setLoadingSubmittedDocs] = useState(false);
 
   // Approve flow
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
@@ -114,11 +131,55 @@ export function SecretariaValidacaoTab() {
     setLoadingDocs(true);
     const { data } = await supabase
       .from("processo_documentos")
-      .select("id, tipo_documento, nome_ficheiro, estado, obrigatorio")
+      .select("id, tipo_documento, nome_ficheiro, estado, obrigatorio, caminho_ficheiro")
       .eq("processo_id", processoId);
     setDocumentos((data as unknown as ProcessoDoc[]) || []);
     setLoadingDocs(false);
   }, []);
+
+  // Fetch submitted documents from the entity portal
+  const fetchSubmittedDocs = useCallback(async (entityId: string, anoGerencia: number) => {
+    setLoadingSubmittedDocs(true);
+    const fiscalYearId = `${entityId}-${anoGerencia}`;
+    try {
+      const { data, error } = await supabase
+        .from("submission_documents")
+        .select("*")
+        .eq("entity_id", entityId)
+        .eq("fiscal_year_id", fiscalYearId)
+        .order("created_at", { ascending: true });
+      if (!error) {
+        setSubmittedDocs((data || []) as SubmittedDoc[]);
+      }
+    } catch (err) {
+      console.error("Error fetching submitted docs:", err);
+    } finally {
+      setLoadingSubmittedDocs(false);
+    }
+  }, []);
+
+  const handleViewSubmittedDoc = (doc: SubmittedDoc) => {
+    const { data } = supabase.storage.from("submission-documents").getPublicUrl(doc.file_path);
+    if (data?.publicUrl) {
+      window.open(data.publicUrl, "_blank");
+    }
+  };
+
+  const handleViewProcessoDoc = (doc: ProcessoDoc) => {
+    if (!doc.caminho_ficheiro) return;
+    const { data } = supabase.storage.from("processo-documentos").getPublicUrl(doc.caminho_ficheiro);
+    if (data?.publicUrl) {
+      window.open(data.publicUrl, "_blank");
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+  };
 
   useEffect(() => {
     fetchProcessos();
@@ -128,8 +189,11 @@ export function SecretariaValidacaoTab() {
   useEffect(() => {
     if (selectedProcesso) {
       fetchDocumentos(selectedProcesso.id);
+      fetchSubmittedDocs(selectedProcesso.entity_id, selectedProcesso.ano_gerencia);
+    } else {
+      setSubmittedDocs([]);
     }
-  }, [selectedProcesso, fetchDocumentos]);
+  }, [selectedProcesso, fetchDocumentos, fetchSubmittedDocs]);
 
   // Approve validation
   const handleApprove = async () => {
@@ -538,27 +602,109 @@ export function SecretariaValidacaoTab() {
                 </CardContent>
               </Card>
 
-              {/* Documents */}
+              {/* Documentos Submetidos pela Entidade */}
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Documentos do Processo</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Eye className="h-4 w-4 text-primary" />
+                      Documentos Submetidos pela Entidade
+                    </CardTitle>
+                    <Badge variant="outline" className="text-[10px]">
+                      {submittedDocs.length} ficheiro(s)
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Documentos carregados pela entidade no portal. Visualize cada um antes de aprovar.
+                  </p>
                 </CardHeader>
                 <CardContent>
-                  {loadingDocs ? (
-                    <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                  {loadingSubmittedDocs ? (
+                    <div className="flex items-center justify-center py-6 gap-2 text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" /> A carregar documentos…
                     </div>
-                  ) : documentos.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4 text-center">
-                      Nenhum documento associado ao processo. A verificação será baseada na acta de recepção.
-                    </p>
+                  ) : submittedDocs.length === 0 ? (
+                    <div className="text-center py-6 text-muted-foreground">
+                      <FileText className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                      <p className="text-sm">Nenhum documento submetido via portal para este exercício.</p>
+                      <p className="text-xs mt-1">A verificação será baseada na acta de recepção e documentos físicos.</p>
+                    </div>
                   ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Documento</TableHead>
+                          <TableHead>Ficheiro</TableHead>
+                          <TableHead className="text-center">Tamanho</TableHead>
+                          <TableHead className="text-center">Data</TableHead>
+                          <TableHead className="text-center w-24">Acções</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {submittedDocs.map((doc) => (
+                          <TableRow key={doc.id}>
+                            <TableCell>
+                              <span className="text-sm font-medium">{doc.doc_label}</span>
+                              <p className="text-[10px] text-muted-foreground">{doc.doc_category}</p>
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-xs truncate max-w-[180px] block" title={doc.file_name}>
+                                {doc.file_name}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-center text-xs text-muted-foreground">
+                              {formatFileSize(doc.file_size)}
+                            </TableCell>
+                            <TableCell className="text-center text-xs text-muted-foreground">
+                              {new Date(doc.created_at).toLocaleDateString("pt-AO")}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <div className="flex items-center justify-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0"
+                                  title={`Visualizar ${doc.file_name}`}
+                                  onClick={() => handleViewSubmittedDoc(doc)}
+                                >
+                                  <Eye className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0"
+                                  title={`Descarregar ${doc.file_name}`}
+                                  onClick={() => handleViewSubmittedDoc(doc)}
+                                >
+                                  <Download className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Documentos do Processo (gerados internamente) */}
+              {documentos.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Documentos Internos do Processo
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
                     <Table>
                       <TableHeader>
                         <TableRow>
                           <TableHead>Documento</TableHead>
                           <TableHead className="text-center">Obrigatório</TableHead>
                           <TableHead className="text-center">Estado</TableHead>
+                          <TableHead className="text-center w-20">Ver</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -583,13 +729,27 @@ export function SecretariaValidacaoTab() {
                                 </span>
                               )}
                             </TableCell>
+                            <TableCell className="text-center">
+                              {doc.caminho_ficheiro ? (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0"
+                                  onClick={() => handleViewProcessoDoc(doc)}
+                                >
+                                  <Eye className="h-3.5 w-3.5" />
+                                </Button>
+                              ) : (
+                                <span className="text-muted-foreground text-xs">—</span>
+                              )}
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
                     </Table>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Action buttons */}
               {isChefe && (
