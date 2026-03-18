@@ -113,7 +113,7 @@ const Relatorios = () => {
   const totalProveitos = totalProveitosOp + totalProveitosFin + totalProveitosNaoOp;
 
   // ── CUSTOS (Classe 7) ──
-  const custosOperacionais = mockTrialBalance.filter(
+  const custosOperacionais = trialBalance.filter(
     (l) => ["71", "72", "73", "74", "75"].includes(l.accountCode)
   );
   const totalCustosOp = custosOperacionais.reduce((s, l) => s + l.balance, 0);
