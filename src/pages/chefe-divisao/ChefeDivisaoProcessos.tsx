@@ -157,7 +157,14 @@ export default function ChefeDivisaoProcessos() {
 
       if (error) throw error;
 
-      const objectUrl = URL.createObjectURL(data);
+      const fileExtension = doc.nome_ficheiro.split(".").pop()?.toLowerCase();
+      const mimeType = fileExtension === "pdf"
+        ? "application/pdf"
+        : data.type || "application/octet-stream";
+      const previewBlob = new Blob([data], { type: mimeType });
+      const objectUrl = URL.createObjectURL(previewBlob);
+
+      setPreviewMime(mimeType);
       setPreviewUrl(objectUrl);
       setPreviewName(doc.nome_ficheiro);
     } catch (error) {
