@@ -153,7 +153,7 @@ const Importacao = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockTrialBalance.map((line) => (
+                  {trialBalance.map((line) => (
                     <TableRow key={line.id}>
                       <TableCell className="font-mono text-xs">{line.accountCode}</TableCell>
                       <TableCell className="text-sm">{line.description}</TableCell>
