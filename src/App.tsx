@@ -228,6 +228,11 @@ const App = () => (
               <AnaliseTecnicaPage />
             </ProtectedRoute>
           } />
+          <Route path="/analise-tecnica/:id" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico de Análise", "Chefe de Divisão", "Chefe de Secção"]}>
+              <AmbienteAnalisePage />
+            </ProtectedRoute>
+          } />
 
           {/* DST - Controle Qualidade */}
           <Route path="/dst/controle-qualidade" element={
