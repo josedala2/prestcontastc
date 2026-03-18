@@ -23,8 +23,10 @@ import {
   AlertTriangle,
   Scale,
   LayoutGrid,
+  GitBranch,
 } from "lucide-react";
 import { MenuPerfilMatrix } from "@/components/configuracoes/MenuPerfilMatrix";
+import { WorkflowDesigner } from "@/components/configuracoes/WorkflowDesigner";
 import { cn } from "@/lib/utils";
 
 interface ValidationRule {
