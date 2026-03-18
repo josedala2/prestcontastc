@@ -75,6 +75,10 @@ export function SecretariaValidacaoTab() {
   // Notifications
   const [notificacoes, setNotificacoes] = useState<any[]>([]);
 
+  // Submitted documents (from portal)
+  const [submittedDocs, setSubmittedDocs] = useState<SubmittedDoc[]>([]);
+  const [loadingSubmittedDocs, setLoadingSubmittedDocs] = useState(false);
+
   // Approve flow
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [approving, setApproving] = useState(false);
