@@ -40,7 +40,7 @@ const Relatorios = () => {
 
   // ── ACTIVO CORRENTE ──
   // Classe 2 (Existências): 22-28, menos 29 (provisões)
-  const existenciasLines = mockTrialBalance.filter(
+  const existenciasLines = trialBalance.filter(
     (l) => ["22", "23", "24", "25", "26", "27", "28", "29"].includes(l.accountCode)
   );
   const totalExistencias = existenciasLines.reduce((s, l) => s + l.balance, 0);
