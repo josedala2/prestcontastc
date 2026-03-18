@@ -112,56 +112,70 @@ function addFooter(doc: jsPDF, executadoPor: string) {
 export async function generateCapaProcesso(data: ProcessoDocData, executadoPor: string): Promise<Blob> {
   const doc = new jsPDF();
   const brasao = await loadImage(brasaoImg);
-  const leftMargin = 25;
-  const fieldGap = 7;
+  const pageWidth = 210;
+  const centerX = pageWidth / 2;
+  const leftMargin = 30;
+  const rightEdge = 180;
+  const fieldGap = 6.5;
 
-  // Helper for section title
+  // Helper: section header with subtle background band
   const sectionTitle = (title: string, y: number): number => {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.text(title, leftMargin, y);
-    doc.setLineWidth(0.3);
-    doc.setDrawColor(180, 160, 100);
-    doc.line(leftMargin, y + 1.5, 185, y + 1.5);
-    return y + 8;
-  };
-
-  const field = (label: string, value: string, y: number): number => {
+    doc.setFillColor(245, 243, 237);
+    doc.roundedRect(leftMargin - 2, y - 4.5, rightEdge - leftMargin + 4, 7, 1, 1, "F");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9.5);
+    doc.setTextColor(100, 80, 40);
+    doc.text(title, leftMargin, y);
+    doc.setTextColor(0);
+    return y + 9;
+  };
+
+  // Helper: field row
+  const field = (label: string, value: string, y: number): number => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(80, 80, 80);
     doc.text(`${label}:`, leftMargin, y);
     doc.setFont("helvetica", "normal");
+    doc.setTextColor(30, 30, 30);
     const labelWidth = doc.getTextWidth(`${label}: `);
     doc.text(value || "—", leftMargin + labelWidth + 1, y);
+    doc.setTextColor(0);
     return y + fieldGap;
   };
 
   // ===== PAGE 1 =====
-  // Header with brasão
-  doc.addImage(brasao, "JPEG", 82, 8, 18, 18, undefined, "FAST");
+  // Centered header block
+  const logoSize = 22;
+  doc.addImage(brasao, "JPEG", centerX - logoSize / 2, 12, logoSize, logoSize, undefined, "FAST");
+
   doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
-  doc.text("REPÚBLICA DE ANGOLA", 105, 30, { align: "center" });
+  doc.setTextColor(30, 30, 30);
+  doc.text("REPÚBLICA DE ANGOLA", centerX, 40, { align: "center" });
+
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(50, 100, 150);
-  doc.text("TRIBUNAL DE CONTAS", 105, 36, { align: "center" });
+  doc.text("TRIBUNAL DE CONTAS", centerX, 46, { align: "center" });
   doc.setTextColor(0);
-  doc.setDrawColor(180, 160, 100);
-  doc.setLineWidth(0.5);
-  doc.line(30, 39, 180, 39);
 
-  doc.setFontSize(12);
+  // Title block with accent background
+  doc.setFillColor(50, 100, 150);
+  doc.roundedRect(leftMargin - 2, 52, rightEdge - leftMargin + 4, 10, 1.5, 1.5, "F");
+  doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
-  doc.text("CAPA DO PROCESSO DE PRESTAÇÃO DE CONTAS", 105, 48, { align: "center" });
+  doc.setTextColor(255, 255, 255);
+  doc.text("CAPA DO PROCESSO DE PRESTAÇÃO DE CONTAS", centerX, 59, { align: "center" });
+  doc.setTextColor(0);
 
-  let y = 58;
+  let y = 72;
 
   // Secção 1: Dados do processo
   y = field("N.º DO PROCESSO", data.numeroProcesso, y);
   y = field("TIPO DE PROCESSO", data.tipoProcesso || "Prestação de Contas", y);
   y = field("NATUREZA DO PROCESSO", data.naturezaProcesso || "Ordinário", y);
-  y += 4;
+  y += 3;
 
   // Secção 2: Identificação da Entidade
   y = sectionTitle("IDENTIFICAÇÃO DA ENTIDADE", y);
@@ -169,13 +183,13 @@ export async function generateCapaProcesso(data: ProcessoDocData, executadoPor: 
   y = field("Tipo/Natureza da Entidade", data.tipoEntidade || "Empresa Pública", y);
   y = field("Categoria da Entidade", data.categoriaEntidade, y);
   y = field("Base Legal (Resolução Aplicável)", data.resolucaoAplicavel || "Resolução n.º 1/17 de 5 de Janeiro", y);
-  y += 4;
+  y += 3;
 
   // Secção 3: Dados da Conta de Gerência
   y = sectionTitle("DADOS DA CONTA DE GERÊNCIA", y);
   y = field("Ano da Conta de Gerência", String(data.anoGerencia), y);
   y = field("Período (Início/Fim)", data.periodoGerencia || `01/01/${data.anoGerencia} a 31/12/${data.anoGerencia}`, y);
-  y += 4;
+  y += 3;
 
   // Secção 4: Responsáveis pela Gerência
   y = sectionTitle("RESPONSÁVEIS PELA GERÊNCIA", y);
@@ -187,7 +201,7 @@ export async function generateCapaProcesso(data: ProcessoDocData, executadoPor: 
     y = field("1. Nome / Cargo", "—", y);
     y = field("2. Nome / Cargo", "—", y);
   }
-  y += 4;
+  y += 3;
 
   // Secção 5: Dados do Expediente
   y = sectionTitle("DADOS DO EXPEDIENTE", y);
@@ -203,7 +217,7 @@ export async function generateCapaProcesso(data: ProcessoDocData, executadoPor: 
 
   // Acta de Recebimento
   y2 = field("N.º Acta de Recebimento", data.actaRecebimentoNumero || "—", y2);
-  y2 += 4;
+  y2 += 3;
 
   // Tramitação Processual
   y2 = sectionTitle("TRAMITAÇÃO PROCESSUAL", y2);
@@ -211,13 +225,13 @@ export async function generateCapaProcesso(data: ProcessoDocData, executadoPor: 
   y2 = field("Juiz Adjunto", data.juizAdjunto || "—", y2);
   y2 = field("Divisão Competente", data.divisaoCompetente || "—", y2);
   y2 = field("Secção Competente", data.seccaoCompetente || "—", y2);
-  y2 += 4;
+  y2 += 3;
 
   // Situação do Processo
   y2 = sectionTitle("SITUAÇÃO DO PROCESSO", y2);
   y2 = field("Estado Atual", data.estado, y2);
   y2 = field("Etapa Atual", `Etapa ${data.etapaAtual}`, y2);
-  y2 += 4;
+  y2 += 3;
 
   // Documentação
   y2 = sectionTitle("DOCUMENTAÇÃO", y2);
@@ -229,30 +243,40 @@ export async function generateCapaProcesso(data: ProcessoDocData, executadoPor: 
     y2 = field("Total de Páginas do Processo", String(data.totalPaginas), y2);
   }
   y2 = field("Observações", data.observacoes || "—", y2);
-  y2 += 4;
+  y2 += 3;
 
   // Registo
   y2 = sectionTitle("REGISTO", y2);
   y2 = field("Data de Autuação", data.dataAutuacao || new Date().toLocaleDateString("pt-AO"), y2);
   y2 = field("Escrivão dos Autos", data.escrivaoAutos || executadoPor, y2);
-  y2 += 4;
+  y2 += 3;
 
   // Observações Gerais
   y2 = sectionTitle("OBSERVAÇÕES GERAIS", y2);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.text("—", leftMargin, y2);
-  y2 += 10;
+  y2 += 14;
 
   // Signature area
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
+  doc.setTextColor(80, 80, 80);
   doc.text("O Escrivão dos Autos", 55, y2 + 20, { align: "center" });
   doc.text("O Chefe da Secretaria", 155, y2 + 20, { align: "center" });
+
+  // Signature dots instead of lines
+  doc.setDrawColor(180, 180, 180);
+  doc.setLineDashPattern([1, 1.5], 0);
   doc.line(25, y2 + 35, 85, y2 + 35);
   doc.line(125, y2 + 35, 185, y2 + 35);
+  doc.setLineDashPattern([], 0);
+
+  doc.setFontSize(7.5);
+  doc.setTextColor(140, 140, 140);
   doc.text("(assinatura e carimbo)", 55, y2 + 40, { align: "center" });
   doc.text("(assinatura e carimbo)", 155, y2 + 40, { align: "center" });
+  doc.setTextColor(0);
 
   addFooter(doc, executadoPor);
   return doc.output("blob");
