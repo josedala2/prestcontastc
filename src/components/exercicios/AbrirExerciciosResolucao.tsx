@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Entity, TIPOLOGIA_GROUPS, TIPOLOGIA_LABELS, TIPOLOGIA_RESOLUCAO, RESOLUCAO_LABELS, FiscalYear } from "@/types";
+import { Entity, TIPOLOGIA_GROUPS, TIPOLOGIA_LABELS, RESOLUCAO_LABELS, FiscalYear, ResolucaoCategoria } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -13,24 +13,24 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
+  resolucao: ResolucaoCategoria;
   allEntities: Entity[];
   existingFiscalYears: FiscalYear[];
   onCreated: () => void;
 }
 
-export function AbrirExerciciosResolucao({ allEntities, existingFiscalYears, onCreated }: Props) {
+export function AbrirExerciciosResolucao({ resolucao, allEntities, existingFiscalYears, onCreated }: Props) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [year, setYear] = useState(new Date().getFullYear());
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
-  // Filter entities that belong to Resolução 1/17
-  const resolucao117Tipologias = TIPOLOGIA_GROUPS.resolucao_1_17;
-  const entities117 = allEntities.filter(e => resolucao117Tipologias.includes(e.tipologia));
+  const tipologias = TIPOLOGIA_GROUPS[resolucao];
+  const filteredEntities = allEntities.filter(e => tipologias.includes(e.tipologia));
+  const resolucaoLabel = RESOLUCAO_LABELS[resolucao];
 
-  // Group by tipologia for display
-  const groupedEntities = resolucao117Tipologias.reduce((acc, tip) => {
-    const group = entities117.filter(e => e.tipologia === tip);
+  const groupedEntities = tipologias.reduce((acc, tip) => {
+    const group = filteredEntities.filter(e => e.tipologia === tip);
     if (group.length > 0) acc.push({ tipologia: tip, label: TIPOLOGIA_LABELS[tip], entities: group });
     return acc;
   }, [] as { tipologia: string; label: string; entities: Entity[] }[]);
@@ -38,11 +38,11 @@ export function AbrirExerciciosResolucao({ allEntities, existingFiscalYears, onC
   const hasExercise = (entityId: string) =>
     existingFiscalYears.some(fy => fy.entityId === entityId && fy.year === year);
 
-  const availableCount = entities117.filter(e => !hasExercise(e.id)).length;
+  const availableCount = filteredEntities.filter(e => !hasExercise(e.id)).length;
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(entities117.filter(e => !hasExercise(e.id)).map(e => e.id));
+      setSelectedIds(filteredEntities.filter(e => !hasExercise(e.id)).map(e => e.id));
     } else {
       setSelectedIds([]);
     }
@@ -55,8 +55,6 @@ export function AbrirExerciciosResolucao({ allEntities, existingFiscalYears, onC
     }
 
     setSaving(true);
-    const startDate = `${year}-01-01`;
-    const endDate = `${year}-12-31`;
     const deadline = `${year + 1}-06-30`;
 
     const newRows = selectedIds
@@ -101,22 +99,18 @@ export function AbrirExerciciosResolucao({ allEntities, existingFiscalYears, onC
               <BookOpen className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1">
-              <CardTitle className="text-base font-serif">
-                {RESOLUCAO_LABELS.resolucao_1_17.label}
-              </CardTitle>
-              <CardDescription className="text-xs">
-                {RESOLUCAO_LABELS.resolucao_1_17.descricao}
-              </CardDescription>
+              <CardTitle className="text-base font-serif">{resolucaoLabel.label}</CardTitle>
+              <CardDescription className="text-xs">{resolucaoLabel.descricao}</CardDescription>
             </div>
             <Badge variant="secondary" className="text-xs">
-              {entities117.length} entidade(s)
+              {filteredEntities.length} entidade(s)
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2 mb-4">
-            {resolucao117Tipologias.map(tip => {
-              const count = entities117.filter(e => e.tipologia === tip).length;
+            {tipologias.map(tip => {
+              const count = filteredEntities.filter(e => e.tipologia === tip).length;
               if (count === 0) return null;
               return (
                 <Badge key={tip} variant="outline" className="text-[10px] gap-1">
@@ -128,7 +122,7 @@ export function AbrirExerciciosResolucao({ allEntities, existingFiscalYears, onC
           </div>
           <Button onClick={() => setDialogOpen(true)} className="w-full gap-2">
             <BookOpen className="h-4 w-4" />
-            Abrir Exercícios — Resolução 1/17
+            Abrir Exercícios — {resolucaoLabel.label}
           </Button>
         </CardContent>
       </Card>
@@ -136,14 +130,11 @@ export function AbrirExerciciosResolucao({ allEntities, existingFiscalYears, onC
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-serif">Abrir Exercícios Fiscais — Resolução nº 1/17</DialogTitle>
-            <DialogDescription>
-              Órgãos Autónomos, Sector Empresarial Público e demais serviços e entidades do sector produtivo regidos pelo PGC
-            </DialogDescription>
+            <DialogTitle className="font-serif">Abrir Exercícios Fiscais — {resolucaoLabel.label}</DialogTitle>
+            <DialogDescription>{resolucaoLabel.descricao}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
-            {/* Year selector */}
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label>Ano do Exercício</Label>
@@ -163,7 +154,6 @@ export function AbrirExerciciosResolucao({ allEntities, existingFiscalYears, onC
 
             <Separator />
 
-            {/* Select all */}
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 cursor-pointer">
                 <Checkbox
@@ -178,11 +168,10 @@ export function AbrirExerciciosResolucao({ allEntities, existingFiscalYears, onC
               )}
             </div>
 
-            {/* Entity groups */}
-            {entities117.length === 0 ? (
+            {filteredEntities.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground text-sm">
                 <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                Nenhuma entidade registada com tipologia da Resolução 1/17.
+                Nenhuma entidade registada com tipologia da {resolucaoLabel.label}.
               </div>
             ) : (
               <div className="space-y-4">
