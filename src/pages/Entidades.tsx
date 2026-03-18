@@ -212,7 +212,10 @@ const Entidades = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setEntities((prev) => prev.filter((e) => e.id !== entity.id))}
+                onClick={async () => {
+                  await supabase.from("entities").delete().eq("id", entity.id);
+                  setEntities((prev) => prev.filter((e) => e.id !== entity.id));
+                }}
               >
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
