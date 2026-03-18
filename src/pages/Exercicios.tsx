@@ -336,7 +336,7 @@ const Exercicios = () => {
       </Dialog>
 
       {/* Abrir Exercícios por Resolução */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 mb-6">
         <AbrirExerciciosResolucao
           resolucao="resolucao_1_17"
           allEntities={allEntities}
