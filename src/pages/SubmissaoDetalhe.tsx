@@ -578,7 +578,7 @@ const SubmissaoDetalhe = () => {
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Visualizar"
-                            onClick={() => { const { data } = supabase.storage.from("actas-recepcao").getPublicUrl(generatedActaFilePath!); setPdfPreviewUrl(data.publicUrl); }}>
+                            onClick={async () => { const { data, error } = await supabase.storage.from("actas-recepcao").download(generatedActaFilePath!); if (error || !data) return; setPdfPreviewUrl(URL.createObjectURL(data)); }}>
                             <Eye className="h-3.5 w-3.5" />
                           </Button>
                           <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Descarregar"
