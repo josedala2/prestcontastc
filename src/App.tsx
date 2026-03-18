@@ -70,6 +70,7 @@ const DASHBOARD_ROLES = [
   "Chefe da Secretaria-Geral",
   "Técnico da Contadoria Geral",
   "Escrivão dos Autos",
+  "Contadoria Geral",
   "Chefe de Divisão",
   "Chefe de Secção",
   "Coordenador de Equipa",
