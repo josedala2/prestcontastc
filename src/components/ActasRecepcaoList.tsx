@@ -262,7 +262,7 @@ export function ActasRecepcaoList({ entityId, fiscalYear, compact, allowEdit, on
       )}
 
       {/* PDF Preview Dialog */}
-      <Dialog open={!!previewActa} onOpenChange={() => setPreviewActa(null)}>
+      <Dialog open={!!previewActa} onOpenChange={() => { if (previewBlobUrl) URL.revokeObjectURL(previewBlobUrl); setPreviewBlobUrl(null); setPreviewActa(null); }}>
         <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
           <DialogHeader>
             <div className="flex items-center justify-between pr-6">
