@@ -1,13 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
-import {
-  mockValidations,
-  mockAttachments,
-  mockAuditLog,
-  submissionChecklist,
-  formatKz,
-} from "@/data/mockData";
+import { submissionChecklist, formatKz, defaultValidations as mockValidations, defaultAttachments as mockAttachments } from "@/lib/dataUtils";
+import { mockAuditLog } from "@/data/mockData";
 import { useFiscalYears } from "@/hooks/useFiscalYears";
 import { useEntities } from "@/hooks/useEntities";
 import { STATUS_LABELS, VALIDATION_LEVEL_LABELS } from "@/types";
