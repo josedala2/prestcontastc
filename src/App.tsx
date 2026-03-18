@@ -45,6 +45,7 @@ import ActasRecepcao from "./pages/ActasRecepcao";
 import Secretaria from "./pages/Secretaria";
 import Atividades from "./pages/Atividades";
 import ContadoriaVerificacao from "./pages/contadoria/ContadoriaVerificacao";
+import ContadoriaTriagem from "./pages/contadoria-geral/ContadoriaTriagem";
 import EscrivaoRegistoAutuacao from "./pages/escrivao/EscrivaoRegistoAutuacao";
 import ChefeDivisaoProcessos from "./pages/chefe-divisao/ChefeDivisaoProcessos";
 import ValidacaoChefeDivisao from "./pages/chefe-divisao/ValidacaoChefeDivisao";
