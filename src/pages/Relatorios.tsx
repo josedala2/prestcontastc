@@ -19,7 +19,7 @@ const Relatorios = () => {
 
   // ─── Helper: filtrar contas por prefixo de código (nível 2 = 2 dígitos) ───
   const filterByPrefix = (prefix: string) =>
-    mockTrialBalance.filter((l) => l.accountCode.startsWith(prefix) && l.accountCode.length === 2);
+    trialBalance.filter((l) => l.accountCode.startsWith(prefix) && l.accountCode.length === 2);
 
   const filterByCode = (code: string) =>
     mockTrialBalance.filter((l) => l.accountCode === code);
