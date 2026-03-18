@@ -569,8 +569,8 @@ export default function ChefeDivisaoProcessos() {
               <DialogTitle className="text-sm flex items-center gap-2">
                 <Eye className="h-4 w-4 text-primary" /> {previewName}
               </DialogTitle>
-              <DialogDescription className="sr-only">
-                Pré-visualização online do documento seleccionado do processo.
+              <DialogDescription className="text-xs text-muted-foreground">
+                Pré-visualização online do documento seleccionado do processo. Se o navegador não renderizar o PDF no painel, use “Abrir em nova aba”.
               </DialogDescription>
             </div>
             <div className="flex-1 overflow-hidden rounded-lg border h-full flex flex-col bg-muted/20">
