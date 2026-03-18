@@ -40,6 +40,7 @@ const NOTIF_FILTERS: { value: SecretariaNotifFilter; label: string }[] = [
 export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const pageTitle = routeTitles[location.pathname] || "PGC";
   const { notifications, markAsRead } = useSubmissions();
   const [showNotifs, setShowNotifs] = useState(false);
