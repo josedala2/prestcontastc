@@ -94,6 +94,12 @@ export default function ChefeDivisaoProcessos() {
   const [observacoes, setObservacoes] = useState("");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
+  // Documents
+  const [documentos, setDocumentos] = useState<DocItem[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewName, setPreviewName] = useState("");
+
   useEffect(() => {
     fetchProcessos();
   }, []);
@@ -109,12 +115,58 @@ export default function ChefeDivisaoProcessos() {
     setLoading(false);
   };
 
+  const fetchDocumentos = async (processoId: string) => {
+    setLoadingDocs(true);
+    const { data } = await supabase
+      .from("processo_documentos")
+      .select("*")
+      .eq("processo_id", processoId)
+      .order("created_at", { ascending: true });
+    
+    // Sort: Capa do Processo first
+    const docs = (data as DocItem[]) || [];
+    const capaIdx = docs.findIndex(d => d.tipo_documento === "Capa do Processo");
+    if (capaIdx > 0) {
+      const [capa] = docs.splice(capaIdx, 1);
+      docs.unshift(capa);
+    }
+    setDocumentos(docs);
+    setLoadingDocs(false);
+  };
+
+  const handlePreview = async (doc: DocItem) => {
+    if (!doc.caminho_ficheiro) return;
+    const bucket = "processo-documentos";
+    const { data } = await supabase.storage.from(bucket).createSignedUrl(doc.caminho_ficheiro, 300);
+    if (data?.signedUrl) {
+      setPreviewUrl(data.signedUrl);
+      setPreviewName(doc.nome_ficheiro);
+    }
+  };
+
+  const handleDownload = async (doc: DocItem) => {
+    if (!doc.caminho_ficheiro) return;
+    const { data } = await supabase.storage.from("processo-documentos").createSignedUrl(doc.caminho_ficheiro, 300);
+    if (data?.signedUrl) {
+      window.open(data.signedUrl, "_blank");
+    }
+  };
+
+  const getDocIcon = (nome: string) => {
+    const ext = nome.split(".").pop()?.toLowerCase();
+    if (ext === "pdf") return <FileText className="h-4 w-4 text-red-500" />;
+    if (ext === "xlsx" || ext === "xls") return <FileSpreadsheet className="h-4 w-4 text-green-600" />;
+    if (["jpg", "jpeg", "png", "gif"].includes(ext || "")) return <FileImage className="h-4 w-4 text-blue-500" />;
+    return <File className="h-4 w-4 text-muted-foreground" />;
+  };
+
   const handleSelectProcesso = (p: Processo) => {
     setSelectedProcesso(p);
     setDivisao(p.divisao_competente || "");
     setSeccao(p.seccao_competente || "");
     setCoordenador(p.coordenador_equipa || "");
     setObservacoes("");
+    fetchDocumentos(p.id);
   };
 
   const handleEncaminhar = async () => {
