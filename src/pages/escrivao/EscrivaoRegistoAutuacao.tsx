@@ -1035,9 +1035,75 @@ export default function EscrivaoRegistoAutuacao() {
                   </Card>
                 )}
 
+                {/* Histórico de acções do Escrivão */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <History className="h-4 w-4 text-primary" />
+                      Histórico de Acções do Escrivão
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {loadingHistorico ? (
+                      <div className="flex items-center justify-center py-6">
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : historico.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-6">Nenhuma acção registada neste processo</p>
+                    ) : (
+                      <ScrollArea className="max-h-[280px]">
+                        <div className="relative pl-6 space-y-0">
+                          {/* Vertical timeline line */}
+                          <div className="absolute left-[9px] top-2 bottom-2 w-px bg-border" />
+                          {historico.map((item) => {
+                            const isAnexo = item.acao.toLowerCase().includes("anexado");
+                            const isRemocao = item.acao.toLowerCase().includes("removido");
+                            const isAutuacao = item.acao.toLowerCase().includes("autuado") || item.acao.toLowerCase().includes("autuação");
+                            const IconComponent = isAnexo ? FilePlus : isRemocao ? FileX : isAutuacao ? FileCheck : FileText;
+                            const iconColor = isAnexo
+                              ? "text-primary bg-primary/10"
+                              : isRemocao
+                              ? "text-destructive bg-destructive/10"
+                              : isAutuacao
+                              ? "text-green-600 bg-green-50"
+                              : "text-muted-foreground bg-muted";
+
+                            return (
+                              <div key={item.id} className="relative pb-4 last:pb-0">
+                                {/* Timeline dot */}
+                                <div className={`absolute -left-6 top-0.5 h-[18px] w-[18px] rounded-full flex items-center justify-center ${iconColor}`}>
+                                  <IconComponent className="h-3 w-3" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-sm text-foreground leading-snug">{item.acao}</p>
+                                  {item.observacoes && (
+                                    <p className="text-[11px] text-muted-foreground mt-0.5">{item.observacoes}</p>
+                                  )}
+                                  {item.documentos_gerados && item.documentos_gerados.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {item.documentos_gerados.map((doc, i) => (
+                                        <Badge key={i} variant="outline" className="text-[9px]">{doc}</Badge>
+                                      ))}
+                                    </div>
+                                  )}
+                                  <p className="text-[10px] text-muted-foreground mt-1">
+                                    {new Date(item.created_at).toLocaleString("pt-AO", {
+                                      day: "2-digit", month: "short", year: "numeric",
+                                      hour: "2-digit", minute: "2-digit",
+                                    })}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </ScrollArea>
+                    )}
+                  </CardContent>
+                </Card>
+
                 {/* Autuar action or locked state */}
                 <Card>
-                  <CardContent className="py-8">
                     {isLocked ? (
                       <div className="flex flex-col items-center gap-4 text-center">
                         <div className="h-16 w-16 rounded-full bg-primary/15 flex items-center justify-center">
