@@ -293,8 +293,8 @@ const Secretaria = () => {
 
   // Dashboard stats
   const pendentesCount = submetidos.length - actasGeradas.length;
-  const emAnalise = mockFiscalYears.filter((fy) => fy.status === "em_analise").length;
-  const totalSubmetidos = mockFiscalYears.filter((fy) => ["submetido", "em_analise", "com_pedidos", "conforme", "nao_conforme"].includes(fy.status)).length;
+  const emAnalise = allFYs.filter((fy) => fy.status === "em_analise").length;
+  const totalSubmetidos = allFYs.filter((fy) => ["submetido", "em_analise", "com_pedidos", "conforme", "nao_conforme"].includes(fy.status)).length;
   const hoje = new Date();
   const submetidosEsteMes = submetidos.filter((fy) => {
     if (!fy.submittedAt) return false;
