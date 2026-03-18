@@ -23,7 +23,7 @@ import {
 import {
   ArrowLeft, Building2, Users, Send, CheckCircle2, Loader2, FolderOpen,
   Calendar, GitBranch, UserCheck, ClipboardList, Search, FileText, Eye,
-  Download, File, FileSpreadsheet, FileImage,
+  Download, File, FileSpreadsheet, FileImage, ShieldCheck, Clock, AlertCircle,
 } from "lucide-react";
 
 interface Processo {
