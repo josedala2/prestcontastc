@@ -729,6 +729,112 @@ export default function EscrivaoRegistoAutuacao() {
                   </CardContent>
                 </Card>
 
+                {/* Upload new document */}
+                {!isLocked && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <Plus className="h-4 w-4 text-primary" />
+                          Anexar Documento
+                        </CardTitle>
+                        <Button
+                          variant={showUploadForm ? "secondary" : "outline"}
+                          size="sm"
+                          className="h-7 text-xs gap-1.5"
+                          onClick={() => setShowUploadForm(!showUploadForm)}
+                        >
+                          {showUploadForm ? (
+                            <><X className="h-3.5 w-3.5" /> Cancelar</>
+                          ) : (
+                            <><Upload className="h-3.5 w-3.5" /> Novo Documento</>
+                          )}
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    {showUploadForm && (
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-xs font-semibold flex items-center gap-1.5">
+                              <Tag className="h-3.5 w-3.5" />
+                              Classificação do Documento *
+                            </Label>
+                            <Select value={uploadTipo} onValueChange={setUploadTipo}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccione o tipo de documento..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {TIPO_DOCUMENTO_OPTIONS.map((tipo) => (
+                                  <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-xs font-semibold flex items-center gap-1.5">
+                              <FileText className="h-3.5 w-3.5" />
+                              Ficheiro *
+                            </Label>
+                            <Input
+                              ref={fileInputRef}
+                              type="file"
+                              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                              onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                              className="text-xs"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs font-semibold">Observações (opcional)</Label>
+                          <Input
+                            placeholder="Descrição ou contexto do documento..."
+                            value={uploadObservacoes}
+                            onChange={(e) => setUploadObservacoes(e.target.value)}
+                            className="text-sm"
+                          />
+                        </div>
+
+                        {uploadFile && (
+                          <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border text-xs">
+                            <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <span className="truncate text-foreground font-medium">{uploadFile.name}</span>
+                            <span className="text-muted-foreground whitespace-nowrap">
+                              ({(uploadFile.size / 1024).toFixed(0)} KB)
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-5 w-5 ml-auto shrink-0"
+                              onClick={() => {
+                                setUploadFile(null);
+                                if (fileInputRef.current) fileInputRef.current.value = "";
+                              }}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
+
+                        <div className="flex justify-end">
+                          <Button
+                            size="sm"
+                            disabled={!uploadFile || !uploadTipo || uploading}
+                            onClick={handleUploadDocument}
+                            className="gap-1.5"
+                          >
+                            {uploading ? (
+                              <><Loader2 className="h-3.5 w-3.5 animate-spin" /> A enviar...</>
+                            ) : (
+                              <><Upload className="h-3.5 w-3.5" /> Anexar ao Processo</>
+                            )}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    )}
+                  </Card>
+                )}
+
                 {/* Autuar action or locked state */}
                 <Card>
                   <CardContent className="py-8">
