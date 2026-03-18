@@ -563,14 +563,12 @@ export default function ChefeDivisaoProcessos() {
             </DialogHeader>
             <div className="flex-1 overflow-hidden rounded-lg border h-full flex flex-col bg-muted/20">
               {previewUrl && (
-                <object data={previewUrl} type="application/pdf" className="w-full flex-1 min-h-[55vh]">
-                  <div className="flex flex-col items-center justify-center h-full gap-4 p-8">
-                    <FileText className="h-12 w-12 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground text-center">
-                      Não foi possível pré-visualizar este documento inline.
-                    </p>
-                  </div>
-                </object>
+                <iframe
+                  src={previewUrl}
+                  className="w-full flex-1 min-h-[55vh]"
+                  title={previewName}
+                  style={{ border: "none" }}
+                />
               )}
             </div>
           </DialogContent>
