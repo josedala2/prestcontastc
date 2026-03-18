@@ -173,7 +173,7 @@ const Relatorios = () => {
   const handleExportExcel = () => {
     setExporting(true);
     try {
-      exportFullReportExcel(mockTrialBalance, [...activoNCLines, ...activoCorrenteLines], passivoLines, capitalAllLines, allCustos, allProveitos);
+      exportFullReportExcel(trialBalance, [...activoNCLines, ...activoCorrenteLines], passivoLines, capitalAllLines, allCustos, allProveitos);
       toast.success("Relatório Excel exportado com sucesso (3 folhas: Balancete, Balanço, DRE).");
     } catch (e) {
       toast.error("Erro ao exportar Excel.");
