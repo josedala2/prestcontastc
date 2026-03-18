@@ -405,6 +405,38 @@ export default function ChefeSeccaoDistribuicao() {
 
                 <div className="flex gap-3 justify-end pt-2">
                   <Button variant="outline" onClick={() => setSelectedProcesso(null)}>Cancelar</Button>
+                  <Button
+                    variant="secondary"
+                    className="gap-2"
+                    onClick={async () => {
+                      if (!selectedProcesso || !user) return;
+                      setSubmitting(true);
+                      try {
+                        await supabase.from("processos").update({
+                          tecnico_analise: user.displayName,
+                          coordenador_equipa: user.displayName,
+                          responsavel_atual: user.displayName,
+                        }).eq("id", selectedProcesso.id);
+                        await avancarEtapaProcesso({
+                          processoId: selectedProcesso.id,
+                          novaEtapa: 8,
+                          novoEstado: "em_analise",
+                          executadoPor: user.displayName,
+                          perfilExecutor: "Chefe de Secção",
+                          observacoes: "Chefe de Secção assume como técnico de análise.",
+                        });
+                        await gerarAtividadesParaEvento("validacao_aprovada", selectedProcesso.id, {
+                          categoriaEntidade: selectedProcesso.categoria_entidade,
+                        });
+                        toast.success(`Processo ${selectedProcesso.numero_processo} assumido.`);
+                        navigate(`/analise-tecnica/${selectedProcesso.id}`);
+                      } catch (err: any) {
+                        toast.error(`Erro: ${err.message}`);
+                      } finally { setSubmitting(false); }
+                    }}
+                  >
+                    <FileSearch className="h-4 w-4" /> Trabalhar como Técnico
+                  </Button>
                   <Button disabled={!canSubmit} onClick={() => setShowConfirm(true)}>
                     <Send className="h-4 w-4 mr-2" /> Distribuir à Equipa
                   </Button>
