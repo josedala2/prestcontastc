@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { useEntities } from "@/hooks/useEntities";
@@ -37,18 +38,42 @@ const Entidades = () => {
       e.nif.includes(search)
   );
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editing) {
-      setEntities((prev) =>
-        prev.map((e) => (e.id === editing.id ? { ...e, ...form } : e))
-      );
+      const { error } = await supabase.from("entities").update({
+        name: form.name,
+        nif: form.nif,
+        tutela: form.tutela || null,
+        contacto: form.contacto || null,
+        morada: form.morada || null,
+        tipologia: form.tipologia,
+        provincia: form.provincia || null,
+      }).eq("id", editing.id);
+      if (!error) {
+        setEntities((prev) =>
+          prev.map((e) => (e.id === editing.id ? { ...e, ...form } : e))
+        );
+      }
     } else {
-      const newEntity: Entity = {
-        id: Date.now().toString(),
-        ...form,
-        createdAt: new Date().toISOString().split("T")[0],
-      };
-      setEntities((prev) => [...prev, newEntity]);
+      const newId = Date.now().toString();
+      const { error } = await supabase.from("entities").insert({
+        id: newId,
+        name: form.name,
+        nif: form.nif,
+        tutela: form.tutela || null,
+        contacto: form.contacto || null,
+        morada: form.morada || null,
+        tipologia: form.tipologia,
+        provincia: form.provincia || null,
+      });
+      if (!error) {
+        const newEntity: Entity = {
+          id: newId,
+          ...form,
+          createdAt: new Date().toISOString().split("T")[0],
+        };
+        setEntities((prev) => [...prev, newEntity]);
+      }
     }
     setDialogOpen(false);
     setForm({ name: "", nif: "", tutela: "", contacto: "", morada: "", tipologia: "orgao_autonomo", provincia: "" });
@@ -187,7 +212,10 @@ const Entidades = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setEntities((prev) => prev.filter((e) => e.id !== entity.id))}
+                onClick={async () => {
+                  await supabase.from("entities").delete().eq("id", entity.id);
+                  setEntities((prev) => prev.filter((e) => e.id !== entity.id));
+                }}
               >
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>

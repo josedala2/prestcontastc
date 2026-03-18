@@ -3,7 +3,7 @@ import { PortalLayout } from "@/components/PortalLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
 // Esclarecimentos are loaded dynamically
 import { ClarificationRequest } from "@/types";
-import { getEntityShortName } from "@/data/mockData";
+import { getEntityShortName } from "@/lib/dataUtils";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";

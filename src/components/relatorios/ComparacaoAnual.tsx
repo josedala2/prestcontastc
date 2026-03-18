@@ -1,4 +1,4 @@
-import { formatKz } from "@/data/mockData";
+import { formatKz } from "@/lib/dataUtils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, ArrowRight } from "lucide-react";

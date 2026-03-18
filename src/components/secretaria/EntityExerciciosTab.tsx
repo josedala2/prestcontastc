@@ -2,7 +2,7 @@ import { FiscalYear, STATUS_LABELS } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatKz } from "@/data/mockData";
+import { formatKz } from "@/lib/dataUtils";
 import { CalendarCheck } from "lucide-react";
 
 interface EntityExerciciosTabProps {

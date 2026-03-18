@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
-import { mockAttachments, submissionChecklist } from "@/data/mockData";
+import { defaultAttachments as mockAttachments, submissionChecklist } from "@/lib/dataUtils";
 import { Attachment } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
