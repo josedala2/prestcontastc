@@ -336,7 +336,7 @@ const Exercicios = () => {
       </Dialog>
 
       {/* Abrir Exercícios por Resolução */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <AbrirExerciciosResolucao
           resolucao="resolucao_1_17"
           allEntities={allEntities}
@@ -345,6 +345,12 @@ const Exercicios = () => {
         />
         <AbrirExerciciosResolucao
           resolucao="resolucao_5_16"
+          allEntities={allEntities}
+          existingFiscalYears={fiscalYears}
+          onCreated={refreshFY}
+        />
+        <AbrirExerciciosResolucao
+          resolucao="resolucao_4_16"
           allEntities={allEntities}
           existingFiscalYears={fiscalYears}
           onCreated={refreshFY}
