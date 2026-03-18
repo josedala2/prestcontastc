@@ -151,21 +151,21 @@ export default function ChefeDivisaoProcessos() {
         URL.revokeObjectURL(previewUrl);
       }
 
-      const { data, error } = await supabase.storage
-        .from("processo-documentos")
-        .download(doc.caminho_ficheiro);
-
-      if (error) throw error;
-
       const fileExtension = doc.nome_ficheiro.split(".").pop()?.toLowerCase();
       const mimeType = fileExtension === "pdf"
         ? "application/pdf"
-        : data.type || "application/octet-stream";
-      const previewBlob = new Blob([data], { type: mimeType });
-      const objectUrl = URL.createObjectURL(previewBlob);
+        : "application/octet-stream";
+
+      const { data, error } = await supabase.storage
+        .from("processo-documentos")
+        .createSignedUrl(doc.caminho_ficheiro, 60 * 10, {
+          download: false,
+        });
+
+      if (error || !data?.signedUrl) throw error || new Error("URL assinada não gerada.");
 
       setPreviewMime(mimeType);
-      setPreviewUrl(objectUrl);
+      setPreviewUrl(data.signedUrl);
       setPreviewName(doc.nome_ficheiro);
     } catch (error) {
       console.error("Erro ao abrir preview do documento:", error);
