@@ -22,7 +22,9 @@ import {
   Building2,
   AlertTriangle,
   Scale,
+  LayoutGrid,
 } from "lucide-react";
+import { MenuPerfilMatrix } from "@/components/configuracoes/MenuPerfilMatrix";
 import { cn } from "@/lib/utils";
 
 interface ValidationRule {
