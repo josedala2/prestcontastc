@@ -47,21 +47,43 @@ async function loadImage(url: string): Promise<string> {
 }
 
 function addHeader(doc: jsPDF, brasao: string, title: string) {
-  doc.addImage(brasao, "JPEG", 80, 8, 20, 20, undefined, "FAST");
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text("REPÚBLICA DE ANGOLA", 105, 32, { align: "center" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const centerX = pageWidth / 2;
+
+  // ── Brasão centrado (mesmo modelo das actas) ──
+  const brasaoSize = 22;
+  doc.addImage(brasao, "JPEG", centerX - brasaoSize / 2, 8, brasaoSize, brasaoSize, undefined, "FAST");
+
+  // ── Header text ──
+  let y = 36;
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("TRIBUNAL DE CONTAS", centerX, y, { align: "center" });
+
+  y += 6;
   doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
-  doc.text("TRIBUNAL DE CONTAS", 105, 38, { align: "center" });
-  doc.setDrawColor(180, 160, 100);
-  doc.setLineWidth(0.5);
-  doc.line(30, 42, 180, 42);
-  doc.setFontSize(14);
-  doc.text(title, 105, 52, { align: "center" });
+  doc.text("DIRECÇÃO DOS SERVIÇOS ADMINISTRATIVOS", centerX, y, { align: "center" });
+
+  y += 5;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text("SECRETARIA GERAL", centerX, y, { align: "center" });
+
+  // ── Título do documento ──
+  y += 10;
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text(title, centerX, y, { align: "center" });
+
+  // ── Linha separadora ──
+  y += 4;
+  doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.3);
-  doc.line(60, 55, 150, 55);
-  return 62;
+  doc.line(20, y, pageWidth - 20, y);
+
+  return y + 8;
 }
 
 function addField(doc: jsPDF, label: string, value: string, y: number, x = 25): number {
