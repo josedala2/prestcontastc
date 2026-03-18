@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, DIVISOES_ESTRUTURA } from "@/contexts/AuthContext";
 import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { AppLayout } from "@/components/AppLayout";
@@ -24,6 +24,7 @@ import {
   ArrowLeft, Building2, Users, Send, CheckCircle2, Loader2, FolderOpen,
   Calendar, GitBranch, UserCheck, ClipboardList, Search, FileText, Eye,
   Download, File, FileSpreadsheet, FileImage, ShieldCheck, Clock, AlertCircle,
+  Wrench, Forward,
 } from "lucide-react";
 
 interface Processo {
@@ -55,30 +56,13 @@ interface DocItem {
   observacoes: string | null;
 }
 
-const DIVISOES = [
-  "1.ª Divisão — Órgãos de Soberania",
-  "2.ª Divisão — Administração Central",
-  "3.ª Divisão — Administração Local",
-  "4.ª Divisão — Sector Empresarial Público",
-];
-
-const SECCOES: Record<string, string[]> = {
-  "1.ª Divisão — Órgãos de Soberania": ["Secção A — Presidência e Assembleia", "Secção B — Ministérios I", "Secção C — Ministérios II"],
-  "2.ª Divisão — Administração Central": ["Secção A — Institutos Públicos", "Secção B — Fundos Autónomos", "Secção C — Serviços Integrados"],
-  "3.ª Divisão — Administração Local": ["Secção A — Governos Provinciais", "Secção B — Administrações Municipais"],
-  "4.ª Divisão — Sector Empresarial Público": ["Secção A — Empresas Públicas", "Secção B — Sociedades Comerciais do Estado"],
-};
-
-const COORDENADORES = [
-  "Dr. Carlos Mendes",
-  "Dra. Isabel Fernandes",
-  "Dr. Ricardo Sousa",
-  "Dra. Marta Oliveira",
-  "Dr. José Tavares",
-];
+type ActionMode = "seccao" | "tecnico" | null;
 
 export default function ChefeDivisaoProcessos() {
   const { user } = useAuth();
+  const divisao = user?.divisao || "3ª Divisão";
+  const divisaoNome = DIVISOES_ESTRUTURA[divisao]?.nome || divisao;
+  const seccoesDivisao = DIVISOES_ESTRUTURA[divisao]?.seccoes || [];
   const executadoPor = user?.displayName || "Chefe de Divisão";
 
   const [processos, setProcessos] = useState<Processo[]>([]);
@@ -87,12 +71,17 @@ export default function ChefeDivisaoProcessos() {
   const [acting, setActing] = useState(false);
   const [search, setSearch] = useState("");
 
-  // Assignment form
-  const [divisao, setDivisao] = useState("");
+  // Action mode
+  const [actionMode, setActionMode] = useState<ActionMode>(null);
+
+  // Send to Secção form
   const [seccao, setSeccao] = useState("");
-  const [coordenador, setCoordenador] = useState("");
   const [observacoes, setObservacoes] = useState("");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+
+  // Work as Técnico form
+  const [tecnicoObs, setTecnicoObs] = useState("");
+  const [confirmTecnico, setConfirmTecnico] = useState(false);
 
   // Documents
   const [documentos, setDocumentos] = useState<DocItem[]>([]);
@@ -101,16 +90,10 @@ export default function ChefeDivisaoProcessos() {
   const [previewName, setPreviewName] = useState("");
   const [previewMime, setPreviewMime] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchProcessos();
-  }, []);
+  useEffect(() => { fetchProcessos(); }, [divisao]);
 
   useEffect(() => {
-    return () => {
-      if (previewUrl?.startsWith("blob:")) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
+    return () => { if (previewUrl?.startsWith("blob:")) URL.revokeObjectURL(previewUrl); };
   }, [previewUrl]);
 
   const fetchProcessos = async () => {
@@ -119,6 +102,7 @@ export default function ChefeDivisaoProcessos() {
       .from("processos")
       .select("*")
       .eq("etapa_atual", 6)
+      .eq("divisao_competente", divisaoNome)
       .order("created_at", { ascending: false });
     setProcessos((data as any[]) || []);
     setLoading(false);
@@ -131,72 +115,131 @@ export default function ChefeDivisaoProcessos() {
       .select("*")
       .eq("processo_id", processoId)
       .order("created_at", { ascending: true });
-    
-    // Sort: Capa do Processo first
     const docs = (data as DocItem[]) || [];
     const capaIdx = docs.findIndex(d => d.tipo_documento === "Capa do Processo");
-    if (capaIdx > 0) {
-      const [capa] = docs.splice(capaIdx, 1);
-      docs.unshift(capa);
-    }
+    if (capaIdx > 0) { const [capa] = docs.splice(capaIdx, 1); docs.unshift(capa); }
     setDocumentos(docs);
     setLoadingDocs(false);
   };
 
   const handlePreview = async (doc: DocItem) => {
     if (!doc.caminho_ficheiro) return;
-
     try {
-      if (previewUrl?.startsWith("blob:")) {
-        URL.revokeObjectURL(previewUrl);
-      }
-
-      const fileExtension = doc.nome_ficheiro.split(".").pop()?.toLowerCase();
-      const mimeType = fileExtension === "pdf"
-        ? "application/pdf"
-        : "application/octet-stream";
-
+      if (previewUrl?.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
+      const ext = doc.nome_ficheiro.split(".").pop()?.toLowerCase();
+      const mime = ext === "pdf" ? "application/pdf" : "application/octet-stream";
       const { data, error } = await supabase.storage
         .from("processo-documentos")
-        .createSignedUrl(doc.caminho_ficheiro, 60 * 10, {
-          download: false,
-        });
-
-      if (error || !data?.signedUrl) throw error || new Error("URL assinada não gerada.");
-
-      setPreviewMime(mimeType);
+        .createSignedUrl(doc.caminho_ficheiro, 600, { download: false });
+      if (error || !data?.signedUrl) throw error || new Error("URL não gerada.");
+      setPreviewMime(mime);
       setPreviewUrl(data.signedUrl);
       setPreviewName(doc.nome_ficheiro);
-    } catch (error) {
-      console.error("Erro ao abrir preview do documento:", error);
-      toast.error("Não foi possível abrir o documento online.");
+    } catch {
+      toast.error("Não foi possível abrir o documento.");
     }
   };
 
   const handleDownload = async (doc: DocItem) => {
     if (!doc.caminho_ficheiro) return;
-
     try {
-      const { data, error } = await supabase.storage
-        .from("processo-documentos")
-        .download(doc.caminho_ficheiro);
-
+      const { data, error } = await supabase.storage.from("processo-documentos").download(doc.caminho_ficheiro);
       if (error) throw error;
-
-      const objectUrl = URL.createObjectURL(data);
-      const link = document.createElement("a");
-      link.href = objectUrl;
-      link.download = doc.nome_ficheiro;
-      link.target = "_blank";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
-    } catch (error) {
-      console.error("Erro ao descarregar documento:", error);
+      const url = URL.createObjectURL(data);
+      const a = document.createElement("a");
+      a.href = url; a.download = doc.nome_ficheiro; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
       toast.error("Não foi possível descarregar o documento.");
     }
   };
+
+  const handleSelectProcesso = (p: Processo) => {
+    setSelectedProcesso(p);
+    setActionMode(null);
+    setSeccao("");
+    setObservacoes("");
+    setTecnicoObs("");
+    fetchDocumentos(p.id);
+  };
+
+  /* ── Action: Send to Chefe de Secção ── */
+  const handleEnviarSeccao = async () => {
+    if (!selectedProcesso) return;
+    setActing(true);
+    try {
+      await supabase.from("processos").update({
+        seccao_competente: seccao,
+        responsavel_atual: `Chefe de Secção — ${divisao}`,
+      }).eq("id", selectedProcesso.id);
+
+      await avancarEtapaProcesso({
+        processoId: selectedProcesso.id,
+        novaEtapa: 7,
+        novoEstado: "em_distribuicao",
+        executadoPor,
+        perfilExecutor: "Chefe de Divisão",
+        observacoes: `Encaminhado à secção: ${seccao}. ${observacoes}`.trim(),
+      });
+
+      await gerarAtividadesParaEvento("validacao_aprovada", selectedProcesso.id, {
+        categoriaEntidade: selectedProcesso.categoria_entidade,
+      });
+
+      toast.success(`Processo ${selectedProcesso.numero_processo} encaminhado ao Chefe de Secção.`);
+      setSelectedProcesso(null);
+      setConfirmDialogOpen(false);
+      fetchProcessos();
+    } catch (err: any) {
+      toast.error(`Erro: ${err.message}`);
+    } finally {
+      setActing(false);
+    }
+  };
+
+  /* ── Action: Work as Técnico (self-assign, advance to analysis) ── */
+  const handleTrabalharComoTecnico = async () => {
+    if (!selectedProcesso) return;
+    setActing(true);
+    try {
+      await supabase.from("processos").update({
+        tecnico_analise: executadoPor,
+        coordenador_equipa: executadoPor,
+        responsavel_atual: executadoPor,
+      }).eq("id", selectedProcesso.id);
+
+      await avancarEtapaProcesso({
+        processoId: selectedProcesso.id,
+        novaEtapa: 8,
+        novoEstado: "em_analise",
+        executadoPor,
+        perfilExecutor: "Chefe de Divisão",
+        observacoes: `Chefe de Divisão assume como técnico. ${tecnicoObs}`.trim(),
+      });
+
+      await gerarAtividadesParaEvento("validacao_aprovada", selectedProcesso.id, {
+        categoriaEntidade: selectedProcesso.categoria_entidade,
+      });
+
+      toast.success(`Processo ${selectedProcesso.numero_processo} assumido como técnico.`);
+      setSelectedProcesso(null);
+      setConfirmTecnico(false);
+      fetchProcessos();
+    } catch (err: any) {
+      toast.error(`Erro: ${err.message}`);
+    } finally {
+      setActing(false);
+    }
+  };
+
+  const filteredProcessos = processos.filter(p => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return p.numero_processo.toLowerCase().includes(q) || p.entity_name.toLowerCase().includes(q);
+  });
+
+  const formatDate = (iso: string) => new Date(iso).toLocaleDateString("pt-AO");
+  const urgenciaColor = (u: string) => u === "urgente" ? "destructive" : u === "alta" ? "default" : "secondary";
 
   const getDocIcon = (nome: string) => {
     const ext = nome.split(".").pop()?.toLowerCase();
@@ -214,7 +257,6 @@ export default function ChefeDivisaoProcessos() {
       XLS: "bg-emerald-500/10 text-emerald-700 border-emerald-500/20",
       PNG: "bg-sky-500/10 text-sky-700 border-sky-500/20",
       JPG: "bg-sky-500/10 text-sky-700 border-sky-500/20",
-      JPEG: "bg-sky-500/10 text-sky-700 border-sky-500/20",
     };
     return (
       <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-bold border ${colors[ext] || "bg-muted text-muted-foreground border-border"}`}>
@@ -224,195 +266,55 @@ export default function ChefeDivisaoProcessos() {
   };
 
   const getEstadoIndicator = (estado: string) => {
-    if (estado === "validado") {
-      return (
-        <div className="flex items-center gap-1.5">
-          <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-          <span className="text-[10px] font-semibold text-emerald-700">Validado</span>
-        </div>
-      );
-    }
-    if (estado === "pendente") {
-      return (
-        <div className="flex items-center gap-1.5">
-          <Clock className="h-3.5 w-3.5 text-amber-500" />
-          <span className="text-[10px] font-semibold text-amber-600">Pendente</span>
-        </div>
-      );
-    }
-    if (estado === "rejeitado") {
-      return (
-        <div className="flex items-center gap-1.5">
-          <AlertCircle className="h-3.5 w-3.5 text-destructive" />
-          <span className="text-[10px] font-semibold text-destructive">Rejeitado</span>
-        </div>
-      );
-    }
-    return (
-      <div className="flex items-center gap-1.5">
-        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-        <span className="text-[10px] font-semibold text-muted-foreground capitalize">{estado}</span>
-      </div>
-    );
-  };
-
-  const handleSelectProcesso = (p: Processo) => {
-    setSelectedProcesso(p);
-    setDivisao(p.divisao_competente || "");
-    setSeccao(p.seccao_competente || "");
-    setCoordenador(p.coordenador_equipa || "");
-    setObservacoes("");
-    fetchDocumentos(p.id);
-  };
-
-  const handleEncaminhar = async () => {
-    if (!selectedProcesso) return;
-    setActing(true);
-    try {
-      // 1. Update processo with divisão, secção, coordenador
-      const { error: updateErr } = await supabase
-        .from("processos")
-        .update({
-          divisao_competente: divisao,
-          seccao_competente: seccao,
-          coordenador_equipa: coordenador,
-          responsavel_atual: coordenador || executadoPor,
-        })
-        .eq("id", selectedProcesso.id);
-
-      if (updateErr) throw updateErr;
-
-      // 2. Advance to stage 7 (Secção Competente)
-      await avancarEtapaProcesso({
-        processoId: selectedProcesso.id,
-        novaEtapa: 7,
-        novoEstado: "em_analise",
-        executadoPor,
-        perfilExecutor: "Chefe de Divisão",
-        observacoes: `Processo encaminhado à ${divisao} / ${seccao}. Coordenador: ${coordenador}. ${observacoes}`.trim(),
-      });
-
-      // 3. Generate activities for the next stage
-      await gerarAtividadesParaEvento(
-        "validacao_aprovada",
-        selectedProcesso.id,
-        { categoriaEntidade: selectedProcesso.categoria_entidade }
-      );
-
-      toast.success(`Processo ${selectedProcesso.numero_processo} encaminhado à secção competente.`);
-      setSelectedProcesso(null);
-      fetchProcessos();
-    } catch (err: any) {
-      toast.error(`Erro: ${err.message}`);
-    } finally {
-      setActing(false);
-      setConfirmDialogOpen(false);
-    }
-  };
-
-  const canEncaminhar = divisao && seccao && coordenador;
-
-  const filteredProcessos = processos.filter(p => {
-    if (!search.trim()) return true;
-    const q = search.toLowerCase();
-    return p.numero_processo.toLowerCase().includes(q) || p.entity_name.toLowerCase().includes(q);
-  });
-
-  const formatDate = (iso: string) => new Date(iso).toLocaleDateString("pt-AO");
-
-  const urgenciaColor = (u: string) => {
-    if (u === "urgente") return "destructive";
-    if (u === "alta") return "default";
-    return "secondary";
+    if (estado === "validado") return <div className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /><span className="text-[10px] font-semibold text-emerald-700">Validado</span></div>;
+    if (estado === "pendente") return <div className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 text-amber-500" /><span className="text-[10px] font-semibold text-amber-600">Pendente</span></div>;
+    if (estado === "rejeitado") return <div className="flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5 text-destructive" /><span className="text-[10px] font-semibold text-destructive">Rejeitado</span></div>;
+    return <div className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 text-muted-foreground" /><span className="text-[10px] font-semibold text-muted-foreground capitalize">{estado}</span></div>;
   };
 
   // ──── Detail View ────
   if (selectedProcesso) {
-    const availableSeccoes = SECCOES[divisao] || [];
-
     return (
       <AppLayout>
-        <div className="space-y-6">
+        <div className="max-w-5xl mx-auto space-y-6">
           <Button variant="ghost" className="gap-2 text-sm" onClick={() => setSelectedProcesso(null)}>
             <ArrowLeft className="h-4 w-4" /> Voltar à lista
           </Button>
 
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <h1 className="text-xl font-bold flex items-center gap-2">
                 <GitBranch className="h-5 w-5 text-primary" />
-                Encaminhamento — {selectedProcesso.numero_processo}
+                {selectedProcesso.numero_processo}
               </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Receba o processo e encaminhe à secção competente, nomeando o coordenador de equipa.
-              </p>
+              <p className="text-sm text-muted-foreground mt-1">{divisaoNome}</p>
             </div>
-            <Badge variant={urgenciaColor(selectedProcesso.urgencia)} className="text-xs">
-              {selectedProcesso.urgencia === "urgente" ? "URGENTE" : selectedProcesso.urgencia === "alta" ? "Alta Prioridade" : "Normal"}
+            <Badge variant={urgenciaColor(selectedProcesso.urgencia) as any}>
+              {selectedProcesso.urgencia}
             </Badge>
           </div>
 
           {/* Process Info */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-primary" />
-                Dados do Processo
-              </CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Building2 className="h-4 w-4 text-primary" /> Dados do Processo</CardTitle></CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground text-xs">Entidade</span>
-                  <p className="font-medium">{selectedProcesso.entity_name}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground text-xs">Exercício</span>
-                  <p className="font-medium">{selectedProcesso.ano_gerencia}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground text-xs">Data Submissão</span>
-                  <p className="font-medium">{formatDate(selectedProcesso.data_submissao)}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground text-xs">Completude</span>
-                  <p className="font-medium">{selectedProcesso.completude_documental}%</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground text-xs">Canal</span>
-                  <p className="font-medium capitalize">{selectedProcesso.canal_entrada}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground text-xs">Categoria</span>
-                  <p className="font-medium">{selectedProcesso.categoria_entidade.replace("_", " ")}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground text-xs">Estado</span>
-                  <Badge variant="outline" className="text-[10px]">{selectedProcesso.estado}</Badge>
-                </div>
-                <div>
-                  <span className="text-muted-foreground text-xs">Etapa</span>
-                  <Badge className="text-[10px] bg-primary">Etapa 6 — Divisão Competente</Badge>
-                </div>
+                <div><span className="text-muted-foreground text-xs">Entidade</span><p className="font-medium">{selectedProcesso.entity_name}</p></div>
+                <div><span className="text-muted-foreground text-xs">Exercício</span><p className="font-medium">{selectedProcesso.ano_gerencia}</p></div>
+                <div><span className="text-muted-foreground text-xs">Categoria</span><Badge variant="outline" className="text-[10px]">{selectedProcesso.categoria_entidade.replace(/_/g, " ")}</Badge></div>
+                <div><span className="text-muted-foreground text-xs">Completude</span><p className="font-medium">{selectedProcesso.completude_documental}%</p></div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Documentos do Processo */}
+          {/* Documents */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2">
-                <FileText className="h-4 w-4 text-primary" />
-                Documentos do Processo ({documentos.length})
-              </CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-sm flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Documentos ({documentos.length})</CardTitle></CardHeader>
             <CardContent>
               {loadingDocs ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                </div>
+                <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
               ) : documentos.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">Nenhum documento associado a este processo.</p>
+                <p className="text-sm text-muted-foreground text-center py-6">Nenhum documento.</p>
               ) : (
                 <div className="border rounded-lg overflow-hidden">
                   <Table>
@@ -429,7 +331,7 @@ export default function ChefeDivisaoProcessos() {
                     <TableBody>
                       {documentos.map((doc, idx) => (
                         <TableRow key={doc.id} className="group">
-                          <TableCell className="text-xs text-muted-foreground font-mono w-8">{idx + 1}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground font-mono">{idx + 1}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2.5">
                               {getDocIcon(doc.nome_ficheiro)}
@@ -444,23 +346,13 @@ export default function ChefeDivisaoProcessos() {
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-[10px] font-normal">{doc.tipo_documento}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            {getEstadoIndicator(doc.estado)}
-                          </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">
-                            {new Date(doc.created_at).toLocaleDateString("pt-AO")}
-                          </TableCell>
+                          <TableCell><Badge variant="outline" className="text-[10px]">{doc.tipo_documento}</Badge></TableCell>
+                          <TableCell>{getEstadoIndicator(doc.estado)}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground">{new Date(doc.created_at).toLocaleDateString("pt-AO")}</TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-1">
-                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 opacity-70 group-hover:opacity-100" onClick={() => handlePreview(doc)} title="Visualizar">
-                                <Eye className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 opacity-70 group-hover:opacity-100" onClick={() => handleDownload(doc)} title="Descarregar">
-                                <Download className="h-3.5 w-3.5" />
-                              </Button>
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 opacity-70 group-hover:opacity-100" onClick={() => handlePreview(doc)}><Eye className="h-3.5 w-3.5" /></Button>
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 opacity-70 group-hover:opacity-100" onClick={() => handleDownload(doc)}><Download className="h-3.5 w-3.5" /></Button>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -472,204 +364,188 @@ export default function ChefeDivisaoProcessos() {
             </CardContent>
           </Card>
 
-          {/* Assignment Form */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" />
-                Encaminhamento e Nomeação
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold">Divisão Competente *</Label>
-                  <Select value={divisao} onValueChange={(v) => { setDivisao(v); setSeccao(""); }}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar divisão" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DIVISOES.map(d => (
-                        <SelectItem key={d} value={d}>{d}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+          {/* Action Choice */}
+          {!actionMode && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" /> Decidir Acção
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Escolha como proceder com este processo:
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <button
+                    onClick={() => setActionMode("seccao")}
+                    className="flex flex-col items-center gap-3 p-6 rounded-lg border-2 border-dashed hover:border-primary hover:bg-primary/5 transition-all text-center group"
+                  >
+                    <Forward className="h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <div>
+                      <p className="font-semibold text-sm">Enviar ao Chefe de Secção</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Encaminhe à secção competente para distribuição e formação de equipa.
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setActionMode("tecnico")}
+                    className="flex flex-col items-center gap-3 p-6 rounded-lg border-2 border-dashed hover:border-primary hover:bg-primary/5 transition-all text-center group"
+                  >
+                    <Wrench className="h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <div>
+                      <p className="font-semibold text-sm">Trabalhar como Técnico</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Assuma o processo directamente para análise técnica.
+                      </p>
+                    </div>
+                  </button>
                 </div>
+              </CardContent>
+            </Card>
+          )}
 
+          {/* Mode: Send to Secção */}
+          {actionMode === "seccao" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Forward className="h-4 w-4 text-primary" /> Encaminhar ao Chefe de Secção
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-xs font-semibold">Secção Competente *</Label>
-                  <Select value={seccao} onValueChange={setSeccao} disabled={!divisao}>
+                  <Select value={seccao} onValueChange={setSeccao}>
                     <SelectTrigger>
-                      <SelectValue placeholder={divisao ? "Seleccionar secção" : "Seleccione uma divisão"} />
+                      <SelectValue placeholder="Seleccionar secção" />
                     </SelectTrigger>
                     <SelectContent>
-                      {availableSeccoes.map(s => (
+                      {seccoesDivisao.map(s => (
                         <SelectItem key={s} value={s}>{s}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold">Coordenador de Equipa *</Label>
-                  <Select value={coordenador} onValueChange={setCoordenador}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nomear coordenador" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {COORDENADORES.map(c => (
-                        <SelectItem key={c} value={c}>{c}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label className="text-xs font-semibold">Observações</Label>
+                  <Textarea value={observacoes} onChange={e => setObservacoes(e.target.value)} placeholder="Instruções para o Chefe de Secção..." rows={3} />
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold">Observações</Label>
-                <Textarea
-                  placeholder="Instruções adicionais para o coordenador de equipa..."
-                  value={observacoes}
-                  onChange={(e) => setObservacoes(e.target.value)}
-                  rows={3}
-                />
-              </div>
-
-              {/* Summary */}
-              {canEncaminhar && (
-                <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-2">
-                  <h4 className="text-xs font-semibold text-primary flex items-center gap-1.5">
-                    <ClipboardList className="h-3.5 w-3.5" /> Resumo do Encaminhamento
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-                    <div>
-                      <span className="text-muted-foreground text-[10px]">Divisão</span>
-                      <p className="font-medium text-xs">{divisao}</p>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground text-[10px]">Secção</span>
-                      <p className="font-medium text-xs">{seccao}</p>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground text-[10px]">Coordenador</span>
-                      <p className="font-medium text-xs">{coordenador}</p>
-                    </div>
+                {seccao && (
+                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-3 text-sm">
+                    <p className="text-xs font-semibold text-primary mb-1">Resumo</p>
+                    <p>Secção: <strong>{seccao}</strong></p>
+                    <p className="text-xs text-muted-foreground mt-1">O processo será encaminhado ao Chefe de Secção para formação de equipa (Etapa 7).</p>
                   </div>
-                </div>
-              )}
+                )}
 
-              <div className="flex justify-end gap-3 pt-2">
-                <Button variant="outline" onClick={() => setSelectedProcesso(null)}>
-                  Cancelar
-                </Button>
-                <Button
-                  disabled={!canEncaminhar || acting}
-                  className="gap-2"
-                  onClick={() => setConfirmDialogOpen(true)}
-                >
-                  {acting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  Encaminhar à Secção
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="flex gap-3 justify-end pt-2">
+                  <Button variant="outline" onClick={() => setActionMode(null)}>Voltar</Button>
+                  <Button disabled={!seccao || acting} onClick={() => setConfirmDialogOpen(true)}>
+                    {acting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+                    Encaminhar à Secção
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Mode: Work as Técnico */}
+          {actionMode === "tecnico" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Wrench className="h-4 w-4 text-primary" /> Assumir como Técnico
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-sm">
+                  <p className="font-semibold text-amber-700 text-xs mb-1">Atenção</p>
+                  <p className="text-xs text-amber-700">Ao assumir como técnico, o processo avança directamente para a Etapa 8 — Análise Técnica, sob sua responsabilidade.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">Observações</Label>
+                  <Textarea value={tecnicoObs} onChange={e => setTecnicoObs(e.target.value)} placeholder="Justificação ou notas..." rows={3} />
+                </div>
+                <div className="flex gap-3 justify-end pt-2">
+                  <Button variant="outline" onClick={() => setActionMode(null)}>Voltar</Button>
+                  <Button onClick={() => setConfirmTecnico(true)} disabled={acting}>
+                    {acting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Wrench className="h-4 w-4 mr-2" />}
+                    Assumir Processo
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
-        {/* Confirmation Dialog */}
+        {/* Confirm: Send to Secção */}
         <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center gap-2">
-                <Send className="h-4 w-4 text-primary" /> Confirmar Encaminhamento
-              </AlertDialogTitle>
-              <AlertDialogDescription className="space-y-2">
-                <p>Confirma o encaminhamento do processo <strong>{selectedProcesso?.numero_processo}</strong>?</p>
-                <div className="mt-3 rounded bg-muted/50 p-3 text-sm space-y-1">
-                  <p><strong>Divisão:</strong> {divisao}</p>
-                  <p><strong>Secção:</strong> {seccao}</p>
-                  <p><strong>Coordenador:</strong> {coordenador}</p>
+              <AlertDialogTitle className="flex items-center gap-2"><Send className="h-4 w-4 text-primary" /> Confirmar Encaminhamento</AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-2 text-sm">
+                  <p>Confirma o encaminhamento de <strong>{selectedProcesso?.numero_processo}</strong>?</p>
+                  <div className="rounded bg-muted/50 p-3 space-y-1">
+                    <p><strong>Secção:</strong> {seccao}</p>
+                    <p><strong>Divisão:</strong> {divisaoNome}</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Avançará para Etapa 7 — Secção Competente.</p>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  O processo avançará para a Etapa 7 — Secção Competente.
-                </p>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={handleEncaminhar} disabled={acting}>
+              <AlertDialogAction onClick={handleEnviarSeccao} disabled={acting}>
                 {acting ? "A processar..." : "Confirmar e Encaminhar"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Document Preview Dialog */}
-        <Dialog
-          open={!!previewUrl}
-          onOpenChange={(open) => {
-            if (!open && previewUrl?.startsWith("blob:")) {
-              URL.revokeObjectURL(previewUrl);
-            }
-            if (!open) {
-              setPreviewUrl(null);
-              setPreviewName("");
-              setPreviewMime(null);
-            }
-          }}
-        >
+        {/* Confirm: Work as Técnico */}
+        <AlertDialog open={confirmTecnico} onOpenChange={setConfirmTecnico}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2"><Wrench className="h-4 w-4 text-primary" /> Confirmar Assunção</AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-2 text-sm">
+                  <p>Confirma que assume o processo <strong>{selectedProcesso?.numero_processo}</strong> como técnico?</p>
+                  <p className="text-xs text-muted-foreground">Avançará directamente para Etapa 8 — Análise Técnica.</p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleTrabalharComoTecnico} disabled={acting}>
+                {acting ? "A processar..." : "Confirmar e Assumir"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Document Preview */}
+        <Dialog open={!!previewUrl} onOpenChange={(open) => {
+          if (!open) { if (previewUrl?.startsWith("blob:")) URL.revokeObjectURL(previewUrl); setPreviewUrl(null); setPreviewName(""); setPreviewMime(null); }
+        }}>
           <DialogContent className="max-w-4xl h-[80vh]">
-            <div className="space-y-1.5 text-center sm:text-left">
-              <DialogTitle className="text-sm flex items-center gap-2">
-                <Eye className="h-4 w-4 text-primary" /> {previewName}
-              </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
-                Pré-visualização online do documento seleccionado do processo. Se o navegador não renderizar o PDF no painel, use “Abrir em nova aba”.
-              </DialogDescription>
-            </div>
+            <div className="space-y-1.5"><DialogTitle className="text-sm flex items-center gap-2"><Eye className="h-4 w-4 text-primary" /> {previewName}</DialogTitle><DialogDescription className="text-xs text-muted-foreground">Pré-visualização do documento.</DialogDescription></div>
             <div className="flex-1 overflow-hidden rounded-lg border h-full flex flex-col bg-muted/20">
               {previewUrl && previewMime === "application/pdf" ? (
-                <object
-                  key={previewUrl}
-                  data={previewUrl}
-                  type="application/pdf"
-                  className="w-full flex-1 min-h-[55vh]"
-                >
+                <object key={previewUrl} data={previewUrl} type="application/pdf" className="w-full flex-1 min-h-[55vh]">
                   <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
                     <FileText className="h-12 w-12 text-muted-foreground/40" />
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-foreground">O navegador não suporta pré-visualização de PDF embutida</p>
-                      <p className="text-xs text-muted-foreground">O documento será aberto numa nova aba automaticamente.</p>
-                    </div>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      className="gap-1.5"
-                      onClick={() => previewUrl && window.open(previewUrl, "_blank", "noopener,noreferrer")}
-                    >
-                      <Download className="h-3.5 w-3.5" /> Abrir PDF em nova aba
-                    </Button>
+                    <p className="text-sm font-medium">O navegador não suporta PDF embutido</p>
+                    <Button variant="default" size="sm" onClick={() => previewUrl && window.open(previewUrl, "_blank")}><Download className="h-3.5 w-3.5 mr-1" /> Abrir em nova aba</Button>
                   </div>
                 </object>
-              ) : previewUrl ? (
-                <iframe
-                  key={previewUrl}
-                  src={previewUrl}
-                  className="w-full flex-1 min-h-[55vh]"
-                  title={previewName}
-                  style={{ border: "none" }}
-                />
-              ) : null}
+              ) : previewUrl ? <iframe key={previewUrl} src={previewUrl} className="w-full flex-1 min-h-[55vh]" title={previewName} style={{ border: "none" }} /> : null}
             </div>
-            <div className="flex items-center justify-end gap-2 border-t border-border px-3 py-2 bg-background">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                onClick={() => previewUrl && window.open(previewUrl, "_blank", "noopener,noreferrer")}
-                disabled={!previewUrl}
-              >
-                <Download className="h-3.5 w-3.5" /> Abrir em nova aba
-              </Button>
+            <div className="flex justify-end gap-2 border-t px-3 py-2">
+              <Button variant="outline" size="sm" onClick={() => previewUrl && window.open(previewUrl, "_blank")} disabled={!previewUrl}><Download className="h-3.5 w-3.5 mr-1" /> Abrir em nova aba</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -680,14 +556,14 @@ export default function ChefeDivisaoProcessos() {
   // ──── List View ────
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6">
         <div>
-          <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
+          <h1 className="text-xl font-bold flex items-center gap-2">
             <GitBranch className="h-5 w-5 text-primary" />
-            Divisão Competente — Etapa 6
+            Divisão Competente — {divisaoNome}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Receba os processos autuados e encaminhe à secção competente, nomeando o coordenador de equipa.
+            Receba os processos e decida: trabalhar como técnico ou encaminhar ao Chefe de Secção.
           </p>
         </div>
 
@@ -697,7 +573,7 @@ export default function ChefeDivisaoProcessos() {
             <CardContent className="pt-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Aguardam Encaminhamento</p>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Aguardam Decisão</p>
                   <p className="text-2xl font-bold text-primary mt-1">{processos.length}</p>
                 </div>
                 <FolderOpen className="h-8 w-8 text-primary/20" />
@@ -723,7 +599,7 @@ export default function ChefeDivisaoProcessos() {
                 <div>
                   <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Perfil</p>
                   <p className="text-sm font-medium mt-1">{executadoPor}</p>
-                  <p className="text-[10px] text-muted-foreground">Chefe de Divisão</p>
+                  <p className="text-[10px] text-muted-foreground">Chefe de Divisão · {divisao}</p>
                 </div>
                 <UserCheck className="h-8 w-8 text-muted-foreground/20" />
               </div>
@@ -734,25 +610,18 @@ export default function ChefeDivisaoProcessos() {
         {/* Search */}
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Pesquisar por nº processo ou entidade..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
+          <Input placeholder="Pesquisar..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
         </div>
 
         {/* Table */}
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
+          <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
         ) : filteredProcessos.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
-              <CheckCircle2 className="h-10 w-10 mx-auto text-success/40 mb-3" />
+              <CheckCircle2 className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
               <p className="text-sm text-muted-foreground">
-                {search ? "Nenhum processo encontrado." : "Não existem processos pendentes de encaminhamento."}
+                {search ? "Nenhum processo encontrado." : "Não existem processos pendentes nesta divisão."}
               </p>
             </CardContent>
           </Card>
@@ -767,31 +636,21 @@ export default function ChefeDivisaoProcessos() {
                     <TableHead className="text-xs">Exercício</TableHead>
                     <TableHead className="text-xs">Categoria</TableHead>
                     <TableHead className="text-xs">Urgência</TableHead>
-                    <TableHead className="text-xs">Data Submissão</TableHead>
+                    <TableHead className="text-xs">Data</TableHead>
                     <TableHead className="text-xs text-right">Acção</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredProcessos.map((p) => (
+                  {filteredProcessos.map(p => (
                     <TableRow key={p.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleSelectProcesso(p)}>
                       <TableCell className="font-mono text-xs font-medium">{p.numero_processo}</TableCell>
                       <TableCell className="text-sm">{p.entity_name}</TableCell>
                       <TableCell className="text-sm">{p.ano_gerencia}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-[10px]">
-                          {p.categoria_entidade.replace("_", " ")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={urgenciaColor(p.urgencia)} className="text-[10px]">
-                          {p.urgencia}
-                        </Badge>
-                      </TableCell>
+                      <TableCell><Badge variant="outline" className="text-[10px]">{p.categoria_entidade.replace(/_/g, " ")}</Badge></TableCell>
+                      <TableCell><Badge variant={urgenciaColor(p.urgencia) as any} className="text-[10px]">{p.urgencia}</Badge></TableCell>
                       <TableCell className="text-xs text-muted-foreground">{formatDate(p.data_submissao)}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-                          <GitBranch className="h-3 w-3" /> Encaminhar
-                        </Button>
+                        <Button variant="outline" size="sm" className="gap-1.5 text-xs"><GitBranch className="h-3 w-3" /> Abrir</Button>
                       </TableCell>
                     </TableRow>
                   ))}
