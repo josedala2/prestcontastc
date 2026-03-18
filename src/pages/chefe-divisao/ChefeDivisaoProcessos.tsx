@@ -589,7 +589,11 @@ export default function ChefeDivisaoProcessos() {
                   title={previewName}
                   style={{ border: "none" }}
                 />
-              ) : null}
+                <div className="flex items-center justify-end gap-2 border-t border-border px-3 py-2 bg-background">
+                  <Button variant="outline" size="sm" className="gap-1.5" onClick={() => previewUrl && window.open(previewUrl, "_blank", "noopener,noreferrer")}>
+                    <Download className="h-3.5 w-3.5" /> Abrir em nova aba
+                  </Button>
+                </div>
             </div>
           </DialogContent>
         </Dialog>
