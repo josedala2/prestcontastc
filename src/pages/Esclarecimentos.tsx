@@ -113,7 +113,8 @@ const Esclarecimentos = () => {
   const handleCreateRequest = () => {
     if (!newSubject.trim() || !newBody.trim() || !newEntity) return;
 
-    const fy = mockFiscalYears.find((f) => f.id === newEntity);
+    // Create a clarification request (placeholder - no FY lookup needed)
+    const fy = { entityName: newEntity, year: 2024 } as any;
     if (!fy) return;
 
     const deadline = new Date();
