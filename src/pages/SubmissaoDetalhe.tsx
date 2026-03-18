@@ -152,10 +152,11 @@ const SubmissaoDetalhe = () => {
       setDocPreviewLoading(true);
       setDocPreview({ label, category });
       try {
-        const { data } = supabase.storage
+        const { data, error } = await supabase.storage
           .from("submission-documents")
-          .getPublicUrl(subDoc.file_path);
-        setDocPreviewUrl(data.publicUrl);
+          .download(subDoc.file_path);
+        if (error || !data) { setDocPreviewUrl(null); }
+        else { setDocPreviewUrl(URL.createObjectURL(data)); }
       } catch {
         setDocPreviewUrl(null);
       }
@@ -167,10 +168,18 @@ const SubmissaoDetalhe = () => {
   };
 
   const handleDownloadDoc = async (subDoc: SubmissionDoc) => {
-    const { data } = supabase.storage
-      .from("submission-documents")
-      .getPublicUrl(subDoc.file_path);
-    window.open(data.publicUrl, "_blank");
+    try {
+      const { data, error } = await supabase.storage.from("submission-documents").download(subDoc.file_path);
+      if (error || !data) return;
+      const url = URL.createObjectURL(data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = subDoc.file_name;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error("Erro ao descarregar documento.");
+    }
   };
 
   const now = new Date();
