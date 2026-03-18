@@ -76,7 +76,7 @@ const Secretaria = () => {
   const [encaminhando, setEncaminhando] = useState<string | null>(null);
 
   const handleEncaminharValidacao = async (fyId: string) => {
-    const fy = submetidos.find((f) => f.id === fyId) || mockFiscalYears.find((f) => f.id === fyId);
+    const fy = submetidos.find((f) => f.id === fyId) || allFYs.find((f) => f.id === fyId);
     const entity = fy ? allEntities.find((e) => e.id === fy.entityId) : null;
     if (!fy || !entity) return;
 
