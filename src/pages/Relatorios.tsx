@@ -48,7 +48,7 @@ const Relatorios = () => {
   // Classe 3 — Classificação por saldo: devedores → Activo, credores → Passivo
   // Excepção: conta 38 (provisão cobrança duvidosa) é sempre contra-activo
   const classe3Codes = ["31", "32", "33", "34", "35", "36", "37", "39"];
-  const classe3Lines = mockTrialBalance.filter(
+  const classe3Lines = trialBalance.filter(
     (l) => classe3Codes.includes(l.accountCode)
   );
   const contasReceberAll = classe3Lines.filter((l) => l.balance > 0);
