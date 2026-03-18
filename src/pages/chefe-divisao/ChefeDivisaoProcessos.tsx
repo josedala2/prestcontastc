@@ -137,9 +137,9 @@ export default function ChefeDivisaoProcessos() {
   const handlePreview = async (doc: DocItem) => {
     if (!doc.caminho_ficheiro) return;
     const bucket = "processo-documentos";
-    const { data } = await supabase.storage.from(bucket).createSignedUrl(doc.caminho_ficheiro, 300);
-    if (data?.signedUrl) {
-      setPreviewUrl(data.signedUrl);
+    const { data } = supabase.storage.from(bucket).getPublicUrl(doc.caminho_ficheiro);
+    if (data?.publicUrl) {
+      setPreviewUrl(data.publicUrl);
       setPreviewName(doc.nome_ficheiro);
     }
   };
