@@ -45,6 +45,7 @@ import ActasRecepcao from "./pages/ActasRecepcao";
 import Secretaria from "./pages/Secretaria";
 import Atividades from "./pages/Atividades";
 import ContadoriaVerificacao from "./pages/contadoria/ContadoriaVerificacao";
+import ContadoriaTriagem from "./pages/contadoria-geral/ContadoriaTriagem";
 import EscrivaoRegistoAutuacao from "./pages/escrivao/EscrivaoRegistoAutuacao";
 import ChefeDivisaoProcessos from "./pages/chefe-divisao/ChefeDivisaoProcessos";
 import ValidacaoChefeDivisao from "./pages/chefe-divisao/ValidacaoChefeDivisao";
@@ -69,6 +70,7 @@ const DASHBOARD_ROLES = [
   "Chefe da Secretaria-Geral",
   "Técnico da Contadoria Geral",
   "Escrivão dos Autos",
+  "Contadoria Geral",
   "Chefe de Divisão",
   "Chefe de Secção",
   "Coordenador de Equipa",
@@ -185,6 +187,13 @@ const App = () => (
           <Route path="/escrivao/registo-autuacao" element={
             <ProtectedRoute allowedRoles={["Administrador do Sistema", "Escrivão dos Autos"]}>
               <EscrivaoRegistoAutuacao />
+            </ProtectedRoute>
+          } />
+
+          {/* Contadoria Geral — Triagem */}
+          <Route path="/contadoria-geral/triagem" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Contadoria Geral"]}>
+              <ContadoriaTriagem />
             </ProtectedRoute>
           } />
 
