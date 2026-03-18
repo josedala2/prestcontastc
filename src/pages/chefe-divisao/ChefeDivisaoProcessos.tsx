@@ -45,6 +45,16 @@ interface Processo {
   urgencia: string;
 }
 
+interface DocItem {
+  id: string;
+  tipo_documento: string;
+  nome_ficheiro: string;
+  caminho_ficheiro: string | null;
+  estado: string;
+  created_at: string;
+  observacoes: string | null;
+}
+
 const DIVISOES = [
   "1.ª Divisão — Órgãos de Soberania",
   "2.ª Divisão — Administração Central",
