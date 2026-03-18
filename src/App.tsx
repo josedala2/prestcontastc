@@ -190,6 +190,13 @@ const App = () => (
             </ProtectedRoute>
           } />
 
+          {/* Contadoria Geral — Triagem */}
+          <Route path="/contadoria-geral/triagem" element={
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Contadoria Geral"]}>
+              <ContadoriaTriagem />
+            </ProtectedRoute>
+          } />
+
           {/* Chefe de Divisão */}
           <Route path="/chefe-divisao/processos" element={
             <ProtectedRoute allowedRoles={["Administrador do Sistema", "Chefe de Divisão"]}>
