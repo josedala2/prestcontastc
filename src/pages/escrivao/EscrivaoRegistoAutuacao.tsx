@@ -279,15 +279,35 @@ export default function EscrivaoRegistoAutuacao() {
     setPreviewDoc(doc);
     setPreviewLoading(true);
     setPreviewUrl(null);
-    const { data } = supabase.storage.from(doc.bucket).getPublicUrl(doc.caminho);
-    if (data?.publicUrl) {
-      setPreviewUrl(data.publicUrl);
+
+    try {
+      // Revoke previous blob URL
+      if (previewUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl);
+      }
+
+      const { data, error } = await supabase.storage.from(doc.bucket).download(doc.caminho);
+      if (error || !data) throw error || new Error("Download falhou");
+
+      const objectUrl = URL.createObjectURL(data);
+      setPreviewUrl(objectUrl);
+    } catch (err) {
+      console.error("Erro ao abrir preview:", err);
+      toast.error("Não foi possível abrir o documento online.");
     }
     setPreviewLoading(false);
   };
 
   const handleOpenExternal = () => {
-    if (previewUrl) window.open(previewUrl, "_blank");
+    if (previewUrl) {
+      const link = document.createElement("a");
+      link.href = previewUrl;
+      link.target = "_blank";
+      link.download = previewDoc?.nome || "documento";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
   };
 
   const handlePrintDoc = () => {
