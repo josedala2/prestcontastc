@@ -123,7 +123,7 @@ const Relatorios = () => {
   );
   const totalCustosFin = custosFinanceiros.reduce((s, l) => s + l.balance, 0);
 
-  const custosNaoOp = mockTrialBalance.filter(
+  const custosNaoOp = trialBalance.filter(
     (l) => ["78", "79"].includes(l.accountCode)
   );
   const totalCustosNaoOp = custosNaoOp.reduce((s, l) => s + l.balance, 0);
