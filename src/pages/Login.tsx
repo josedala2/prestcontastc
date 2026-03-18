@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Mail, Eye, EyeOff, User, LogIn, UserPlus } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff, User, LogIn, UserPlus, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { useAuth, UserRole, roleDefaultRoute } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const ALL_ROLES: UserRole[] = [
   "Administrador do Sistema",
@@ -33,24 +34,51 @@ const ALL_ROLES: UserRole[] = [
 
 const DIVISOES = ["3ª Divisão", "4ª Divisão", "5ª Divisão", "6ª Divisão", "7ª Divisão", "8ª Divisão"];
 
+interface DemoUser {
+  email: string;
+  password: string;
+  label: string;
+  shortLabel: string;
+}
+
+const DEMO_USERS: DemoUser[] = [
+  { email: "admin@demo.tca.ao", password: "demo123456", label: "Administrador do Sistema", shortLabel: "Admin" },
+  { email: "entidade@demo.tca.ao", password: "demo123456", label: "Representante da Entidade", shortLabel: "Entidade" },
+  { email: "secretaria@demo.tca.ao", password: "demo123456", label: "Técnico da Secretaria-Geral", shortLabel: "Téc. Secretaria" },
+  { email: "chefe.secretaria@demo.tca.ao", password: "demo123456", label: "Chefe da Secretaria-Geral", shortLabel: "Ch. Secretaria" },
+  { email: "contadoria@demo.tca.ao", password: "demo123456", label: "Técnico da Contadoria Geral", shortLabel: "Téc. Contadoria" },
+  { email: "escrivao@demo.tca.ao", password: "demo123456", label: "Escrivão dos Autos", shortLabel: "Escrivão" },
+  { email: "contadoria.geral@demo.tca.ao", password: "demo123456", label: "Contadoria Geral", shortLabel: "Cont. Geral" },
+  { email: "chefe.divisao@demo.tca.ao", password: "demo123456", label: "Chefe de Divisão", shortLabel: "Ch. Divisão" },
+  { email: "chefe.seccao@demo.tca.ao", password: "demo123456", label: "Chefe de Secção", shortLabel: "Ch. Secção" },
+  { email: "tecnico.analise@demo.tca.ao", password: "demo123456", label: "Técnico de Análise", shortLabel: "Téc. Análise" },
+  { email: "coordenador@demo.tca.ao", password: "demo123456", label: "Coordenador de Equipa", shortLabel: "Coordenador" },
+  { email: "dst@demo.tca.ao", password: "demo123456", label: "Diretor dos Serviços Técnicos", shortLabel: "DST" },
+  { email: "juiz.relator@demo.tca.ao", password: "demo123456", label: "Juiz Relator", shortLabel: "Juiz Relator" },
+  { email: "juiz.adjunto@demo.tca.ao", password: "demo123456", label: "Juiz Adjunto", shortLabel: "Juiz Adjunto" },
+  { email: "mp@demo.tca.ao", password: "demo123456", label: "Ministério Público", shortLabel: "Min. Público" },
+  { email: "custas@demo.tca.ao", password: "demo123456", label: "Téc. Custas e Emolumentos", shortLabel: "Custas" },
+  { email: "diligencias@demo.tca.ao", password: "demo123456", label: "Oficial de Diligências", shortLabel: "Diligências" },
+  { email: "presidente.camara@demo.tca.ao", password: "demo123456", label: "Presidente da Câmara", shortLabel: "Pres. Câmara" },
+  { email: "presidente@demo.tca.ao", password: "demo123456", label: "Presidente do Tribunal de Contas", shortLabel: "Presidente TCA" },
+];
+
 export default function Login() {
   const navigate = useNavigate();
   const { login, signup, user } = useAuth();
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (user) {
       navigate(roleDefaultRoute[user.role] || "/dashboard", { replace: true });
     }
   }, [user, navigate]);
 
-  // Login state
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPw, setShowLoginPw] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
+  const [showDemoUsers, setShowDemoUsers] = useState(false);
 
-  // Signup state
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupNome, setSignupNome] = useState("");
@@ -61,6 +89,12 @@ export default function Login() {
 
   const needsDivisao = signupCargo === "Chefe de Divisão" || signupCargo === "Chefe de Secção";
 
+  const handleDemoFill = (demo: DemoUser) => {
+    setLoginEmail(demo.email);
+    setLoginPassword(demo.password);
+    toast.info(`Credenciais preenchidas: ${demo.label}`);
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginEmail || !loginPassword) return;
@@ -68,7 +102,6 @@ export default function Login() {
     try {
       await login(loginEmail, loginPassword);
       toast.success("Autenticado com sucesso!");
-      // Navigation will happen via useEffect watching auth state
     } catch (err: any) {
       toast.error(err.message || "Credenciais inválidas.");
     } finally {
@@ -94,7 +127,6 @@ export default function Login() {
     try {
       await signup(signupEmail, signupPassword, signupNome, signupCargo, needsDivisao ? signupDivisao : undefined);
       toast.success("Conta criada com sucesso! A iniciar sessão...");
-      // Auto-login after signup (auto-confirm is enabled)
       setTimeout(() => {
         navigate(roleDefaultRoute[signupCargo] || "/dashboard");
       }, 1000);
@@ -131,9 +163,9 @@ export default function Login() {
       </div>
 
       {/* Right - Auth Forms */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-background">
-        <div className="w-full max-w-md space-y-6">
-          <div className="text-center lg:hidden mb-8">
+      <div className="flex-1 flex items-center justify-center p-6 bg-background overflow-auto">
+        <div className="w-full max-w-md space-y-4">
+          <div className="text-center lg:hidden mb-6">
             <img src="/logo-tca.png" alt="TCA" className="h-16 mx-auto mb-3" />
             <h1 className="text-lg font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
               Tribunal de Contas de Angola
@@ -194,6 +226,38 @@ export default function Login() {
                   {loginLoading ? "A autenticar..." : "Entrar no Sistema"}
                 </Button>
               </form>
+
+              {/* Demo Users Section */}
+              <div className="mt-4 border-t pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowDemoUsers(!showDemoUsers)}
+                  className="flex items-center gap-2 w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Users className="h-3.5 w-3.5" />
+                  <span className="font-medium">Utilizadores Demo</span>
+                  {showDemoUsers ? <ChevronUp className="h-3.5 w-3.5 ml-auto" /> : <ChevronDown className="h-3.5 w-3.5 ml-auto" />}
+                </button>
+                
+                {showDemoUsers && (
+                  <ScrollArea className="mt-3 h-[220px] rounded-md border bg-muted/30 p-2">
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {DEMO_USERS.map((demo) => (
+                        <button
+                          key={demo.email}
+                          type="button"
+                          onClick={() => handleDemoFill(demo)}
+                          className="text-left px-2.5 py-1.5 rounded-md text-[11px] leading-tight border bg-background hover:bg-accent hover:text-accent-foreground transition-colors truncate"
+                          title={`${demo.label}\n${demo.email}`}
+                        >
+                          <span className="font-medium block truncate">{demo.shortLabel}</span>
+                          <span className="text-muted-foreground text-[10px] block truncate">{demo.email}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                )}
+              </div>
             </TabsContent>
 
             {/* Signup Tab */}
