@@ -194,8 +194,24 @@ export default function EscrivaoRegistoAutuacao() {
 
   const handleViewDoc = async (doc: DocItem) => {
     if (!doc.caminho) return;
+    setPreviewDoc(doc);
+    setPreviewLoading(true);
+    setPreviewUrl(null);
     const { data } = supabase.storage.from(doc.bucket).getPublicUrl(doc.caminho);
-    if (data?.publicUrl) window.open(data.publicUrl, "_blank");
+    if (data?.publicUrl) {
+      setPreviewUrl(data.publicUrl);
+    }
+    setPreviewLoading(false);
+  };
+
+  const handleOpenExternal = () => {
+    if (previewUrl) window.open(previewUrl, "_blank");
+  };
+
+  const handlePrintDoc = () => {
+    if (!previewUrl) return;
+    const printWindow = window.open(previewUrl, "_blank");
+    printWindow?.addEventListener("load", () => printWindow.print());
   };
 
   const handleDownloadDoc = async (doc: DocItem) => {
