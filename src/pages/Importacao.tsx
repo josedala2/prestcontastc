@@ -24,7 +24,7 @@ const Importacao = () => {
     const file = e.target.files?.[0];
     if (file) {
       setUploaded(true);
-      toast.success(`Ficheiro "${file.name}" carregado com ${mockTrialBalance.length} linhas.`);
+      toast.success(`Ficheiro "${file.name}" carregado com ${trialBalance.length} linhas.`);
     }
   };
 
