@@ -52,6 +52,7 @@ import ValidacaoChefeDivisao from "./pages/chefe-divisao/ValidacaoChefeDivisao";
 import ChefeSeccaoDistribuicao from "./pages/chefe-seccao/ChefeSeccaoDistribuicao";
 import ValidacaoChefeSeccao from "./pages/chefe-seccao/ValidacaoChefeSeccao";
 import AnaliseTecnicaPage from "./pages/tecnico-analise/AnaliseTecnicaPage";
+import AmbienteAnalisePage from "./pages/tecnico-analise/AmbienteAnalisePage";
 import ControleQualidadeDST from "./pages/dst/ControleQualidadeDST";
 import DecisaoJuizRelator from "./pages/juiz/DecisaoJuizRelator";
 import Arquivamento from "./pages/juiz/Arquivamento";
