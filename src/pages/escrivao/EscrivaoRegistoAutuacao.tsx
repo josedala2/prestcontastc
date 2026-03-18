@@ -11,9 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AppLayout } from "@/components/AppLayout";
 import { toast } from "sonner";
-import { BookOpen, FileText, CheckCircle2, Loader2, Lock, Files, Eye, Download, FileArchive, PackageOpen, Plus, Upload, X, Tag } from "lucide-react";
+import { BookOpen, FileText, CheckCircle2, Loader2, Lock, Files, Eye, Download, FileArchive, PackageOpen, Plus, Upload, X, Tag, ExternalLink, Printer } from "lucide-react";
 import { generateCapaProcesso, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { PDFDocument } from "pdf-lib";
@@ -98,6 +99,9 @@ export default function EscrivaoRegistoAutuacao() {
   const [deleteDocDialogOpen, setDeleteDocDialogOpen] = useState(false);
   const [docToDelete, setDocToDelete] = useState<DocItem | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<DocItem | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -190,8 +194,24 @@ export default function EscrivaoRegistoAutuacao() {
 
   const handleViewDoc = async (doc: DocItem) => {
     if (!doc.caminho) return;
+    setPreviewDoc(doc);
+    setPreviewLoading(true);
+    setPreviewUrl(null);
     const { data } = supabase.storage.from(doc.bucket).getPublicUrl(doc.caminho);
-    if (data?.publicUrl) window.open(data.publicUrl, "_blank");
+    if (data?.publicUrl) {
+      setPreviewUrl(data.publicUrl);
+    }
+    setPreviewLoading(false);
+  };
+
+  const handleOpenExternal = () => {
+    if (previewUrl) window.open(previewUrl, "_blank");
+  };
+
+  const handlePrintDoc = () => {
+    if (!previewUrl) return;
+    const printWindow = window.open(previewUrl, "_blank");
+    printWindow?.addEventListener("load", () => printWindow.print());
   };
 
   const handleDownloadDoc = async (doc: DocItem) => {
@@ -1033,6 +1053,58 @@ export default function EscrivaoRegistoAutuacao() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Inline document preview dialog */}
+      <Dialog open={!!previewDoc} onOpenChange={(open) => { if (!open) { setPreviewDoc(null); setPreviewUrl(null); } }}>
+        <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-5 pb-3 border-b border-border shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0 flex-1">
+                <DialogTitle className="text-sm font-semibold truncate">{previewDoc?.tipo}</DialogTitle>
+                <p className="text-[11px] text-muted-foreground truncate mt-0.5">{previewDoc?.nome}</p>
+              </div>
+              <div className="flex items-center gap-1.5 ml-4 shrink-0">
+                <Badge variant="outline" className="text-[9px]">
+                  {previewDoc?.origem === "submissao" ? "Entidade" : "Interno"}
+                </Badge>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handlePrintDoc} title="Imprimir">
+                  <Printer className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => previewDoc && handleDownloadDoc(previewDoc)} title="Descarregar">
+                  <Download className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleOpenExternal} title="Abrir em nova janela">
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          </DialogHeader>
+          <div className="flex-1 min-h-0 bg-muted/30">
+            {previewLoading ? (
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : previewUrl ? (
+              <iframe
+                src={previewUrl}
+                className="w-full h-full border-0"
+                title={previewDoc?.nome || "Pré-visualização"}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground">
+                <FileText className="h-12 w-12" />
+                <p className="text-sm">Não foi possível carregar a pré-visualização</p>
+                {previewDoc && (
+                  <Button variant="outline" size="sm" onClick={handleOpenExternal}>
+                    <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                    Abrir em nova janela
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
