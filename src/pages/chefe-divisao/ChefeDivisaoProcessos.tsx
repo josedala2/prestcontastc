@@ -23,7 +23,7 @@ import {
 import {
   ArrowLeft, Building2, Users, Send, CheckCircle2, Loader2, FolderOpen,
   Calendar, GitBranch, UserCheck, ClipboardList, Search, FileText, Eye,
-  Download, File, FileSpreadsheet, FileImage,
+  Download, File, FileSpreadsheet, FileImage, ShieldCheck, Clock, AlertCircle,
 } from "lucide-react";
 
 interface Processo {
@@ -200,10 +200,60 @@ export default function ChefeDivisaoProcessos() {
 
   const getDocIcon = (nome: string) => {
     const ext = nome.split(".").pop()?.toLowerCase();
-    if (ext === "pdf") return <FileText className="h-4 w-4 text-red-500" />;
-    if (ext === "xlsx" || ext === "xls") return <FileSpreadsheet className="h-4 w-4 text-green-600" />;
-    if (["jpg", "jpeg", "png", "gif"].includes(ext || "")) return <FileImage className="h-4 w-4 text-blue-500" />;
-    return <File className="h-4 w-4 text-muted-foreground" />;
+    if (ext === "pdf") return <FileText className="h-5 w-5 text-destructive" />;
+    if (ext === "xlsx" || ext === "xls") return <FileSpreadsheet className="h-5 w-5 text-emerald-600" />;
+    if (["jpg", "jpeg", "png", "gif"].includes(ext || "")) return <FileImage className="h-5 w-5 text-sky-500" />;
+    return <File className="h-5 w-5 text-muted-foreground" />;
+  };
+
+  const getExtLabel = (nome: string) => {
+    const ext = nome.split(".").pop()?.toUpperCase() || "???";
+    const colors: Record<string, string> = {
+      PDF: "bg-destructive/10 text-destructive border-destructive/20",
+      XLSX: "bg-emerald-500/10 text-emerald-700 border-emerald-500/20",
+      XLS: "bg-emerald-500/10 text-emerald-700 border-emerald-500/20",
+      PNG: "bg-sky-500/10 text-sky-700 border-sky-500/20",
+      JPG: "bg-sky-500/10 text-sky-700 border-sky-500/20",
+      JPEG: "bg-sky-500/10 text-sky-700 border-sky-500/20",
+    };
+    return (
+      <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-bold border ${colors[ext] || "bg-muted text-muted-foreground border-border"}`}>
+        {ext}
+      </span>
+    );
+  };
+
+  const getEstadoIndicator = (estado: string) => {
+    if (estado === "validado") {
+      return (
+        <div className="flex items-center gap-1.5">
+          <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+          <span className="text-[10px] font-semibold text-emerald-700">Validado</span>
+        </div>
+      );
+    }
+    if (estado === "pendente") {
+      return (
+        <div className="flex items-center gap-1.5">
+          <Clock className="h-3.5 w-3.5 text-amber-500" />
+          <span className="text-[10px] font-semibold text-amber-600">Pendente</span>
+        </div>
+      );
+    }
+    if (estado === "rejeitado") {
+      return (
+        <div className="flex items-center gap-1.5">
+          <AlertCircle className="h-3.5 w-3.5 text-destructive" />
+          <span className="text-[10px] font-semibold text-destructive">Rejeitado</span>
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center gap-1.5">
+        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+        <span className="text-[10px] font-semibold text-muted-foreground capitalize">{estado}</span>
+      </div>
+    );
   };
 
   const handleSelectProcesso = (p: Processo) => {
@@ -378,34 +428,37 @@ export default function ChefeDivisaoProcessos() {
                     </TableHeader>
                     <TableBody>
                       {documentos.map((doc, idx) => (
-                        <TableRow key={doc.id}>
-                          <TableCell className="text-xs text-muted-foreground font-mono">{idx + 1}</TableCell>
+                        <TableRow key={doc.id} className="group">
+                          <TableCell className="text-xs text-muted-foreground font-mono w-8">{idx + 1}</TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2.5">
                               {getDocIcon(doc.nome_ficheiro)}
-                              <span className="text-xs font-medium truncate max-w-[200px]">{doc.nome_ficheiro}</span>
-                              {idx === 0 && doc.tipo_documento === "Capa do Processo" && (
-                                <Badge className="text-[9px] bg-primary/10 text-primary border-primary/20" variant="outline">CAPA</Badge>
-                              )}
+                              <div className="flex flex-col gap-0.5 min-w-0">
+                                <span className="text-xs font-medium truncate max-w-[220px]">{doc.nome_ficheiro}</span>
+                                <div className="flex items-center gap-1.5">
+                                  {getExtLabel(doc.nome_ficheiro)}
+                                  {idx === 0 && doc.tipo_documento === "Capa do Processo" && (
+                                    <Badge className="text-[8px] bg-primary/10 text-primary border-primary/20 px-1 py-0" variant="outline">CAPA</Badge>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline" className="text-[10px]">{doc.tipo_documento}</Badge>
+                            <Badge variant="outline" className="text-[10px] font-normal">{doc.tipo_documento}</Badge>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={doc.estado === "validado" ? "default" : "secondary"} className="text-[10px]">
-                              {doc.estado}
-                            </Badge>
+                            {getEstadoIndicator(doc.estado)}
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground">
                             {new Date(doc.created_at).toLocaleDateString("pt-AO")}
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-1">
-                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handlePreview(doc)} title="Visualizar">
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 opacity-70 group-hover:opacity-100" onClick={() => handlePreview(doc)} title="Visualizar">
                                 <Eye className="h-3.5 w-3.5" />
                               </Button>
-                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleDownload(doc)} title="Descarregar">
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 opacity-70 group-hover:opacity-100" onClick={() => handleDownload(doc)} title="Descarregar">
                                 <Download className="h-3.5 w-3.5" />
                               </Button>
                             </div>
