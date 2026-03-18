@@ -340,8 +340,56 @@ const Secretaria = () => {
 
   const [activeMainTab, setActiveMainTab] = useState("dashboard");
 
-  // Get uploaded docs for selected fiscal year
+  // Fetch actual submitted documents from submission_documents table
+  interface SubmittedDoc {
+    id: string;
+    doc_id: string;
+    doc_label: string;
+    doc_category: string;
+    file_name: string;
+    file_path: string;
+    file_size: number;
+    content_type: string | null;
+    created_at: string;
+  }
+  const [submittedDocs, setSubmittedDocs] = useState<SubmittedDoc[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+
+  const fetchSubmittedDocs = useCallback(async () => {
+    if (!selectedFy) {
+      setSubmittedDocs([]);
+      return;
+    }
+    const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
+    setLoadingDocs(true);
+    try {
+      const { data, error } = await supabase
+        .from("submission_documents")
+        .select("*")
+        .eq("entity_id", selectedFy.entityId)
+        .eq("fiscal_year_id", fiscalYearId)
+        .order("created_at", { ascending: true });
+      if (error) {
+        console.error("Error fetching submission docs:", error);
+      } else {
+        setSubmittedDocs((data || []) as SubmittedDoc[]);
+      }
+    } catch (err) {
+      console.error("Error fetching submission docs:", err);
+    } finally {
+      setLoadingDocs(false);
+    }
+  }, [selectedFy]);
+
+  useEffect(() => {
+    fetchSubmittedDocs();
+  }, [fetchSubmittedDocs]);
+
+  // Build uploaded doc IDs from actual DB documents
   const selectedUploadedDocs = useMemo(() => {
+    if (submittedDocs.length > 0) {
+      return submittedDocs.map(d => d.doc_id);
+    }
     if (!selectedFy) return [];
     const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
     const fromContext = getUploadedDocs(selectedFy.entityId, fiscalYearId);
@@ -350,7 +398,38 @@ const Secretaria = () => {
       return submissionChecklist.map(c => c.id);
     }
     return fromContext;
-  }, [selectedFy, getUploadedDocs]);
+  }, [selectedFy, getUploadedDocs, submittedDocs]);
+
+  // Helper to get submitted doc info by checklist ID
+  const getSubmittedDocByChecklistId = (checklistId: string): SubmittedDoc | undefined => {
+    // Direct match
+    const direct = submittedDocs.find(d => d.doc_id === checklistId);
+    if (direct) return direct;
+    // Via mapping
+    const mappedDocId = Object.entries(DOC_ID_MAP).find(([, cId]) => cId === checklistId)?.[0];
+    if (mappedDocId) return submittedDocs.find(d => d.doc_id === mappedDocId);
+    return undefined;
+  };
+
+  const handleViewDoc = async (doc: SubmittedDoc) => {
+    try {
+      const { data } = supabase.storage.from("submission-documents").getPublicUrl(doc.file_path);
+      if (data?.publicUrl) {
+        window.open(data.publicUrl, "_blank");
+      }
+    } catch (err) {
+      console.error("Error getting doc URL:", err);
+      toast.error("Erro ao abrir documento");
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+  };
 
   // Map EntidadeDocumentosTab doc IDs to submissionChecklist IDs
   const DOC_ID_MAP: Record<string, string> = {
