@@ -556,15 +556,19 @@ export default function ChefeDivisaoProcessos() {
           }}
         >
           <DialogContent className="max-w-4xl h-[80vh]">
-            <DialogHeader>
+            <div className="space-y-1.5 text-center sm:text-left">
               <DialogTitle className="text-sm flex items-center gap-2">
                 <Eye className="h-4 w-4 text-primary" /> {previewName}
               </DialogTitle>
-            </DialogHeader>
+              <DialogDescription className="sr-only">
+                Pré-visualização online do documento seleccionado do processo.
+              </DialogDescription>
+            </div>
             <div className="flex-1 overflow-hidden rounded-lg border h-full flex flex-col bg-muted/20">
               {previewUrl && (
                 <iframe
-                  src={previewUrl}
+                  key={previewUrl}
+                  src={`${previewUrl}#toolbar=1&navpanes=0&scrollbar=1`}
                   className="w-full flex-1 min-h-[55vh]"
                   title={previewName}
                   style={{ border: "none" }}
