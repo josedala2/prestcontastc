@@ -60,6 +60,7 @@ interface DocItem {
 type ActionMode = "seccao" | "tecnico" | null;
 
 export default function ChefeDivisaoProcessos() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const divisao = user?.divisao || "3ª Divisão";
   const divisaoNome = DIVISOES_ESTRUTURA[divisao]?.nome || divisao;
