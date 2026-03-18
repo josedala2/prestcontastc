@@ -165,7 +165,7 @@ const Importacao = () => {
                   <TableRow className="bg-muted/30 font-bold">
                     <TableCell colSpan={2} className="text-sm">TOTAIS</TableCell>
                     <TableCell className="text-right font-mono text-sm">
-                      {formatKz(mockTrialBalance.reduce((s, l) => s + l.debit, 0))}
+                      {formatKz(trialBalance.reduce((s, l) => s + l.debit, 0))}
                     </TableCell>
                     <TableCell className="text-right font-mono text-sm">
                       {formatKz(mockTrialBalance.reduce((s, l) => s + l.credit, 0))}
