@@ -79,7 +79,7 @@ const Relatorios = () => {
   const capitalLines = trialBalance.filter(
     (l) => ["51", "52", "53", "54", "55", "56", "57", "58"].includes(l.accountCode)
   );
-  const resultadosLines = mockTrialBalance.filter(
+  const resultadosLines = trialBalance.filter(
     (l) => ["81", "88"].includes(l.accountCode)
   );
   const capitalAllLines = [...capitalLines, ...resultadosLines];
