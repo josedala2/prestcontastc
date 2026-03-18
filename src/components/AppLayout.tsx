@@ -2,6 +2,7 @@ import { ReactNode, useState, useRef, useEffect } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LogOut, Bell, Send, CheckCircle, XCircle, FileQuestion, FileSearch } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useSubmissions, PortalNotification } from "@/contexts/SubmissionContext";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,7 @@ const NOTIF_FILTERS: { value: SecretariaNotifFilter; label: string }[] = [
 export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const pageTitle = routeTitles[location.pathname] || "PGC";
   const { notifications, markAsRead } = useSubmissions();
   const [showNotifs, setShowNotifs] = useState(false);
@@ -209,7 +211,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
             <div className="w-1.5 h-1.5 rounded-full bg-header-accent" />
             <button
-              onClick={() => navigate("/login")}
+              onClick={() => { logout(); navigate("/login"); }}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] text-header-foreground/70 hover:text-header-foreground hover:bg-header-foreground/10 transition-colors"
               title="Terminar Sessão"
             >
