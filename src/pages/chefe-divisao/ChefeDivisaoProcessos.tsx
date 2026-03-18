@@ -18,8 +18,12 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
   ArrowLeft, Building2, Users, Send, CheckCircle2, Loader2, FolderOpen,
-  Calendar, GitBranch, UserCheck, ClipboardList, Search,
+  Calendar, GitBranch, UserCheck, ClipboardList, Search, FileText, Eye,
+  Download, File, FileSpreadsheet, FileImage,
 } from "lucide-react";
 
 interface Processo {
@@ -39,6 +43,16 @@ interface Processo {
   coordenador_equipa: string | null;
   canal_entrada: string;
   urgencia: string;
+}
+
+interface DocItem {
+  id: string;
+  tipo_documento: string;
+  nome_ficheiro: string;
+  caminho_ficheiro: string | null;
+  estado: string;
+  created_at: string;
+  observacoes: string | null;
 }
 
 const DIVISOES = [
@@ -80,6 +94,12 @@ export default function ChefeDivisaoProcessos() {
   const [observacoes, setObservacoes] = useState("");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
+  // Documents
+  const [documentos, setDocumentos] = useState<DocItem[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewName, setPreviewName] = useState("");
+
   useEffect(() => {
     fetchProcessos();
   }, []);
@@ -95,12 +115,58 @@ export default function ChefeDivisaoProcessos() {
     setLoading(false);
   };
 
+  const fetchDocumentos = async (processoId: string) => {
+    setLoadingDocs(true);
+    const { data } = await supabase
+      .from("processo_documentos")
+      .select("*")
+      .eq("processo_id", processoId)
+      .order("created_at", { ascending: true });
+    
+    // Sort: Capa do Processo first
+    const docs = (data as DocItem[]) || [];
+    const capaIdx = docs.findIndex(d => d.tipo_documento === "Capa do Processo");
+    if (capaIdx > 0) {
+      const [capa] = docs.splice(capaIdx, 1);
+      docs.unshift(capa);
+    }
+    setDocumentos(docs);
+    setLoadingDocs(false);
+  };
+
+  const handlePreview = async (doc: DocItem) => {
+    if (!doc.caminho_ficheiro) return;
+    const bucket = "processo-documentos";
+    const { data } = await supabase.storage.from(bucket).createSignedUrl(doc.caminho_ficheiro, 300);
+    if (data?.signedUrl) {
+      setPreviewUrl(data.signedUrl);
+      setPreviewName(doc.nome_ficheiro);
+    }
+  };
+
+  const handleDownload = async (doc: DocItem) => {
+    if (!doc.caminho_ficheiro) return;
+    const { data } = await supabase.storage.from("processo-documentos").createSignedUrl(doc.caminho_ficheiro, 300);
+    if (data?.signedUrl) {
+      window.open(data.signedUrl, "_blank");
+    }
+  };
+
+  const getDocIcon = (nome: string) => {
+    const ext = nome.split(".").pop()?.toLowerCase();
+    if (ext === "pdf") return <FileText className="h-4 w-4 text-red-500" />;
+    if (ext === "xlsx" || ext === "xls") return <FileSpreadsheet className="h-4 w-4 text-green-600" />;
+    if (["jpg", "jpeg", "png", "gif"].includes(ext || "")) return <FileImage className="h-4 w-4 text-blue-500" />;
+    return <File className="h-4 w-4 text-muted-foreground" />;
+  };
+
   const handleSelectProcesso = (p: Processo) => {
     setSelectedProcesso(p);
     setDivisao(p.divisao_competente || "");
     setSeccao(p.seccao_competente || "");
     setCoordenador(p.coordenador_equipa || "");
     setObservacoes("");
+    fetchDocumentos(p.id);
   };
 
   const handleEncaminhar = async () => {
@@ -236,6 +302,77 @@ export default function ChefeDivisaoProcessos() {
             </CardContent>
           </Card>
 
+          {/* Documentos do Processo */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" />
+                Documentos do Processo ({documentos.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingDocs ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : documentos.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">Nenhum documento associado a este processo.</p>
+              ) : (
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-xs w-10">#</TableHead>
+                        <TableHead className="text-xs">Documento</TableHead>
+                        <TableHead className="text-xs">Tipo</TableHead>
+                        <TableHead className="text-xs">Estado</TableHead>
+                        <TableHead className="text-xs">Data</TableHead>
+                        <TableHead className="text-xs text-right">Acções</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {documentos.map((doc, idx) => (
+                        <TableRow key={doc.id}>
+                          <TableCell className="text-xs text-muted-foreground font-mono">{idx + 1}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {getDocIcon(doc.nome_ficheiro)}
+                              <span className="text-xs font-medium truncate max-w-[200px]">{doc.nome_ficheiro}</span>
+                              {idx === 0 && doc.tipo_documento === "Capa do Processo" && (
+                                <Badge className="text-[9px] bg-primary/10 text-primary border-primary/20" variant="outline">CAPA</Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-[10px]">{doc.tipo_documento}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={doc.estado === "validado" ? "default" : "secondary"} className="text-[10px]">
+                              {doc.estado}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            {new Date(doc.created_at).toLocaleDateString("pt-AO")}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handlePreview(doc)} title="Visualizar">
+                                <Eye className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleDownload(doc)} title="Descarregar">
+                                <Download className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Assignment Form */}
           <Card>
             <CardHeader>
@@ -366,6 +503,22 @@ export default function ChefeDivisaoProcessos() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Document Preview Dialog */}
+        <Dialog open={!!previewUrl} onOpenChange={() => { setPreviewUrl(null); setPreviewName(""); }}>
+          <DialogContent className="max-w-4xl h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="text-sm flex items-center gap-2">
+                <Eye className="h-4 w-4 text-primary" /> {previewName}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 overflow-hidden rounded-lg border h-full">
+              {previewUrl && (
+                <iframe src={previewUrl} className="w-full h-full min-h-[60vh]" title={previewName} />
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </AppLayout>
     );
   }
