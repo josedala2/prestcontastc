@@ -45,7 +45,7 @@ const Importacao = () => {
   const handleExportExcel = () => {
     setExporting(true);
     try {
-      exportBalanceteExcel(mockTrialBalance);
+      exportBalanceteExcel(trialBalance);
       toast.success("Balancete exportado em Excel com sucesso.");
     } catch (e) {
       toast.error("Erro ao exportar.");
