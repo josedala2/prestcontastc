@@ -177,9 +177,9 @@ const Esclarecimentos = () => {
                       <SelectValue placeholder="Seleccionar exercício..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockFiscalYears
-                        .filter((fy) => ["submetido", "em_analise", "com_pedidos"].includes(fy.status))
-                        .map((fy) => (
+                      {[
+                        { id: "placeholder-2024", entityName: "Seleccionar entidade", year: 2024 },
+                      ].map((fy) => (
                           <SelectItem key={fy.id} value={fy.id}>
                             {fy.entityName} — {fy.year}
                           </SelectItem>

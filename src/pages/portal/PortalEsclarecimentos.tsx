@@ -32,8 +32,8 @@ const STATUS_CONFIG = {
 const PortalEsclarecimentos = () => {
   const { entity } = usePortalEntity();
   
-  // Filter clarifications for current entity
-  const entityClarifications = mockClarifications.filter((cr) => cr.entityId === entity.id);
+  // Clarifications start empty (will be loaded from DB in future)
+  const entityClarifications: ClarificationRequest[] = [];
 
   const [requests, setRequests] = useState<ClarificationRequest[]>(entityClarifications);
   const [selectedRequest, setSelectedRequest] = useState<ClarificationRequest | null>(null);
