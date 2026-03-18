@@ -134,7 +134,8 @@ export default function EscrivaoRegistoAutuacao() {
       .order("created_at", { ascending: true });
 
     if (subDocs) {
-      for (const d of subDocs as any[]) {
+      for (let i = 0; i < (subDocs as any[]).length; i++) {
+        const d = (subDocs as any[])[i];
         docs.push({
           id: d.id,
           nome: d.file_name,
@@ -144,6 +145,7 @@ export default function EscrivaoRegistoAutuacao() {
           bucket: "submission-documents",
           data: d.created_at,
           estado: "submetido",
+          ordem: i,
         });
       }
     }
