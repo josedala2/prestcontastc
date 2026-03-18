@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building2, Phone, MapPin, Calendar, Hash, Briefcase, Globe } from "lucide-react";
 import { formatKz } from "@/lib/dataUtils";
-import { mockFinancialIndicators } from "@/data/mockData";
+import { useFinancialIndicators } from "@/hooks/useFinancialData";
 import { useFiscalYears } from "@/hooks/useFiscalYears";
 import { EntityExerciciosTab } from "./EntityExerciciosTab";
 import { EntityFinanceiroTab } from "./EntityFinanceiroTab";
