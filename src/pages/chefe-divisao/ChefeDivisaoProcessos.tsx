@@ -224,9 +224,7 @@ export default function ChefeDivisaoProcessos() {
       });
 
       toast.success(`Processo ${selectedProcesso.numero_processo} assumido como técnico.`);
-      setSelectedProcesso(null);
-      setConfirmTecnico(false);
-      fetchProcessos();
+      navigate(`/analise-tecnica/${selectedProcesso.id}`);
     } catch (err: any) {
       toast.error(`Erro: ${err.message}`);
     } finally {
