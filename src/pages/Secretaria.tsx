@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { gerarNumeroProcesso, avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
@@ -26,7 +26,7 @@ import { Label } from "@/components/ui/label";
 import {
   CheckCircle, XCircle, FileCheck, Stamp, Clock, AlertTriangle, Building2,
   FileText, Inbox, BarChart3, CalendarCheck, Eye, X, Undo2, ShieldCheck,
-  TrendingUp, ArrowRight, Bell, Activity, PieChart, Send, Lock, Loader2,
+  TrendingUp, ArrowRight, Bell, Activity, PieChart, Send, Lock, Loader2, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
@@ -340,8 +340,56 @@ const Secretaria = () => {
 
   const [activeMainTab, setActiveMainTab] = useState("dashboard");
 
-  // Get uploaded docs for selected fiscal year
+  // Fetch actual submitted documents from submission_documents table
+  interface SubmittedDoc {
+    id: string;
+    doc_id: string;
+    doc_label: string;
+    doc_category: string;
+    file_name: string;
+    file_path: string;
+    file_size: number;
+    content_type: string | null;
+    created_at: string;
+  }
+  const [submittedDocs, setSubmittedDocs] = useState<SubmittedDoc[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+
+  const fetchSubmittedDocs = useCallback(async () => {
+    if (!selectedFy) {
+      setSubmittedDocs([]);
+      return;
+    }
+    const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
+    setLoadingDocs(true);
+    try {
+      const { data, error } = await supabase
+        .from("submission_documents")
+        .select("*")
+        .eq("entity_id", selectedFy.entityId)
+        .eq("fiscal_year_id", fiscalYearId)
+        .order("created_at", { ascending: true });
+      if (error) {
+        console.error("Error fetching submission docs:", error);
+      } else {
+        setSubmittedDocs((data || []) as SubmittedDoc[]);
+      }
+    } catch (err) {
+      console.error("Error fetching submission docs:", err);
+    } finally {
+      setLoadingDocs(false);
+    }
+  }, [selectedFy]);
+
+  useEffect(() => {
+    fetchSubmittedDocs();
+  }, [fetchSubmittedDocs]);
+
+  // Build uploaded doc IDs from actual DB documents
   const selectedUploadedDocs = useMemo(() => {
+    if (submittedDocs.length > 0) {
+      return submittedDocs.map(d => d.doc_id);
+    }
     if (!selectedFy) return [];
     const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
     const fromContext = getUploadedDocs(selectedFy.entityId, fiscalYearId);
@@ -350,7 +398,38 @@ const Secretaria = () => {
       return submissionChecklist.map(c => c.id);
     }
     return fromContext;
-  }, [selectedFy, getUploadedDocs]);
+  }, [selectedFy, getUploadedDocs, submittedDocs]);
+
+  // Helper to get submitted doc info by checklist ID
+  const getSubmittedDocByChecklistId = (checklistId: string): SubmittedDoc | undefined => {
+    // Direct match
+    const direct = submittedDocs.find(d => d.doc_id === checklistId);
+    if (direct) return direct;
+    // Via mapping
+    const mappedDocId = Object.entries(DOC_ID_MAP).find(([, cId]) => cId === checklistId)?.[0];
+    if (mappedDocId) return submittedDocs.find(d => d.doc_id === mappedDocId);
+    return undefined;
+  };
+
+  const handleViewDoc = async (doc: SubmittedDoc) => {
+    try {
+      const { data } = supabase.storage.from("submission-documents").getPublicUrl(doc.file_path);
+      if (data?.publicUrl) {
+        window.open(data.publicUrl, "_blank");
+      }
+    } catch (err) {
+      console.error("Error getting doc URL:", err);
+      toast.error("Erro ao abrir documento");
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+  };
 
   // Map EntidadeDocumentosTab doc IDs to submissionChecklist IDs
   const DOC_ID_MAP: Record<string, string> = {
@@ -409,20 +488,27 @@ const Secretaria = () => {
           <p className="text-xs text-muted-foreground">Confirme a existência de cada documento antes de emitir a acta de recepção.</p>
         </CardHeader>
         <CardContent>
+          {loadingDocs ? (
+            <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> A carregar documentos…
+            </div>
+          ) : (
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-10">✓</TableHead>
                 <TableHead>Documento</TableHead>
+                <TableHead>Ficheiro Submetido</TableHead>
                 <TableHead className="text-center">Obrigatório</TableHead>
                 <TableHead className="text-center">Estado</TableHead>
-                <TableHead className="text-center w-24">Acções</TableHead>
+                <TableHead className="text-center w-28">Acções</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {submissionChecklist.map((item) => {
                 const isChecked = !!checkedDocs[item.id];
                 const uploaded = isDocUploaded(item.id);
+                const submittedDoc = getSubmittedDocByChecklistId(item.id);
                 return (
                   <TableRow
                     key={item.id}
@@ -443,6 +529,22 @@ const Secretaria = () => {
                     </TableCell>
                     <TableCell className={`text-sm ${!uploaded ? "text-muted-foreground line-through" : ""}`}>
                       {item.label}
+                    </TableCell>
+                    <TableCell>
+                      {submittedDoc ? (
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-xs font-medium truncate max-w-[200px]" title={submittedDoc.file_name}>
+                            {submittedDoc.file_name}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {formatFileSize(submittedDoc.file_size)} · {new Date(submittedDoc.created_at).toLocaleDateString("pt-AO")}
+                          </span>
+                        </div>
+                      ) : uploaded ? (
+                        <span className="text-xs text-muted-foreground italic">Documento registado</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-center">
                       {item.required ? (
@@ -467,25 +569,49 @@ const Secretaria = () => {
                       )}
                     </TableCell>
                     <TableCell className="text-center">
-                      {uploaded ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0"
-                          title={`Visualizar ${item.label}`}
-                          onClick={handlePreviewPdf}
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                        </Button>
-                      ) : (
-                        <span className="text-muted-foreground text-xs">—</span>
-                      )}
+                      <div className="flex items-center justify-center gap-1">
+                        {submittedDoc ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0"
+                              title={`Visualizar ${submittedDoc.file_name}`}
+                              onClick={() => handleViewDoc(submittedDoc)}
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0"
+                              title={`Descarregar ${submittedDoc.file_name}`}
+                              onClick={() => handleViewDoc(submittedDoc)}
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                            </Button>
+                          </>
+                        ) : uploaded ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            title={`Visualizar ${item.label}`}
+                            onClick={handlePreviewPdf}
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">—</span>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
               })}
             </TableBody>
           </Table>
+          )}
         </CardContent>
       </Card>
 
