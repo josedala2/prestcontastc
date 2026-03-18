@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { mockDocumentosTribunal, mockEntities } from "@/data/mockData";
+import { mockDocumentosTribunal } from "@/data/mockData";
+import { useEntities } from "@/hooks/useEntities";
 import { exportDocumentoTribunalPdf } from "@/lib/exportUtils";
 import {
   DocumentoTribunal,
@@ -58,6 +59,7 @@ const TIPO_ICONS: Record<DocumentoTribunalTipo, React.ReactNode> = {
 };
 
 export function DocumentosTribunal({ exercicioId, entidadeId, readOnly = false }: DocumentosTribunalProps) {
+  const { findById } = useEntities();
   const [documentos, setDocumentos] = useState<DocumentoTribunal[]>(
     mockDocumentosTribunal.filter((d) => d.exercicioId === exercicioId && d.entidadeId === entidadeId)
   );
@@ -322,7 +324,7 @@ export function DocumentosTribunal({ exercicioId, entidadeId, readOnly = false }
                     </TableCell>
                     <TableCell className="text-right space-x-1">
                       <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={() => {
-                        const entity = mockEntities.find((e) => e.id === entidadeId);
+                        const entity = findById(entidadeId);
                         exportDocumentoTribunalPdf(doc, entity?.name || "Entidade");
                       }}>
                         <Download className="h-3 w-3" /> PDF
@@ -377,7 +379,7 @@ export function DocumentosTribunal({ exercicioId, entidadeId, readOnly = false }
                       size="sm"
                       className="gap-1.5 text-xs"
                       onClick={() => {
-                        const entity = mockEntities.find((e) => e.id === entidadeId);
+                        const entity = findById(entidadeId);
                         exportDocumentoTribunalPdf(selectedDoc, entity?.name || "Entidade");
                       }}
                     >

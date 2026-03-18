@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
-import { mockFiscalYears, mockEntities, formatKz } from "@/data/mockData";
+import { mockFiscalYears, formatKz } from "@/data/mockData";
+import { useEntities } from "@/hooks/useEntities";
 import { FiscalYear, STATUS_LABELS } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ import { toast } from "sonner";
 
 const Exercicios = () => {
   const navigate = useNavigate();
+  const { entities: allEntities } = useEntities();
   const [fiscalYears, setFiscalYears] = useState<FiscalYear[]>(mockFiscalYears);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<FiscalYear | null>(null);
@@ -64,7 +66,7 @@ const Exercicios = () => {
 
     if (editing) {
       // Edit mode: single entity
-      const entity = mockEntities.find((e) => e.id === form.entityId);
+      const entity = allEntities.find((e) => e.id === form.entityId);
       if (!entity) {
         toast.error("Seleccione uma entidade.");
         return;
@@ -93,7 +95,7 @@ const Exercicios = () => {
       const duplicates: string[] = [];
       const newFys: FiscalYear[] = [];
       for (const eid of selectedEntityIds) {
-        const entity = mockEntities.find((e) => e.id === eid);
+        const entity = allEntities.find((e) => e.id === eid);
         if (!entity) continue;
         const exists = fiscalYears.find((fy) => fy.entityId === eid && fy.year === form.year);
         if (exists) {
@@ -184,7 +186,7 @@ const Exercicios = () => {
                     <SelectValue placeholder="Seleccione a entidade" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockEntities.map((e) => (
+                    {allEntities.map((e) => (
                       <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -197,16 +199,16 @@ const Exercicios = () => {
                   <div className="p-2 border-b border-border bg-muted/30">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <Checkbox
-                        checked={selectedEntityIds.length === mockEntities.length}
+                        checked={selectedEntityIds.length === allEntities.length}
                         onCheckedChange={(checked) => {
-                          setSelectedEntityIds(checked ? mockEntities.map((e) => e.id) : []);
+                          setSelectedEntityIds(checked ? allEntities.map((e) => e.id) : []);
                         }}
                       />
-                      <span className="text-sm font-medium">Seleccionar Todas ({mockEntities.length})</span>
+                      <span className="text-sm font-medium">Seleccionar Todas ({allEntities.length})</span>
                     </label>
                   </div>
                   <div className="p-2 space-y-1.5">
-                    {mockEntities.map((e) => {
+                    {allEntities.map((e) => {
                       const alreadyExists = fiscalYears.some((fy) => fy.entityId === e.id && fy.year === form.year);
                       return (
                         <label key={e.id} className="flex items-center gap-2 cursor-pointer py-1 px-1 rounded hover:bg-muted/30">

@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { useSubmissions } from "@/contexts/SubmissionContext";
-import { mockEntities } from "@/data/mockData";
+import { useEntities } from "@/hooks/useEntities";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,6 +65,7 @@ export function PortalLayout({ children }: PortalLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pageTitle = routeTitles[location.pathname] || "Portal";
   const { entity, setEntityId } = usePortalEntity();
+  const { entities: allEntities } = useEntities();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useSubmissions();
   const { logout } = useAuth();
   const entityNotifications = notifications.filter((n) => n.entityId === entity.id);
@@ -96,7 +97,7 @@ export function PortalLayout({ children }: PortalLayoutProps) {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80 max-h-[400px] overflow-auto">
-              {mockEntities.map((e) => {
+              {allEntities.map((e) => {
                 const eName = e.name.split(" - ")[1] || e.name;
                 return (
                   <DropdownMenuItem

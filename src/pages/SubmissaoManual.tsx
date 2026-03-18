@@ -16,7 +16,7 @@ import {
 import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
 import { EntidadeDocumentosTab } from "@/components/portal/EntidadeDocumentosTab";
 import { useSubmissions } from "@/contexts/SubmissionContext";
-import { mockEntities } from "@/data/mockData";
+import { useEntities } from "@/hooks/useEntities";
 import { generateCC2Template } from "@/lib/cc2TemplateGenerator";
 import {
   ArrowLeft, FileSpreadsheet, CheckCircle, Upload, FileUp, X, Download,
@@ -33,8 +33,9 @@ const SubmissaoManual = () => {
   const [activeTab, setActiveTab] = useState("balancete");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { submit } = useSubmissions();
+  const { entities: allEntities } = useEntities();
 
-  const entity = mockEntities.find((e) => e.id === selectedEntityId);
+  const entity = allEntities.find((e) => e.id === selectedEntityId);
   const fiscalYearId = entity ? `${entity.id}-${periodo}` : "";
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,7 +88,7 @@ const SubmissaoManual = () => {
                   <SelectValue placeholder="Seleccionar entidade..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockEntities.map((e) => (
+                  {allEntities.map((e) => (
                     <SelectItem key={e.id} value={e.id}>
                       <span className="flex items-center gap-2">
                         <Building2 className="h-3.5 w-3.5 text-muted-foreground" />

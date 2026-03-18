@@ -5,12 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useSubmissions } from "@/contexts/SubmissionContext";
-import { mockEntities } from "@/data/mockData";
+import { useEntities } from "@/hooks/useEntities";
 import { obterEstatisticasDashboard, obterEstatisticasPorPerfil } from "@/hooks/useBackendFunctions";
 import { FileBarChart, CheckCircle, Clock, AlertTriangle, ArrowRight, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const TecnicoDashboard = () => {
+  const { entities: allEntities } = useEntities();
   const navigate = useNavigate();
   const location = window.location.pathname;
   const prefix = location.startsWith("/contadoria") ? "/contadoria" : "/tecnico";
@@ -65,7 +66,7 @@ const TecnicoDashboard = () => {
           <CardContent className="space-y-2">
             {emAnalise.length > 0 ? (
               emAnalise.map((s) => {
-                const ent = mockEntities.find((e) => e.id === s.entityId);
+                const ent = allEntities.find((e) => e.id === s.entityId);
                 const year = s.fiscalYearId.split("-").pop() || "";
                 return (
                   <div key={s.fiscalYearId} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 transition-colors">

@@ -17,7 +17,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { mockFiscalYears, mockEntities, submissionChecklist, formatKz } from "@/data/mockData";
+import { mockFiscalYears, submissionChecklist, formatKz } from "@/data/mockData";
+import { useEntities } from "@/hooks/useEntities";
 import { getDocumentRequirements } from "@/components/portal/EntidadeDocumentosTab";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -37,6 +38,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Secretaria = () => {
   const { recepcionar, rejeitar, submissions, getUploadedDocs } = useSubmissions();
+  const { entities: allEntities } = useEntities();
   const { user } = useAuth();
   const isChefe = user?.role === "Chefe da Secretaria-Geral" ||
     user?.role === "Administrador do Sistema" ||
@@ -77,7 +79,7 @@ const Secretaria = () => {
 
   const handleEncaminharValidacao = async (fyId: string) => {
     const fy = submetidos.find((f) => f.id === fyId) || mockFiscalYears.find((f) => f.id === fyId);
-    const entity = fy ? mockEntities.find((e) => e.id === fy.entityId) : null;
+    const entity = fy ? allEntities.find((e) => e.id === fy.entityId) : null;
     if (!fy || !entity) return;
 
     setEncaminhando(fyId);
@@ -174,7 +176,7 @@ const Secretaria = () => {
   };
 
   const selectedFy = submetidos.find((fy) => fy.id === selectedId);
-  const selectedEntity = selectedFy ? mockEntities.find((e) => e.id === selectedFy.entityId) : null;
+  const selectedEntity = selectedFy ? allEntities.find((e) => e.id === selectedFy.entityId) : null;
 
   const requiredItems = submissionChecklist.filter((c) => c.required);
   const allRequiredChecked = requiredItems.every((item) => checkedDocs[item.id]);
@@ -765,7 +767,7 @@ const Secretaria = () => {
                 </div>
               ) : (
                 submetidos.filter((fy) => !actasGeradas.includes(fy.id)).map((fy) => {
-                  const entity = mockEntities.find((e) => e.id === fy.entityId);
+                  const entity = allEntities.find((e) => e.id === fy.entityId);
                   return (
                     <button
                       key={fy.id}

@@ -18,7 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
-import { mockEntities } from "@/data/mockData";
+import { useEntities } from "@/hooks/useEntities";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,6 +69,7 @@ export function TecnicoLayout({ children }: TecnicoLayoutProps) {
   const routeTitles = buildRouteTitles(prefix);
   const pageTitle = routeTitles[location.pathname] || (isContadoria ? "Contadoria Geral" : "Técnico");
   const { entity, setEntityId } = usePortalEntity();
+  const { entities: allEntities } = useEntities();
   const { user, logout } = useAuth();
 
   const shortName = entity.name.split(" - ")[1] || entity.name.split(" — ")[0] || entity.name;
@@ -100,7 +101,7 @@ export function TecnicoLayout({ children }: TecnicoLayoutProps) {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80 max-h-[400px] overflow-auto">
-              {mockEntities.map((e) => {
+              {allEntities.map((e) => {
                 const eName = e.name.split(" - ")[1] || e.name;
                 return (
                   <DropdownMenuItem

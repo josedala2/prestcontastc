@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { WORKFLOW_STAGES, WORKFLOW_ESTADOS, CATEGORIAS_ENTIDADE, type Processo } from "@/types/workflow";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { gerarNumeroProcesso } from "@/hooks/useBackendFunctions";
-import { mockEntities } from "@/data/mockData";
+import { useEntities } from "@/hooks/useEntities";
 import { EntityTipologia } from "@/types";
 
 // Mapping: workflow category → entity tipologias
@@ -33,6 +33,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const GestaoProcessos = () => {
+  const { entities: allEntities } = useEntities();
   const navigate = useNavigate();
   const [processos, setProcessos] = useState<Processo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -307,7 +308,7 @@ const GestaoProcessos = () => {
                       <Select
                         value={newProcess.entity_id || ""}
                         onValueChange={v => {
-                          const ent = mockEntities.find(e => e.id === v);
+                          const ent = allEntities.find(e => e.id === v);
                           if (ent) setNewProcess(p => ({ ...p, entity_id: ent.id, entity_name: ent.name }));
                         }}
                       >
@@ -315,7 +316,7 @@ const GestaoProcessos = () => {
                         <SelectContent>
                           {(() => {
                             const tipologias = CATEGORIA_TIPOLOGIA_MAP[newProcess.categoria_entidade] || [];
-                            const filtered = mockEntities.filter(e => tipologias.includes(e.tipologia));
+                            const filtered = allEntities.filter(e => tipologias.includes(e.tipologia));
                             if (filtered.length === 0) return <SelectItem value="_none" disabled>Nenhuma entidade nesta categoria</SelectItem>;
                             return filtered.map(e => (
                               <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>

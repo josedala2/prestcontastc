@@ -15,7 +15,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { mockEntities, submissionChecklist } from "@/data/mockData";
+import { submissionChecklist } from "@/data/mockData";
+import { useEntities } from "@/hooks/useEntities";
 import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { exportActaRecepcaoPdf } from "@/lib/exportUtils";
@@ -46,7 +47,8 @@ interface SubmissionDoc {
 const SubmissaoDetalhe = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const entity = mockEntities.find((e) => e.id === id) || mockEntities[0];
+  const { entities: allEntities } = useEntities();
+  const entity = allEntities.find((e) => e.id === id) || allEntities[0];
   const periodo = "2024";
 
   const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
