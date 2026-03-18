@@ -36,7 +36,7 @@ const STATUS_CONFIG = {
 };
 
 const Esclarecimentos = () => {
-  const [requests, setRequests] = useState<ClarificationRequest[]>(mockClarifications);
+  const [requests, setRequests] = useState<ClarificationRequest[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<ClarificationRequest | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("todos");
