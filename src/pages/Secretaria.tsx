@@ -1102,17 +1102,16 @@ const Secretaria = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog de Rejeição / Devolução */}
       <AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
-        <AlertDialogContent className="max-w-lg">
+        <AlertDialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              Devolver Submissão
+              Devolver Submissão e Gerar Acta de Devolução
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-4">
-                <p>A submissão será devolvida à entidade para correção. Indique o motivo da devolução.</p>
+                <p>A submissão será devolvida à entidade para correção. Será gerada uma <strong className="text-foreground">Acta de Devolução</strong> com a fundamentação indicada.</p>
                 {selectedFy && selectedEntity && (
                   <div className="bg-muted/50 rounded-lg p-3 space-y-2 text-sm">
                     <div className="flex justify-between"><span className="text-muted-foreground">Entidade</span><span className="font-medium text-foreground">{selectedEntity.name}</span></div>
@@ -1120,19 +1119,41 @@ const Secretaria = () => {
                     <div className="flex justify-between"><span className="text-muted-foreground">Documentos verificados</span><span className="font-medium text-foreground">{checkedCount}/{submissionChecklist.length}</span></div>
                   </div>
                 )}
+
+                {/* Documentos em falta */}
+                {(() => {
+                  const emFalta = submissionChecklist.filter((item) => item.required && !checkedDocs[item.id]);
+                  if (emFalta.length === 0) return null;
+                  return (
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-foreground">
+                        Documentos obrigatórios em falta ({emFalta.length})
+                      </Label>
+                      <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3 space-y-1.5">
+                        {emFalta.map((item) => (
+                          <div key={item.id} className="flex items-center gap-2 text-sm text-destructive">
+                            <XCircle className="h-3.5 w-3.5 flex-shrink-0" />
+                            <span>{item.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 <div className="space-y-2">
                   <Label htmlFor="motivo-rejeicao" className="text-sm font-medium text-foreground">
-                    Motivo da devolução <span className="text-destructive">*</span>
+                    Fundamentação da devolução <span className="text-destructive">*</span>
                   </Label>
                   <Textarea
                     id="motivo-rejeicao"
                     placeholder="Ex: Faltam os modelos de prestação de contas nº 1 a 10 e o inventário de bens patrimoniais..."
                     value={motivoRejeicao}
                     onChange={(e) => setMotivoRejeicao(e.target.value)}
-                    className="min-h-[100px]"
-                    maxLength={500}
+                    className="min-h-[120px]"
+                    maxLength={1000}
                   />
-                  <p className="text-[10px] text-muted-foreground text-right">{motivoRejeicao.length}/500</p>
+                  <p className="text-[10px] text-muted-foreground text-right">{motivoRejeicao.length}/1000</p>
                 </div>
               </div>
             </AlertDialogDescription>
@@ -1144,8 +1165,8 @@ const Secretaria = () => {
               disabled={!motivoRejeicao.trim()}
               className="gap-2 bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              <Undo2 className="h-4 w-4" />
-              Confirmar Devolução
+              <FileText className="h-4 w-4" />
+              Devolver e Gerar Acta
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
