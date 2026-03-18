@@ -17,7 +17,7 @@ interface EntityProfilePanelProps {
 
 export function EntityProfilePanel({ entity, fiscalYear, children }: EntityProfilePanelProps) {
   const { user } = useAuth();
-  const entityFiscalYears = mockFiscalYears.filter((fy) => fy.entityId === entity.id);
+  const { fiscalYears: entityFiscalYears } = useFiscalYears(entity.id);
   const entityIndicators = mockFinancialIndicators.filter((fi) => fi.entityId === entity.id);
 
   // Hide financial data for Secretaria roles
