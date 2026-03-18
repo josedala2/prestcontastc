@@ -99,7 +99,7 @@ const Relatorios = () => {
   );
   const totalProveitosOp = proveitosOperacionais.reduce((s, l) => s + Math.abs(l.balance), 0);
 
-  const proveitosFinanceiros = mockTrialBalance.filter(
+  const proveitosFinanceiros = trialBalance.filter(
     (l) => ["66", "67"].includes(l.accountCode)
   );
   const totalProveitosFin = proveitosFinanceiros.reduce((s, l) => s + Math.abs(l.balance), 0);
