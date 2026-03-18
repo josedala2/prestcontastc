@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
-import { mockAccounts } from "@/data/mockData";
+import { useAccounts } from "@/hooks/useFinancialData";
 import { Account } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
