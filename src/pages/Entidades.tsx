@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
 import { useEntities } from "@/hooks/useEntities";
 import { Entity, TIPOLOGIA_LABELS, TIPOLOGIA_GROUPS, RESOLUCAO_LABELS } from "@/types";
