@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { mockDocumentosTribunal } from "@/data/mockData";
+import { useDocumentosTribunal } from "@/hooks/useFinancialData";
 import { useEntities } from "@/hooks/useEntities";
 import { exportDocumentoTribunalPdf } from "@/lib/exportUtils";
 import {
@@ -60,8 +60,8 @@ const TIPO_ICONS: Record<DocumentoTribunalTipo, React.ReactNode> = {
 
 export function DocumentosTribunal({ exercicioId, entidadeId, readOnly = false }: DocumentosTribunalProps) {
   const { findById } = useEntities();
+  const { documentos: dbDocumentos, loading: loadingDocs, addDocumento, updateDocumento } = useDocumentosTribunal(exercicioId, entidadeId);
   const [documentos, setDocumentos] = useState<DocumentoTribunal[]>(
-    mockDocumentosTribunal.filter((d) => d.exercicioId === exercicioId && d.entidadeId === entidadeId)
   );
   const [selectedDoc, setSelectedDoc] = useState<DocumentoTribunal | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);

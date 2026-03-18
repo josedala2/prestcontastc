@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
 import { submissionChecklist, formatKz, defaultValidations as mockValidations, defaultAttachments as mockAttachments } from "@/lib/dataUtils";
-import { mockAuditLog } from "@/data/mockData";
+import { useAuditLog } from "@/hooks/useFinancialData";
 import { useFiscalYears } from "@/hooks/useFiscalYears";
 import { useEntities } from "@/hooks/useEntities";
 import { STATUS_LABELS, VALIDATION_LEVEL_LABELS } from "@/types";
@@ -382,7 +382,8 @@ const ExercicioDetalhe = () => {
               <div className="relative">
                 <div className="absolute left-[15px] top-0 bottom-0 w-px bg-border" />
                 <div className="space-y-4">
-                  {mockAuditLog.map((entry) => (
+                  {[] as any[]}
+                  {/* Audit log loaded from backend - see Auditoria page */}
                     <div key={entry.id} className="flex gap-4 relative">
                       <div className={`z-10 w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                         entry.actionType === "importacao" ? "bg-primary/10 text-primary" :

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/ui-custom/PageElements";
-import { mockAccounts } from "@/data/mockData";
+import { useAccounts } from "@/hooks/useFinancialData";
 import { Account } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,12 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 const PlanoContas = () => {
-  const [accounts, setAccounts] = useState<Account[]>(mockAccounts);
+  const { accounts: dbAccounts, loading: loadingAccounts } = useAccounts();
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  
+  // Sync with DB data
+  useState(() => { if (dbAccounts.length > 0) setAccounts(dbAccounts); });
+  if (accounts.length === 0 && dbAccounts.length > 0) setAccounts(dbAccounts);
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);

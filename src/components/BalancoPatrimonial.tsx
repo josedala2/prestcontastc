@@ -1,5 +1,5 @@
 import { formatKz, defaultFinancialIndicators } from "@/lib/dataUtils";
-import { mockFinancialIndicators } from "@/data/mockData";
+import { useFinancialIndicators } from "@/hooks/useFinancialData";
 import { FinancialIndicators } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -23,11 +23,12 @@ interface BalancoLine {
 }
 
 export function BalancoPatrimonial({ entityId, fiscalYearId, year }: BalancoPatrimonialProps) {
-  const indicators = mockFinancialIndicators.find(
+  const { indicators: allIndicators } = useFinancialIndicators(entityId);
+  const indicators = allIndicators.find(
     (fi) => fi.entityId === entityId && fi.fiscalYearId === fiscalYearId
   );
 
-  const prevIndicators = mockFinancialIndicators.find(
+  const prevIndicators = allIndicators.find(
     (fi) => fi.entityId === entityId && fi.year === year - 1
   );
 

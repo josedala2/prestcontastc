@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building2, Phone, MapPin, Calendar, Hash, Briefcase, Globe } from "lucide-react";
 import { formatKz } from "@/lib/dataUtils";
-import { mockFinancialIndicators } from "@/data/mockData";
+import { useFinancialIndicators } from "@/hooks/useFinancialData";
 import { useFiscalYears } from "@/hooks/useFiscalYears";
 import { EntityExerciciosTab } from "./EntityExerciciosTab";
 import { EntityFinanceiroTab } from "./EntityFinanceiroTab";
@@ -19,7 +19,7 @@ interface EntityProfilePanelProps {
 export function EntityProfilePanel({ entity, fiscalYear, children }: EntityProfilePanelProps) {
   const { user } = useAuth();
   const { fiscalYears: entityFiscalYears } = useFiscalYears(entity.id);
-  const entityIndicators = mockFinancialIndicators.filter((fi) => fi.entityId === entity.id);
+  const { indicators: entityIndicators } = useFinancialIndicators(entity.id);
 
   // Hide financial data for Secretaria roles
   const showFinanceiro = user?.role !== "Chefe da Secretaria-Geral" &&
