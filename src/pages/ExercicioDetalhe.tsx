@@ -2,15 +2,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
 import {
-  mockFiscalYears,
-  mockEntities,
   mockValidations,
   mockAttachments,
   mockAuditLog,
-  mockClarifications,
   submissionChecklist,
   formatKz,
 } from "@/data/mockData";
+import { useFiscalYears } from "@/hooks/useFiscalYears";
+import { useEntities } from "@/hooks/useEntities";
 import { STATUS_LABELS, VALIDATION_LEVEL_LABELS } from "@/types";
 import { BalancoPatrimonial } from "@/components/BalancoPatrimonial";
 import { AvaliacaoConta } from "@/components/AvaliacaoConta";
@@ -44,9 +43,11 @@ import {
 const ExercicioDetalhe = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { allFiscalYears } = useFiscalYears();
+  const { findById } = useEntities();
 
-  const fy = mockFiscalYears.find((f) => f.id === id);
-  const entity = fy ? mockEntities.find((e) => e.id === fy.entityId) : null;
+  const fy = allFiscalYears.find((f) => f.id === id);
+  const entity = fy ? findById(fy.entityId) : null;
 
   if (!fy) {
     return (
@@ -63,7 +64,7 @@ const ExercicioDetalhe = () => {
 
   const daysLeft = Math.ceil((new Date(fy.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   const isOverdue = daysLeft < 0 && !["conforme", "nao_conforme", "submetido", "em_analise", "com_pedidos"].includes(fy.status);
-  const clarifications = mockClarifications.filter((c) => c.exercicioId === fy.id);
+  const clarifications: any[] = []; // TODO: load from DB
   const validationsByLevel = {
     completude: mockValidations.filter((v) => v.level === "completude"),
     consistencia: mockValidations.filter((v) => v.level === "consistencia"),

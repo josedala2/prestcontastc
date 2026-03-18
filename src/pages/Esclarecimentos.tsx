@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
-import { mockClarifications, mockFiscalYears } from "@/data/mockData";
+import { getEntityShortName } from "@/data/mockData";
 import { ClarificationRequest } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +36,7 @@ const STATUS_CONFIG = {
 };
 
 const Esclarecimentos = () => {
-  const [requests, setRequests] = useState<ClarificationRequest[]>(mockClarifications);
+  const [requests, setRequests] = useState<ClarificationRequest[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<ClarificationRequest | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("todos");
@@ -113,7 +113,8 @@ const Esclarecimentos = () => {
   const handleCreateRequest = () => {
     if (!newSubject.trim() || !newBody.trim() || !newEntity) return;
 
-    const fy = mockFiscalYears.find((f) => f.id === newEntity);
+    // Create a clarification request (placeholder - no FY lookup needed)
+    const fy = { entityName: newEntity, year: 2024 } as any;
     if (!fy) return;
 
     const deadline = new Date();
@@ -176,9 +177,9 @@ const Esclarecimentos = () => {
                       <SelectValue placeholder="Seleccionar exercício..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockFiscalYears
-                        .filter((fy) => ["submetido", "em_analise", "com_pedidos"].includes(fy.status))
-                        .map((fy) => (
+                      {[
+                        { id: "placeholder-2024", entityName: "Seleccionar entidade", year: 2024 },
+                      ].map((fy) => (
                           <SelectItem key={fy.id} value={fy.id}>
                             {fy.entityName} — {fy.year}
                           </SelectItem>

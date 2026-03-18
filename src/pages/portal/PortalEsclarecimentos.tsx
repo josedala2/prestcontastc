@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PortalLayout } from "@/components/PortalLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
-import { mockClarifications } from "@/data/mockData";
+// Esclarecimentos are loaded dynamically
 import { ClarificationRequest } from "@/types";
 import { getEntityShortName } from "@/data/mockData";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
@@ -32,8 +32,8 @@ const STATUS_CONFIG = {
 const PortalEsclarecimentos = () => {
   const { entity } = usePortalEntity();
   
-  // Filter clarifications for current entity
-  const entityClarifications = mockClarifications.filter((cr) => cr.entityId === entity.id);
+  // Clarifications start empty (will be loaded from DB in future)
+  const entityClarifications: ClarificationRequest[] = [];
 
   const [requests, setRequests] = useState<ClarificationRequest[]>(entityClarifications);
   const [selectedRequest, setSelectedRequest] = useState<ClarificationRequest | null>(null);

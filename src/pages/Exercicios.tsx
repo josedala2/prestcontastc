@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader, StatusBadge } from "@/components/ui-custom/PageElements";
-import { mockFiscalYears, formatKz } from "@/data/mockData";
+import { formatKz } from "@/data/mockData";
 import { useEntities } from "@/hooks/useEntities";
+import { useFiscalYears } from "@/hooks/useFiscalYears";
 import { FiscalYear, STATUS_LABELS } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +21,9 @@ import { toast } from "sonner";
 const Exercicios = () => {
   const navigate = useNavigate();
   const { entities: allEntities } = useEntities();
-  const [fiscalYears, setFiscalYears] = useState<FiscalYear[]>(mockFiscalYears);
+  const { allFiscalYears, loading: loadingFY, refresh: refreshFY } = useFiscalYears();
+  const [fiscalYears, setFiscalYears] = useState<FiscalYear[]>([]);
+  useEffect(() => { setFiscalYears(allFiscalYears); }, [allFiscalYears]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<FiscalYear | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);

@@ -17,7 +17,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { mockFiscalYears, submissionChecklist, formatKz } from "@/data/mockData";
+import { submissionChecklist, formatKz } from "@/data/mockData";
+import { useFiscalYears } from "@/hooks/useFiscalYears";
 import { useEntities } from "@/hooks/useEntities";
 import { getDocumentRequirements } from "@/components/portal/EntidadeDocumentosTab";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,32 +41,29 @@ const Secretaria = () => {
   const { recepcionar, rejeitar, submissions, getUploadedDocs } = useSubmissions();
   const { entities: allEntities } = useEntities();
   const { user } = useAuth();
+  const { allFiscalYears: allFYs } = useFiscalYears();
   const isChefe = user?.role === "Chefe da Secretaria-Geral" ||
     user?.role === "Administrador do Sistema" ||
     user?.role === "Presidente do Tribunal de Contas";
 
-  // Merge: mock "submetido" + dynamically submitted via Portal ("pendente" in SubmissionContext)
+  // Merge: DB fiscal years with status "submetido" + dynamically submitted via Portal
   const submetidos = useMemo(() => {
-    // Start with mock data that has status "submetido"
-    const fromMock = mockFiscalYears.filter((fy) => fy.status === "submetido");
+    const fromDB = allFYs.filter((fy) => fy.status === "submetido");
     
-    // Add fiscal years that were dynamically submitted via Portal
     const dynamicSubmissions = submissions.filter((s) => s.status === "pendente");
     const dynamicFys = dynamicSubmissions
       .map((s) => {
-        // Find the fiscal year in mockData (it may have status "rascunho")
-        const fy = mockFiscalYears.find(
+        const fy = allFYs.find(
           (f) => f.entityId === s.entityId && `${f.entityId}-${f.year}` === s.fiscalYearId
         );
         if (!fy) return null;
-        // Don't duplicate if already in fromMock
-        if (fromMock.some((m) => m.id === fy.id)) return null;
+        if (fromDB.some((m) => m.id === fy.id)) return null;
         return { ...fy, status: "submetido" as const, submittedAt: s.submittedAt || new Date().toISOString() };
       })
-      .filter(Boolean) as typeof fromMock;
+      .filter(Boolean) as typeof fromDB;
 
-    return [...fromMock, ...dynamicFys];
-  }, [submissions]);
+    return [...fromDB, ...dynamicFys];
+  }, [submissions, allFYs]);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
@@ -78,7 +76,7 @@ const Secretaria = () => {
   const [encaminhando, setEncaminhando] = useState<string | null>(null);
 
   const handleEncaminharValidacao = async (fyId: string) => {
-    const fy = submetidos.find((f) => f.id === fyId) || mockFiscalYears.find((f) => f.id === fyId);
+    const fy = submetidos.find((f) => f.id === fyId) || allFYs.find((f) => f.id === fyId);
     const entity = fy ? allEntities.find((e) => e.id === fy.entityId) : null;
     if (!fy || !entity) return;
 
@@ -295,8 +293,8 @@ const Secretaria = () => {
 
   // Dashboard stats
   const pendentesCount = submetidos.length - actasGeradas.length;
-  const emAnalise = mockFiscalYears.filter((fy) => fy.status === "em_analise").length;
-  const totalSubmetidos = mockFiscalYears.filter((fy) => ["submetido", "em_analise", "com_pedidos", "conforme", "nao_conforme"].includes(fy.status)).length;
+  const emAnalise = allFYs.filter((fy) => fy.status === "em_analise").length;
+  const totalSubmetidos = allFYs.filter((fy) => ["submetido", "em_analise", "com_pedidos", "conforme", "nao_conforme"].includes(fy.status)).length;
   const hoje = new Date();
   const submetidosEsteMes = submetidos.filter((fy) => {
     if (!fy.submittedAt) return false;
@@ -309,14 +307,14 @@ const Secretaria = () => {
   const recentNotifications = notifications.slice(0, 5);
   const unreadNotifCount = notifications.filter((n) => !n.read).length;
 
-  const totalEntidades = new Set(mockFiscalYears.map((fy) => fy.entityId)).size;
-  const conformeCount = mockFiscalYears.filter((fy) => fy.status === "conforme").length;
-  const naoConformeCount = mockFiscalYears.filter((fy) => fy.status === "nao_conforme").length;
-  const rascunhoCount = mockFiscalYears.filter((fy) => fy.status === "rascunho").length;
-  const comPedidosCount = mockFiscalYears.filter((fy) => fy.status === "com_pedidos").length;
+  const totalEntidades = new Set(allFYs.map((fy) => fy.entityId)).size;
+  const conformeCount = allFYs.filter((fy) => fy.status === "conforme").length;
+  const naoConformeCount = allFYs.filter((fy) => fy.status === "nao_conforme").length;
+  const rascunhoCount = allFYs.filter((fy) => fy.status === "rascunho").length;
+  const comPedidosCount = allFYs.filter((fy) => fy.status === "com_pedidos").length;
 
   // Deadlines
-  const deadlinesSoon = mockFiscalYears
+  const deadlinesSoon = allFYs
     .filter((fy) => !["conforme", "nao_conforme"].includes(fy.status))
     .map((fy) => ({
       ...fy,
@@ -348,7 +346,7 @@ const Secretaria = () => {
     const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
     const fromContext = getUploadedDocs(selectedFy.entityId, fiscalYearId);
     // Mock data entries: assume all docs uploaded
-    if (fromContext.length === 0 && mockFiscalYears.some(f => f.id === selectedFy.id && f.status === "submetido")) {
+    if (fromContext.length === 0 && allFYs.some(f => f.id === selectedFy.id && f.status === "submetido")) {
       return submissionChecklist.map(c => c.id);
     }
     return fromContext;
@@ -809,7 +807,7 @@ const Secretaria = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 {actasGeradas.map((fyId) => {
-                  const fy = mockFiscalYears.find((f) => f.id === fyId);
+                  const fy = allFYs.find((f) => f.id === fyId) || submetidos.find((f) => f.id === fyId);
                   if (!fy) return null;
                   const isEncaminhado = encaminhados.includes(fyId);
                   const isEncaminhando = encaminhando === fyId;

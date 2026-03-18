@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building2, Phone, MapPin, Calendar, Hash, Briefcase, Globe } from "lucide-react";
-import { mockFiscalYears, mockFinancialIndicators, formatKz } from "@/data/mockData";
+import { mockFinancialIndicators, formatKz } from "@/data/mockData";
+import { useFiscalYears } from "@/hooks/useFiscalYears";
 import { EntityExerciciosTab } from "./EntityExerciciosTab";
 import { EntityFinanceiroTab } from "./EntityFinanceiroTab";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,7 +17,7 @@ interface EntityProfilePanelProps {
 
 export function EntityProfilePanel({ entity, fiscalYear, children }: EntityProfilePanelProps) {
   const { user } = useAuth();
-  const entityFiscalYears = mockFiscalYears.filter((fy) => fy.entityId === entity.id);
+  const { fiscalYears: entityFiscalYears } = useFiscalYears(entity.id);
   const entityIndicators = mockFinancialIndicators.filter((fi) => fi.entityId === entity.id);
 
   // Hide financial data for Secretaria roles
