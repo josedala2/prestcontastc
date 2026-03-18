@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,15 +7,35 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { AppLayout } from "@/components/AppLayout";
 import { toast } from "sonner";
-import { BookOpen, FileText, CheckCircle2, Loader2, Lock, Files, Eye, Download, FileArchive, PackageOpen } from "lucide-react";
+import { BookOpen, FileText, CheckCircle2, Loader2, Lock, Files, Eye, Download, FileArchive, PackageOpen, Plus, Upload, X, Tag } from "lucide-react";
 import { generateCapaProcesso, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { PDFDocument } from "pdf-lib";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
+
+const TIPO_DOCUMENTO_OPTIONS = [
+  "Ofício de Remessa",
+  "Despacho",
+  "Nota Interna",
+  "Relatório de Verificação",
+  "Termo de Notificação",
+  "Auto de Diligência",
+  "Parecer Técnico",
+  "Certidão",
+  "Declaração",
+  "Guia de Cobrança",
+  "Acta",
+  "Requerimento",
+  "Cópia Autenticada",
+  "Outro",
+];
 
 interface Processo {
   id: string;
