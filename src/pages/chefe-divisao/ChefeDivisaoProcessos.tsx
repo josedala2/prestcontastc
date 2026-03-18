@@ -560,6 +560,7 @@ export default function ChefeDivisaoProcessos() {
             if (!open) {
               setPreviewUrl(null);
               setPreviewName("");
+              setPreviewMime(null);
             }
           }}
         >
