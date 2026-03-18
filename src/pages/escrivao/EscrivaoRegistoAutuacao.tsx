@@ -448,6 +448,62 @@ export default function EscrivaoRegistoAutuacao() {
     }
   };
 
+  const handleUploadDocument = async () => {
+    if (!selectedProcesso || !uploadFile || !uploadTipo) return;
+    setUploading(true);
+    try {
+      const sanitizedName = uploadFile.name.replace(/[^a-zA-Z0-9À-ú._-]/g, "_");
+      const filePath = `${selectedProcesso.id}/${Date.now()}_${sanitizedName}`;
+
+      const { error: storageError } = await supabase.storage
+        .from("processo-documentos")
+        .upload(filePath, uploadFile, {
+          contentType: uploadFile.type,
+          upsert: false,
+        });
+
+      if (storageError) throw storageError;
+
+      await supabase.from("processo_documentos").insert({
+        processo_id: selectedProcesso.id,
+        tipo_documento: uploadTipo,
+        nome_ficheiro: uploadFile.name,
+        caminho_ficheiro: filePath,
+        estado: "pendente",
+        obrigatorio: false,
+        observacoes: uploadObservacoes || `Anexado pelo ${executadoPor}`,
+      } as any);
+
+      // Log in history
+      await supabase.from("processo_historico").insert({
+        processo_id: selectedProcesso.id,
+        etapa_anterior: selectedProcesso.etapa_atual,
+        etapa_seguinte: selectedProcesso.etapa_atual,
+        estado_anterior: selectedProcesso.estado,
+        estado_seguinte: selectedProcesso.estado,
+        acao: `Documento anexado: ${uploadTipo} — ${uploadFile.name}`,
+        executado_por: executadoPor,
+        perfil_executor: "Escrivão dos Autos",
+        observacoes: uploadObservacoes || null,
+        documentos_gerados: [uploadTipo],
+      } as any);
+
+      toast.success(`Documento "${uploadTipo}" anexado com sucesso`);
+
+      // Reset form & refresh docs
+      setUploadFile(null);
+      setUploadTipo("");
+      setUploadObservacoes("");
+      setShowUploadForm(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      fetchAllDocuments(selectedProcesso);
+    } catch (err: any) {
+      toast.error(`Erro ao anexar documento: ${err.message}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const isLocked = autuado || (selectedProcesso && selectedProcesso.etapa_atual > 5);
 
   const submissionDocs = allDocs.filter(d => d.origem === "submissao");
