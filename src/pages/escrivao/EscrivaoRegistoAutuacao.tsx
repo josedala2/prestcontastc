@@ -70,6 +70,7 @@ interface DocItem {
   bucket: string;
   data: string;
   estado?: string;
+  ordem: number;
 }
 
 export default function EscrivaoRegistoAutuacao() {
