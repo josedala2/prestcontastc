@@ -22,7 +22,7 @@ const Relatorios = () => {
     trialBalance.filter((l) => l.accountCode.startsWith(prefix) && l.accountCode.length === 2);
 
   const filterByCode = (code: string) =>
-    mockTrialBalance.filter((l) => l.accountCode === code);
+    trialBalance.filter((l) => l.accountCode === code);
   // ══════════════════════════════════════════════════
   // BALANÇO PATRIMONIAL — conforme PGC Angola
   // ══════════════════════════════════════════════════
