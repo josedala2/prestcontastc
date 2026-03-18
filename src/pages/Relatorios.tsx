@@ -15,24 +15,24 @@ import { ComparacaoAnual } from "@/components/relatorios/ComparacaoAnual";
 const COLORS = ["hsl(210,70%,28%)", "hsl(170,50%,42%)", "hsl(38,92%,50%)", "hsl(0,72%,51%)", "hsl(280,60%,50%)", "hsl(150,50%,35%)"];
 
 const Relatorios = () => {
-  const { trialBalance: mockTrialBalance, loading: loadingTB } = useTrialBalance("1", "fy1");
+  const { trialBalance, loading: loadingTB } = useTrialBalance("1", "fy1");
 
   // ─── Helper: filtrar contas por prefixo de código (nível 2 = 2 dígitos) ───
   const filterByPrefix = (prefix: string) =>
-    mockTrialBalance.filter((l) => l.accountCode.startsWith(prefix) && l.accountCode.length === 2);
+    trialBalance.filter((l) => l.accountCode.startsWith(prefix) && l.accountCode.length === 2);
 
   const filterByCode = (code: string) =>
-    mockTrialBalance.filter((l) => l.accountCode === code);
+    trialBalance.filter((l) => l.accountCode === code);
   // ══════════════════════════════════════════════════
   // BALANÇO PATRIMONIAL — conforme PGC Angola
   // ══════════════════════════════════════════════════
 
   // ── ACTIVO NÃO CORRENTE (Classe 1) ──
   // Contas: 11-14 (bruto) menos 18 (amortizações) e 19 (provisões)
-  const activoNCBruto = mockTrialBalance.filter(
+  const activoNCBruto = trialBalance.filter(
     (l) => ["11", "12", "13", "14"].includes(l.accountCode)
   );
-  const activoNCContra = mockTrialBalance.filter(
+  const activoNCContra = trialBalance.filter(
     (l) => ["18", "19"].includes(l.accountCode)
   );
   const activoNCLines = [...activoNCBruto, ...activoNCContra];
@@ -40,7 +40,7 @@ const Relatorios = () => {
 
   // ── ACTIVO CORRENTE ──
   // Classe 2 (Existências): 22-28, menos 29 (provisões)
-  const existenciasLines = mockTrialBalance.filter(
+  const existenciasLines = trialBalance.filter(
     (l) => ["22", "23", "24", "25", "26", "27", "28", "29"].includes(l.accountCode)
   );
   const totalExistencias = existenciasLines.reduce((s, l) => s + l.balance, 0);
@@ -48,7 +48,7 @@ const Relatorios = () => {
   // Classe 3 — Classificação por saldo: devedores → Activo, credores → Passivo
   // Excepção: conta 38 (provisão cobrança duvidosa) é sempre contra-activo
   const classe3Codes = ["31", "32", "33", "34", "35", "36", "37", "39"];
-  const classe3Lines = mockTrialBalance.filter(
+  const classe3Lines = trialBalance.filter(
     (l) => classe3Codes.includes(l.accountCode)
   );
   const contasReceberAll = classe3Lines.filter((l) => l.balance > 0);
@@ -59,7 +59,7 @@ const Relatorios = () => {
   const totalProvisoesCD = provisoesCDLines.reduce((s, l) => s + l.balance, 0);
 
   // Classe 4 — Meios Monetários: 41-45, 48, menos 49
-  const meiosMonetariosLines = mockTrialBalance.filter(
+  const meiosMonetariosLines = trialBalance.filter(
     (l) => ["41", "42", "43", "44", "45", "48", "49"].includes(l.accountCode)
   );
   const totalMeiosMonetarios = meiosMonetariosLines.reduce((s, l) => s + l.balance, 0);
@@ -76,10 +76,10 @@ const Relatorios = () => {
 
   // ── CAPITAL PRÓPRIO (Classe 5 + Classe 8) ──
   // Usa -balance: credores (negativos) → positivos; devedores (positivos) → negativos (prejuízos)
-  const capitalLines = mockTrialBalance.filter(
+  const capitalLines = trialBalance.filter(
     (l) => ["51", "52", "53", "54", "55", "56", "57", "58"].includes(l.accountCode)
   );
-  const resultadosLines = mockTrialBalance.filter(
+  const resultadosLines = trialBalance.filter(
     (l) => ["81", "88"].includes(l.accountCode)
   );
   const capitalAllLines = [...capitalLines, ...resultadosLines];
@@ -94,17 +94,17 @@ const Relatorios = () => {
   // ══════════════════════════════════════════════════
 
   // ── PROVEITOS (Classe 6) ──
-  const proveitosOperacionais = mockTrialBalance.filter(
+  const proveitosOperacionais = trialBalance.filter(
     (l) => ["61", "62", "63", "64", "65"].includes(l.accountCode)
   );
   const totalProveitosOp = proveitosOperacionais.reduce((s, l) => s + Math.abs(l.balance), 0);
 
-  const proveitosFinanceiros = mockTrialBalance.filter(
+  const proveitosFinanceiros = trialBalance.filter(
     (l) => ["66", "67"].includes(l.accountCode)
   );
   const totalProveitosFin = proveitosFinanceiros.reduce((s, l) => s + Math.abs(l.balance), 0);
 
-  const proveitosNaoOp = mockTrialBalance.filter(
+  const proveitosNaoOp = trialBalance.filter(
     (l) => ["68", "69"].includes(l.accountCode)
   );
   const totalProveitosNaoOp = proveitosNaoOp.reduce((s, l) => s + Math.abs(l.balance), 0);
@@ -113,17 +113,17 @@ const Relatorios = () => {
   const totalProveitos = totalProveitosOp + totalProveitosFin + totalProveitosNaoOp;
 
   // ── CUSTOS (Classe 7) ──
-  const custosOperacionais = mockTrialBalance.filter(
+  const custosOperacionais = trialBalance.filter(
     (l) => ["71", "72", "73", "74", "75"].includes(l.accountCode)
   );
   const totalCustosOp = custosOperacionais.reduce((s, l) => s + l.balance, 0);
 
-  const custosFinanceiros = mockTrialBalance.filter(
+  const custosFinanceiros = trialBalance.filter(
     (l) => ["76", "77"].includes(l.accountCode)
   );
   const totalCustosFin = custosFinanceiros.reduce((s, l) => s + l.balance, 0);
 
-  const custosNaoOp = mockTrialBalance.filter(
+  const custosNaoOp = trialBalance.filter(
     (l) => ["78", "79"].includes(l.accountCode)
   );
   const totalCustosNaoOp = custosNaoOp.reduce((s, l) => s + l.balance, 0);
@@ -173,7 +173,7 @@ const Relatorios = () => {
   const handleExportExcel = () => {
     setExporting(true);
     try {
-      exportFullReportExcel(mockTrialBalance, [...activoNCLines, ...activoCorrenteLines], passivoLines, capitalAllLines, allCustos, allProveitos);
+      exportFullReportExcel(trialBalance, [...activoNCLines, ...activoCorrenteLines], passivoLines, capitalAllLines, allCustos, allProveitos);
       toast.success("Relatório Excel exportado com sucesso (3 folhas: Balancete, Balanço, DRE).");
     } catch (e) {
       toast.error("Erro ao exportar Excel.");
@@ -188,7 +188,7 @@ const Relatorios = () => {
 
   // ── Helper para renderizar secção de linhas ──
   // mode: 'raw' = balance as-is, 'abs' = Math.abs, 'negate' = -balance (credit→positive)
-  const renderLines = (lines: typeof mockTrialBalance, mode: 'raw' | 'abs' | 'negate' = 'raw') =>
+  const renderLines = (lines: typeof trialBalance, mode: 'raw' | 'abs' | 'negate' = 'raw') =>
     lines.map((l) => {
       const val = mode === 'abs' ? Math.abs(l.balance) : mode === 'negate' ? -l.balance : l.balance;
       return (

@@ -11,18 +11,24 @@ Sistema de Prestação de Contas do Tribunal de Contas de Angola (TCA)
 - processos: Main workflow table with 18-stage tramitação
 - processo_historico: Audit trail for all stage transitions
 - processo_documentos: Documents attached to processes
-- submissions: Entity submission tracking
+- submissions: Entity submission tracking (unique constraint on entity_id+fiscal_year_id)
 - submission_notifications: Notification system
 - actas_recepcao: Reception acts
 - pareceres: Technical opinions
 - fiscal_years: Annual fiscal exercises per entity
 - atividades: Workflow activities/tasks
 - profiles / user_roles: User management
+- trial_balance: Balancete analítico per entity/fiscal year
+- accounts: Plano Geral de Contas (PGC)
+- financial_indicators: KPIs per entity/year
+- audit_log: System audit trail
+- compliance_questions: 27 conformity questions
+- documentos_tribunal: TCA official documents
 
 ## Data Sources
-- Utilities (formatKz, submissionChecklist, getEntityShortName): src/lib/dataUtils.ts
-- Mock data still used for: mockTrialBalance, mockAccounts, mockAuditLog, mockFinancialIndicators, complianceQuestions, mockDocumentosTribunal (in src/data/mockData.ts)
-- Real DB data: entities, fiscal_years, submissions, processos, atividades, notifications
+- All data now from Supabase backend (mockData.ts deleted)
+- Static reference data in src/lib/dataUtils.ts: submissionChecklist, defaultValidations, defaultAttachments, defaultFinancialIndicators
+- Hooks: useTrialBalance, useAccounts, useAuditLog, useFinancialIndicators, useComplianceQuestions, useDocumentosTribunal
 
 ## Workflow
 - 18 stages defined in src/types/workflow.ts

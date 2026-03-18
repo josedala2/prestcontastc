@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { exportBalanceteExcel, exportBalancetePdf } from "@/lib/exportUtils";
 
 const Importacao = () => {
-  const { trialBalance: mockTrialBalance } = useTrialBalance("1", "fy1");
+  const { trialBalance } = useTrialBalance("1", "fy1");
   const [uploaded, setUploaded] = useState(false);
   const [preview, setPreview] = useState(true);
   const [versions, setVersions] = useState<string[]>([]);
@@ -24,7 +24,7 @@ const Importacao = () => {
     const file = e.target.files?.[0];
     if (file) {
       setUploaded(true);
-      toast.success(`Ficheiro "${file.name}" carregado com ${mockTrialBalance.length} linhas.`);
+      toast.success(`Ficheiro "${file.name}" carregado com ${trialBalance.length} linhas.`);
     }
   };
 
@@ -45,7 +45,7 @@ const Importacao = () => {
   const handleExportExcel = () => {
     setExporting(true);
     try {
-      exportBalanceteExcel(mockTrialBalance);
+      exportBalanceteExcel(trialBalance);
       toast.success("Balancete exportado em Excel com sucesso.");
     } catch (e) {
       toast.error("Erro ao exportar.");
@@ -57,7 +57,7 @@ const Importacao = () => {
   const handleExportPdf = () => {
     setExporting(true);
     try {
-      exportBalancetePdf(mockTrialBalance);
+      exportBalancetePdf(trialBalance);
       toast.success("Balancete exportado em PDF com sucesso.");
     } catch (e) {
       toast.error("Erro ao exportar.");
@@ -118,7 +118,7 @@ const Importacao = () => {
             <FileSpreadsheet className="h-5 w-5 text-success" />
             <div className="flex-1">
               <p className="text-sm font-medium text-foreground">Balancete importado</p>
-              <p className="text-xs text-muted-foreground">{mockTrialBalance.length} linhas carregadas • {versions.length} versão(ões) guardada(s)</p>
+              <p className="text-xs text-muted-foreground">{trialBalance.length} linhas carregadas • {versions.length} versão(ões) guardada(s)</p>
             </div>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setPreview(!preview)}>
               {preview ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -153,7 +153,7 @@ const Importacao = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockTrialBalance.map((line) => (
+                  {trialBalance.map((line) => (
                     <TableRow key={line.id}>
                       <TableCell className="font-mono text-xs">{line.accountCode}</TableCell>
                       <TableCell className="text-sm">{line.description}</TableCell>
@@ -165,13 +165,13 @@ const Importacao = () => {
                   <TableRow className="bg-muted/30 font-bold">
                     <TableCell colSpan={2} className="text-sm">TOTAIS</TableCell>
                     <TableCell className="text-right font-mono text-sm">
-                      {formatKz(mockTrialBalance.reduce((s, l) => s + l.debit, 0))}
+                      {formatKz(trialBalance.reduce((s, l) => s + l.debit, 0))}
                     </TableCell>
                     <TableCell className="text-right font-mono text-sm">
-                      {formatKz(mockTrialBalance.reduce((s, l) => s + l.credit, 0))}
+                      {formatKz(trialBalance.reduce((s, l) => s + l.credit, 0))}
                     </TableCell>
                     <TableCell className="text-right font-mono text-sm">
-                      {formatKz(mockTrialBalance.reduce((s, l) => s + l.balance, 0))}
+                      {formatKz(trialBalance.reduce((s, l) => s + l.balance, 0))}
                     </TableCell>
                   </TableRow>
                 </TableBody>
