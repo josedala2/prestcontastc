@@ -46,9 +46,9 @@ export const defaultValidations: ValidationResult[] = [
 export const defaultAttachments: Attachment[] = [
   { id: "a1", name: "Inventário Patrimonial 2024.pdf", type: "application/pdf", category: "inventario", size: 2450000, uploadedAt: "2025-03-15", version: 1, required: true },
   { id: "a2", name: "Reconciliação Bancária - BFA.xlsx", type: "application/xlsx", category: "reconciliacao", size: 1200000, uploadedAt: "2025-03-18", version: 1, required: true },
-  { id: "a3", name: "Extractos Bancários Jan-Dez 2024.pdf", type: "application/pdf", category: "extracto", size: 8700000, uploadedAt: "2025-03-20", version: 1, required: true },
-  { id: "a4", name: "Acta da Assembleia Geral 2024.pdf", type: "application/pdf", category: "acta", size: 1500000, uploadedAt: "2025-03-22", version: 1, required: false },
-  { id: "a5", name: "Relatório do Auditor Externo 2024.pdf", type: "application/pdf", category: "relatorio", size: 3200000, uploadedAt: "2025-04-01", version: 1, required: true },
+  { id: "a3", name: "Extractos Bancários Jan-Dez 2024.pdf", type: "application/pdf", category: "outro", size: 8700000, uploadedAt: "2025-03-20", version: 1, required: true },
+  { id: "a4", name: "Acta da Assembleia Geral 2024.pdf", type: "application/pdf", category: "outro", size: 1500000, uploadedAt: "2025-03-22", version: 1, required: false },
+  { id: "a5", name: "Relatório do Auditor Externo 2024.pdf", type: "application/pdf", category: "parecer", size: 3200000, uploadedAt: "2025-04-01", version: 1, required: true },
 ];
 
 // ─── Indicadores Financeiros placeholder ───
