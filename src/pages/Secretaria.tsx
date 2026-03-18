@@ -346,7 +346,7 @@ const Secretaria = () => {
     const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
     const fromContext = getUploadedDocs(selectedFy.entityId, fiscalYearId);
     // Mock data entries: assume all docs uploaded
-    if (fromContext.length === 0 && mockFiscalYears.some(f => f.id === selectedFy.id && f.status === "submetido")) {
+    if (fromContext.length === 0 && allFYs.some(f => f.id === selectedFy.id && f.status === "submetido")) {
       return submissionChecklist.map(c => c.id);
     }
     return fromContext;
