@@ -208,14 +208,14 @@ export default function ChefeSeccaoDistribuicao() {
         observacoes ? `Obs: ${observacoes}` : "",
       ].filter(Boolean).join(" | ");
 
-      await avancarEtapaProcesso(
-        selectedProcesso.id,
-        8,
-        "em_analise",
-        user.displayName,
-        "Chefe de Secção",
-        obsText
-      );
+      await avancarEtapaProcesso({
+        processoId: selectedProcesso.id,
+        novaEtapa: 8,
+        novoEstado: "em_analise",
+        executadoPor: user.displayName,
+        perfilExecutor: "Chefe de Secção",
+        observacoes: obsText,
+      });
 
       await gerarAtividadesParaEvento("validacao_aprovada", selectedProcesso.id, {
         categoriaEntidade: selectedProcesso.categoria_entidade,
