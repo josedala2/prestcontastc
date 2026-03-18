@@ -105,6 +105,37 @@ export default function EscrivaoRegistoAutuacao() {
   const [previewLoading, setPreviewLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Histórico do Escrivão
+  interface HistoricoItem {
+    id: string;
+    acao: string;
+    created_at: string;
+    observacoes: string | null;
+    documentos_gerados: string[] | null;
+  }
+  const [historico, setHistorico] = useState<HistoricoItem[]>([]);
+  const [loadingHistorico, setLoadingHistorico] = useState(false);
+
+  const fetchHistorico = useCallback(async (processoId: string) => {
+    setLoadingHistorico(true);
+    const { data } = await supabase
+      .from("processo_historico")
+      .select("id, acao, created_at, observacoes, documentos_gerados")
+      .eq("processo_id", processoId)
+      .eq("perfil_executor", "Escrivão dos Autos")
+      .order("created_at", { ascending: false });
+    setHistorico((data as HistoricoItem[]) || []);
+    setLoadingHistorico(false);
+  }, []);
+
+  useEffect(() => {
+    if (selectedProcesso) {
+      fetchHistorico(selectedProcesso.id);
+    } else {
+      setHistorico([]);
+    }
+  }, [selectedProcesso, fetchHistorico]);
+
   // Drag & drop reorder state
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
