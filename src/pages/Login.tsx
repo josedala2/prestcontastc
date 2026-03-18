@@ -77,7 +77,7 @@ export default function Login() {
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPw, setShowLoginPw] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
-  const [showDemoUsers, setShowDemoUsers] = useState(false);
+  const [showDemoUsers, setShowDemoUsers] = useState(true);
 
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
