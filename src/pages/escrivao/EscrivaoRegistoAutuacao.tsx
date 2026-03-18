@@ -243,7 +243,15 @@ export default function EscrivaoRegistoAutuacao() {
       }
     }
 
-    setAllDocs(docs);
+    // Garantir que a "Capa do Processo" é sempre o primeiro documento
+    const capaIndex = docs.findIndex(d => d.tipo === "Capa do Processo");
+    if (capaIndex > 0) {
+      const [capa] = docs.splice(capaIndex, 1);
+      docs.unshift(capa);
+    }
+    // Re-atribuir ordem sequencial
+    const ordered = docs.map((d, i) => ({ ...d, ordem: i }));
+    setAllDocs(ordered);
     setLoadingDocs(false);
   }, []);
 
