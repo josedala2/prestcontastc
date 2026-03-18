@@ -385,5 +385,14 @@ const ExercicioDetalhe = () => {
                   <p className="text-sm text-muted-foreground py-4 text-center">
                     Consulte a página de <a href="/auditoria" className="text-primary underline">Auditoria</a> para a trilha completa.
                   </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </AppLayout>
+  );
+};
 
 export default ExercicioDetalhe;
