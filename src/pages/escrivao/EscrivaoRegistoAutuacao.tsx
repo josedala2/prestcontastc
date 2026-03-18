@@ -9,11 +9,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { AppLayout } from "@/components/AppLayout";
 import { toast } from "sonner";
-import { BookOpen, FileText, CheckCircle2, Loader2, Lock, Files, Eye, Download, FileArchive } from "lucide-react";
+import { BookOpen, FileText, CheckCircle2, Loader2, Lock, Files, Eye, Download, FileArchive, PackageOpen } from "lucide-react";
 import { generateCapaProcesso, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { PDFDocument } from "pdf-lib";
 import { saveAs } from "file-saver";
+import JSZip from "jszip";
 
 interface Processo {
   id: string;
@@ -62,6 +63,7 @@ export default function EscrivaoRegistoAutuacao() {
   const [autuacaoResult, setAutuacaoResult] = useState<{ numero: string; totalDocs: number; totalPaginas: number } | null>(null);
   const [allDocs, setAllDocs] = useState<DocItem[]>([]);
   const [loadingDocs, setLoadingDocs] = useState(false);
+  const [exportingZip, setExportingZip] = useState(false);
   const [docFilter, setDocFilter] = useState<"todos" | "submissao" | "processo">("todos");
 
   useEffect(() => {
@@ -370,6 +372,40 @@ export default function EscrivaoRegistoAutuacao() {
     }
   };
 
+  const handleExportZip = async () => {
+    if (!selectedProcesso || allDocs.length === 0) return;
+    setExportingZip(true);
+    try {
+      const zip = new JSZip();
+      const entidadeFolder = zip.folder("01_Documentos_Entidade");
+      const tribunalFolder = zip.folder("02_Documentos_Tribunal");
+
+      let count = 0;
+      for (const doc of allDocs) {
+        if (!doc.caminho) continue;
+        const { data, error } = await supabase.storage.from(doc.bucket).download(doc.caminho);
+        if (error || !data) continue;
+        const folder = doc.origem === "submissao" ? entidadeFolder : tribunalFolder;
+        folder?.file(doc.nome, data);
+        count++;
+      }
+
+      if (count === 0) {
+        toast.error("Nenhum ficheiro disponível para exportar");
+        return;
+      }
+
+      const blob = await zip.generateAsync({ type: "blob" });
+      const sanitized = selectedProcesso.numero_processo.replace(/[^a-zA-Z0-9-]/g, "_");
+      saveAs(blob, `Dossie_${sanitized}_${selectedProcesso.ano_gerencia}.zip`);
+      toast.success(`Dossiê exportado — ${count} ficheiro(s)`);
+    } catch (err: any) {
+      toast.error(`Erro ao exportar: ${err.message}`);
+    } finally {
+      setExportingZip(false);
+    }
+  };
+
   const isLocked = autuado || (selectedProcesso && selectedProcesso.etapa_atual > 5);
 
   const submissionDocs = allDocs.filter(d => d.origem === "submissao");
@@ -457,10 +493,24 @@ export default function EscrivaoRegistoAutuacao() {
                 {/* Documents panel */}
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <FileArchive className="h-4 w-4 text-primary" />
-                      Dossiê do Processo ({allDocs.length} documento{allDocs.length !== 1 ? "s" : ""})
-                    </CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <FileArchive className="h-4 w-4 text-primary" />
+                        Dossiê do Processo ({allDocs.length} documento{allDocs.length !== 1 ? "s" : ""})
+                      </CardTitle>
+                      {allDocs.length > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs gap-1.5"
+                          onClick={handleExportZip}
+                          disabled={exportingZip}
+                        >
+                          {exportingZip ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <PackageOpen className="h-3.5 w-3.5" />}
+                          {exportingZip ? "A exportar..." : "Exportar ZIP"}
+                        </Button>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent>
                     {/* Filter bar with visual indicator */}
