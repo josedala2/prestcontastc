@@ -76,7 +76,7 @@ const Relatorios = () => {
 
   // ── CAPITAL PRÓPRIO (Classe 5 + Classe 8) ──
   // Usa -balance: credores (negativos) → positivos; devedores (positivos) → negativos (prejuízos)
-  const capitalLines = mockTrialBalance.filter(
+  const capitalLines = trialBalance.filter(
     (l) => ["51", "52", "53", "54", "55", "56", "57", "58"].includes(l.accountCode)
   );
   const resultadosLines = mockTrialBalance.filter(
