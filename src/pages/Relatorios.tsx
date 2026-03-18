@@ -188,7 +188,7 @@ const Relatorios = () => {
 
   // ── Helper para renderizar secção de linhas ──
   // mode: 'raw' = balance as-is, 'abs' = Math.abs, 'negate' = -balance (credit→positive)
-  const renderLines = (lines: typeof mockTrialBalance, mode: 'raw' | 'abs' | 'negate' = 'raw') =>
+  const renderLines = (lines: typeof trialBalance, mode: 'raw' | 'abs' | 'negate' = 'raw') =>
     lines.map((l) => {
       const val = mode === 'abs' ? Math.abs(l.balance) : mode === 'negate' ? -l.balance : l.balance;
       return (
