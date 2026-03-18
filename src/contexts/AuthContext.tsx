@@ -6,6 +6,7 @@ export type UserRole =
   | "Chefe da Secretaria-Geral"
   | "Técnico da Contadoria Geral"
   | "Escrivão dos Autos"
+  | "Contadoria Geral"
   | "Chefe de Divisão"
   | "Chefe de Secção"
   | "Técnico de Análise"
@@ -25,6 +26,7 @@ export interface AuthUser {
   displayName: string;
   role: UserRole;
   initials: string;
+  divisao?: string; // e.g. "3ª Divisão", used to scope Chefe de Divisão / Secção
 }
 
 // Which workflow stages (1-18) each role can act on (advance/return)
@@ -34,6 +36,7 @@ export const roleStagePermissions: Record<UserRole, number[]> = {
   "Chefe da Secretaria-Geral": [3],
   "Técnico da Contadoria Geral": [4],
   "Escrivão dos Autos": [5, 15],
+  "Contadoria Geral": [5, 6],
   "Chefe de Divisão": [6, 10],
   "Chefe de Secção": [7, 9],
   "Técnico de Análise": [8],
@@ -76,6 +79,11 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/dashboard", "/gestao-processos", "/entidades", "/submissoes",
     "/actas-recepcao", "/documentos-obrigatorios", "/escrivao/registo-autuacao",
     "/escrivao/cumprimento-despachos",
+  ],
+  "Contadoria Geral": [
+    "/dashboard", "/gestao-processos", "/entidades", "/submissoes",
+    "/documentos-obrigatorios", "/contadoria-geral/triagem",
+    "/mapas", "/relatorios",
   ],
   "Chefe de Divisão": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
@@ -143,6 +151,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/validacoes", "/relatorios", "/mapas", "/anexos", "/actas-recepcao",
     "/documentos-obrigatorios", "/auditoria", "/esclarecimentos", "/configuracoes",
     "/submissoes", "/processos-visto", "/gestao-processos", "/secretaria", "/portal", "/tecnico",
+    "/contadoria-geral/triagem",
   ],
 };
 
@@ -153,6 +162,7 @@ export const roleSidebarSections: Record<UserRole, string[]> = {
   "Chefe da Secretaria-Geral": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
   "Técnico da Contadoria Geral": ["Principal", "Relatórios", "Dossiê"],
   "Escrivão dos Autos": ["Principal", "Dossiê", "Acesso Externo"],
+  "Contadoria Geral": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
   "Chefe de Divisão": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
   "Chefe de Secção": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
   "Técnico de Análise": ["Acesso Externo"],
@@ -191,6 +201,12 @@ export const roleHiddenPaths: Record<UserRole, string[]> = {
     "/exercicios", "/importacao", "/plano-contas", "/validacoes",
     "/configuracoes", "/portal", "/tecnico", "/secretaria",
     "/processos-visto", "/submissoes/manual", "/relatorios", "/mapas",
+    "/anexos", "/esclarecimentos", "/auditoria", "/gestao-processos", "/atividades",
+  ],
+  "Contadoria Geral": [
+    "/exercicios", "/importacao", "/plano-contas", "/validacoes",
+    "/configuracoes", "/portal", "/tecnico", "/secretaria",
+    "/processos-visto", "/submissoes/manual", "/actas-recepcao",
     "/anexos", "/esclarecimentos", "/auditoria", "/gestao-processos", "/atividades",
   ],
   "Chefe de Divisão": [
@@ -276,11 +292,21 @@ export const roleGroups = [
   },
   {
     label: "Contadoria e Autuação",
-    roles: ["Técnico da Contadoria Geral", "Escrivão dos Autos"],
+    roles: ["Técnico da Contadoria Geral", "Escrivão dos Autos", "Contadoria Geral"],
   },
   {
-    label: "Divisão / Secção / Análise",
-    roles: ["Chefe de Divisão", "Chefe de Secção", "Técnico de Análise", "Coordenador de Equipa"],
+    label: "Chefes de Divisão (3ª–8ª)",
+    roles: ["Chefe de Divisão"],
+    showAllDemoUsers: true,
+  },
+  {
+    label: "Chefes de Secção (3ª–8ª)",
+    roles: ["Chefe de Secção"],
+    showAllDemoUsers: true,
+  },
+  {
+    label: "Análise e Coordenação",
+    roles: ["Técnico de Análise", "Coordenador de Equipa"],
   },
   {
     label: "Direcção e Magistratura",
@@ -303,8 +329,9 @@ export const roleDefaultRoute: Record<UserRole, string> = {
   "Chefe da Secretaria-Geral": "/secretaria",
   "Técnico da Contadoria Geral": "/contadoria",
   "Escrivão dos Autos": "/dashboard",
-  "Chefe de Divisão": "/dashboard",
-  "Chefe de Secção": "/dashboard",
+  "Contadoria Geral": "/contadoria-geral/triagem",
+  "Chefe de Divisão": "/chefe-divisao/processos",
+  "Chefe de Secção": "/chefe-seccao/distribuicao",
   "Técnico de Análise": "/tecnico",
   "Coordenador de Equipa": "/dashboard",
   "Diretor dos Serviços Técnicos": "/dashboard",
@@ -316,6 +343,34 @@ export const roleDefaultRoute: Record<UserRole, string> = {
   "Presidente da Câmara": "/dashboard",
   "Presidente do Tribunal de Contas": "/dashboard",
   "Administrador do Sistema": "/dashboard",
+};
+
+// Divisions 3-8 with their sections
+export const DIVISOES_ESTRUTURA: Record<string, { nome: string; seccoes: string[] }> = {
+  "3ª Divisão": {
+    nome: "3ª Divisão — Administração Local I",
+    seccoes: ["Secção A — Governos Provinciais", "Secção B — Administrações Municipais I"],
+  },
+  "4ª Divisão": {
+    nome: "4ª Divisão — Administração Local II",
+    seccoes: ["Secção A — Administrações Municipais II", "Secção B — Institutos e Fundos Locais"],
+  },
+  "5ª Divisão": {
+    nome: "5ª Divisão — Sector Empresarial Público",
+    seccoes: ["Secção A — Empresas Públicas", "Secção B — Sociedades Comerciais do Estado", "Secção C — Participações Públicas"],
+  },
+  "6ª Divisão": {
+    nome: "6ª Divisão — Administração Central I",
+    seccoes: ["Secção A — Ministérios I", "Secção B — Ministérios II"],
+  },
+  "7ª Divisão": {
+    nome: "7ª Divisão — Administração Central II",
+    seccoes: ["Secção A — Institutos Públicos", "Secção B — Fundos Autónomos", "Secção C — Serviços Integrados"],
+  },
+  "8ª Divisão": {
+    nome: "8ª Divisão — Órgãos de Soberania",
+    seccoes: ["Secção A — Presidência e Assembleia", "Secção B — Tribunais e MP"],
+  },
 };
 
 interface AuthContextType {
