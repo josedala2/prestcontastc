@@ -63,6 +63,7 @@ export default function EscrivaoRegistoAutuacao() {
   const [autuacaoResult, setAutuacaoResult] = useState<{ numero: string; totalDocs: number; totalPaginas: number } | null>(null);
   const [allDocs, setAllDocs] = useState<DocItem[]>([]);
   const [loadingDocs, setLoadingDocs] = useState(false);
+  const [exportingZip, setExportingZip] = useState(false);
   const [docFilter, setDocFilter] = useState<"todos" | "submissao" | "processo">("todos");
 
   useEffect(() => {
