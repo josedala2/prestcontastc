@@ -1104,6 +1104,7 @@ export default function EscrivaoRegistoAutuacao() {
 
                 {/* Autuar action or locked state */}
                 <Card>
+                  <CardContent className="py-8">
                     {isLocked ? (
                       <div className="flex flex-col items-center gap-4 text-center">
                         <div className="h-16 w-16 rounded-full bg-primary/15 flex items-center justify-center">
