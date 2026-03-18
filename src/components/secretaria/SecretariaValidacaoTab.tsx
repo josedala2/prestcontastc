@@ -131,11 +131,55 @@ export function SecretariaValidacaoTab() {
     setLoadingDocs(true);
     const { data } = await supabase
       .from("processo_documentos")
-      .select("id, tipo_documento, nome_ficheiro, estado, obrigatorio")
+      .select("id, tipo_documento, nome_ficheiro, estado, obrigatorio, caminho_ficheiro")
       .eq("processo_id", processoId);
     setDocumentos((data as unknown as ProcessoDoc[]) || []);
     setLoadingDocs(false);
   }, []);
+
+  // Fetch submitted documents from the entity portal
+  const fetchSubmittedDocs = useCallback(async (entityId: string, anoGerencia: number) => {
+    setLoadingSubmittedDocs(true);
+    const fiscalYearId = `${entityId}-${anoGerencia}`;
+    try {
+      const { data, error } = await supabase
+        .from("submission_documents")
+        .select("*")
+        .eq("entity_id", entityId)
+        .eq("fiscal_year_id", fiscalYearId)
+        .order("created_at", { ascending: true });
+      if (!error) {
+        setSubmittedDocs((data || []) as SubmittedDoc[]);
+      }
+    } catch (err) {
+      console.error("Error fetching submitted docs:", err);
+    } finally {
+      setLoadingSubmittedDocs(false);
+    }
+  }, []);
+
+  const handleViewSubmittedDoc = (doc: SubmittedDoc) => {
+    const { data } = supabase.storage.from("submission-documents").getPublicUrl(doc.file_path);
+    if (data?.publicUrl) {
+      window.open(data.publicUrl, "_blank");
+    }
+  };
+
+  const handleViewProcessoDoc = (doc: ProcessoDoc) => {
+    if (!doc.caminho_ficheiro) return;
+    const { data } = supabase.storage.from("processo-documentos").getPublicUrl(doc.caminho_ficheiro);
+    if (data?.publicUrl) {
+      window.open(data.publicUrl, "_blank");
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+  };
 
   useEffect(() => {
     fetchProcessos();
@@ -145,8 +189,11 @@ export function SecretariaValidacaoTab() {
   useEffect(() => {
     if (selectedProcesso) {
       fetchDocumentos(selectedProcesso.id);
+      fetchSubmittedDocs(selectedProcesso.entity_id, selectedProcesso.ano_gerencia);
+    } else {
+      setSubmittedDocs([]);
     }
-  }, [selectedProcesso, fetchDocumentos]);
+  }, [selectedProcesso, fetchDocumentos, fetchSubmittedDocs]);
 
   // Approve validation
   const handleApprove = async () => {
