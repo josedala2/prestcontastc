@@ -376,8 +376,10 @@ export const DIVISOES_ESTRUTURA: Record<string, { nome: string; seccoes: string[
 
 interface AuthContextType {
   user: AuthUser | null;
-  login: (user: AuthUser) => void;
-  logout: () => void;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, nomeCompleto: string, cargo: UserRole, divisao?: string) => Promise<void>;
+  logout: () => Promise<void>;
   canAccess: (path: string) => boolean;
   canActOnStage: (stageId: number) => boolean;
 }
@@ -385,34 +387,118 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(() => {
-    const stored = sessionStorage.getItem("auth_user");
-    return stored ? JSON.parse(stored) : null;
-  });
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (u: AuthUser) => {
-    setUser(u);
-    sessionStorage.setItem("auth_user", JSON.stringify(u));
+  const getInitials = (name: string) =>
+    name.split(" ").filter(Boolean).map(n => n[0]).join("").substring(0, 2).toUpperCase() || "U";
+
+  const loadProfile = useCallback(async (userId: string, email: string, metadata?: Record<string, any>) => {
+    try {
+      let { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      // Auto-create profile if it doesn't exist (first login after signup)
+      if (!profile) {
+        const nomeCompleto = metadata?.nome_completo || email.split("@")[0];
+        const cargo = metadata?.cargo || null;
+        const divisao = metadata?.divisao || null;
+        const { data: newProfile } = await supabase
+          .from("profiles")
+          .insert({
+            user_id: userId,
+            nome_completo: nomeCompleto,
+            email,
+            cargo,
+            divisao,
+          })
+          .select()
+          .single();
+        profile = newProfile;
+      }
+
+      if (profile) {
+        const role = (profile.cargo as UserRole) || "Administrador do Sistema";
+        setUser({
+          email,
+          displayName: profile.nome_completo || email,
+          role,
+          initials: getInitials(profile.nome_completo || email),
+          divisao: profile.divisao || undefined,
+        });
+      }
+    } catch (err) {
+      console.error("Erro ao carregar perfil:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    // 1. Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session?.user) {
+          // Use setTimeout to avoid Supabase auth deadlock
+          setTimeout(() => {
+            loadProfile(session.user.id, session.user.email || "", session.user.user_metadata);
+          }, 0);
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      }
+    );
+
+    // 2. Then check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        setLoading(false);
+      }
+      // onAuthStateChange will handle setting the user if session exists
+    });
+
+    return () => subscription.unsubscribe();
+  }, [loadProfile]);
+
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
   };
 
-  const logout = () => {
+  const signup = async (email: string, password: string, nomeCompleto: string, cargo: UserRole, divisao?: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { nome_completo: nomeCompleto, cargo, divisao: divisao || null },
+      },
+    });
+    if (error) throw error;
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    sessionStorage.removeItem("auth_user");
   };
 
   const canAccess = (path: string): boolean => {
     if (!user) return false;
     const perms = rolePermissions[user.role];
+    if (!perms) return false;
     return perms.some(p => path === p || path.startsWith(p + "/"));
   };
 
   const canActOnStage = (stageId: number): boolean => {
     if (!user) return false;
-    return roleStagePermissions[user.role].includes(stageId);
+    const stages = roleStagePermissions[user.role];
+    if (!stages) return false;
+    return stages.includes(stageId);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, canAccess, canActOnStage }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, canAccess, canActOnStage }}>
       {children}
     </AuthContext.Provider>
   );
