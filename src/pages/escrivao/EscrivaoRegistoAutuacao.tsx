@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { AppLayout } from "@/components/AppLayout";
 import { toast } from "sonner";
-import { BookOpen, FileText, CheckCircle2, Loader2, Lock, Files } from "lucide-react";
+import { BookOpen, FileText, CheckCircle2, Loader2, Lock, Files, Eye, Download, FileArchive } from "lucide-react";
 import { generateCapaProcesso, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { PDFDocument } from "pdf-lib";
@@ -38,6 +38,17 @@ interface Processo {
   canal_entrada?: string;
 }
 
+interface DocItem {
+  id: string;
+  nome: string;
+  tipo: string;
+  origem: "submissao" | "processo";
+  caminho: string | null;
+  bucket: string;
+  data: string;
+  estado?: string;
+}
+
 export default function EscrivaoRegistoAutuacao() {
   const { user } = useAuth();
   const executadoPor = user?.displayName || "Escrivão dos Autos";
@@ -49,6 +60,8 @@ export default function EscrivaoRegistoAutuacao() {
   const [autuarDialogOpen, setAutuarDialogOpen] = useState(false);
   const [autuado, setAutuado] = useState(false);
   const [autuacaoResult, setAutuacaoResult] = useState<{ numero: string; totalDocs: number; totalPaginas: number } | null>(null);
+  const [allDocs, setAllDocs] = useState<DocItem[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
 
   useEffect(() => {
     fetchProcessos();
@@ -65,25 +78,85 @@ export default function EscrivaoRegistoAutuacao() {
     setLoading(false);
   };
 
-  /** Download a PDF from storage and return as ArrayBuffer */
-  const downloadDocFromStorage = async (filePath: string): Promise<ArrayBuffer | null> => {
-    try {
-      const { data, error } = await supabase.storage
-        .from("processo-documentos")
-        .download(filePath);
-      if (error || !data) return null;
-      return await data.arrayBuffer();
-    } catch {
-      return null;
+  const fetchAllDocuments = useCallback(async (processo: Processo) => {
+    setLoadingDocs(true);
+    const docs: DocItem[] = [];
+
+    // 1. Fetch submission documents (initial entity docs)
+    const fyId = `${processo.entity_id}-${processo.ano_gerencia}`;
+    const { data: subDocs } = await supabase
+      .from("submission_documents")
+      .select("*")
+      .eq("entity_id", processo.entity_id)
+      .eq("fiscal_year_id", fyId)
+      .order("created_at", { ascending: true });
+
+    if (subDocs) {
+      for (const d of subDocs as any[]) {
+        docs.push({
+          id: d.id,
+          nome: d.file_name,
+          tipo: d.doc_label || d.doc_category,
+          origem: "submissao",
+          caminho: d.file_path,
+          bucket: "submission-documents",
+          data: d.created_at,
+          estado: "submetido",
+        });
+      }
     }
+
+    // 2. Fetch processo documents (created by previous stages)
+    const { data: procDocs } = await supabase
+      .from("processo_documentos")
+      .select("*")
+      .eq("processo_id", processo.id)
+      .order("created_at", { ascending: true });
+
+    if (procDocs) {
+      for (const d of procDocs as any[]) {
+        docs.push({
+          id: d.id,
+          nome: d.nome_ficheiro,
+          tipo: d.tipo_documento,
+          origem: "processo",
+          caminho: d.caminho_ficheiro,
+          bucket: "processo-documentos",
+          data: d.created_at,
+          estado: d.estado,
+        });
+      }
+    }
+
+    setAllDocs(docs);
+    setLoadingDocs(false);
+  }, []);
+
+  useEffect(() => {
+    if (selectedProcesso) {
+      fetchAllDocuments(selectedProcesso);
+    } else {
+      setAllDocs([]);
+    }
+  }, [selectedProcesso, fetchAllDocuments]);
+
+  const handleViewDoc = async (doc: DocItem) => {
+    if (!doc.caminho) return;
+    const { data } = supabase.storage.from(doc.bucket).getPublicUrl(doc.caminho);
+    if (data?.publicUrl) window.open(data.publicUrl, "_blank");
   };
 
-  /** Also try submission-documents bucket */
-  const downloadFromSubmissions = async (filePath: string): Promise<ArrayBuffer | null> => {
+  const handleDownloadDoc = async (doc: DocItem) => {
+    if (!doc.caminho) return;
+    const { data, error } = await supabase.storage.from(doc.bucket).download(doc.caminho);
+    if (error || !data) { toast.error("Erro ao descarregar"); return; }
+    saveAs(data, doc.nome);
+  };
+
+  /** Download a PDF from storage and return as ArrayBuffer */
+  const downloadFromBucket = async (bucket: string, filePath: string): Promise<ArrayBuffer | null> => {
     try {
-      const { data, error } = await supabase.storage
-        .from("submission-documents")
-        .download(filePath);
+      const { data, error } = await supabase.storage.from(bucket).download(filePath);
       if (error || !data) return null;
       return await data.arrayBuffer();
     } catch {
@@ -103,26 +176,16 @@ export default function EscrivaoRegistoAutuacao() {
       if (numError) throw numError;
       const numero = novoNumero as string;
 
-      // 2. Fetch existing documents attached to process
-      const { data: existingDocs } = await supabase
-        .from("processo_documentos")
-        .select("*")
-        .eq("processo_id", selectedProcesso.id)
-        .order("created_at", { ascending: true });
-
-      const docsList = (existingDocs as any[]) || [];
-
-      // 3. Download all existing PDFs from storage
+      // 2. Download ALL PDFs (submission + processo docs)
       const pdfBuffers: ArrayBuffer[] = [];
-      for (const d of docsList) {
-        if (d.caminho_ficheiro) {
-          const buf = await downloadDocFromStorage(d.caminho_ficheiro)
-            || await downloadFromSubmissions(d.caminho_ficheiro);
+      for (const doc of allDocs) {
+        if (doc.caminho) {
+          const buf = await downloadFromBucket(doc.bucket, doc.caminho);
           if (buf) pdfBuffers.push(buf);
         }
       }
 
-      // 4. Generate Cover Page (2 pages) with all metadata
+      // 3. Generate Cover Page
       const docData: ProcessoDocData = {
         numeroProcesso: numero,
         entityName: selectedProcesso.entity_name,
@@ -143,7 +206,7 @@ export default function EscrivaoRegistoAutuacao() {
         portadorNome: selectedProcesso.portador_nome || undefined,
         portadorDocumento: selectedProcesso.portador_documento || undefined,
         checklistCompleta: selectedProcesso.completude_documental >= 100,
-        totalDocumentos: docsList.length + 1, // +1 for the cover itself
+        totalDocumentos: allDocs.length + 1,
         dataAutuacao: new Date().toLocaleDateString("pt-AO"),
         escrivaoAutos: executadoPor,
       };
@@ -151,40 +214,34 @@ export default function EscrivaoRegistoAutuacao() {
       const capaBlob = await generateCapaProcesso(docData, executadoPor);
       const capaBuffer = await capaBlob.arrayBuffer();
 
-      // 5. Merge: Cover first, then all existing documents
-      const mergedPdf = await PDFDocument.create();
-
-      // Add cover
+      // 4. First pass merge to count pages
+      const tempPdf = await PDFDocument.create();
       try {
         const capaPdf = await PDFDocument.load(capaBuffer);
-        const capaPages = await mergedPdf.copyPages(capaPdf, capaPdf.getPageIndices());
-        capaPages.forEach((p) => mergedPdf.addPage(p));
+        const capaPages = await tempPdf.copyPages(capaPdf, capaPdf.getPageIndices());
+        capaPages.forEach((p) => tempPdf.addPage(p));
       } catch (err) {
         console.error("Erro ao adicionar capa:", err);
       }
-
-      // Add all other documents
       for (const buf of pdfBuffers) {
         try {
-          const existingPdf = await PDFDocument.load(buf, { ignoreEncryption: true });
-          const pages = await mergedPdf.copyPages(existingPdf, existingPdf.getPageIndices());
-          pages.forEach((p) => mergedPdf.addPage(p));
+          const ep = await PDFDocument.load(buf, { ignoreEncryption: true });
+          const pages = await tempPdf.copyPages(ep, ep.getPageIndices());
+          pages.forEach((p) => tempPdf.addPage(p));
         } catch (err) {
           console.error("Erro ao juntar documento:", err);
         }
       }
 
-      const totalPaginas = mergedPdf.getPageCount();
-      const totalDocumentos = docsList.length + 1;
+      const totalPaginas = tempPdf.getPageCount();
+      const totalDocumentos = allDocs.length + 1;
 
-      // Update cover page with final page count — regenerate with totalPaginas
-      // (We regenerate the cover now that we know the total pages)
+      // 5. Rebuild with updated cover (final page count)
       docData.totalPaginas = totalPaginas;
       docData.totalDocumentos = totalDocumentos;
       const capaFinalBlob = await generateCapaProcesso(docData, executadoPor);
       const capaFinalBuffer = await capaFinalBlob.arrayBuffer();
 
-      // Rebuild merged PDF with updated cover
       const finalPdf = await PDFDocument.create();
       try {
         const capaFinalPdf = await PDFDocument.load(capaFinalBuffer);
@@ -225,6 +282,9 @@ export default function EscrivaoRegistoAutuacao() {
       ]);
 
       // 7. Register documents in DB
+      const subDocsCount = allDocs.filter(d => d.origem === "submissao").length;
+      const procDocsCount = allDocs.filter(d => d.origem === "processo").length;
+
       await supabase.from("processo_documentos").insert([
         {
           processo_id: selectedProcesso.id,
@@ -245,7 +305,7 @@ export default function EscrivaoRegistoAutuacao() {
           obrigatorio: true,
           validado_por: executadoPor,
           validado_em: new Date().toISOString(),
-          observacoes: `${totalDocumentos} documento(s), ${totalPaginas} página(s)`,
+          observacoes: `${totalDocumentos} documento(s), ${totalPaginas} página(s) — ${subDocsCount} doc(s) da entidade + ${procDocsCount} doc(s) internos`,
         },
       ] as any);
 
@@ -262,7 +322,7 @@ export default function EscrivaoRegistoAutuacao() {
         etapa_seguinte: 5,
         estado_anterior: selectedProcesso.estado,
         estado_seguinte: "em_autuacao",
-        acao: `Processo autuado: número ${numero}, capa gerada, ${totalDocumentos} doc(s) compilados em ${totalPaginas} página(s)`,
+        acao: `Processo autuado: número ${numero}, capa gerada, ${totalDocumentos} doc(s) compilados em ${totalPaginas} página(s) (${subDocsCount} da entidade + ${procDocsCount} internos)`,
         executado_por: executadoPor,
         perfil_executor: "Escrivão dos Autos",
         observacoes: `Autuação completa — processo compilado num único documento`,
@@ -310,6 +370,9 @@ export default function EscrivaoRegistoAutuacao() {
   };
 
   const isLocked = autuado || (selectedProcesso && selectedProcesso.etapa_atual > 5);
+
+  const submissionDocs = allDocs.filter(d => d.origem === "submissao");
+  const processoDocs = allDocs.filter(d => d.origem === "processo");
 
   return (
     <AppLayout>
@@ -390,6 +453,83 @@ export default function EscrivaoRegistoAutuacao() {
                   </CardContent>
                 </Card>
 
+                {/* Documents panel */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <FileArchive className="h-4 w-4 text-primary" />
+                      Dossiê do Processo ({allDocs.length} documento{allDocs.length !== 1 ? "s" : ""})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {loadingDocs ? (
+                      <div className="flex items-center justify-center py-6">
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : allDocs.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">Nenhum documento encontrado</p>
+                    ) : (
+                      <div className="space-y-4">
+                        {/* Submission documents */}
+                        {submissionDocs.length > 0 && (
+                          <div>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                              Documentos Submetidos pela Entidade ({submissionDocs.length})
+                            </h4>
+                            <div className="border rounded-md divide-y divide-border">
+                              {submissionDocs.map((doc) => (
+                                <div key={doc.id} className="flex items-center justify-between px-3 py-2">
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-foreground truncate">{doc.tipo}</p>
+                                    <p className="text-[10px] text-muted-foreground truncate">{doc.nome}</p>
+                                  </div>
+                                  <div className="flex items-center gap-1 ml-2">
+                                    <Badge variant="outline" className="text-[9px] bg-blue-50 text-blue-700 border-blue-200">Entidade</Badge>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleViewDoc(doc)}>
+                                      <Eye className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDownloadDoc(doc)}>
+                                      <Download className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Process documents */}
+                        {processoDocs.length > 0 && (
+                          <div>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                              Documentos Gerados pelo Tribunal ({processoDocs.length})
+                            </h4>
+                            <div className="border rounded-md divide-y divide-border">
+                              {processoDocs.map((doc) => (
+                                <div key={doc.id} className="flex items-center justify-between px-3 py-2">
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-foreground truncate">{doc.tipo}</p>
+                                    <p className="text-[10px] text-muted-foreground truncate">{doc.nome}</p>
+                                  </div>
+                                  <div className="flex items-center gap-1 ml-2">
+                                    <Badge variant="outline" className="text-[9px] bg-amber-50 text-amber-700 border-amber-200">Interno</Badge>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleViewDoc(doc)}>
+                                      <Eye className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDownloadDoc(doc)}>
+                                      <Download className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
                 {/* Autuar action or locked state */}
                 <Card>
                   <CardContent className="py-8">
@@ -435,7 +575,7 @@ export default function EscrivaoRegistoAutuacao() {
                         <div>
                           <h3 className="text-lg font-semibold text-foreground">Autuação do Processo</h3>
                           <p className="text-sm text-muted-foreground mt-1 max-w-md">
-                            Ao autuar, o sistema irá automaticamente:
+                            Ao autuar, o sistema irá compilar <strong>{allDocs.length} documento(s)</strong> num único PDF:
                           </p>
                           <ul className="text-sm text-muted-foreground mt-2 space-y-1 text-left inline-block">
                             <li className="flex items-center gap-2">
@@ -448,7 +588,7 @@ export default function EscrivaoRegistoAutuacao() {
                             </li>
                             <li className="flex items-center gap-2">
                               <Files className="h-3.5 w-3.5 text-primary shrink-0" />
-                              Compilar todos os documentos num único PDF
+                              Compilar {submissionDocs.length} doc(s) da entidade + {processoDocs.length} doc(s) internos
                             </li>
                             <li className="flex items-center gap-2">
                               <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
@@ -463,13 +603,13 @@ export default function EscrivaoRegistoAutuacao() {
                         <Button
                           size="lg"
                           onClick={() => setAutuarDialogOpen(true)}
-                          disabled={acting}
+                          disabled={acting || allDocs.length === 0}
                           className="mt-2 px-8"
                         >
                           {acting ? (
                             <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> A autuar...</>
                           ) : (
-                            <><FileText className="h-4 w-4 mr-2" /> Autuar</>
+                            <><FileText className="h-4 w-4 mr-2" /> Autuar ({allDocs.length} docs)</>
                           )}
                         </Button>
                       </div>
@@ -491,8 +631,8 @@ export default function EscrivaoRegistoAutuacao() {
               O processo <strong>{selectedProcesso?.numero_processo}</strong> da entidade{" "}
               <strong>{selectedProcesso?.entity_name}</strong> será autuado.
               <br /><br />
-              Será gerada a capa oficial, todos os documentos serão compilados num único PDF
-              com contagem total de páginas, e o processo será encaminhado ao Chefe de Divisão.
+              Serão compilados <strong>{allDocs.length} documento(s)</strong> ({submissionDocs.length} da entidade + {processoDocs.length} internos)
+              num único PDF com capa oficial e contagem de páginas.
               <br /><br />
               Após a autuação, o processo ficará <strong>bloqueado</strong> para o Escrivão.
             </AlertDialogDescription>
