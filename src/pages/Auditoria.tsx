@@ -41,7 +41,7 @@ const Auditoria = () => {
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center ${actionTypeColors[log.actionType || "edicao"]}`}>
                   {actionTypeIcons[log.actionType || "edicao"] || <FileText className="h-4 w-4" />}
                 </div>
-                {index < mockAuditLog.length - 1 && (
+                {index < auditLog.length - 1 && (
                   <div className="absolute left-1/2 top-9 w-px h-6 bg-border -translate-x-1/2" />
                 )}
               </div>
