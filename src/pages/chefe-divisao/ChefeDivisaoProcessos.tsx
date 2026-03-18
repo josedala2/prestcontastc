@@ -144,11 +144,11 @@ export default function ChefeDivisaoProcessos() {
     }
   };
 
-  const handleDownload = async (doc: DocItem) => {
+  const handleDownload = (doc: DocItem) => {
     if (!doc.caminho_ficheiro) return;
-    const { data } = await supabase.storage.from("processo-documentos").createSignedUrl(doc.caminho_ficheiro, 300);
-    if (data?.signedUrl) {
-      window.open(data.signedUrl, "_blank");
+    const { data } = supabase.storage.from("processo-documentos").getPublicUrl(doc.caminho_ficheiro);
+    if (data?.publicUrl) {
+      window.open(data.publicUrl, "_blank");
     }
   };
 
