@@ -60,11 +60,8 @@ export default function Login() {
     setLoginLoading(true);
     try {
       await login(loginEmail, loginPassword);
-      // Navigate after a short delay to let profile load
-      setTimeout(() => {
-        const role = signupCargo; // Will be overridden by profile
-        navigate("/dashboard");
-      }, 500);
+      toast.success("Autenticado com sucesso!");
+      // Navigation will happen via useEffect watching auth state
     } catch (err: any) {
       toast.error(err.message || "Credenciais inválidas.");
     } finally {
