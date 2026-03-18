@@ -14,7 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AppLayout } from "@/components/AppLayout";
 import { toast } from "sonner";
-import { BookOpen, FileText, CheckCircle2, Loader2, Lock, Files, Eye, Download, FileArchive, PackageOpen, Plus, Upload, X, Tag, ExternalLink, Printer, GripVertical } from "lucide-react";
+import { BookOpen, FileText, CheckCircle2, Loader2, Lock, Files, Eye, Download, FileArchive, PackageOpen, Plus, Upload, X, Tag, ExternalLink, Printer, GripVertical, History, FilePlus, FileX, FileCheck } from "lucide-react";
 import { generateCapaProcesso, type ProcessoDocData } from "@/lib/workflowDocGenerator";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { PDFDocument } from "pdf-lib";
@@ -104,6 +104,37 @@ export default function EscrivaoRegistoAutuacao() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Histórico do Escrivão
+  interface HistoricoItem {
+    id: string;
+    acao: string;
+    created_at: string;
+    observacoes: string | null;
+    documentos_gerados: string[] | null;
+  }
+  const [historico, setHistorico] = useState<HistoricoItem[]>([]);
+  const [loadingHistorico, setLoadingHistorico] = useState(false);
+
+  const fetchHistorico = useCallback(async (processoId: string) => {
+    setLoadingHistorico(true);
+    const { data } = await supabase
+      .from("processo_historico")
+      .select("id, acao, created_at, observacoes, documentos_gerados")
+      .eq("processo_id", processoId)
+      .eq("perfil_executor", "Escrivão dos Autos")
+      .order("created_at", { ascending: false });
+    setHistorico((data as HistoricoItem[]) || []);
+    setLoadingHistorico(false);
+  }, []);
+
+  useEffect(() => {
+    if (selectedProcesso) {
+      fetchHistorico(selectedProcesso.id);
+    } else {
+      setHistorico([]);
+    }
+  }, [selectedProcesso, fetchHistorico]);
 
   // Drag & drop reorder state
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -563,6 +594,7 @@ export default function EscrivaoRegistoAutuacao() {
       setShowUploadForm(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
       fetchAllDocuments(selectedProcesso);
+      fetchHistorico(selectedProcesso.id);
     } catch (err: any) {
       toast.error(`Erro ao anexar documento: ${err.message}`);
     } finally {
@@ -598,6 +630,7 @@ export default function EscrivaoRegistoAutuacao() {
       setDocToDelete(null);
       setDeleteDocDialogOpen(false);
       fetchAllDocuments(selectedProcesso);
+      fetchHistorico(selectedProcesso.id);
     } catch (err: any) {
       toast.error(`Erro ao remover: ${err.message}`);
     } finally {
@@ -1001,6 +1034,73 @@ export default function EscrivaoRegistoAutuacao() {
                     )}
                   </Card>
                 )}
+
+                {/* Histórico de acções do Escrivão */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <History className="h-4 w-4 text-primary" />
+                      Histórico de Acções do Escrivão
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {loadingHistorico ? (
+                      <div className="flex items-center justify-center py-6">
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : historico.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-6">Nenhuma acção registada neste processo</p>
+                    ) : (
+                      <ScrollArea className="max-h-[280px]">
+                        <div className="relative pl-6 space-y-0">
+                          {/* Vertical timeline line */}
+                          <div className="absolute left-[9px] top-2 bottom-2 w-px bg-border" />
+                          {historico.map((item) => {
+                            const isAnexo = item.acao.toLowerCase().includes("anexado");
+                            const isRemocao = item.acao.toLowerCase().includes("removido");
+                            const isAutuacao = item.acao.toLowerCase().includes("autuado") || item.acao.toLowerCase().includes("autuação");
+                            const IconComponent = isAnexo ? FilePlus : isRemocao ? FileX : isAutuacao ? FileCheck : FileText;
+                            const iconColor = isAnexo
+                              ? "text-primary bg-primary/10"
+                              : isRemocao
+                              ? "text-destructive bg-destructive/10"
+                              : isAutuacao
+                              ? "text-green-600 bg-green-50"
+                              : "text-muted-foreground bg-muted";
+
+                            return (
+                              <div key={item.id} className="relative pb-4 last:pb-0">
+                                {/* Timeline dot */}
+                                <div className={`absolute -left-6 top-0.5 h-[18px] w-[18px] rounded-full flex items-center justify-center ${iconColor}`}>
+                                  <IconComponent className="h-3 w-3" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-sm text-foreground leading-snug">{item.acao}</p>
+                                  {item.observacoes && (
+                                    <p className="text-[11px] text-muted-foreground mt-0.5">{item.observacoes}</p>
+                                  )}
+                                  {item.documentos_gerados && item.documentos_gerados.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {item.documentos_gerados.map((doc, i) => (
+                                        <Badge key={i} variant="outline" className="text-[9px]">{doc}</Badge>
+                                      ))}
+                                    </div>
+                                  )}
+                                  <p className="text-[10px] text-muted-foreground mt-1">
+                                    {new Date(item.created_at).toLocaleString("pt-AO", {
+                                      day: "2-digit", month: "short", year: "numeric",
+                                      hour: "2-digit", minute: "2-digit",
+                                    })}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </ScrollArea>
+                    )}
+                  </CardContent>
+                </Card>
 
                 {/* Autuar action or locked state */}
                 <Card>
