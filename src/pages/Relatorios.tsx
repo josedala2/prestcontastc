@@ -94,7 +94,7 @@ const Relatorios = () => {
   // ══════════════════════════════════════════════════
 
   // ── PROVEITOS (Classe 6) ──
-  const proveitosOperacionais = mockTrialBalance.filter(
+  const proveitosOperacionais = trialBalance.filter(
     (l) => ["61", "62", "63", "64", "65"].includes(l.accountCode)
   );
   const totalProveitosOp = proveitosOperacionais.reduce((s, l) => s + Math.abs(l.balance), 0);
