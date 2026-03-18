@@ -99,6 +99,9 @@ export default function EscrivaoRegistoAutuacao() {
   const [deleteDocDialogOpen, setDeleteDocDialogOpen] = useState(false);
   const [docToDelete, setDocToDelete] = useState<DocItem | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<DocItem | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
