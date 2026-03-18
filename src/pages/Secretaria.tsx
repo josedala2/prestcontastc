@@ -648,8 +648,8 @@ const Secretaria = () => {
             onClick={() => setConfirmDialogOpen(true)}
             className="gap-2"
           >
-            <Stamp className="h-4 w-4" />
-            Confirmar e Autuar
+            <FileCheck className="h-4 w-4" />
+            Confirmar e Gerar Acta
           </Button>
         </div>
       </div>
