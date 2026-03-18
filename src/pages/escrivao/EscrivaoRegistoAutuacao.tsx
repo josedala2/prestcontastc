@@ -700,23 +700,36 @@ export default function EscrivaoRegistoAutuacao() {
                         <FileArchive className="h-4 w-4 text-primary" />
                         Dossiê do Processo ({allDocs.length} documento{allDocs.length !== 1 ? "s" : ""})
                       </CardTitle>
-                      {allDocs.length > 0 && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 text-xs gap-1.5"
-                          onClick={handleExportZip}
-                          disabled={exportingZip}
-                        >
-                          {exportingZip ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <PackageOpen className="h-3.5 w-3.5" />}
-                          {exportingZip ? "A exportar..." : "Exportar ZIP"}
-                        </Button>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {!isLocked && allDocs.length > 1 && (
+                          <Button
+                            variant={reorderMode ? "default" : "outline"}
+                            size="sm"
+                            className="h-7 text-xs gap-1.5"
+                            onClick={() => { setReorderMode(!reorderMode); if (!reorderMode) setDocFilter("todos"); }}
+                          >
+                            <GripVertical className="h-3.5 w-3.5" />
+                            {reorderMode ? "Concluir" : "Reordenar"}
+                          </Button>
+                        )}
+                        {allDocs.length > 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs gap-1.5"
+                            onClick={handleExportZip}
+                            disabled={exportingZip}
+                          >
+                            {exportingZip ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <PackageOpen className="h-3.5 w-3.5" />}
+                            {exportingZip ? "A exportar..." : "Exportar ZIP"}
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    {/* Filter bar with visual indicator */}
-                    {!loadingDocs && allDocs.length > 0 && (
+                    {/* Filter bar - hidden in reorder mode */}
+                    {!loadingDocs && allDocs.length > 0 && !reorderMode && (
                       <div className="flex items-center gap-3 mb-4 p-3 rounded-lg bg-muted/50 border border-border">
                         <button
                           onClick={() => setDocFilter("todos")}
@@ -767,13 +780,53 @@ export default function EscrivaoRegistoAutuacao() {
                       </div>
                     )}
 
+                    {/* Reorder mode hint */}
+                    {reorderMode && (
+                      <div className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-primary/5 border border-primary/20 text-xs text-primary">
+                        <GripVertical className="h-4 w-4 shrink-0" />
+                        <span>Arraste os documentos para reordenar. A ordem definida será usada na compilação do dossiê autuado.</span>
+                      </div>
+                    )}
+
                     {loadingDocs ? (
                       <div className="flex items-center justify-center py-6">
                         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                       </div>
                     ) : allDocs.length === 0 ? (
                       <p className="text-sm text-muted-foreground text-center py-4">Nenhum documento encontrado</p>
+                    ) : reorderMode ? (
+                      /* ─── Reorder mode: single flat draggable list ─── */
+                      <div className="border rounded-md divide-y divide-border">
+                        {allDocs.map((doc, index) => (
+                          <div
+                            key={doc.id}
+                            draggable
+                            onDragStart={() => handleDragStart(index)}
+                            onDragOver={(e) => handleDragOver(e, index)}
+                            onDrop={() => handleDrop(index)}
+                            onDragEnd={handleDragEnd}
+                            className={`flex items-center gap-2 px-3 py-2 cursor-grab active:cursor-grabbing transition-all ${
+                              dragIndex === index ? "opacity-40 bg-muted" : ""
+                            } ${dragOverIndex === index ? "border-t-2 border-primary" : ""}`}
+                          >
+                            <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <span className="text-[10px] font-mono text-muted-foreground w-5 text-center shrink-0">{index + 1}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-foreground truncate">{doc.tipo}</p>
+                              <p className="text-[10px] text-muted-foreground truncate">{doc.nome}</p>
+                            </div>
+                            <Badge variant="outline" className={`text-[9px] shrink-0 ${
+                              doc.origem === "submissao"
+                                ? "bg-blue-50 text-blue-700 border-blue-200"
+                                : "bg-amber-50 text-amber-700 border-amber-200"
+                            }`}>
+                              {doc.origem === "submissao" ? "Entidade" : "Interno"}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
                     ) : (
+                      /* ─── Normal mode: grouped by origin ─── */
                       <div className="space-y-4">
                         {(docFilter === "todos" || docFilter === "submissao") && submissionDocs.length > 0 && (
                           <div>
