@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -24,9 +23,15 @@ import { formatKz } from "@/lib/dataUtils";
 import {
   ArrowLeft, FileSearch, FileText, FileSpreadsheet, FileImage,
   File, Eye, Download, Loader2,
-  Send, RotateCcw, BarChart3, BookOpen, Calculator,
+  Send, RotateCcw, BarChart3, BookOpen,
   Scale, TrendingUp, ClipboardList, FileCheck,
 } from "lucide-react";
+import {
+  type BalancoLine,
+  activoNaoCorrente, activoCorrentes, capitalProprioLines,
+  passivoNaoCorrenteLines, passivoCorrenteLines, proveitosLines, custosLines,
+  allCC3Sections, sumEditable, mapBalanceteToCC3,
+} from "@/lib/cc3Structures";
 
 // ─── Types ───
 interface Processo {
@@ -218,70 +223,68 @@ export default function AmbienteAnalisePage() {
     return <Badge variant="secondary" className="text-[10px]">Pendente</Badge>;
   };
 
-  // ─── Computed Financial Data ───
-  const totalDebit = balancete.reduce((s, l) => s + l.debit, 0);
-  const totalCredit = balancete.reduce((s, l) => s + l.credit, 0);
+  // ─── Map balancete to CC3 structure ───
+  const cc3Data = useMemo(() => mapBalanceteToCC3(balancete), [balancete]);
 
-  // Balanço Patrimonial (derive from balancete by account classes)
-  const balancoData = useMemo(() => {
-    const sumByPrefix = (prefix: string) =>
-      balancete.filter(l => l.account_code.startsWith(prefix)).reduce((s, l) => s + l.balance, 0);
+  const totalAtivoNaoCorrente = sumEditable(activoNaoCorrente, cc3Data.ativNaoCorr);
+  const totalAtivoCorrentes = sumEditable(activoCorrentes, cc3Data.ativCorr);
+  const totalActivo = totalAtivoNaoCorrente + totalAtivoCorrentes;
+  const totalCapProprio = sumEditable(capitalProprioLines, cc3Data.capProprio);
+  const totalPassNaoCorrente = sumEditable(passivoNaoCorrenteLines, cc3Data.passNaoCorr);
+  const totalPassCorrente = sumEditable(passivoCorrenteLines, cc3Data.passCorr);
+  const totalPassivo = totalPassNaoCorrente + totalPassCorrente;
+  const totalCapPassivo = totalCapProprio + totalPassivo;
+  const totalProveitos = sumEditable(proveitosLines, cc3Data.proveitos);
+  const totalCustos = sumEditable(custosLines, cc3Data.custos);
+  const resultadoExercicio = totalProveitos - totalCustos;
 
-    const activoNaoCorrente = sumByPrefix("1"); // Classe 1 — Meios Fixos
-    const activoCorrente = sumByPrefix("3") + sumByPrefix("4"); // Existências + Terceiros
-    const disponibilidades = sumByPrefix("5"); // Disponibilidades
-    const totalActivo = activoNaoCorrente + activoCorrente + disponibilidades;
-
-    const capitalProprio = sumByPrefix("6"); // Capital Próprio
-    const passivoNaoCorrente = sumByPrefix("2"); // Investimentos Financeiros / Passivo LP
-    const passivoCorrente = sumByPrefix("4").toString().startsWith("4") ? Math.abs(balancete.filter(l => l.account_code.startsWith("4") && l.balance < 0).reduce((s, l) => s + l.balance, 0)) : 0;
-    const totalPassivoCP = capitalProprio + passivoNaoCorrente + passivoCorrente;
-
-    return {
-      activoNaoCorrente, activoCorrente, disponibilidades, totalActivo,
-      capitalProprio, passivoNaoCorrente, passivoCorrente, totalPassivoCP,
-    };
-  }, [balancete]);
-
-  // Demonstração de Resultados
-  const drData = useMemo(() => {
-    const sumByPrefix = (prefix: string) =>
-      balancete.filter(l => l.account_code.startsWith(prefix)).reduce((s, l) => s + Math.abs(l.balance), 0);
-
-    const proveitos = sumByPrefix("7"); // Classe 7 — Proveitos
-    const custos = sumByPrefix("6").toString().startsWith("6") ? 0 : sumByPrefix("6"); // Avoid overlap with CP
-    const custosOperacionais = sumByPrefix("61") + sumByPrefix("62") + sumByPrefix("63") + sumByPrefix("64") + sumByPrefix("65") + sumByPrefix("66");
-    const resultadoOperacional = proveitos - custosOperacionais;
-    const resultadosFinanceiros = sumByPrefix("78") - sumByPrefix("68");
-    const resultadoAntesImpostos = resultadoOperacional + resultadosFinanceiros;
-    const impostos = sumByPrefix("69");
-    const resultadoLiquido = resultadoAntesImpostos - impostos;
-
-    return {
-      proveitos, custosOperacionais, resultadoOperacional,
-      resultadosFinanceiros, resultadoAntesImpostos, impostos, resultadoLiquido,
-    };
-  }, [balancete]);
-
-  // Indicadores
+  // Indicadores from DB or computed
   const indicadorRows = useMemo(() => {
     const i = indicators;
-    if (!i || Object.keys(i).length === 0) return [];
+    const hasDbIndicators = i && Object.keys(i).length > 0 && Object.values(i).some(v => typeof v === 'number' && v !== 0);
+    
+    if (hasDbIndicators) {
+      return [
+        { label: "Activo Total", value: Number(i.activo_total) || 0, fmt: "kz" as const },
+        { label: "Capital Próprio", value: Number(i.capital_proprio) || 0, fmt: "kz" as const },
+        { label: "Passivo Total", value: Number(i.passivo_total) || 0, fmt: "kz" as const },
+        { label: "Resultado Líquido", value: Number(i.resultado_liquido) || 0, fmt: "kz" as const },
+        { label: "Proveitos Operacionais", value: Number(i.proveitos_operacionais) || 0, fmt: "kz" as const },
+        { label: "Custos Operacionais", value: Number(i.custos_operacionais) || 0, fmt: "kz" as const },
+        { label: "Liquidez Corrente", value: Number(i.liquidez_corrente) || 0 },
+        { label: "Liquidez Geral", value: Number(i.liquidez_geral) || 0 },
+        { label: "ROE", value: Number(i.roe) || 0, fmt: "pct" as const },
+        { label: "ROA", value: Number(i.roa) || 0, fmt: "pct" as const },
+        { label: "Endividamento Geral", value: Number(i.endividamento_geral) || 0, fmt: "pct" as const },
+        { label: "Margem Líquida", value: Number(i.margem_liquida) || 0, fmt: "pct" as const },
+      ];
+    }
+
+    // Compute from CC3 data
+    if (totalActivo === 0 && totalProveitos === 0) return [];
+
+    const liqCorrente = totalPassCorrente !== 0 ? totalAtivoCorrentes / totalPassCorrente : 0;
+    const liqGeral = totalPassivo !== 0 ? totalActivo / totalPassivo : 0;
+    const roe = totalCapProprio !== 0 ? resultadoExercicio / totalCapProprio : 0;
+    const roa = totalActivo !== 0 ? resultadoExercicio / totalActivo : 0;
+    const endiv = totalActivo !== 0 ? totalPassivo / totalActivo : 0;
+    const margem = totalProveitos !== 0 ? resultadoExercicio / totalProveitos : 0;
+
     return [
-      { label: "Activo Total", value: Number(i.activo_total) || 0, fmt: "kz" as const },
-      { label: "Capital Próprio", value: Number(i.capital_proprio) || 0, fmt: "kz" as const },
-      { label: "Passivo Total", value: Number(i.passivo_total) || 0, fmt: "kz" as const },
-      { label: "Resultado Líquido", value: Number(i.resultado_liquido) || 0, fmt: "kz" as const },
-      { label: "Proveitos Operacionais", value: Number(i.proveitos_operacionais) || 0, fmt: "kz" as const },
-      { label: "Custos Operacionais", value: Number(i.custos_operacionais) || 0, fmt: "kz" as const },
-      { label: "Liquidez Corrente", value: Number(i.liquidez_corrente) || 0 },
-      { label: "Liquidez Geral", value: Number(i.liquidez_geral) || 0 },
-      { label: "ROE", value: Number(i.roe) || 0, fmt: "pct" as const },
-      { label: "ROA", value: Number(i.roa) || 0, fmt: "pct" as const },
-      { label: "Endividamento Geral", value: Number(i.endividamento_geral) || 0, fmt: "pct" as const },
-      { label: "Margem Líquida", value: Number(i.margem_liquida) || 0, fmt: "pct" as const },
+      { label: "Activo Total", value: totalActivo, fmt: "kz" as const },
+      { label: "Capital Próprio", value: totalCapProprio, fmt: "kz" as const },
+      { label: "Passivo Total", value: totalPassivo, fmt: "kz" as const },
+      { label: "Resultado Líquido", value: resultadoExercicio, fmt: "kz" as const },
+      { label: "Proveitos", value: totalProveitos, fmt: "kz" as const },
+      { label: "Custos", value: totalCustos, fmt: "kz" as const },
+      { label: "Liquidez Corrente", value: liqCorrente },
+      { label: "Liquidez Geral", value: liqGeral },
+      { label: "ROE", value: roe, fmt: "pct" as const },
+      { label: "ROA", value: roa, fmt: "pct" as const },
+      { label: "Endividamento Geral", value: endiv, fmt: "pct" as const },
+      { label: "Margem Líquida", value: margem, fmt: "pct" as const },
     ];
-  }, [indicators]);
+  }, [indicators, totalActivo, totalCapProprio, totalPassivo, totalProveitos, totalCustos, resultadoExercicio, totalAtivoCorrentes, totalPassCorrente]);
 
   const fmtIndicator = (row: { value: number; fmt?: string }) => {
     if (row.fmt === "kz") return `${formatKz(row.value)} Kz`;
@@ -292,6 +295,9 @@ export default function AmbienteAnalisePage() {
   // Separate docs by source
   const submissionDocs = documentos.filter(d => d._source === "submission");
   const processoDocs = documentos.filter(d => d._source !== "submission");
+
+  const totalDebit = balancete.reduce((s, l) => s + l.debit, 0);
+  const totalCredit = balancete.reduce((s, l) => s + l.credit, 0);
 
   // ─── Render ───
   if (loading) {
@@ -338,7 +344,7 @@ export default function AmbienteAnalisePage() {
           </CardContent>
         </Card>
 
-        {/* Main tabs - 6 tabs */}
+        {/* Main tabs */}
         <Tabs defaultValue="documentos" className="space-y-4">
           <TabsList className="grid grid-cols-6 w-full">
             <TabsTrigger value="documentos" className="gap-1 text-xs"><FileText className="h-3.5 w-3.5" /> Documentos</TabsTrigger>
@@ -352,7 +358,6 @@ export default function AmbienteAnalisePage() {
           {/* ── Tab: Documentos ── */}
           <TabsContent value="documentos">
             <div className="space-y-4">
-              {/* Entity submission documents */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-sm flex items-center gap-2">
@@ -370,7 +375,6 @@ export default function AmbienteAnalisePage() {
                 </CardContent>
               </Card>
 
-              {/* Process generated documents */}
               {processoDocs.length > 0 && (
                 <Card>
                   <CardHeader>
@@ -388,131 +392,158 @@ export default function AmbienteAnalisePage() {
             </div>
           </TabsContent>
 
-          {/* ── Tab: Balanço Patrimonial ── */}
+          {/* ── Tab: Balanço Patrimonial (detailed CC3 tables) ── */}
           <TabsContent value="balanco">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Activo */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">ACTIVO</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <BalancoRow label="Activo Não Corrente (Meios Fixos)" value={balancoData.activoNaoCorrente} />
-                  <BalancoRow label="Activo Corrente (Existências + Terceiros)" value={balancoData.activoCorrente} />
-                  <BalancoRow label="Disponibilidades" value={balancoData.disponibilidades} />
-                  <div className="border-t pt-2">
-                    <BalancoRow label="TOTAL DO ACTIVO" value={balancoData.totalActivo} bold />
-                  </div>
-                </CardContent>
-              </Card>
+            {loadingBal ? (
+              <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+            ) : balancete.length === 0 ? (
+              <div className="text-center py-12 space-y-2">
+                <BookOpen className="h-10 w-10 mx-auto text-muted-foreground/40" />
+                <p className="text-sm text-muted-foreground">Nenhum dado de balancete encontrado para este exercício.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Summary cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <SummaryCard label="Total Activo" value={`${formatKz(totalActivo)} Kz`} sub={`Não Corrente: ${formatKz(totalAtivoNaoCorrente)} Kz`} />
+                  <SummaryCard label="Capital Próprio" value={`${formatKz(totalCapProprio)} Kz`} sub={`${totalActivo ? ((totalCapProprio / totalActivo) * 100).toFixed(1) : 0}% do activo`} />
+                  <SummaryCard label="Total Passivo" value={`${formatKz(totalPassivo)} Kz`} sub={`Corrente: ${formatKz(totalPassCorrente)} Kz`} />
+                  <SummaryCard label="Equilíbrio" value={`${formatKz(totalCapPassivo)} Kz`} sub={Math.abs(totalActivo - totalCapPassivo) < 1 ? "✓ Equilibrado" : "⚠ Desequilíbrio"} />
+                </div>
 
-              {/* Capital Próprio + Passivo */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">CAPITAL PRÓPRIO E PASSIVO</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <BalancoRow label="Capital Próprio" value={balancoData.capitalProprio} />
-                  <BalancoRow label="Passivo Não Corrente" value={balancoData.passivoNaoCorrente} />
-                  <BalancoRow label="Passivo Corrente" value={balancoData.passivoCorrente} />
-                  <div className="border-t pt-2">
-                    <BalancoRow label="TOTAL CP + PASSIVO" value={balancoData.totalPassivoCP} bold />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                {/* Activo */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">ACTIVO</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <ReadOnlyCC3Table lines={activoNaoCorrente} values={cc3Data.ativNaoCorr} sectionTitle="Activo Não Corrente" />
+                    <ReadOnlyCC3Table lines={activoCorrentes} values={cc3Data.ativCorr} sectionTitle="Activo Corrente" />
+                    <div className="border-t pt-2 flex justify-between items-center px-2">
+                      <span className="text-sm font-bold">TOTAL DO ACTIVO</span>
+                      <span className="font-mono text-sm font-bold">{formatKz(totalActivo)} Kz</span>
+                    </div>
+                  </CardContent>
+                </Card>
 
-            {/* Full balancete detail */}
-            <Card className="mt-4">
-              <CardHeader>
-                <CardTitle className="text-sm">Balancete Analítico Detalhado</CardTitle>
-                <CardDescription>Dados do balancete carregado pela entidade para o exercício {processo.ano_gerencia}.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loadingBal ? (
-                  <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
-                ) : balancete.length === 0 ? (
-                  <div className="text-center py-12 space-y-2">
-                    <BookOpen className="h-10 w-10 mx-auto text-muted-foreground/40" />
-                    <p className="text-sm text-muted-foreground">Nenhum dado de balancete encontrado.</p>
-                  </div>
-                ) : (
-                  <div className="border rounded-lg overflow-auto max-h-[500px]">
-                    <Table>
-                      <TableHeader className="sticky top-0 bg-card z-10">
-                        <TableRow>
-                          <TableHead className="text-xs font-mono w-24">Conta</TableHead>
-                          <TableHead className="text-xs">Descrição</TableHead>
-                          <TableHead className="text-xs text-right">Débito</TableHead>
-                          <TableHead className="text-xs text-right">Crédito</TableHead>
-                          <TableHead className="text-xs text-right">Saldo</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {balancete.map((line) => (
-                          <TableRow key={line.id}>
-                            <TableCell className="text-xs font-mono">{line.account_code}</TableCell>
-                            <TableCell className="text-xs">{line.description}</TableCell>
-                            <TableCell className="text-xs text-right font-mono">{formatKz(line.debit)}</TableCell>
-                            <TableCell className="text-xs text-right font-mono">{formatKz(line.credit)}</TableCell>
-                            <TableCell className="text-xs text-right font-mono font-semibold">{formatKz(line.balance)}</TableCell>
+                {/* Capital Próprio + Passivo */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">CAPITAL PRÓPRIO E PASSIVO</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <ReadOnlyCC3Table lines={capitalProprioLines} values={cc3Data.capProprio} sectionTitle="Capital Próprio" />
+                    <ReadOnlyCC3Table lines={passivoNaoCorrenteLines} values={cc3Data.passNaoCorr} sectionTitle="Passivo Não Corrente" />
+                    <ReadOnlyCC3Table lines={passivoCorrenteLines} values={cc3Data.passCorr} sectionTitle="Passivo Corrente" />
+                    <div className="border-t pt-2 flex justify-between items-center px-2">
+                      <span className="text-sm font-bold">TOTAL CAPITAL PRÓPRIO + PASSIVO</span>
+                      <span className="font-mono text-sm font-bold">{formatKz(totalCapPassivo)} Kz</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Raw balancete */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Balancete Analítico (Dados Brutos)</CardTitle>
+                    <CardDescription>{balancete.length} contas carregadas pela entidade.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="border rounded-lg overflow-auto max-h-[400px]">
+                      <Table>
+                        <TableHeader className="sticky top-0 bg-card z-10">
+                          <TableRow>
+                            <TableHead className="text-xs font-mono w-24">Conta</TableHead>
+                            <TableHead className="text-xs">Descrição</TableHead>
+                            <TableHead className="text-xs text-right">Débito</TableHead>
+                            <TableHead className="text-xs text-right">Crédito</TableHead>
+                            <TableHead className="text-xs text-right">Saldo</TableHead>
                           </TableRow>
-                        ))}
-                        <TableRow className="bg-muted/30 font-semibold">
-                          <TableCell colSpan={2} className="text-xs">TOTAIS</TableCell>
-                          <TableCell className="text-xs text-right font-mono">{formatKz(totalDebit)}</TableCell>
-                          <TableCell className="text-xs text-right font-mono">{formatKz(totalCredit)}</TableCell>
-                          <TableCell className="text-xs text-right font-mono">{formatKz(totalDebit - totalCredit)}</TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                        </TableHeader>
+                        <TableBody>
+                          {balancete.map((line) => (
+                            <TableRow key={line.id}>
+                              <TableCell className="text-xs font-mono">{line.account_code}</TableCell>
+                              <TableCell className="text-xs">{line.description}</TableCell>
+                              <TableCell className="text-xs text-right font-mono">{formatKz(line.debit)}</TableCell>
+                              <TableCell className="text-xs text-right font-mono">{formatKz(line.credit)}</TableCell>
+                              <TableCell className="text-xs text-right font-mono font-semibold">{formatKz(line.balance)}</TableCell>
+                            </TableRow>
+                          ))}
+                          <TableRow className="bg-muted/30 font-semibold">
+                            <TableCell colSpan={2} className="text-xs">TOTAIS</TableCell>
+                            <TableCell className="text-xs text-right font-mono">{formatKz(totalDebit)}</TableCell>
+                            <TableCell className="text-xs text-right font-mono">{formatKz(totalCredit)}</TableCell>
+                            <TableCell className="text-xs text-right font-mono">{formatKz(totalDebit - totalCredit)}</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </TabsContent>
 
           {/* ── Tab: Demonstração de Resultados ── */}
           <TabsContent value="dr">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                  Demonstração de Resultados — Exercício {processo.ano_gerencia}
-                </CardTitle>
-                <CardDescription>Estrutura de proveitos e custos derivada do balancete analítico.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {balancete.length === 0 ? (
-                  <div className="text-center py-12 space-y-2">
-                    <TrendingUp className="h-10 w-10 mx-auto text-muted-foreground/40" />
-                    <p className="text-sm text-muted-foreground">Sem dados de balancete para gerar a demonstração de resultados.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
+            {balancete.length === 0 ? (
+              <div className="text-center py-12 space-y-2">
+                <TrendingUp className="h-10 w-10 mx-auto text-muted-foreground/40" />
+                <p className="text-sm text-muted-foreground">Sem dados de balancete para gerar a demonstração de resultados.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Summary */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <SummaryCard label="Total Proveitos" value={`${formatKz(totalProveitos)} Kz`} sub="Classe 6 PGC" />
+                  <SummaryCard label="Total Custos" value={`${formatKz(totalCustos)} Kz`} sub="Classe 7 PGC" />
+                  <SummaryCard label="Resultado do Exercício" value={`${formatKz(resultadoExercicio)} Kz`} sub={resultadoExercicio >= 0 ? "Positivo" : "Negativo"} />
+                  <SummaryCard label="Margem" value={totalProveitos > 0 ? `${((resultadoExercicio / totalProveitos) * 100).toFixed(1)}%` : "—"} sub="Resultado / Proveitos" />
+                </div>
+
+                {/* Proveitos detail */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-primary" />
+                      Proveitos e Ganhos
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ReadOnlyCC3Table lines={proveitosLines} values={cc3Data.proveitos} sectionTitle="Proveitos" />
+                  </CardContent>
+                </Card>
+
+                {/* Custos detail */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-destructive" />
+                      Custos e Perdas
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ReadOnlyCC3Table lines={custosLines} values={cc3Data.custos} sectionTitle="Custos" />
+                  </CardContent>
+                </Card>
+
+                {/* Result summary */}
+                <Card>
+                  <CardContent className="pt-6">
                     <div className="border rounded-lg overflow-hidden">
                       <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="text-xs">Rubrica</TableHead>
-                            <TableHead className="text-xs text-right">Valor (Kz)</TableHead>
-                          </TableRow>
-                        </TableHeader>
                         <TableBody>
-                          <DRRow label="Proveitos Operacionais (Classe 7)" value={drData.proveitos} />
-                          <DRRow label="Custos Operacionais (Classes 61-66)" value={-drData.custosOperacionais} />
-                          <DRRow label="Resultado Operacional" value={drData.resultadoOperacional} bold highlight />
-                          <DRRow label="Resultados Financeiros" value={drData.resultadosFinanceiros} />
-                          <DRRow label="Resultado Antes de Impostos" value={drData.resultadoAntesImpostos} bold />
-                          <DRRow label="Impostos s/ Rendimento (69)" value={-drData.impostos} />
-                          <DRRow label="RESULTADO LÍQUIDO DO EXERCÍCIO" value={drData.resultadoLiquido} bold highlight />
+                          <DRRow label="Total de Proveitos e Ganhos" value={totalProveitos} bold />
+                          <DRRow label="Total de Custos e Perdas" value={-totalCustos} bold />
+                          <DRRow label="RESULTADO LÍQUIDO DO EXERCÍCIO" value={resultadoExercicio} bold highlight />
                         </TableBody>
                       </Table>
                     </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </TabsContent>
 
           {/* ── Tab: Indicadores Financeiros ── */}
@@ -523,10 +554,10 @@ export default function AmbienteAnalisePage() {
                   <BarChart3 className="h-4 w-4 text-primary" />
                   Indicadores Financeiros — Exercício {processo.ano_gerencia}
                 </CardTitle>
-                <CardDescription>Rácios e indicadores calculados a partir dos dados financeiros.</CardDescription>
+                <CardDescription>Rácios e indicadores calculados a partir dos dados do balancete.</CardDescription>
               </CardHeader>
               <CardContent>
-                {indicadorRows.length === 0 || indicadorRows.every(r => r.value === 0) ? (
+                {indicadorRows.length === 0 ? (
                   <div className="text-center py-12 space-y-2">
                     <BarChart3 className="h-10 w-10 mx-auto text-muted-foreground/40" />
                     <p className="text-sm text-muted-foreground">Indicadores financeiros não disponíveis para este exercício.</p>
@@ -536,7 +567,7 @@ export default function AmbienteAnalisePage() {
                     {indicadorRows.map((row) => (
                       <div key={row.label} className="rounded-lg border p-4 space-y-1">
                         <p className="text-[11px] text-muted-foreground">{row.label}</p>
-                        <p className="text-lg font-bold font-mono">{fmtIndicator(row)}</p>
+                        <p className={`text-lg font-bold font-mono ${row.fmt === 'kz' && row.value < 0 ? 'text-destructive' : ''}`}>{fmtIndicator(row)}</p>
                       </div>
                     ))}
                   </div>
@@ -554,45 +585,39 @@ export default function AmbienteAnalisePage() {
                     <ClipboardList className="h-4 w-4 text-primary" />
                     Resumo da Análise
                   </CardTitle>
-                  <CardDescription>Visão geral consolidada do processo de prestação de contas.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Key metrics */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <SummaryCard label="Total Documentos" value={String(documentos.length)} sub={`${submissionDocs.length} da entidade · ${processoDocs.length} do processo`} />
-                    <SummaryCard label="Completude Documental" value={`${processo.completude_documental}%`} sub={processo.completude_documental >= 100 ? "Completo" : "Incompleto"} />
-                    <SummaryCard label="Resultado Líquido" value={formatKz(drData.resultadoLiquido) + " Kz"} sub={drData.resultadoLiquido >= 0 ? "Positivo" : "Negativo"} />
-                    <SummaryCard label="Total Activo" value={formatKz(balancoData.totalActivo) + " Kz"} sub="Balanço Patrimonial" />
+                    <SummaryCard label="Completude" value={`${processo.completude_documental}%`} sub={processo.completude_documental >= 100 ? "Completo" : "Incompleto"} />
+                    <SummaryCard label="Resultado Líquido" value={`${formatKz(resultadoExercicio)} Kz`} sub={resultadoExercicio >= 0 ? "Positivo" : "Negativo"} />
+                    <SummaryCard label="Total Activo" value={`${formatKz(totalActivo)} Kz`} sub="Balanço Patrimonial" />
                   </div>
 
-                  {/* Process info */}
                   <div className="border rounded-lg overflow-hidden">
                     <Table>
                       <TableBody>
                         <InfoTableRow label="Nº Processo" value={processo.numero_processo} />
                         <InfoTableRow label="Entidade" value={processo.entity_name} />
-                        <InfoTableRow label="Exercício / Ano de Gerência" value={String(processo.ano_gerencia)} />
+                        <InfoTableRow label="Exercício" value={String(processo.ano_gerencia)} />
                         <InfoTableRow label="Categoria" value={processo.categoria_entidade.replace(/_/g, " ")} />
-                        <InfoTableRow label="Divisão Competente" value={processo.divisao_competente || "—"} />
-                        <InfoTableRow label="Secção Competente" value={processo.seccao_competente || "—"} />
-                        <InfoTableRow label="Técnico de Análise" value={processo.tecnico_analise || "—"} />
-                        <InfoTableRow label="Coordenador de Equipa" value={processo.coordenador_equipa || "—"} />
+                        <InfoTableRow label="Divisão" value={processo.divisao_competente || "—"} />
+                        <InfoTableRow label="Técnico" value={processo.tecnico_analise || "—"} />
                         <InfoTableRow label="Data de Submissão" value={new Date(processo.data_submissao).toLocaleDateString("pt-AO")} />
                         <InfoTableRow label="Estado" value={processo.estado.replace(/_/g, " ")} />
                       </TableBody>
                     </Table>
                   </div>
 
-                  {/* Financial summary */}
                   <div className="border rounded-lg p-4 space-y-3">
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Síntese Financeira</h4>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                      <div><span className="text-muted-foreground text-xs">Total Débito</span><p className="font-mono font-medium">{formatKz(totalDebit)} Kz</p></div>
-                      <div><span className="text-muted-foreground text-xs">Total Crédito</span><p className="font-mono font-medium">{formatKz(totalCredit)} Kz</p></div>
-                      <div><span className="text-muted-foreground text-xs">Diferença</span><p className="font-mono font-medium">{formatKz(totalDebit - totalCredit)} Kz</p></div>
-                      <div><span className="text-muted-foreground text-xs">Proveitos</span><p className="font-mono font-medium">{formatKz(drData.proveitos)} Kz</p></div>
-                      <div><span className="text-muted-foreground text-xs">Custos Operacionais</span><p className="font-mono font-medium">{formatKz(drData.custosOperacionais)} Kz</p></div>
-                      <div><span className="text-muted-foreground text-xs">Resultado Líquido</span><p className={`font-mono font-bold ${drData.resultadoLiquido >= 0 ? "text-emerald-600" : "text-destructive"}`}>{formatKz(drData.resultadoLiquido)} Kz</p></div>
+                      <div><span className="text-muted-foreground text-xs">Total Activo</span><p className="font-mono font-medium">{formatKz(totalActivo)} Kz</p></div>
+                      <div><span className="text-muted-foreground text-xs">Capital Próprio</span><p className="font-mono font-medium">{formatKz(totalCapProprio)} Kz</p></div>
+                      <div><span className="text-muted-foreground text-xs">Total Passivo</span><p className="font-mono font-medium">{formatKz(totalPassivo)} Kz</p></div>
+                      <div><span className="text-muted-foreground text-xs">Proveitos</span><p className="font-mono font-medium">{formatKz(totalProveitos)} Kz</p></div>
+                      <div><span className="text-muted-foreground text-xs">Custos</span><p className="font-mono font-medium">{formatKz(totalCustos)} Kz</p></div>
+                      <div><span className="text-muted-foreground text-xs">Resultado Líquido</span><p className={`font-mono font-bold ${resultadoExercicio >= 0 ? "text-emerald-600" : "text-destructive"}`}>{formatKz(resultadoExercicio)} Kz</p></div>
                     </div>
                   </div>
                 </CardContent>
@@ -688,6 +713,59 @@ export default function AmbienteAnalisePage() {
 
 // ─── Sub-components ───
 
+function ReadOnlyCC3Table({ lines, values, sectionTitle }: {
+  lines: BalancoLine[];
+  values: Record<string, number>;
+  sectionTitle: string;
+}) {
+  const total = sumEditable(lines, values);
+  const hasData = Object.values(values).some(v => v !== 0);
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-xs border-collapse">
+        <thead>
+          <tr className="bg-muted/50">
+            <th className="px-2 py-1.5 text-left border border-border w-20">Código</th>
+            <th className="px-2 py-1.5 text-left border border-border">Designação</th>
+            <th className="px-2 py-1.5 text-right border border-border w-32">Valor (Kz)</th>
+            <th className="px-2 py-1.5 text-right border border-border w-20">%</th>
+          </tr>
+        </thead>
+        <tbody>
+          {lines.map((line) => {
+            const val = line.editable
+              ? (values[line.code] || 0)
+              : sumEditable(lines.filter(l => l.code.startsWith(line.code + ".") && l.editable), values);
+
+            if (!hasData && !line.isHeader && val === 0) return null;
+
+            return (
+              <tr key={line.code} className={line.isHeader ? "bg-muted/30 font-medium" : "hover:bg-muted/10"}>
+                <td className="px-2 py-1 border border-border text-muted-foreground">{line.code}</td>
+                <td className="px-2 py-1 border border-border" style={{ paddingLeft: `${line.level * 12 + 8}px` }}>
+                  {line.label}
+                </td>
+                <td className="px-2 py-1 border border-border text-right font-mono">
+                  {val !== 0 ? formatKz(val) : "—"}
+                </td>
+                <td className="px-2 py-1 border border-border text-right text-muted-foreground">
+                  {total > 0 && val !== 0 ? `${((val / total) * 100).toFixed(1)}%` : ""}
+                </td>
+              </tr>
+            );
+          })}
+          <tr className="bg-primary/10 font-semibold">
+            <td className="px-2 py-1.5 border border-border" colSpan={2}>Total {sectionTitle}</td>
+            <td className="px-2 py-1.5 border border-border text-right font-mono">{formatKz(total)}</td>
+            <td className="px-2 py-1.5 border border-border text-right">100%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function DocTable({ docs, getDocIcon, getEstadoBadge, onPreview, onDownload }: {
   docs: DocItem[];
   getDocIcon: (n: string) => React.ReactNode;
@@ -740,15 +818,6 @@ function DocTable({ docs, getDocIcon, getEstadoBadge, onPreview, onDownload }: {
           ))}
         </TableBody>
       </Table>
-    </div>
-  );
-}
-
-function BalancoRow({ label, value, bold }: { label: string; value: number; bold?: boolean }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className={`text-sm ${bold ? "font-bold" : "text-muted-foreground"}`}>{label}</span>
-      <span className={`font-mono text-sm ${bold ? "font-bold" : ""}`}>{formatKz(value)} Kz</span>
     </div>
   );
 }
