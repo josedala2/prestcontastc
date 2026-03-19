@@ -9,6 +9,7 @@ export default function AnaliseTecnicaPage() {
       subtitle: "Analise os documentos do processo, solicite elementos adicionais e emita o parecer técnico.",
       icon: FileSearch,
       perfilExecutor: "Técnico de Análise",
+      detailRoute: "/analise-tecnica",
       actions: [
         { label: "Concluir Análise e Submeter", nextEtapa: 9, nextEstado: "em_validacao", evento: "analise_concluida" },
         { label: "Solicitar Elementos", nextEtapa: 8, nextEstado: "aguardando_elementos", evento: "falta_elementos", variant: "outline" },
