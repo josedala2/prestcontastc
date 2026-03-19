@@ -52,6 +52,9 @@ interface DocItem {
   estado: string;
   created_at: string;
   observacoes: string | null;
+  /** Source: "processo" or "submission" */
+  _source?: "processo" | "submission";
+  _storageBucket?: string;
 }
 
 interface BalanceteLine {
