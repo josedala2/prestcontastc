@@ -108,6 +108,10 @@ export default function WorkflowStagePage({ config }: { config: WorkflowStagePag
   };
 
   const handleSelect = (p: Processo) => {
+    if (config.detailRoute) {
+      navigate(`${config.detailRoute}/${p.id}`);
+      return;
+    }
     setSelected(p);
     setObservacoes("");
     const initial: Record<string, string> = {};
