@@ -333,7 +333,14 @@ export default function AmbienteAnalisePage() {
                                 <span className="text-xs font-medium truncate max-w-[220px]">{doc.nome_ficheiro}</span>
                               </div>
                             </TableCell>
-                            <TableCell><Badge variant="outline" className="text-[10px]">{doc.tipo_documento}</Badge></TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1.5">
+                                <Badge variant="outline" className="text-[10px]">{doc.tipo_documento}</Badge>
+                                {doc._source === "submission" && (
+                                  <Badge variant="secondary" className="text-[9px]">Entidade</Badge>
+                                )}
+                              </div>
+                            </TableCell>
                             <TableCell>{getEstadoBadge(doc.estado)}</TableCell>
                             <TableCell className="text-xs text-muted-foreground">{new Date(doc.created_at).toLocaleDateString("pt-AO")}</TableCell>
                             <TableCell className="text-right">
