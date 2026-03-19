@@ -308,6 +308,11 @@ const Configuracoes = () => {
           <MenuPerfilMatrix />
         </TabsContent>
 
+        {/* Gestão de Utilizadores */}
+        <TabsContent value="utilizadores">
+          <GestaoUtilizadores />
+        </TabsContent>
+
         {/* System */}
         <TabsContent value="sistema">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
