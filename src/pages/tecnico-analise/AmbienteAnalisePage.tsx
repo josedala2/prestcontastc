@@ -348,7 +348,7 @@ export default function AmbienteAnalisePage() {
         <Tabs defaultValue="documentos" className="space-y-4">
           <TabsList className="grid grid-cols-6 w-full">
             <TabsTrigger value="documentos" className="gap-1 text-xs"><FileText className="h-3.5 w-3.5" /> Documentos</TabsTrigger>
-            <TabsTrigger value="balanco" className="gap-1 text-xs"><Scale className="h-3.5 w-3.5" /> Balanço</TabsTrigger>
+            <TabsTrigger value="balanco" className="gap-1 text-xs"><Scale className="h-3.5 w-3.5" /> Balanço (CC-2)</TabsTrigger>
             <TabsTrigger value="dr" className="gap-1 text-xs"><TrendingUp className="h-3.5 w-3.5" /> Dem. Resultados</TabsTrigger>
             <TabsTrigger value="indicadores" className="gap-1 text-xs"><BarChart3 className="h-3.5 w-3.5" /> Indicadores</TabsTrigger>
             <TabsTrigger value="resumo" className="gap-1 text-xs"><ClipboardList className="h-3.5 w-3.5" /> Resumo</TabsTrigger>
