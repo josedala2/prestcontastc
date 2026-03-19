@@ -193,7 +193,8 @@ export default function AmbienteAnalisePage() {
     if (!doc.caminho_ficheiro) return;
     try {
       if (previewUrl?.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
-      const { data, error } = await supabase.storage.from("processo-documentos").createSignedUrl(doc.caminho_ficheiro, 600, { download: false });
+      const bucket = doc._storageBucket || "processo-documentos";
+      const { data, error } = await supabase.storage.from(bucket).createSignedUrl(doc.caminho_ficheiro, 600, { download: false });
       if (error || !data?.signedUrl) throw error;
       setPreviewUrl(data.signedUrl);
       setPreviewName(doc.nome_ficheiro);
@@ -203,7 +204,8 @@ export default function AmbienteAnalisePage() {
   const handleDownload = async (doc: DocItem) => {
     if (!doc.caminho_ficheiro) return;
     try {
-      const { data, error } = await supabase.storage.from("processo-documentos").download(doc.caminho_ficheiro);
+      const bucket = doc._storageBucket || "processo-documentos";
+      const { data, error } = await supabase.storage.from(bucket).download(doc.caminho_ficheiro);
       if (error) throw error;
       const url = URL.createObjectURL(data);
       const a = document.createElement("a"); a.href = url; a.download = doc.nome_ficheiro; document.body.appendChild(a); a.click(); a.remove();
