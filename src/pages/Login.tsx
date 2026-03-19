@@ -44,17 +44,45 @@ const DEMO_GROUPS: DemoGroup[] = [
     ],
   },
   {
-    label: "Divisões e Secções (3ª)",
+    label: "3ª Divisão",
     users: [
       { email: "chefe.divisao@demo.tca.ao", password: "demo123456", label: "Chefe de Divisão", shortLabel: "Ch. Divisão", divisao: "3ª Divisão" },
       { email: "chefe.seccao@demo.tca.ao", password: "demo123456", label: "Chefe de Secção", shortLabel: "Ch. Secção", divisao: "3ª Divisão" },
     ],
   },
   {
-    label: "Divisões e Secções (5ª)",
+    label: "4ª Divisão",
+    users: [
+      { email: "chefe.divisao4@demo.tca.ao", password: "demo123456", label: "Chefe de Divisão", shortLabel: "Ch. Divisão", divisao: "4ª Divisão" },
+      { email: "chefe.seccao4@demo.tca.ao", password: "demo123456", label: "Chefe de Secção", shortLabel: "Ch. Secção", divisao: "4ª Divisão" },
+    ],
+  },
+  {
+    label: "5ª Divisão",
     users: [
       { email: "chefe.divisao5@demo.tca.ao", password: "demo123456", label: "Chefe de Divisão", shortLabel: "Ch. Divisão", divisao: "5ª Divisão" },
       { email: "chefe.seccao5@demo.tca.ao", password: "demo123456", label: "Chefe de Secção", shortLabel: "Ch. Secção", divisao: "5ª Divisão" },
+    ],
+  },
+  {
+    label: "6ª Divisão",
+    users: [
+      { email: "chefe.divisao6@demo.tca.ao", password: "demo123456", label: "Chefe de Divisão", shortLabel: "Ch. Divisão", divisao: "6ª Divisão" },
+      { email: "chefe.seccao6@demo.tca.ao", password: "demo123456", label: "Chefe de Secção", shortLabel: "Ch. Secção", divisao: "6ª Divisão" },
+    ],
+  },
+  {
+    label: "7ª Divisão",
+    users: [
+      { email: "chefe.divisao7@demo.tca.ao", password: "demo123456", label: "Chefe de Divisão", shortLabel: "Ch. Divisão", divisao: "7ª Divisão" },
+      { email: "chefe.seccao7@demo.tca.ao", password: "demo123456", label: "Chefe de Secção", shortLabel: "Ch. Secção", divisao: "7ª Divisão" },
+    ],
+  },
+  {
+    label: "8ª Divisão",
+    users: [
+      { email: "chefe.divisao8@demo.tca.ao", password: "demo123456", label: "Chefe de Divisão", shortLabel: "Ch. Divisão", divisao: "8ª Divisão" },
+      { email: "chefe.seccao8@demo.tca.ao", password: "demo123456", label: "Chefe de Secção", shortLabel: "Ch. Secção", divisao: "8ª Divisão" },
     ],
   },
   {
