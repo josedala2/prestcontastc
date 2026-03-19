@@ -10,6 +10,8 @@ const DEMO_USERS = [
   { email: "contadoria.geral@demo.tca.ao", password: "demo123456", nome: "Teresa Costa", cargo: "Contadoria Geral" },
   { email: "chefe.divisao@demo.tca.ao", password: "demo123456", nome: "Manuel Dias", cargo: "Chefe de Divisão", divisao: "3ª Divisão" },
   { email: "chefe.seccao@demo.tca.ao", password: "demo123456", nome: "Sofia Lopes", cargo: "Chefe de Secção", divisao: "3ª Divisão" },
+  { email: "chefe.divisao5@demo.tca.ao", password: "demo123456", nome: "Augusto Fernandes", cargo: "Chefe de Divisão", divisao: "5ª Divisão" },
+  { email: "chefe.seccao5@demo.tca.ao", password: "demo123456", nome: "Graça Tavares", cargo: "Chefe de Secção", divisao: "5ª Divisão" },
   { email: "tecnico.analise@demo.tca.ao", password: "demo123456", nome: "Rui Almeida", cargo: "Técnico de Análise" },
   { email: "coordenador@demo.tca.ao", password: "demo123456", nome: "Luísa Mendes", cargo: "Coordenador de Equipa" },
   { email: "dst@demo.tca.ao", password: "demo123456", nome: "António Rocha", cargo: "Diretor dos Serviços Técnicos" },
