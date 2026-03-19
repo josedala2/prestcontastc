@@ -44,10 +44,17 @@ const DEMO_GROUPS: DemoGroup[] = [
     ],
   },
   {
-    label: "Divisões e Secções",
+    label: "Divisões e Secções (3ª)",
     users: [
       { email: "chefe.divisao@demo.tca.ao", password: "demo123456", label: "Chefe de Divisão", shortLabel: "Ch. Divisão", divisao: "3ª Divisão" },
       { email: "chefe.seccao@demo.tca.ao", password: "demo123456", label: "Chefe de Secção", shortLabel: "Ch. Secção", divisao: "3ª Divisão" },
+    ],
+  },
+  {
+    label: "Divisões e Secções (5ª)",
+    users: [
+      { email: "chefe.divisao5@demo.tca.ao", password: "demo123456", label: "Chefe de Divisão", shortLabel: "Ch. Divisão", divisao: "5ª Divisão" },
+      { email: "chefe.seccao5@demo.tca.ao", password: "demo123456", label: "Chefe de Secção", shortLabel: "Ch. Secção", divisao: "5ª Divisão" },
     ],
   },
   {
