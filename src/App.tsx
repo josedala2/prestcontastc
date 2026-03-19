@@ -229,7 +229,7 @@ const App = () => (
             </ProtectedRoute>
           } />
           <Route path="/analise-tecnica/:id" element={
-            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico de Análise", "Chefe de Divisão", "Chefe de Secção"]}>
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico de Análise", "Coordenador de Equipa", "Chefe de Divisão", "Chefe de Secção"]}>
               <AmbienteAnalisePage />
             </ProtectedRoute>
           } />

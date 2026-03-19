@@ -104,7 +104,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
   "Coordenador de Equipa": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
     "/relatorios", "/mapas", "/anexos", "/documentos-obrigatorios",
-    "/esclarecimentos", "/auditoria",
+    "/esclarecimentos", "/auditoria", "/analise-tecnica",
   ],
   "Diretor dos Serviços Técnicos": [
     "/dashboard", "/entidades", "/exercicios", "/gestao-processos",
