@@ -303,10 +303,10 @@ export default function AmbienteAnalisePage() {
           {/* ── Documentos ── */}
           <TabsContent value="documentos">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Documentos do Processo ({documentos.length})</CardTitle>
-                <CardDescription>Documentos submetidos pela entidade e gerados pelo sistema.</CardDescription>
-              </CardHeader>
+          <CardHeader>
+            <CardTitle className="text-sm">Documentos do Processo ({documentos.length})</CardTitle>
+            <CardDescription>Documentos do processo e documentos submetidos pela entidade (prestação de contas).</CardDescription>
+          </CardHeader>
               <CardContent>
                 {documentos.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-8">Nenhum documento associado.</p>
