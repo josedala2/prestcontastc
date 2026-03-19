@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useEntities } from "@/hooks/useEntities";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { obterEstatisticasDashboard, obterEstatisticasPorPerfil } from "@/hooks/useBackendFunctions";
 import { FileBarChart, CheckCircle, Clock, AlertTriangle, ArrowRight, BarChart3 } from "lucide-react";
@@ -25,6 +26,7 @@ interface Processo {
 
 const TecnicoDashboard = () => {
   const { entities: allEntities } = useEntities();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = window.location.pathname;
   const prefix = location.startsWith("/contadoria") ? "/contadoria" : "/tecnico";
@@ -53,11 +55,18 @@ const TecnicoDashboard = () => {
 
   const fetchProcessos = async () => {
     setLoadingProcessos(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from("processos")
-      .select("id, numero_processo, entity_id, entity_name, ano_gerencia, categoria_entidade, estado, etapa_atual, urgencia, data_submissao")
+      .select("id, numero_processo, entity_id, entity_name, ano_gerencia, categoria_entidade, estado, etapa_atual, urgencia, data_submissao, divisao_competente")
       .eq("etapa_atual", 8)
       .order("data_submissao", { ascending: false });
+
+    // Filter by user's division if they have one (e.g. Técnico de Análise da 5ª Divisão)
+    if (user?.divisao) {
+      query = query.ilike("divisao_competente", `%${user.divisao.replace("ª", "ª")}%`);
+    }
+
+    const { data, error } = await query;
     if (!error && data) {
       setProcessos(data as Processo[]);
     }
