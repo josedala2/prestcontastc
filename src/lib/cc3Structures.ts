@@ -323,6 +323,9 @@ export function sumEditable(lines: BalancoLine[], vals: Record<string, number>):
   return lines.filter(l => l.editable).reduce((s, l) => s + (vals[l.code] || 0), 0);
 }
 
+// Sections where credit balances (negative in debit-credit convention) should show as positive
+const creditNatureSections = new Set(["capProprio", "passNaoCorr", "passCorr", "proveitos"]);
+
 // Map trial_balance rows (PGC account codes) to CC3 section values
 export function mapBalanceteToCC3(balanceteRows: { account_code: string; balance: number }[]): Record<string, Record<string, number>> {
   const result: Record<string, Record<string, number>> = {};
@@ -339,12 +342,18 @@ export function mapBalanceteToCC3(balanceteRows: { account_code: string; balance
   balanceteRows.forEach(row => {
     const rawCode = row.account_code.replace(/[.\s]/g, "");
     
+    const applyMapping = (cc3Code: string, sectionKey: string) => {
+      // For credit-nature sections, negate the balance so they display as positive
+      const value = creditNatureSections.has(sectionKey) ? -row.balance : row.balance;
+      result[sectionKey][cc3Code] = (result[sectionKey][cc3Code] || 0) + value;
+    };
+
     // Try exact PGC mapping first
     const cc3Code = pgcToCC3[rawCode];
     if (cc3Code) {
       const sectionKey = cc3ToSection.get(cc3Code);
       if (sectionKey) {
-        result[sectionKey][cc3Code] = (result[sectionKey][cc3Code] || 0) + row.balance;
+        applyMapping(cc3Code, sectionKey);
         return;
       }
     }
@@ -356,7 +365,7 @@ export function mapBalanceteToCC3(balanceteRows: { account_code: string; balance
       if (cc3) {
         const sectionKey = cc3ToSection.get(cc3);
         if (sectionKey) {
-          result[sectionKey][cc3] = (result[sectionKey][cc3] || 0) + row.balance;
+          applyMapping(cc3, sectionKey);
           return;
         }
       }
