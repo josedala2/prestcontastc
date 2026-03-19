@@ -224,7 +224,7 @@ const App = () => (
 
           {/* Análise Técnica */}
           <Route path="/analise-tecnica" element={
-            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico de Análise"]}>
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico de Análise", "Coordenador de Equipa"]}>
               <AnaliseTecnicaPage />
             </ProtectedRoute>
           } />
