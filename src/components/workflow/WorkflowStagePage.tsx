@@ -82,6 +82,7 @@ interface Processo {
 
 export default function WorkflowStagePage({ config }: { config: WorkflowStagePageConfig }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const executadoPor = user?.displayName || config.perfilExecutor;
 
   const [processos, setProcessos] = useState<Processo[]>([]);
