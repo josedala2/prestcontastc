@@ -103,9 +103,30 @@ export default function AmbienteAnalisePage() {
     if (!p) { setLoading(false); return; }
     setProcesso(p as unknown as Processo);
 
-    // Docs
+    // Process docs
     const { data: docs } = await supabase.from("processo_documentos").select("*").eq("processo_id", processoId).order("created_at");
-    setDocumentos((docs as DocItem[]) || []);
+    const processoDocs: DocItem[] = (docs || []).map((d: any) => ({ ...d, _source: "processo" as const, _storageBucket: "processo-documentos" }));
+
+    // Also load entity submission documents for this fiscal year
+    const { data: fyData } = await supabase.from("fiscal_years").select("id").eq("entity_id", p.entity_id).eq("year", p.ano_gerencia).limit(1);
+    const fyId = fyData?.[0]?.id;
+    let submissionDocs: DocItem[] = [];
+    if (fyId) {
+      const { data: subDocs } = await supabase.from("submission_documents").select("*").eq("entity_id", p.entity_id).eq("fiscal_year_id", fyId).order("created_at");
+      submissionDocs = (subDocs || []).map((sd: any) => ({
+        id: sd.id,
+        tipo_documento: sd.doc_category || sd.doc_label,
+        nome_ficheiro: sd.file_name,
+        caminho_ficheiro: sd.file_path,
+        estado: "submetido",
+        created_at: sd.created_at,
+        observacoes: sd.doc_label,
+        _source: "submission" as const,
+        _storageBucket: "submission-documents",
+      }));
+    }
+
+    setDocumentos([...processoDocs, ...submissionDocs]);
 
     // Balancete + indicators
     loadFinancialData(p.entity_id, p.ano_gerencia);
