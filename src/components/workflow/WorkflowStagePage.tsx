@@ -54,6 +54,8 @@ export interface WorkflowStagePageConfig {
   actions: StageAction[];
   /** Show process history on detail view */
   showHistory?: boolean;
+  /** If set, navigate to this route (with /:id) instead of showing inline detail */
+  detailRoute?: string;
 }
 
 interface Processo {
