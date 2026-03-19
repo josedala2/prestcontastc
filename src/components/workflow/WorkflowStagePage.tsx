@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
@@ -53,6 +54,8 @@ export interface WorkflowStagePageConfig {
   actions: StageAction[];
   /** Show process history on detail view */
   showHistory?: boolean;
+  /** If set, navigate to this route (with /:id) instead of showing inline detail */
+  detailRoute?: string;
 }
 
 interface Processo {
@@ -79,6 +82,7 @@ interface Processo {
 
 export default function WorkflowStagePage({ config }: { config: WorkflowStagePageConfig }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const executadoPor = user?.displayName || config.perfilExecutor;
 
   const [processos, setProcessos] = useState<Processo[]>([]);
@@ -104,6 +108,10 @@ export default function WorkflowStagePage({ config }: { config: WorkflowStagePag
   };
 
   const handleSelect = (p: Processo) => {
+    if (config.detailRoute) {
+      navigate(`${config.detailRoute}/${p.id}`);
+      return;
+    }
     setSelected(p);
     setObservacoes("");
     const initial: Record<string, string> = {};
