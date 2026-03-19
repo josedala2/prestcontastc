@@ -215,19 +215,31 @@ export default function Login() {
             </button>
             
             {showDemoUsers && (
-              <ScrollArea className="mt-3 h-[220px] rounded-md border bg-muted/30 p-2">
-                <div className="grid grid-cols-2 gap-1.5">
-                  {DEMO_USERS.map((demo) => (
-                    <button
-                      key={demo.email}
-                      type="button"
-                      onClick={() => handleDemoFill(demo)}
-                      className="text-left px-2.5 py-1.5 rounded-md text-[11px] leading-tight border bg-background hover:bg-accent hover:text-accent-foreground transition-colors truncate"
-                      title={`${demo.label}\n${demo.email}`}
-                    >
-                      <span className="font-medium block truncate">{demo.shortLabel}</span>
-                      <span className="text-muted-foreground text-[10px] block truncate">{demo.email}</span>
-                    </button>
+              <ScrollArea className="mt-3 h-[280px] rounded-md border bg-muted/30 p-2">
+                <div className="space-y-2">
+                  {DEMO_GROUPS.map((group) => (
+                    <div key={group.label}>
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-1">
+                        {group.label}
+                      </p>
+                      <div className="grid grid-cols-2 gap-1">
+                        {group.users.map((demo) => (
+                          <button
+                            key={demo.email}
+                            type="button"
+                            onClick={() => handleDemoFill(demo)}
+                            className="text-left px-2.5 py-1.5 rounded-md text-[11px] leading-tight border bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+                            title={`${demo.label}${demo.divisao ? ` — ${demo.divisao}` : ''}\n${demo.email}`}
+                          >
+                            <span className="font-medium block truncate">{demo.shortLabel}</span>
+                            {demo.divisao && (
+                              <span className="text-primary/70 text-[9px] block truncate">{demo.divisao}</span>
+                            )}
+                            <span className="text-muted-foreground text-[10px] block truncate">{demo.email}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </ScrollArea>
