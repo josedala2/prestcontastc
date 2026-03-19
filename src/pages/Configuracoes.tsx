@@ -152,6 +152,9 @@ const Configuracoes = () => {
             <GitBranch className="h-3.5 w-3.5 mr-1" /> Workflow
           </TabsTrigger>
           <TabsTrigger value="menus">Menus & Perfis</TabsTrigger>
+          <TabsTrigger value="utilizadores">
+            <UserPlus className="h-3.5 w-3.5 mr-1" /> Utilizadores
+          </TabsTrigger>
           <TabsTrigger value="sistema">Sistema</TabsTrigger>
         </TabsList>
 
