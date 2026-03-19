@@ -24,9 +24,11 @@ import {
   Scale,
   LayoutGrid,
   GitBranch,
+  UserPlus,
 } from "lucide-react";
 import { MenuPerfilMatrix } from "@/components/configuracoes/MenuPerfilMatrix";
 import { WorkflowDesigner } from "@/components/configuracoes/WorkflowDesigner";
+import { GestaoUtilizadores } from "@/components/configuracoes/GestaoUtilizadores";
 import { cn } from "@/lib/utils";
 
 interface ValidationRule {
@@ -150,6 +152,9 @@ const Configuracoes = () => {
             <GitBranch className="h-3.5 w-3.5 mr-1" /> Workflow
           </TabsTrigger>
           <TabsTrigger value="menus">Menus & Perfis</TabsTrigger>
+          <TabsTrigger value="utilizadores">
+            <UserPlus className="h-3.5 w-3.5 mr-1" /> Utilizadores
+          </TabsTrigger>
           <TabsTrigger value="sistema">Sistema</TabsTrigger>
         </TabsList>
 
@@ -301,6 +306,11 @@ const Configuracoes = () => {
         {/* Menu ↔ Perfil Matrix */}
         <TabsContent value="menus">
           <MenuPerfilMatrix />
+        </TabsContent>
+
+        {/* Gestão de Utilizadores */}
+        <TabsContent value="utilizadores">
+          <GestaoUtilizadores />
         </TabsContent>
 
         {/* System */}
