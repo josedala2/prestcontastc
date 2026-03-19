@@ -392,7 +392,7 @@ export default function AmbienteAnalisePage() {
             </div>
           </TabsContent>
 
-          {/* ── Tab: Balanço Patrimonial (detailed CC3 tables) ── */}
+          {/* ── Tab: Balanço Patrimonial — Modelo CC-2 ── */}
           <TabsContent value="balanco">
             {loadingBal ? (
               <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
@@ -400,9 +400,18 @@ export default function AmbienteAnalisePage() {
               <div className="text-center py-12 space-y-2">
                 <BookOpen className="h-10 w-10 mx-auto text-muted-foreground/40" />
                 <p className="text-sm text-muted-foreground">Nenhum dado de balancete encontrado para este exercício.</p>
+                <p className="text-xs text-muted-foreground">Os dados do Modelo CC-2 serão preenchidos automaticamente quando a entidade submeter o balancete analítico.</p>
               </div>
             ) : (
               <div className="space-y-4">
+                {/* CC-2 Auto-fill banner */}
+                <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                  <Scale className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Análise de Contas — Modelo CC-2 <Badge variant="outline" className="text-[10px] ml-2">Preenchimento Automático</Badge></p>
+                    <p className="text-xs text-muted-foreground">Dados carregados automaticamente a partir do balancete analítico submetido pela entidade ({balancete.length} contas PGC mapeadas).</p>
+                  </div>
+                </div>
                 {/* Summary cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <SummaryCard label="Total Activo" value={`${formatKz(totalActivo)} Kz`} sub={`Não Corrente: ${formatKz(totalAtivoNaoCorrente)} Kz`} />
