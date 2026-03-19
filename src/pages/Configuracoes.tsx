@@ -24,9 +24,11 @@ import {
   Scale,
   LayoutGrid,
   GitBranch,
+  UserPlus,
 } from "lucide-react";
 import { MenuPerfilMatrix } from "@/components/configuracoes/MenuPerfilMatrix";
 import { WorkflowDesigner } from "@/components/configuracoes/WorkflowDesigner";
+import { GestaoUtilizadores } from "@/components/configuracoes/GestaoUtilizadores";
 import { cn } from "@/lib/utils";
 
 interface ValidationRule {
