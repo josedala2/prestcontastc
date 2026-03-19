@@ -503,6 +503,14 @@ export default function AmbienteAnalisePage() {
               </div>
             ) : (
               <div className="space-y-4">
+                {/* CC-2 DRE banner */}
+                <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                  <TrendingUp className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Demonstração de Resultados — Modelo CC-2 <Badge variant="outline" className="text-[10px] ml-2">Preenchimento Automático</Badge></p>
+                    <p className="text-xs text-muted-foreground">Proveitos (Classe 6) e Custos (Classe 7) extraídos automaticamente do balancete da entidade.</p>
+                  </div>
+                </div>
                 {/* Summary */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <SummaryCard label="Total Proveitos" value={`${formatKz(totalProveitos)} Kz`} sub="Classe 6 PGC" />
