@@ -52,6 +52,9 @@ interface DocItem {
   estado: string;
   created_at: string;
   observacoes: string | null;
+  /** Source: "processo" or "submission" */
+  _source?: "processo" | "submission";
+  _storageBucket?: string;
 }
 
 interface BalanceteLine {
@@ -100,9 +103,30 @@ export default function AmbienteAnalisePage() {
     if (!p) { setLoading(false); return; }
     setProcesso(p as unknown as Processo);
 
-    // Docs
+    // Process docs
     const { data: docs } = await supabase.from("processo_documentos").select("*").eq("processo_id", processoId).order("created_at");
-    setDocumentos((docs as DocItem[]) || []);
+    const processoDocs: DocItem[] = (docs || []).map((d: any) => ({ ...d, _source: "processo" as const, _storageBucket: "processo-documentos" }));
+
+    // Also load entity submission documents for this fiscal year
+    const { data: fyData } = await supabase.from("fiscal_years").select("id").eq("entity_id", p.entity_id).eq("year", p.ano_gerencia).limit(1);
+    const fyId = fyData?.[0]?.id;
+    let submissionDocs: DocItem[] = [];
+    if (fyId) {
+      const { data: subDocs } = await supabase.from("submission_documents").select("*").eq("entity_id", p.entity_id).eq("fiscal_year_id", fyId).order("created_at");
+      submissionDocs = (subDocs || []).map((sd: any) => ({
+        id: sd.id,
+        tipo_documento: sd.doc_category || sd.doc_label,
+        nome_ficheiro: sd.file_name,
+        caminho_ficheiro: sd.file_path,
+        estado: "submetido",
+        created_at: sd.created_at,
+        observacoes: sd.doc_label,
+        _source: "submission" as const,
+        _storageBucket: "submission-documents",
+      }));
+    }
+
+    setDocumentos([...processoDocs, ...submissionDocs]);
 
     // Balancete + indicators
     loadFinancialData(p.entity_id, p.ano_gerencia);
@@ -169,7 +193,8 @@ export default function AmbienteAnalisePage() {
     if (!doc.caminho_ficheiro) return;
     try {
       if (previewUrl?.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
-      const { data, error } = await supabase.storage.from("processo-documentos").createSignedUrl(doc.caminho_ficheiro, 600, { download: false });
+      const bucket = doc._storageBucket || "processo-documentos";
+      const { data, error } = await supabase.storage.from(bucket).createSignedUrl(doc.caminho_ficheiro, 600, { download: false });
       if (error || !data?.signedUrl) throw error;
       setPreviewUrl(data.signedUrl);
       setPreviewName(doc.nome_ficheiro);
@@ -179,7 +204,8 @@ export default function AmbienteAnalisePage() {
   const handleDownload = async (doc: DocItem) => {
     if (!doc.caminho_ficheiro) return;
     try {
-      const { data, error } = await supabase.storage.from("processo-documentos").download(doc.caminho_ficheiro);
+      const bucket = doc._storageBucket || "processo-documentos";
+      const { data, error } = await supabase.storage.from(bucket).download(doc.caminho_ficheiro);
       if (error) throw error;
       const url = URL.createObjectURL(data);
       const a = document.createElement("a"); a.href = url; a.download = doc.nome_ficheiro; document.body.appendChild(a); a.click(); a.remove();
@@ -277,10 +303,10 @@ export default function AmbienteAnalisePage() {
           {/* ── Documentos ── */}
           <TabsContent value="documentos">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Documentos do Processo ({documentos.length})</CardTitle>
-                <CardDescription>Documentos submetidos pela entidade e gerados pelo sistema.</CardDescription>
-              </CardHeader>
+          <CardHeader>
+            <CardTitle className="text-sm">Documentos do Processo ({documentos.length})</CardTitle>
+            <CardDescription>Documentos do processo e documentos submetidos pela entidade (prestação de contas).</CardDescription>
+          </CardHeader>
               <CardContent>
                 {documentos.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-8">Nenhum documento associado.</p>
@@ -307,7 +333,14 @@ export default function AmbienteAnalisePage() {
                                 <span className="text-xs font-medium truncate max-w-[220px]">{doc.nome_ficheiro}</span>
                               </div>
                             </TableCell>
-                            <TableCell><Badge variant="outline" className="text-[10px]">{doc.tipo_documento}</Badge></TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1.5">
+                                <Badge variant="outline" className="text-[10px]">{doc.tipo_documento}</Badge>
+                                {doc._source === "submission" && (
+                                  <Badge variant="secondary" className="text-[9px]">Entidade</Badge>
+                                )}
+                              </div>
+                            </TableCell>
                             <TableCell>{getEstadoBadge(doc.estado)}</TableCell>
                             <TableCell className="text-xs text-muted-foreground">{new Date(doc.created_at).toLocaleDateString("pt-AO")}</TableCell>
                             <TableCell className="text-right">
