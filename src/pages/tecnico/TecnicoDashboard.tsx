@@ -4,11 +4,24 @@ import { PageHeader, StatCard } from "@/components/ui-custom/PageElements";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useSubmissions } from "@/contexts/SubmissionContext";
 import { useEntities } from "@/hooks/useEntities";
+import { supabase } from "@/integrations/supabase/client";
 import { obterEstatisticasDashboard, obterEstatisticasPorPerfil } from "@/hooks/useBackendFunctions";
 import { FileBarChart, CheckCircle, Clock, AlertTriangle, ArrowRight, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+
+interface Processo {
+  id: string;
+  numero_processo: string;
+  entity_id: string;
+  entity_name: string;
+  ano_gerencia: number;
+  categoria_entidade: string;
+  estado: string;
+  etapa_atual: number;
+  urgencia: string;
+  data_submissao: string;
+}
 
 const TecnicoDashboard = () => {
   const { entities: allEntities } = useEntities();
@@ -16,9 +29,10 @@ const TecnicoDashboard = () => {
   const location = window.location.pathname;
   const prefix = location.startsWith("/contadoria") ? "/contadoria" : "/tecnico";
   const isContadoria = prefix === "/contadoria";
-  const { submissions } = useSubmissions();
   const [rpcStats, setRpcStats] = useState<any>(null);
   const [perfilStats, setPerfilStats] = useState<any>(null);
+  const [processos, setProcessos] = useState<Processo[]>([]);
+  const [loadingProcessos, setLoadingProcessos] = useState(true);
 
   useEffect(() => {
     const load = async () => {
@@ -29,15 +43,26 @@ const TecnicoDashboard = () => {
         ]);
         setRpcStats(dashboard);
         setPerfilStats(perfil);
-        console.log("[TecnicoDashboard] RPC stats:", dashboard, perfil);
       } catch (err) {
         console.error("[TecnicoDashboard] Erro RPC:", err);
       }
     };
     load();
+    fetchProcessos();
   }, []);
 
-  const emAnalise = submissions.filter((s) => s.status === "em_analise");
+  const fetchProcessos = async () => {
+    setLoadingProcessos(true);
+    const { data, error } = await supabase
+      .from("processos")
+      .select("id, numero_processo, entity_id, entity_name, ano_gerencia, categoria_entidade, estado, etapa_atual, urgencia, data_submissao")
+      .eq("etapa_atual", 8)
+      .order("data_submissao", { ascending: false });
+    if (!error && data) {
+      setProcessos(data as Processo[]);
+    }
+    setLoadingProcessos(false);
+  };
 
   return (
     <TecnicoLayout>
@@ -49,7 +74,7 @@ const TecnicoDashboard = () => {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Em Análise" value={emAnalise.length} subtitle="processos atribuídos" icon={<Clock className="h-5 w-5" />} variant="warning" />
+        <StatCard title="Em Análise" value={processos.length} subtitle="processos atribuídos" icon={<Clock className="h-5 w-5" />} variant="warning" />
         <StatCard title="Total Processos" value={rpcStats?.total_processos ?? 0} subtitle="no sistema" icon={<FileBarChart className="h-5 w-5" />} variant="primary" />
         <StatCard title="Concluídas" value={perfilStats?.concluidas ?? 0} subtitle="atividades do perfil" icon={<CheckCircle className="h-5 w-5" />} variant="success" />
         <StatCard title="Atrasadas" value={perfilStats?.atrasadas ?? 0} subtitle="atividades atrasadas" icon={<AlertTriangle className="h-5 w-5" />} variant="default" />
@@ -64,24 +89,26 @@ const TecnicoDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {emAnalise.length > 0 ? (
-              emAnalise.map((s) => {
-                const ent = allEntities.find((e) => e.id === s.entityId);
-                const year = s.fiscalYearId.split("-").pop() || "";
+            {loadingProcessos ? (
+              <div className="text-center py-6 text-muted-foreground">
+                <p className="text-sm">A carregar processos...</p>
+              </div>
+            ) : processos.length > 0 ? (
+              processos.map((p) => {
+                const ent = allEntities.find((e) => e.id === p.entity_id);
                 return (
-                  <div key={s.fiscalYearId} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 transition-colors">
+                  <div key={p.id} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 transition-colors cursor-pointer"
+                    onClick={() => navigate(`/analise-tecnica/${p.id}`)}
+                  >
                     <div>
-                      <p className="text-sm font-medium">{ent?.name || s.entityId}</p>
-                      <p className="text-xs text-muted-foreground">Exercício {year} · {ent?.provincia}</p>
+                      <p className="text-sm font-medium">{p.entity_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Proc. {p.numero_processo} · Exercício {p.ano_gerencia} · {ent?.provincia || ""}
+                      </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary" className="text-[10px]">Em Análise</Badge>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 w-7 p-0"
-                        onClick={() => navigate(`${prefix}/prestacao-contas?entityId=${s.entityId}&exercicio=${year}`)}
-                      >
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
                         <ArrowRight className="h-3.5 w-3.5" />
                       </Button>
                     </div>
