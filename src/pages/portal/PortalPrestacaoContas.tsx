@@ -152,6 +152,7 @@ function EntidadeView({
             nif={entityNif}
             year={periodo}
             dataKey={dataKey}
+            entityId={entityId}
             readOnly={isSubmitted && !canResubmit}
             hideTabs={["dre", "indicadores", "resumo"]}
           />
