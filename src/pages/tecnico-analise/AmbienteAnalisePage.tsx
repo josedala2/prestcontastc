@@ -587,32 +587,183 @@ export default function AmbienteAnalisePage() {
 
           {/* ── Tab: Indicadores Financeiros ── */}
           <TabsContent value="indicadores">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4 text-primary" />
-                  Indicadores Financeiros — Exercício {processo.ano_gerencia}
-                </CardTitle>
-                <CardDescription>Rácios e indicadores calculados a partir dos dados do balancete.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {indicadorRows.length === 0 ? (
-                  <div className="text-center py-12 space-y-2">
-                    <BarChart3 className="h-10 w-10 mx-auto text-muted-foreground/40" />
-                    <p className="text-sm text-muted-foreground">Indicadores financeiros não disponíveis para este exercício.</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {indicadorRows.map((row) => (
-                      <div key={row.label} className="rounded-lg border p-4 space-y-1">
-                        <p className="text-[11px] text-muted-foreground">{row.label}</p>
-                        <p className={`text-lg font-bold font-mono ${row.fmt === 'kz' && row.value < 0 ? 'text-destructive' : ''}`}>{fmtIndicator(row)}</p>
+            <div className="space-y-4">
+              {/* Banner */}
+              <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                <BarChart3 className="h-5 w-5 text-primary shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Indicadores Financeiros — Exercício {processo.ano_gerencia} <Badge variant="outline" className="text-[10px] ml-2">Cálculo Automático</Badge></p>
+                  <p className="text-xs text-muted-foreground">Rácios calculados automaticamente a partir dos dados do Modelo CC-2 submetidos pela entidade.</p>
+                </div>
+              </div>
+
+              {balancete.length === 0 ? (
+                <div className="text-center py-12 space-y-2">
+                  <BarChart3 className="h-10 w-10 mx-auto text-muted-foreground/40" />
+                  <p className="text-sm text-muted-foreground">Sem dados do CC-2 para calcular indicadores.</p>
+                </div>
+              ) : (
+                <>
+                  {/* Estrutura Patrimonial */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Estrutura Patrimonial</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <IndicadorCard label="Activo Total" value={formatKz(totalActivo)} sub="Não Corrente + Corrente" />
+                        <IndicadorCard label="Activo Não Corrente" value={formatKz(totalAtivoNaoCorrente)} sub={totalActivo ? `${((totalAtivoNaoCorrente / totalActivo) * 100).toFixed(1)}% do activo` : "—"} />
+                        <IndicadorCard label="Activo Corrente" value={formatKz(totalAtivoCorrentes)} sub={totalActivo ? `${((totalAtivoCorrentes / totalActivo) * 100).toFixed(1)}% do activo` : "—"} />
+                        <IndicadorCard label="Capital Próprio" value={formatKz(totalCapProprio)} sub={totalActivo ? `${((totalCapProprio / totalActivo) * 100).toFixed(1)}% do activo` : "—"} />
+                        <IndicadorCard label="Passivo Não Corrente" value={formatKz(totalPassNaoCorrente)} sub={totalPassivo ? `${((totalPassNaoCorrente / totalPassivo) * 100).toFixed(1)}% do passivo` : "—"} />
+                        <IndicadorCard label="Passivo Corrente" value={formatKz(totalPassCorrente)} sub={totalPassivo ? `${((totalPassCorrente / totalPassivo) * 100).toFixed(1)}% do passivo` : "—"} />
+                        <IndicadorCard label="Passivo Total" value={formatKz(totalPassivo)} sub="Não Corrente + Corrente" />
+                        <IndicadorCard 
+                          label="Equilíbrio Patrimonial" 
+                          value={Math.abs(totalActivo - totalCapPassivo) < 1 ? "✓ Equilibrado" : `Δ ${formatKz(Math.abs(totalActivo - totalCapPassivo))}`}
+                          sub={Math.abs(totalActivo - totalCapPassivo) < 1 ? "Activo = Cap. Próprio + Passivo" : "⚠ Desequilíbrio detectado"}
+                          alert={Math.abs(totalActivo - totalCapPassivo) >= 1}
+                        />
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                    </CardContent>
+                  </Card>
+
+                  {/* Demonstração de Resultados */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Resultados do Exercício</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <IndicadorCard label="Total Proveitos" value={formatKz(totalProveitos)} sub="Ganhos operacionais e outros" />
+                        <IndicadorCard label="Total Custos" value={formatKz(totalCustos)} sub="Perdas operacionais e outros" />
+                        <IndicadorCard 
+                          label="Resultado Líquido" 
+                          value={formatKz(resultadoExercicio)} 
+                          sub={resultadoExercicio >= 0 ? "Resultado positivo" : "Resultado negativo"}
+                          alert={resultadoExercicio < 0}
+                          positive={resultadoExercicio > 0}
+                        />
+                        <IndicadorCard 
+                          label="Margem Líquida" 
+                          value={totalProveitos > 0 ? `${((resultadoExercicio / totalProveitos) * 100).toFixed(2)}%` : "—"} 
+                          sub="Resultado / Proveitos"
+                          alert={totalProveitos > 0 && resultadoExercicio / totalProveitos < 0}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Rácios de Liquidez */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Rácios de Liquidez</CardTitle>
+                      <CardDescription>Capacidade de cumprir obrigações de curto prazo.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <IndicadorCard 
+                          label="Liquidez Corrente" 
+                          value={totalPassCorrente > 0 ? (totalAtivoCorrentes / totalPassCorrente).toFixed(2) : "—"} 
+                          sub="Activo Corrente / Passivo Corrente"
+                          alert={totalPassCorrente > 0 && totalAtivoCorrentes / totalPassCorrente < 1}
+                          positive={totalPassCorrente > 0 && totalAtivoCorrentes / totalPassCorrente >= 1.5}
+                        />
+                        <IndicadorCard 
+                          label="Liquidez Geral" 
+                          value={totalPassivo > 0 ? (totalActivo / totalPassivo).toFixed(2) : "—"} 
+                          sub="Activo Total / Passivo Total"
+                          alert={totalPassivo > 0 && totalActivo / totalPassivo < 1}
+                          positive={totalPassivo > 0 && totalActivo / totalPassivo >= 1.5}
+                        />
+                        <IndicadorCard 
+                          label="Fundo de Maneio" 
+                          value={formatKz(totalAtivoCorrentes - totalPassCorrente)} 
+                          sub={totalAtivoCorrentes - totalPassCorrente >= 0 ? "Positivo — boa capacidade" : "Negativo — risco de liquidez"}
+                          alert={totalAtivoCorrentes - totalPassCorrente < 0}
+                          positive={totalAtivoCorrentes - totalPassCorrente > 0}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Rácios de Rentabilidade */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Rácios de Rentabilidade</CardTitle>
+                      <CardDescription>Eficiência na geração de resultados.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <IndicadorCard 
+                          label="ROE — Rent. Cap. Próprio" 
+                          value={totalCapProprio !== 0 ? `${((resultadoExercicio / totalCapProprio) * 100).toFixed(2)}%` : "—"} 
+                          sub="Resultado / Capital Próprio"
+                          alert={totalCapProprio !== 0 && resultadoExercicio / totalCapProprio < 0}
+                          positive={totalCapProprio !== 0 && resultadoExercicio / totalCapProprio > 0.05}
+                        />
+                        <IndicadorCard 
+                          label="ROA — Rent. do Activo" 
+                          value={totalActivo !== 0 ? `${((resultadoExercicio / totalActivo) * 100).toFixed(2)}%` : "—"} 
+                          sub="Resultado / Activo Total"
+                          alert={totalActivo !== 0 && resultadoExercicio / totalActivo < 0}
+                          positive={totalActivo !== 0 && resultadoExercicio / totalActivo > 0.03}
+                        />
+                        <IndicadorCard 
+                          label="Giro do Activo" 
+                          value={totalActivo !== 0 ? (totalProveitos / totalActivo).toFixed(2) : "—"} 
+                          sub="Proveitos / Activo Total"
+                        />
+                        <IndicadorCard 
+                          label="Margem Operacional" 
+                          value={totalProveitos > 0 ? `${(((totalProveitos - totalCustos) / totalProveitos) * 100).toFixed(2)}%` : "—"} 
+                          sub="(Proveitos - Custos) / Proveitos"
+                          alert={totalProveitos > 0 && (totalProveitos - totalCustos) / totalProveitos < 0}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Rácios de Endividamento */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Rácios de Endividamento</CardTitle>
+                      <CardDescription>Estrutura de financiamento e alavancagem.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <IndicadorCard 
+                          label="Endividamento Geral" 
+                          value={totalActivo !== 0 ? `${((totalPassivo / totalActivo) * 100).toFixed(2)}%` : "—"} 
+                          sub="Passivo / Activo Total"
+                          alert={totalActivo !== 0 && totalPassivo / totalActivo > 0.7}
+                        />
+                        <IndicadorCard 
+                          label="Autonomia Financeira" 
+                          value={totalActivo !== 0 ? `${((totalCapProprio / totalActivo) * 100).toFixed(2)}%` : "—"} 
+                          sub="Capital Próprio / Activo Total"
+                          positive={totalActivo !== 0 && totalCapProprio / totalActivo > 0.3}
+                          alert={totalActivo !== 0 && totalCapProprio / totalActivo < 0.2}
+                        />
+                        <IndicadorCard 
+                          label="Solvabilidade" 
+                          value={totalPassivo !== 0 ? `${((totalCapProprio / totalPassivo) * 100).toFixed(2)}%` : "—"} 
+                          sub="Capital Próprio / Passivo Total"
+                          positive={totalPassivo !== 0 && totalCapProprio / totalPassivo > 0.5}
+                          alert={totalPassivo !== 0 && totalCapProprio / totalPassivo < 0.25}
+                        />
+                        <IndicadorCard 
+                          label="Composição Endivid." 
+                          value={totalPassivo !== 0 ? `${((totalPassCorrente / totalPassivo) * 100).toFixed(2)}%` : "—"} 
+                          sub="Passivo Corrente / Passivo Total"
+                          alert={totalPassivo !== 0 && totalPassCorrente / totalPassivo > 0.8}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+            </div>
           </TabsContent>
 
           {/* ── Tab: Resumo ── */}
@@ -940,5 +1091,15 @@ function InfoTableRow({ label, value }: { label: string; value: string }) {
       <TableCell className="text-xs font-semibold text-muted-foreground w-48">{label}</TableCell>
       <TableCell className="text-sm">{value}</TableCell>
     </TableRow>
+  );
+}
+
+function IndicadorCard({ label, value, sub, alert, positive }: { label: string; value: string; sub: string; alert?: boolean; positive?: boolean }) {
+  return (
+    <div className={`rounded-lg border p-4 space-y-1 ${alert ? "border-destructive/40 bg-destructive/5" : positive ? "border-primary/40 bg-primary/5" : ""}`}>
+      <p className="text-[11px] text-muted-foreground uppercase tracking-wider">{label}</p>
+      <p className={`text-lg font-bold font-mono ${alert ? "text-destructive" : positive ? "text-primary" : ""}`}>{value}</p>
+      <p className="text-[10px] text-muted-foreground">{sub}</p>
+    </div>
   );
 }
