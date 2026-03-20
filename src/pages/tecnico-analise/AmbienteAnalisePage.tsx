@@ -945,6 +945,184 @@ export default function AmbienteAnalisePage() {
                       </div>
                     </CardContent>
                   </Card>
+                  {/* Comparação Anual */}
+                  {historicalData.length > 0 && (
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <TrendingUp className="h-4 w-4 text-primary" />
+                          Comparação Anual
+                        </CardTitle>
+                        <CardDescription>Evolução dos principais indicadores vs exercícios anteriores.</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {/* Bar chart: Activo / Cap. Próprio / Passivo por ano */}
+                        <div>
+                          <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Estrutura Patrimonial — Evolução</p>
+                          <ResponsiveContainer width="100%" height={280}>
+                            <BarChart data={[
+                              ...historicalData.map(h => ({
+                                name: String(h.year),
+                                "Activo": h.totals.activo,
+                                "Cap. Próprio": h.totals.capProprio,
+                                "Passivo": h.totals.passivo,
+                              })),
+                              {
+                                name: String(processo.ano_gerencia),
+                                "Activo": totalActivo,
+                                "Cap. Próprio": totalCapProprio,
+                                "Passivo": totalPassivo,
+                              },
+                            ].sort((a, b) => Number(a.name) - Number(b.name))}>
+                              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                              <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : v >= 1e3 ? `${(v / 1e3).toFixed(0)}K` : String(v)} />
+                              <Tooltip formatter={(v: number) => formatKz(v)} />
+                              <Legend />
+                              <Bar dataKey="Activo" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                              <Bar dataKey="Cap. Próprio" fill="hsl(var(--primary) / 0.6)" radius={[4, 4, 0, 0]} />
+                              <Bar dataKey="Passivo" fill="hsl(var(--destructive) / 0.7)" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+
+                        {/* Bar chart: Proveitos / Custos / Resultado por ano */}
+                        <div>
+                          <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Resultados — Evolução</p>
+                          <ResponsiveContainer width="100%" height={280}>
+                            <BarChart data={[
+                              ...historicalData.map(h => ({
+                                name: String(h.year),
+                                "Proveitos": h.totals.proveitos,
+                                "Custos": h.totals.custos,
+                                "Resultado": h.totals.resultado,
+                              })),
+                              {
+                                name: String(processo.ano_gerencia),
+                                "Proveitos": totalProveitos,
+                                "Custos": totalCustos,
+                                "Resultado": resultadoExercicio,
+                              },
+                            ].sort((a, b) => Number(a.name) - Number(b.name))}>
+                              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                              <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : v >= 1e3 ? `${(v / 1e3).toFixed(0)}K` : String(v)} />
+                              <Tooltip formatter={(v: number) => formatKz(v)} />
+                              <Legend />
+                              <Bar dataKey="Proveitos" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                              <Bar dataKey="Custos" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
+                              <Bar dataKey="Resultado" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+
+                        {/* Tabela comparativa */}
+                        <div>
+                          <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Tabela Comparativa</p>
+                          <div className="border rounded-lg overflow-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead className="text-xs">Indicador</TableHead>
+                                  {[...historicalData].sort((a, b) => a.year - b.year).map(h => (
+                                    <TableHead key={h.year} className="text-xs text-right">{h.year}</TableHead>
+                                  ))}
+                                  <TableHead className="text-xs text-right font-bold bg-primary/5">{processo.ano_gerencia}</TableHead>
+                                  <TableHead className="text-xs text-right">Variação</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {(() => {
+                                  const sorted = [...historicalData].sort((a, b) => a.year - b.year);
+                                  const lastHist = sorted[sorted.length - 1];
+                                  const rows = [
+                                    { label: "Activo Total", key: "activo", current: totalActivo },
+                                    { label: "Activo Não Corrente", key: "ativoNC", current: totalAtivoNaoCorrente },
+                                    { label: "Activo Corrente", key: "ativoC", current: totalAtivoCorrentes },
+                                    { label: "Capital Próprio", key: "capProprio", current: totalCapProprio },
+                                    { label: "Passivo Total", key: "passivo", current: totalPassivo },
+                                    { label: "Total Proveitos", key: "proveitos", current: totalProveitos },
+                                    { label: "Total Custos", key: "custos", current: totalCustos },
+                                    { label: "Resultado Líquido", key: "resultado", current: resultadoExercicio },
+                                  ];
+                                  return rows.map(row => {
+                                    const prevVal = lastHist?.totals[row.key] || 0;
+                                    const variation = prevVal !== 0 ? ((row.current - prevVal) / Math.abs(prevVal)) * 100 : 0;
+                                    return (
+                                      <TableRow key={row.key}>
+                                        <TableCell className="text-xs font-medium">{row.label}</TableCell>
+                                        {sorted.map(h => (
+                                          <TableCell key={h.year} className="text-xs text-right font-mono">{formatKz(h.totals[row.key] || 0)}</TableCell>
+                                        ))}
+                                        <TableCell className="text-xs text-right font-mono font-bold bg-primary/5">{formatKz(row.current)}</TableCell>
+                                        <TableCell className={`text-xs text-right font-mono font-semibold ${variation > 0 ? "text-primary" : variation < 0 ? "text-destructive" : ""}`}>
+                                          {prevVal !== 0 ? `${variation > 0 ? "+" : ""}${variation.toFixed(1)}%` : "—"}
+                                        </TableCell>
+                                      </TableRow>
+                                    );
+                                  });
+                                })()}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+
+                        {/* Rácios comparison */}
+                        <div>
+                          <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Evolução dos Rácios</p>
+                          <div className="border rounded-lg overflow-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead className="text-xs">Rácio</TableHead>
+                                  {[...historicalData].sort((a, b) => a.year - b.year).map(h => (
+                                    <TableHead key={h.year} className="text-xs text-right">{h.year}</TableHead>
+                                  ))}
+                                  <TableHead className="text-xs text-right font-bold bg-primary/5">{processo.ano_gerencia}</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {(() => {
+                                  const sorted = [...historicalData].sort((a, b) => a.year - b.year);
+                                  const calcRatios = (t: Record<string, number>) => ({
+                                    liqCorr: (t.passivoC || 0) > 0 ? ((t.ativoC || 0) / (t.passivoC || 1)).toFixed(2) : "—",
+                                    liqGeral: (t.passivo || 0) > 0 ? ((t.activo || 0) / (t.passivo || 1)).toFixed(2) : "—",
+                                    roe: (t.capProprio || 0) !== 0 ? `${(((t.resultado || 0) / (t.capProprio || 1)) * 100).toFixed(1)}%` : "—",
+                                    roa: (t.activo || 0) !== 0 ? `${(((t.resultado || 0) / (t.activo || 1)) * 100).toFixed(1)}%` : "—",
+                                    endiv: (t.activo || 0) !== 0 ? `${(((t.passivo || 0) / (t.activo || 1)) * 100).toFixed(1)}%` : "—",
+                                    autoFin: (t.activo || 0) !== 0 ? `${(((t.capProprio || 0) / (t.activo || 1)) * 100).toFixed(1)}%` : "—",
+                                  });
+                                  const currentTotals = {
+                                    activo: totalActivo, ativoC: totalAtivoCorrentes, capProprio: totalCapProprio,
+                                    passivoC: totalPassCorrente, passivo: totalPassivo, resultado: resultadoExercicio,
+                                  };
+                                  const currentRatios = calcRatios(currentTotals);
+                                  const ratioLabels = [
+                                    { key: "liqCorr", label: "Liquidez Corrente" },
+                                    { key: "liqGeral", label: "Liquidez Geral" },
+                                    { key: "roe", label: "ROE" },
+                                    { key: "roa", label: "ROA" },
+                                    { key: "endiv", label: "Endividamento" },
+                                    { key: "autoFin", label: "Autonomia Financeira" },
+                                  ];
+                                  return ratioLabels.map(r => (
+                                    <TableRow key={r.key}>
+                                      <TableCell className="text-xs font-medium">{r.label}</TableCell>
+                                      {sorted.map(h => {
+                                        const hRatios = calcRatios(h.totals);
+                                        return <TableCell key={h.year} className="text-xs text-right font-mono">{(hRatios as any)[r.key]}</TableCell>;
+                                      })}
+                                      <TableCell className="text-xs text-right font-mono font-bold bg-primary/5">{(currentRatios as any)[r.key]}</TableCell>
+                                    </TableRow>
+                                  ));
+                                })()}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </>
               )}
             </div>
