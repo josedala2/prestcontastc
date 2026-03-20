@@ -16,11 +16,13 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import {
   ArrowLeft, Building2, Send, CheckCircle2, Loader2, FolderOpen,
   Calendar, UserCheck, ClipboardList, Search, type LucideIcon,
+  FileText, Eye, Download, Printer, ExternalLink,
 } from "lucide-react";
 
 export interface StageField {
@@ -79,6 +81,14 @@ interface Processo {
   juiz_relator: string | null;
   juiz_adjunto: string | null;
 }
+interface ProcessoDoc {
+  id: string;
+  tipo_documento: string;
+  nome_ficheiro: string;
+  caminho_ficheiro: string | null;
+  estado: string;
+  created_at: string;
+}
 
 export default function WorkflowStagePage({ config }: { config: WorkflowStagePageConfig }) {
   const { user } = useAuth();
@@ -94,6 +104,12 @@ export default function WorkflowStagePage({ config }: { config: WorkflowStagePag
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [confirmAction, setConfirmAction] = useState<StageAction | null>(null);
 
+  // Documents state
+  const [documentos, setDocumentos] = useState<ProcessoDoc[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<ProcessoDoc | null>(null);
+
   useEffect(() => { fetchProcessos(); }, []);
 
   const fetchProcessos = async () => {
@@ -107,6 +123,39 @@ export default function WorkflowStagePage({ config }: { config: WorkflowStagePag
     setLoading(false);
   };
 
+  const fetchDocumentos = async (processoId: string) => {
+    setLoadingDocs(true);
+    const { data } = await supabase
+      .from("processo_documentos")
+      .select("id, tipo_documento, nome_ficheiro, caminho_ficheiro, estado, created_at")
+      .eq("processo_id", processoId)
+      .order("created_at", { ascending: false });
+    setDocumentos((data as ProcessoDoc[]) || []);
+    setLoadingDocs(false);
+  };
+
+  const handlePreviewDoc = async (doc: ProcessoDoc) => {
+    if (!doc.caminho_ficheiro) { toast.error("Ficheiro não disponível."); return; }
+    const { data, error } = await supabase.storage.from("processo-documentos").download(doc.caminho_ficheiro);
+    if (error || !data) { toast.error("Erro ao carregar documento."); return; }
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    const url = URL.createObjectURL(data);
+    setPreviewUrl(url);
+    setPreviewDoc(doc);
+  };
+
+  const handleDownloadDoc = async (doc: ProcessoDoc) => {
+    if (!doc.caminho_ficheiro) { toast.error("Ficheiro não disponível."); return; }
+    const { data, error } = await supabase.storage.from("processo-documentos").download(doc.caminho_ficheiro);
+    if (error || !data) { toast.error("Erro ao descarregar documento."); return; }
+    const url = URL.createObjectURL(data);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = doc.nome_ficheiro;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleSelect = (p: Processo) => {
     if (config.detailRoute) {
       navigate(`${config.detailRoute}/${p.id}`);
@@ -114,6 +163,8 @@ export default function WorkflowStagePage({ config }: { config: WorkflowStagePag
     }
     setSelected(p);
     setObservacoes("");
+    setDocumentos([]);
+    fetchDocumentos(p.id);
     const initial: Record<string, string> = {};
     config.fields?.forEach(f => {
       initial[f.key] = (p as any)[f.dbColumn || f.key] || "";
@@ -231,7 +282,61 @@ export default function WorkflowStagePage({ config }: { config: WorkflowStagePag
             </CardContent>
           </Card>
 
-          {/* Fields */}
+          {/* Documentos do Processo */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" /> Documentos do Processo
+                <Badge variant="secondary" className="text-[10px] ml-auto">{documentos.length}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingDocs ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : documentos.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">Nenhum documento associado a este processo.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-xs">Tipo</TableHead>
+                      <TableHead className="text-xs">Ficheiro</TableHead>
+                      <TableHead className="text-xs">Estado</TableHead>
+                      <TableHead className="text-xs">Data</TableHead>
+                      <TableHead className="text-xs text-right">Acções</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {documentos.map(doc => (
+                      <TableRow key={doc.id}>
+                        <TableCell className="text-xs font-medium">{doc.tipo_documento}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">{doc.nome_ficheiro}</TableCell>
+                        <TableCell>
+                          <Badge variant={doc.estado === "validado" ? "default" : "secondary"} className="text-[10px]">
+                            {doc.estado}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{formatDate(doc.created_at)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handlePreviewDoc(doc)} disabled={!doc.caminho_ficheiro} title="Visualizar">
+                              <Eye className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleDownloadDoc(doc)} disabled={!doc.caminho_ficheiro} title="Descarregar">
+                              <Download className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+
           {config.fields && config.fields.length > 0 && (
             <Card>
               <CardHeader>
@@ -319,6 +424,25 @@ export default function WorkflowStagePage({ config }: { config: WorkflowStagePag
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Document Preview Dialog */}
+        <Dialog open={!!previewDoc} onOpenChange={() => { if (previewUrl) URL.revokeObjectURL(previewUrl); setPreviewUrl(null); setPreviewDoc(null); }}>
+          <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
+            <DialogHeader>
+              <div className="flex items-center justify-between pr-6">
+                <DialogTitle className="text-sm">{previewDoc?.tipo_documento} — {previewDoc?.nome_ficheiro}</DialogTitle>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => previewDoc && handleDownloadDoc(previewDoc)}>
+                    <Download className="h-3.5 w-3.5" /> Descarregar
+                  </Button>
+                </div>
+              </div>
+            </DialogHeader>
+            {previewUrl && (
+              <iframe src={previewUrl} className="w-full flex-1 min-h-0 rounded-lg border" title="Document Preview" />
+            )}
+          </DialogContent>
+        </Dialog>
       </AppLayout>
     );
   }
