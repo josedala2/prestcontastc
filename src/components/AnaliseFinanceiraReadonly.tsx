@@ -405,9 +405,10 @@ interface AnaliseFinanceiraProps {
   readOnly?: boolean;
   hideTabs?: string[];
   dataKey?: string;
+  entityId?: string;
 }
 
-export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hideTabs = [], dataKey }: AnaliseFinanceiraProps) {
+export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hideTabs = [], dataKey, entityId }: AnaliseFinanceiraProps) {
   const [activeTab, setActiveTab] = useState("balanco");
   const financialCtx = useFinancialData();
 
