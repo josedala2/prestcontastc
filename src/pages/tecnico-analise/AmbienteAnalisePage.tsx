@@ -594,13 +594,33 @@ export default function AmbienteAnalisePage() {
           {/* ── Tab: Indicadores Financeiros ── */}
           <TabsContent value="indicadores">
             <div className="space-y-4">
-              {/* Banner */}
-              <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
-                <BarChart3 className="h-5 w-5 text-primary shrink-0" />
-                <div>
-                  <p className="text-sm font-semibold text-foreground">Indicadores Financeiros — Exercício {processo.ano_gerencia} <Badge variant="outline" className="text-[10px] ml-2">Cálculo Automático</Badge></p>
-                  <p className="text-xs text-muted-foreground">Rácios calculados automaticamente a partir dos dados do Modelo CC-2 submetidos pela entidade.</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3 flex-1">
+                  <BarChart3 className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Indicadores Financeiros — Exercício {processo.ano_gerencia} <Badge variant="outline" className="text-[10px] ml-2">Cálculo Automático</Badge></p>
+                    <p className="text-xs text-muted-foreground">Rácios calculados automaticamente a partir dos dados do Modelo CC-2 submetidos pela entidade.</p>
+                  </div>
                 </div>
+                {balancete.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="ml-3 gap-2 shrink-0"
+                    onClick={() => exportIndicadoresPdf({
+                      entityName: processo.entity_name,
+                      year: processo.ano_gerencia,
+                      totalActivo, totalAtivoNaoCorrente, totalAtivoCorrentes,
+                      totalCapProprio, totalPassNaoCorrente, totalPassCorrente, totalPassivo,
+                      totalProveitos, totalCustos, resultadoExercicio,
+                      numeroProcesso: processo.numero_processo,
+                      tecnico: processo.tecnico_analise || undefined,
+                    })}
+                  >
+                    <Download className="h-4 w-4" />
+                    Exportar PDF
+                  </Button>
+                )}
               </div>
 
               {balancete.length === 0 ? (
