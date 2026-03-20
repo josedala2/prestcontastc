@@ -683,6 +683,58 @@ export default function AmbienteAnalisePage() {
                   />
                 </div>
 
+                {/* Anexos do Parecer */}
+                <div className="space-y-3">
+                  <Label className="text-xs font-semibold flex items-center gap-1.5">
+                    <Paperclip className="h-3.5 w-3.5" /> Anexos do Parecer
+                  </Label>
+                  
+                  {parecerAnexos.length > 0 && (
+                    <div className="space-y-2">
+                      {parecerAnexos.map((anexo, idx) => (
+                        <div key={idx} className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm">
+                          <File className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <span className="truncate flex-1">{anexo.name}</span>
+                          <span className="text-xs text-muted-foreground">{(anexo.file.size / 1024).toFixed(0)} KB</span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => setParecerAnexos(prev => prev.filter((_, i) => i !== idx))}
+                          >
+                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div>
+                    <label htmlFor="parecer-anexo-input">
+                      <div className="flex items-center gap-2 cursor-pointer rounded-md border border-dashed border-primary/40 bg-primary/5 px-4 py-3 text-sm text-primary hover:bg-primary/10 transition-colors">
+                        <Upload className="h-4 w-4" />
+                        <span>Adicionar anexo</span>
+                      </div>
+                    </label>
+                    <input
+                      id="parecer-anexo-input"
+                      type="file"
+                      className="hidden"
+                      multiple
+                      accept=".pdf,.xlsx,.xls,.doc,.docx,.jpg,.jpeg,.png,.zip"
+                      onChange={(e) => {
+                        const files = e.target.files;
+                        if (files) {
+                          const newAnexos = Array.from(files).map(f => ({ name: f.name, file: f }));
+                          setParecerAnexos(prev => [...prev, ...newAnexos]);
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                    <p className="text-[11px] text-muted-foreground mt-1">PDF, Excel, Word, imagens ou ZIP (máx. 20MB por ficheiro)</p>
+                  </div>
+                </div>
+
                 <div className="flex gap-3 justify-end pt-2">
                   <Button variant="outline" className="gap-2" onClick={() => setConfirmAction("elementos")}>
                     <RotateCcw className="h-4 w-4" /> Solicitar Elementos
