@@ -9,7 +9,7 @@
 import { describe, it, expect } from "vitest";
 import {
   activoNaoCorrente,
-  ativoCorrentes,
+  activoCorrentes as ativoCorrentes,
   capitalProprioLines,
   passivoNaoCorrenteLines,
   passivoCorrenteLines,
