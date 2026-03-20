@@ -28,6 +28,11 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid,
+  PolarAngleAxis, PolarRadiusAxis, Radar,
+} from "recharts";
+import {
   type BalancoLine,
   activoNaoCorrente, activoCorrentes, capitalProprioLines,
   passivoNaoCorrenteLines, passivoCorrenteLines, proveitosLines, custosLines,
