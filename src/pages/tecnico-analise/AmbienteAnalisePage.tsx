@@ -93,6 +93,10 @@ export default function AmbienteAnalisePage() {
   const [acting, setActing] = useState(false);
   const [confirmAction, setConfirmAction] = useState<"concluir" | "elementos" | null>(null);
 
+  // Attachments for parecer
+  const [parecerAnexos, setParecerAnexos] = useState<{ name: string; file: File }[]>([]);
+  const [uploading, setUploading] = useState(false);
+
   // Preview
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewName, setPreviewName] = useState("");
