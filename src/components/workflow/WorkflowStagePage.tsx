@@ -16,11 +16,13 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import {
   ArrowLeft, Building2, Send, CheckCircle2, Loader2, FolderOpen,
   Calendar, UserCheck, ClipboardList, Search, type LucideIcon,
+  FileText, Eye, Download, Printer, ExternalLink,
 } from "lucide-react";
 
 export interface StageField {
