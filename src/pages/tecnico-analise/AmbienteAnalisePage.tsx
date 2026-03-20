@@ -20,6 +20,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { formatKz } from "@/lib/dataUtils";
+import { exportIndicadoresPdf } from "@/lib/exportUtils";
 import {
   ArrowLeft, FileSearch, FileText, FileSpreadsheet, FileImage,
   File, Eye, Download, Loader2,
