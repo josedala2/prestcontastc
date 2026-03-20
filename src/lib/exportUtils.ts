@@ -1039,6 +1039,7 @@ export interface IndicadoresExportData {
   resultadoExercicio: number;
   numeroProcesso?: string;
   tecnico?: string;
+  historicalData?: { year: number; totals: Record<string, number> }[];
 }
 
 export function exportIndicadoresPdf(data: IndicadoresExportData) {
