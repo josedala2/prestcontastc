@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { generateCC2Template } from "@/lib/cc2TemplateGenerator";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
+import { supabase } from "@/integrations/supabase/client";
+import { allCC3Sections } from "@/lib/cc3Structures";
 
 // ─── Helpers ───
 const formatKz = (v: number) =>
@@ -403,9 +405,10 @@ interface AnaliseFinanceiraProps {
   readOnly?: boolean;
   hideTabs?: string[];
   dataKey?: string;
+  entityId?: string;
 }
 
-export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hideTabs = [], dataKey }: AnaliseFinanceiraProps) {
+export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hideTabs = [], dataKey, entityId }: AnaliseFinanceiraProps) {
   const [activeTab, setActiveTab] = useState("balanco");
   const financialCtx = useFinancialData();
 
@@ -438,6 +441,94 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataKey, financialCtx.version]);
+
+  // ─── Persist CC3 data to trial_balance (so technician sees same data) ───
+  const fiscalYearId = entityId ? `${entityId}-${year}` : null;
+
+  const persistToTrialBalance = useCallback(async (sectionValues: Record<string, number>[]) => {
+    if (!entityId || !fiscalYearId) return;
+    try {
+      // Delete existing records for this entity/fiscal year
+      await supabase.from("trial_balance").delete().eq("entity_id", entityId).eq("fiscal_year_id", fiscalYearId);
+
+      // Build rows from all CC3 sections
+      const sectionKeys = allCC3Sections.map(s => s.key);
+      const rows: { account_code: string; description: string; debit: number; credit: number; balance: number; entity_id: string; fiscal_year_id: string }[] = [];
+
+      sectionKeys.forEach((sectionKey, idx) => {
+        const vals = sectionValues[idx] || {};
+        const section = allCC3Sections[idx];
+        const isCreditNature = ["capProprio", "passNaoCorr", "passCorr", "proveitos"].includes(sectionKey);
+
+        Object.entries(vals).forEach(([cc3Code, value]) => {
+          if (value === 0) return;
+          const line = section.lines.find(l => l.code === cc3Code);
+          // For credit-nature sections, store as negative balance (reverse the sign)
+          const balance = isCreditNature ? -value : value;
+          rows.push({
+            account_code: cc3Code,
+            description: line?.label || cc3Code,
+            debit: balance > 0 ? balance : 0,
+            credit: balance < 0 ? -balance : 0,
+            balance,
+            entity_id: entityId,
+            fiscal_year_id: fiscalYearId,
+          });
+        });
+      });
+
+      if (rows.length > 0) {
+        await supabase.from("trial_balance").insert(rows);
+      }
+    } catch (err) {
+      console.error("Erro ao persistir balancete:", err);
+    }
+  }, [entityId, fiscalYearId]);
+
+  // Load from trial_balance on mount if no context data
+  useEffect(() => {
+    if (!entityId || !fiscalYearId) return;
+    if (uploadedFile) return; // Already has data from context
+
+    const loadFromDb = async () => {
+      const { data: tb } = await supabase
+        .from("trial_balance")
+        .select("*")
+        .eq("entity_id", entityId)
+        .eq("fiscal_year_id", fiscalYearId)
+        .order("account_code");
+
+      if (!tb || tb.length === 0) return;
+
+      // Map DB rows back to CC3 sections using mapBalanceteToCC3
+      const { mapBalanceteToCC3 } = await import("@/lib/cc3Structures");
+      const cc3Data = mapBalanceteToCC3(tb as { account_code: string; balance: number }[]);
+      
+      setAtivNaoCorr(cc3Data.ativNaoCorr);
+      setAtivCorr(cc3Data.ativCorr);
+      setCapProprio(cc3Data.capProprio);
+      setPassNaoCorr(cc3Data.passNaoCorr);
+      setPassCorr(cc3Data.passCorr);
+      setProveitos(cc3Data.proveitos);
+      setCustos(cc3Data.custos);
+      setUploadedFile("(carregado da base de dados)");
+
+      if (dataKey) {
+        financialCtx.setData(dataKey, {
+          ativNaoCorr: cc3Data.ativNaoCorr,
+          ativCorr: cc3Data.ativCorr,
+          capProprio: cc3Data.capProprio,
+          passNaoCorr: cc3Data.passNaoCorr,
+          passCorr: cc3Data.passCorr,
+          proveitos: cc3Data.proveitos,
+          custos: cc3Data.custos,
+          uploadedFile: "(carregado da base de dados)",
+        });
+      }
+    };
+    loadFromDb();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entityId, fiscalYearId]);
 
   const emptyPrior: Record<string, number> = {};
 
@@ -628,6 +719,10 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
               custos: mergeWith(custosV, sectionValues[6]),
               uploadedFile: file.name,
             });
+            // Persist to database for technician access
+            persistToTrialBalance(sectionValues.map((sv, i) => 
+              Object.keys(sv).length > 0 ? { ...([ativNaoCorr, ativCorr, capProprio, passNaoCorr, passCorr, proveitosV, custosV][i]), ...sv } : [ativNaoCorr, ativCorr, capProprio, passNaoCorr, passCorr, proveitosV, custosV][i]
+            ));
           }, 0);
         }
 
@@ -642,13 +737,17 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
     };
     reader.readAsArrayBuffer(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [mapExcelToForm, dataKey, financialCtx, ativNaoCorr, ativCorr, capProprio, passNaoCorr, passCorr, proveitosV, custosV]);
+  }, [mapExcelToForm, dataKey, financialCtx, ativNaoCorr, ativCorr, capProprio, passNaoCorr, passCorr, proveitosV, custosV, persistToTrialBalance]);
 
-  const handleClearData = () => {
+  const handleClearData = async () => {
     setAtivNaoCorr({}); setAtivCorr({}); setCapProprio({});
     setPassNaoCorr({}); setPassCorr({}); setProveitos({}); setCustos({});
     setUploadedFile(null);
     if (dataKey) financialCtx.clearData(dataKey);
+    // Also clear from database
+    if (entityId && fiscalYearId) {
+      await supabase.from("trial_balance").delete().eq("entity_id", entityId).eq("fiscal_year_id", fiscalYearId);
+    }
     toast.info("Todos os campos foram limpos.");
   };
 
