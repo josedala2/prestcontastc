@@ -67,6 +67,7 @@ const PortalExercicioDetalhe = () => {
         entityName={entity?.name || fy.entityName}
         nif={entity?.nif || ""}
         year={String(fy.year)}
+        entityId={entityId}
         hideTabs={["dre", "indicadores", "resumo"]}
         dataKey={`${entityId}-${fy.year}`}
       />
