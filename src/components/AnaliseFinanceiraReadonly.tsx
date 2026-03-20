@@ -737,13 +737,17 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
     };
     reader.readAsArrayBuffer(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [mapExcelToForm, dataKey, financialCtx, ativNaoCorr, ativCorr, capProprio, passNaoCorr, passCorr, proveitosV, custosV]);
+  }, [mapExcelToForm, dataKey, financialCtx, ativNaoCorr, ativCorr, capProprio, passNaoCorr, passCorr, proveitosV, custosV, persistToTrialBalance]);
 
-  const handleClearData = () => {
+  const handleClearData = async () => {
     setAtivNaoCorr({}); setAtivCorr({}); setCapProprio({});
     setPassNaoCorr({}); setPassCorr({}); setProveitos({}); setCustos({});
     setUploadedFile(null);
     if (dataKey) financialCtx.clearData(dataKey);
+    // Also clear from database
+    if (entityId && fiscalYearId) {
+      await supabase.from("trial_balance").delete().eq("entity_id", entityId).eq("fiscal_year_id", fiscalYearId);
+    }
     toast.info("Todos os campos foram limpos.");
   };
 
