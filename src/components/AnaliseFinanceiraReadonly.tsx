@@ -14,7 +14,7 @@ import * as XLSX from "xlsx";
 import { generateCC2Template } from "@/lib/cc2TemplateGenerator";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { supabase } from "@/integrations/supabase/client";
-import { allCC3Sections } from "@/lib/cc3Structures";
+import { allCC3Sections, pgcToCC3 } from "@/lib/cc3Structures";
 
 // ─── Helpers ───
 const formatKz = (v: number) =>
