@@ -346,7 +346,7 @@ export function sumEditable(lines: BalancoLine[], vals: Record<string, number>):
 // Sections where credit balances (negative in debit-credit convention) should show as positive
 const creditNatureSections = new Set(["capProprio", "passNaoCorr", "passCorr", "proveitos"]);
 
-// Map trial_balance rows (PGC account codes) to CC3 section values
+// Map trial_balance rows (PGC or CC3 account codes) to CC3 section values
 export function mapBalanceteToCC3(balanceteRows: { account_code: string; balance: number }[]): Record<string, Record<string, number>> {
   const result: Record<string, Record<string, number>> = {};
   allCC3Sections.forEach(s => { result[s.key] = {}; });
@@ -360,7 +360,7 @@ export function mapBalanceteToCC3(balanceteRows: { account_code: string; balance
   });
 
   balanceteRows.forEach(row => {
-    const rawCode = row.account_code.replace(/[.\s]/g, "");
+    const rawCode = row.account_code.replace(/\s/g, "");
     
     const applyMapping = (cc3Code: string, sectionKey: string) => {
       // For credit-nature sections, negate the balance so they display as positive
@@ -368,8 +368,16 @@ export function mapBalanceteToCC3(balanceteRows: { account_code: string; balance
       result[sectionKey][cc3Code] = (result[sectionKey][cc3Code] || 0) + value;
     };
 
-    // Try exact PGC mapping first
-    const cc3Code = pgcToCC3[rawCode];
+    // 1) Try direct CC3 code match (e.g. "1.1.1.1" already stored as CC3)
+    const directSection = cc3ToSection.get(rawCode);
+    if (directSection) {
+      applyMapping(rawCode, directSection);
+      return;
+    }
+
+    // 2) Try PGC mapping (strip dots for PGC lookup)
+    const pgcCode = rawCode.replace(/\./g, "");
+    const cc3Code = pgcToCC3[pgcCode];
     if (cc3Code) {
       const sectionKey = cc3ToSection.get(cc3Code);
       if (sectionKey) {
@@ -378,9 +386,9 @@ export function mapBalanceteToCC3(balanceteRows: { account_code: string; balance
       }
     }
 
-    // Try progressively shorter prefixes (e.g. "1121" → "112" → "11")
-    for (let len = rawCode.length; len >= 2; len--) {
-      const prefix = rawCode.substring(0, len);
+    // 3) Try progressively shorter prefixes (e.g. "1121" → "112" → "11")
+    for (let len = pgcCode.length; len >= 2; len--) {
+      const prefix = pgcCode.substring(0, len);
       const cc3 = pgcToCC3[prefix];
       if (cc3) {
         const sectionKey = cc3ToSection.get(cc3);
