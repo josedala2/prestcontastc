@@ -424,6 +424,25 @@ export default function WorkflowStagePage({ config }: { config: WorkflowStagePag
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Document Preview Dialog */}
+        <Dialog open={!!previewDoc} onOpenChange={() => { if (previewUrl) URL.revokeObjectURL(previewUrl); setPreviewUrl(null); setPreviewDoc(null); }}>
+          <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
+            <DialogHeader>
+              <div className="flex items-center justify-between pr-6">
+                <DialogTitle className="text-sm">{previewDoc?.tipo_documento} — {previewDoc?.nome_ficheiro}</DialogTitle>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => previewDoc && handleDownloadDoc(previewDoc)}>
+                    <Download className="h-3.5 w-3.5" /> Descarregar
+                  </Button>
+                </div>
+              </div>
+            </DialogHeader>
+            {previewUrl && (
+              <iframe src={previewUrl} className="w-full flex-1 min-h-0 rounded-lg border" title="Document Preview" />
+            )}
+          </DialogContent>
+        </Dialog>
       </AppLayout>
     );
   }
