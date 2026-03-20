@@ -1048,6 +1048,7 @@ export function exportIndicadoresPdf(data: IndicadoresExportData) {
     entityName, year, totalActivo, totalAtivoNaoCorrente, totalAtivoCorrentes,
     totalCapProprio, totalPassNaoCorrente, totalPassCorrente, totalPassivo,
     totalProveitos, totalCustos, resultadoExercicio, numeroProcesso, tecnico,
+    historicalData,
   } = data;
 
   addPdfHeader(doc, `Indicadores Financeiros — ${entityName}`, `Exercício ${year}${numeroProcesso ? ` · Processo ${numeroProcesso}` : ""}`);
