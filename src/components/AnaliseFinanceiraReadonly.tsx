@@ -719,6 +719,10 @@ export function AnaliseFinanceira({ entityName, nif, year, readOnly = false, hid
               custos: mergeWith(custosV, sectionValues[6]),
               uploadedFile: file.name,
             });
+            // Persist to database for technician access
+            persistToTrialBalance(sectionValues.map((sv, i) => 
+              Object.keys(sv).length > 0 ? { ...([ativNaoCorr, ativCorr, capProprio, passNaoCorr, passCorr, proveitosV, custosV][i]), ...sv } : [ativNaoCorr, ativCorr, capProprio, passNaoCorr, passCorr, proveitosV, custosV][i]
+            ));
           }, 0);
         }
 
