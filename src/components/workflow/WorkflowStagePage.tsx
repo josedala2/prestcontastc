@@ -282,7 +282,61 @@ export default function WorkflowStagePage({ config }: { config: WorkflowStagePag
             </CardContent>
           </Card>
 
-          {/* Fields */}
+          {/* Documentos do Processo */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" /> Documentos do Processo
+                <Badge variant="secondary" className="text-[10px] ml-auto">{documentos.length}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingDocs ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : documentos.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">Nenhum documento associado a este processo.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-xs">Tipo</TableHead>
+                      <TableHead className="text-xs">Ficheiro</TableHead>
+                      <TableHead className="text-xs">Estado</TableHead>
+                      <TableHead className="text-xs">Data</TableHead>
+                      <TableHead className="text-xs text-right">Acções</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {documentos.map(doc => (
+                      <TableRow key={doc.id}>
+                        <TableCell className="text-xs font-medium">{doc.tipo_documento}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">{doc.nome_ficheiro}</TableCell>
+                        <TableCell>
+                          <Badge variant={doc.estado === "validado" ? "default" : "secondary"} className="text-[10px]">
+                            {doc.estado}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{formatDate(doc.created_at)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handlePreviewDoc(doc)} disabled={!doc.caminho_ficheiro} title="Visualizar">
+                              <Eye className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleDownloadDoc(doc)} disabled={!doc.caminho_ficheiro} title="Descarregar">
+                              <Download className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+
           {config.fields && config.fields.length > 0 && (
             <Card>
               <CardHeader>
