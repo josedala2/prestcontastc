@@ -114,11 +114,31 @@ export default function WorkflowStagePage({ config }: { config: WorkflowStagePag
 
   const fetchProcessos = async () => {
     setLoading(true);
-    const { data } = await supabase
+    let query = supabase
       .from("processos")
       .select("*")
       .eq("etapa_atual", config.etapa)
       .order("created_at", { ascending: false });
+
+    // Coordenador de Equipa: only see processes assigned to them
+    if (user?.role === "Coordenador de Equipa" && user.displayName) {
+      query = query.eq("coordenador_equipa", user.displayName);
+    }
+    // Division-scoped roles: filter by divisao_competente
+    else if (user?.divisao && ["Chefe de Divisão", "Chefe de Secção", "Técnico de Análise"].includes(user.role)) {
+      const DIVISOES_MAP: Record<string, string> = {
+        "3ª Divisão": "3ª Divisão — Administração Local I",
+        "4ª Divisão": "4ª Divisão — Administração Local II",
+        "5ª Divisão": "5ª Divisão — Sector Empresarial Público",
+        "6ª Divisão": "6ª Divisão — Administração Central I",
+        "7ª Divisão": "7ª Divisão — Administração Central II",
+        "8ª Divisão": "8ª Divisão — Órgãos de Soberania",
+      };
+      const divisaoNome = DIVISOES_MAP[user.divisao] || user.divisao;
+      query = query.eq("divisao_competente", divisaoNome);
+    }
+
+    const { data } = await query;
     setProcessos((data as any[]) || []);
     setLoading(false);
   };
