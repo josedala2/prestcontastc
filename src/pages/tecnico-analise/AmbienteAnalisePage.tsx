@@ -656,6 +656,7 @@ export default function AmbienteAnalisePage() {
                       totalProveitos, totalCustos, resultadoExercicio,
                       numeroProcesso: processo.numero_processo,
                       tecnico: processo.tecnico_analise || undefined,
+                      historicalData: historicalData.length > 0 ? historicalData : undefined,
                     })}
                   >
                     <Download className="h-4 w-4" />

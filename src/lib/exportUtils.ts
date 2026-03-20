@@ -1160,6 +1160,107 @@ export function exportIndicadoresPdf(data: IndicadoresExportData) {
     margin: { left: 14, right: 14 },
   });
 
+  // 4. Comparação Anual (if historical data available)
+  if (historicalData && historicalData.length > 0) {
+    const sorted = [...historicalData].sort((a, b) => a.year - b.year);
+    const allYears = [...sorted.map(h => ({ yr: h.year, t: h.totals })), {
+      yr: year,
+      t: {
+        activo: totalActivo, ativoNC: totalAtivoNaoCorrente, ativoC: totalAtivoCorrentes,
+        capProprio: totalCapProprio, passivoNC: totalPassNaoCorrente, passivoC: totalPassCorrente,
+        passivo: totalPassivo, proveitos: totalProveitos, custos: totalCustos, resultado: resultadoExercicio,
+      }
+    }];
+
+    y = (doc as any).lastAutoTable.finalY + 10;
+    if (y > 240) { doc.addPage(); y = 20; }
+
+    doc.setFontSize(10);
+    doc.setTextColor(40, 38, 72);
+    doc.setFont("helvetica", "bold");
+    doc.text("4. Comparação Anual — Evolução Patrimonial e Resultados", 14, y);
+    y += 2;
+
+    const compHeaders = ["Indicador", ...allYears.map(a => String(a.yr)), "Δ %"];
+    const compRows = [
+      { label: "Activo Total", key: "activo" },
+      { label: "Capital Próprio", key: "capProprio" },
+      { label: "Passivo Total", key: "passivo" },
+      { label: "Proveitos", key: "proveitos" },
+      { label: "Custos", key: "custos" },
+      { label: "Resultado Líquido", key: "resultado" },
+    ];
+
+    const compBody = compRows.map(r => {
+      const vals = allYears.map(a => a.t[r.key] || 0);
+      const last = vals[vals.length - 1];
+      const prev = vals.length >= 2 ? vals[vals.length - 2] : 0;
+      const delta = prev !== 0 ? (((last - prev) / Math.abs(prev)) * 100).toFixed(1) + "%" : "—";
+      return [r.label, ...vals.map(v => formatKz(v)), delta];
+    });
+
+    autoTable(doc, {
+      startY: y,
+      head: [compHeaders],
+      body: compBody,
+      styles: { fontSize: 7, cellPadding: 2 },
+      headStyles: { fillColor: [40, 38, 72], textColor: [255, 255, 255], fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [245, 245, 250] },
+      columnStyles: Object.fromEntries([
+        ...allYears.map((_, i) => [i + 1, { halign: "right" as const }]),
+        [allYears.length + 1, { halign: "right" as const, fontStyle: "bold" as const }],
+      ]),
+      margin: { left: 14, right: 14 },
+    });
+
+    // 5. Evolução de Rácios
+    y = (doc as any).lastAutoTable.finalY + 8;
+    if (y > 240) { doc.addPage(); y = 20; }
+
+    doc.setFontSize(10);
+    doc.setTextColor(40, 38, 72);
+    doc.setFont("helvetica", "bold");
+    doc.text("5. Evolução de Rácios Financeiros", 14, y);
+    y += 2;
+
+    const ratioRows = allYears.map(a => {
+      const t = a.t;
+      const at = t.activo || t["activo"] || 0;
+      const ac = t.ativoC || t["ativoC"] || 0;
+      const pc = t.passivoC || t["passivoC"] || 0;
+      const pt = t.passivo || t["passivo"] || 0;
+      const cp = t.capProprio || t["capProprio"] || 0;
+      const rl = t.resultado || t["resultado"] || 0;
+      return {
+        liqCorr: pc > 0 ? (ac / pc).toFixed(2) : "—",
+        roe: cp !== 0 ? ((rl / cp) * 100).toFixed(2) + "%" : "—",
+        roa: at !== 0 ? ((rl / at) * 100).toFixed(2) + "%" : "—",
+        endiv: at !== 0 ? ((pt / at) * 100).toFixed(2) + "%" : "—",
+        autoFin: at !== 0 ? ((cp / at) * 100).toFixed(2) + "%" : "—",
+      };
+    });
+
+    const ratioHeaders = ["Rácio", ...allYears.map(a => String(a.yr))];
+    const ratioBody = [
+      ["Liquidez Corrente", ...ratioRows.map(r => r.liqCorr)],
+      ["ROE", ...ratioRows.map(r => r.roe)],
+      ["ROA", ...ratioRows.map(r => r.roa)],
+      ["Endividamento Geral", ...ratioRows.map(r => r.endiv)],
+      ["Autonomia Financeira", ...ratioRows.map(r => r.autoFin)],
+    ];
+
+    autoTable(doc, {
+      startY: y,
+      head: [ratioHeaders],
+      body: ratioBody,
+      styles: { fontSize: 7, cellPadding: 2 },
+      headStyles: { fillColor: [40, 38, 72], textColor: [255, 255, 255], fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [245, 245, 250] },
+      columnStyles: Object.fromEntries(allYears.map((_, i) => [i + 1, { halign: "right" as const }])),
+      margin: { left: 14, right: 14 },
+    });
+  }
+
   addPdfFooter(doc);
   doc.save(`Indicadores_Financeiros_${entityName.replace(/[^a-zA-Z0-9]/g, "_")}_${year}.pdf`);
 }
