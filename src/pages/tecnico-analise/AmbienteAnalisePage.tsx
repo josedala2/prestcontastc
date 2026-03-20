@@ -92,6 +92,7 @@ export default function AmbienteAnalisePage() {
   const [documentos, setDocumentos] = useState<DocItem[]>([]);
   const [balancete, setBalancete] = useState<BalanceteLine[]>([]);
   const [indicators, setIndicators] = useState<Record<string, number>>({});
+  const [historicalData, setHistoricalData] = useState<{ year: number; totals: Record<string, number> }[]>([]);
   const [loadingBal, setLoadingBal] = useState(false);
 
   const [observacoes, setObservacoes] = useState("");
