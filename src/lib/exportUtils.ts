@@ -1022,3 +1022,142 @@ export async function exportActaDevolucaoPdf(data: ActaDevolucaoData, preview = 
     return { blob, fileName };
   }
 }
+
+// ─── Export Indicadores Financeiros PDF ───
+export interface IndicadoresExportData {
+  entityName: string;
+  year: number;
+  totalActivo: number;
+  totalAtivoNaoCorrente: number;
+  totalAtivoCorrentes: number;
+  totalCapProprio: number;
+  totalPassNaoCorrente: number;
+  totalPassCorrente: number;
+  totalPassivo: number;
+  totalProveitos: number;
+  totalCustos: number;
+  resultadoExercicio: number;
+  numeroProcesso?: string;
+  tecnico?: string;
+}
+
+export function exportIndicadoresPdf(data: IndicadoresExportData) {
+  const doc = new jsPDF();
+  const {
+    entityName, year, totalActivo, totalAtivoNaoCorrente, totalAtivoCorrentes,
+    totalCapProprio, totalPassNaoCorrente, totalPassCorrente, totalPassivo,
+    totalProveitos, totalCustos, resultadoExercicio, numeroProcesso, tecnico,
+  } = data;
+
+  addPdfHeader(doc, `Indicadores Financeiros — ${entityName}`, `Exercício ${year}${numeroProcesso ? ` · Processo ${numeroProcesso}` : ""}`);
+
+  let y = 42;
+
+  // Meta info
+  if (tecnico || numeroProcesso) {
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    if (tecnico) { doc.text(`Técnico: ${tecnico}`, 14, y); y += 4; }
+    if (numeroProcesso) { doc.text(`Processo: ${numeroProcesso}`, 14, y); y += 4; }
+    y += 3;
+  }
+
+  // 1. Estrutura Patrimonial
+  doc.setFontSize(10);
+  doc.setTextColor(40, 38, 72);
+  doc.setFont("helvetica", "bold");
+  doc.text("1. Estrutura Patrimonial", 14, y);
+  y += 2;
+
+  autoTable(doc, {
+    startY: y,
+    head: [["Indicador", "Valor (Kz)", "% do Activo"]],
+    body: [
+      ["Activo Total", formatKz(totalActivo), "100%"],
+      ["  Activo Não Corrente", formatKz(totalAtivoNaoCorrente), totalActivo ? `${((totalAtivoNaoCorrente / totalActivo) * 100).toFixed(1)}%` : "—"],
+      ["  Activo Corrente", formatKz(totalAtivoCorrentes), totalActivo ? `${((totalAtivoCorrentes / totalActivo) * 100).toFixed(1)}%` : "—"],
+      ["Capital Próprio", formatKz(totalCapProprio), totalActivo ? `${((totalCapProprio / totalActivo) * 100).toFixed(1)}%` : "—"],
+      ["Passivo Total", formatKz(totalPassivo), totalActivo ? `${((totalPassivo / totalActivo) * 100).toFixed(1)}%` : "—"],
+      ["  Passivo Não Corrente", formatKz(totalPassNaoCorrente), totalPassivo ? `${((totalPassNaoCorrente / totalPassivo) * 100).toFixed(1)}% do passivo` : "—"],
+      ["  Passivo Corrente", formatKz(totalPassCorrente), totalPassivo ? `${((totalPassCorrente / totalPassivo) * 100).toFixed(1)}% do passivo` : "—"],
+      ["Equilíbrio (A - CP+P)", formatKz(totalActivo - (totalCapProprio + totalPassivo)), Math.abs(totalActivo - (totalCapProprio + totalPassivo)) < 1 ? "✓ Equilibrado" : "⚠ Desequilíbrio"],
+    ],
+    styles: { fontSize: 8, cellPadding: 2 },
+    headStyles: { fillColor: [40, 38, 72], textColor: [255, 255, 255], fontStyle: "bold" },
+    alternateRowStyles: { fillColor: [245, 245, 250] },
+    margin: { left: 14, right: 14 },
+  });
+
+  y = (doc as any).lastAutoTable.finalY + 8;
+
+  // 2. Resultados
+  doc.setFontSize(10);
+  doc.setTextColor(40, 38, 72);
+  doc.setFont("helvetica", "bold");
+  doc.text("2. Resultados do Exercício", 14, y);
+  y += 2;
+
+  autoTable(doc, {
+    startY: y,
+    head: [["Indicador", "Valor (Kz)"]],
+    body: [
+      ["Total Proveitos", formatKz(totalProveitos)],
+      ["Total Custos", formatKz(totalCustos)],
+      ["Resultado Líquido", formatKz(resultadoExercicio)],
+      ["Margem Líquida", totalProveitos > 0 ? `${((resultadoExercicio / totalProveitos) * 100).toFixed(2)}%` : "—"],
+    ],
+    styles: { fontSize: 8, cellPadding: 2 },
+    headStyles: { fillColor: [40, 38, 72], textColor: [255, 255, 255], fontStyle: "bold" },
+    alternateRowStyles: { fillColor: [245, 245, 250] },
+    margin: { left: 14, right: 14 },
+  });
+
+  y = (doc as any).lastAutoTable.finalY + 8;
+
+  // 3. Rácios
+  const liqCorr = totalPassCorrente > 0 ? totalAtivoCorrentes / totalPassCorrente : 0;
+  const liqGeral = totalPassivo > 0 ? totalActivo / totalPassivo : 0;
+  const fundoManeio = totalAtivoCorrentes - totalPassCorrente;
+  const roe = totalCapProprio !== 0 ? (resultadoExercicio / totalCapProprio) * 100 : 0;
+  const roa = totalActivo !== 0 ? (resultadoExercicio / totalActivo) * 100 : 0;
+  const giro = totalActivo !== 0 ? totalProveitos / totalActivo : 0;
+  const margemOp = totalProveitos > 0 ? ((totalProveitos - totalCustos) / totalProveitos) * 100 : 0;
+  const endiv = totalActivo !== 0 ? (totalPassivo / totalActivo) * 100 : 0;
+  const autoFin = totalActivo !== 0 ? (totalCapProprio / totalActivo) * 100 : 0;
+  const solvab = totalPassivo !== 0 ? (totalCapProprio / totalPassivo) * 100 : 0;
+  const compEndiv = totalPassivo !== 0 ? (totalPassCorrente / totalPassivo) * 100 : 0;
+
+  doc.setFontSize(10);
+  doc.setTextColor(40, 38, 72);
+  doc.setFont("helvetica", "bold");
+  doc.text("3. Rácios Financeiros", 14, y);
+  y += 2;
+
+  autoTable(doc, {
+    startY: y,
+    head: [["Rácio", "Valor", "Fórmula", "Avaliação"]],
+    body: [
+      ["Liquidez Corrente", liqCorr.toFixed(2), "AC / PC", liqCorr >= 1.5 ? "Bom" : liqCorr >= 1 ? "Aceitável" : "⚠ Insuficiente"],
+      ["Liquidez Geral", liqGeral.toFixed(2), "AT / PT", liqGeral >= 1.5 ? "Bom" : liqGeral >= 1 ? "Aceitável" : "⚠ Insuficiente"],
+      ["Fundo de Maneio", formatKz(fundoManeio), "AC - PC", fundoManeio >= 0 ? "Positivo" : "⚠ Negativo"],
+      ["ROE", `${roe.toFixed(2)}%`, "RL / CP", roe > 5 ? "Bom" : roe >= 0 ? "Aceitável" : "⚠ Negativo"],
+      ["ROA", `${roa.toFixed(2)}%`, "RL / AT", roa > 3 ? "Bom" : roa >= 0 ? "Aceitável" : "⚠ Negativo"],
+      ["Giro do Activo", giro.toFixed(2), "Prov. / AT", giro > 1 ? "Bom" : "Baixo"],
+      ["Margem Operacional", `${margemOp.toFixed(2)}%`, "(P-C) / P", margemOp > 0 ? "Positiva" : "⚠ Negativa"],
+      ["Endividamento Geral", `${endiv.toFixed(2)}%`, "PT / AT", endiv > 70 ? "⚠ Elevado" : "Aceitável"],
+      ["Autonomia Financeira", `${autoFin.toFixed(2)}%`, "CP / AT", autoFin > 30 ? "Bom" : autoFin > 20 ? "Aceitável" : "⚠ Baixa"],
+      ["Solvabilidade", `${solvab.toFixed(2)}%`, "CP / PT", solvab > 50 ? "Bom" : solvab > 25 ? "Aceitável" : "⚠ Baixa"],
+      ["Composição Endivid.", `${compEndiv.toFixed(2)}%`, "PC / PT", compEndiv > 80 ? "⚠ Concentrado" : "Equilibrado"],
+    ],
+    styles: { fontSize: 7.5, cellPadding: 2 },
+    headStyles: { fillColor: [40, 38, 72], textColor: [255, 255, 255], fontStyle: "bold" },
+    alternateRowStyles: { fillColor: [245, 245, 250] },
+    columnStyles: {
+      3: { fontStyle: "bold" },
+    },
+    margin: { left: 14, right: 14 },
+  });
+
+  addPdfFooter(doc);
+  doc.save(`Indicadores_Financeiros_${entityName.replace(/[^a-zA-Z0-9]/g, "_")}_${year}.pdf`);
+}
