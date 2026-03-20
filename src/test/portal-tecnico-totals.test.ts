@@ -27,7 +27,7 @@ const SAMPLE_BALANCETE: { account_code: string; balance: number }[] = [
   // Classe 5 – Capital Próprio (credit nature → stored negative)
   { account_code: "51", balance: -800000 },
   { account_code: "541", balance: -120000 },
-  { account_code: "591", balance: -95000 },
+  { account_code: "58", balance: -95000 },
   // Classe 6 – Proveitos (credit nature → stored negative)
   { account_code: "611", balance: -2500000 },
   { account_code: "621", balance: -300000 },
