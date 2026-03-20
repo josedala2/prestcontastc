@@ -123,6 +123,39 @@ export default function WorkflowStagePage({ config }: { config: WorkflowStagePag
     setLoading(false);
   };
 
+  const fetchDocumentos = async (processoId: string) => {
+    setLoadingDocs(true);
+    const { data } = await supabase
+      .from("processo_documentos")
+      .select("id, tipo_documento, nome_ficheiro, caminho_ficheiro, estado, created_at")
+      .eq("processo_id", processoId)
+      .order("created_at", { ascending: false });
+    setDocumentos((data as ProcessoDoc[]) || []);
+    setLoadingDocs(false);
+  };
+
+  const handlePreviewDoc = async (doc: ProcessoDoc) => {
+    if (!doc.caminho_ficheiro) { toast.error("Ficheiro não disponível."); return; }
+    const { data, error } = await supabase.storage.from("processo-documentos").download(doc.caminho_ficheiro);
+    if (error || !data) { toast.error("Erro ao carregar documento."); return; }
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    const url = URL.createObjectURL(data);
+    setPreviewUrl(url);
+    setPreviewDoc(doc);
+  };
+
+  const handleDownloadDoc = async (doc: ProcessoDoc) => {
+    if (!doc.caminho_ficheiro) { toast.error("Ficheiro não disponível."); return; }
+    const { data, error } = await supabase.storage.from("processo-documentos").download(doc.caminho_ficheiro);
+    if (error || !data) { toast.error("Erro ao descarregar documento."); return; }
+    const url = URL.createObjectURL(data);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = doc.nome_ficheiro;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleSelect = (p: Processo) => {
     if (config.detailRoute) {
       navigate(`${config.detailRoute}/${p.id}`);
@@ -130,6 +163,8 @@ export default function WorkflowStagePage({ config }: { config: WorkflowStagePag
     }
     setSelected(p);
     setObservacoes("");
+    setDocumentos([]);
+    fetchDocumentos(p.id);
     const initial: Record<string, string> = {};
     config.fields?.forEach(f => {
       initial[f.key] = (p as any)[f.dbColumn || f.key] || "";
