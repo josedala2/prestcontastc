@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import * as XLSX from "xlsx";
 import { generateCC2Template } from "@/lib/cc2TemplateGenerator";
+import { pgcToCC3 } from "@/lib/cc3Structures";
 
 // ─── Helpers ───
 const formatKz = (v: number) =>
