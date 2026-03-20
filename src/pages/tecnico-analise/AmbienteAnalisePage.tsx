@@ -1093,3 +1093,13 @@ function InfoTableRow({ label, value }: { label: string; value: string }) {
     </TableRow>
   );
 }
+
+function IndicadorCard({ label, value, sub, alert, positive }: { label: string; value: string; sub: string; alert?: boolean; positive?: boolean }) {
+  return (
+    <div className={`rounded-lg border p-4 space-y-1 ${alert ? "border-destructive/40 bg-destructive/5" : positive ? "border-primary/40 bg-primary/5" : ""}`}>
+      <p className="text-[11px] text-muted-foreground uppercase tracking-wider">{label}</p>
+      <p className={`text-lg font-bold font-mono ${alert ? "text-destructive" : positive ? "text-primary" : ""}`}>{value}</p>
+      <p className="text-[10px] text-muted-foreground">{sub}</p>
+    </div>
+  );
+}
