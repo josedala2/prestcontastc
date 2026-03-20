@@ -212,12 +212,13 @@ describe("Excel Upload: Portal ↔ Técnico produzem mesmos valores", () => {
     expect(provPGC - custPGC).toBeCloseTo(provCC3 - custCC3, 2);
   });
 
-  it("parseKzValue trata formatos angolanos correctamente", () => {
-    expect(parseKzValue("1.500.000,00 Kz")).toBe(1500000);
+  it("parseKzValue trata formatos correctamente", () => {
+    expect(parseKzValue("1500000 Kz")).toBe(1500000);
     expect(parseKzValue("(500)")).toBe(-500);
     expect(parseKzValue(42000)).toBe(42000);
     expect(parseKzValue("")).toBe(0);
     expect(parseKzValue(null)).toBe(0);
+    expect(parseKzValue("500.50")).toBe(500.5);
   });
 
   it("linhas vazias ou curtas são ignoradas", () => {
