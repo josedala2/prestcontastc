@@ -24,8 +24,9 @@ import {
   ArrowLeft, FileSearch, FileText, FileSpreadsheet, FileImage,
   File, Eye, Download, Loader2,
   Send, RotateCcw, BarChart3, BookOpen,
-  Scale, TrendingUp, ClipboardList, FileCheck,
+  Scale, TrendingUp, ClipboardList, FileCheck, Paperclip, Plus, Trash2, Upload,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import {
   type BalancoLine,
   activoNaoCorrente, activoCorrentes, capitalProprioLines,
