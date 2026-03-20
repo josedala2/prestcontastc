@@ -18,16 +18,16 @@ const SAMPLE_BALANCETE: { account_code: string; balance: number }[] = [
   { account_code: "121", balance: 1200000 },
   { account_code: "133", balance: 80000 },
   // Classe 3 – Existências (debit)
-  { account_code: "31", balance: 150000 },
-  { account_code: "35", balance: 45000 },
+  { account_code: "311", balance: 150000 },
+  { account_code: "351", balance: 45000 },
   // Classe 4 – Terceiros (debit: clientes)
   { account_code: "411", balance: 320000 },
   // Classe 1 – Amortizações (credit nature → stored negative)
   { account_code: "182", balance: -200000 },
   // Classe 5 – Capital Próprio (credit nature → stored negative)
   { account_code: "51", balance: -800000 },
-  { account_code: "54", balance: -120000 },
-  { account_code: "59", balance: -95000 },
+  { account_code: "541", balance: -120000 },
+  { account_code: "591", balance: -95000 },
   // Classe 6 – Proveitos (credit nature → stored negative)
   { account_code: "611", balance: -2500000 },
   { account_code: "621", balance: -300000 },
@@ -35,9 +35,7 @@ const SAMPLE_BALANCETE: { account_code: string; balance: number }[] = [
   { account_code: "711", balance: 900000 },
   { account_code: "721", balance: 600000 },
   { account_code: "731", balance: 150000 },
-  { account_code: "75", balance: 50000 },
-  // Classe 8 – Resultados
-  { account_code: "81", balance: -100000 },
+  { account_code: "751", balance: 50000 },
 ];
 
 const CREDIT_SECTIONS = new Set(["capProprio", "passNaoCorr", "passCorr", "proveitos"]);
