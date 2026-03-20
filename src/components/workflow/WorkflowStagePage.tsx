@@ -81,6 +81,14 @@ interface Processo {
   juiz_relator: string | null;
   juiz_adjunto: string | null;
 }
+interface ProcessoDoc {
+  id: string;
+  tipo_documento: string;
+  nome_ficheiro: string;
+  caminho_ficheiro: string | null;
+  estado: string;
+  created_at: string;
+}
 
 export default function WorkflowStagePage({ config }: { config: WorkflowStagePageConfig }) {
   const { user } = useAuth();
@@ -95,6 +103,12 @@ export default function WorkflowStagePage({ config }: { config: WorkflowStagePag
   const [observacoes, setObservacoes] = useState("");
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [confirmAction, setConfirmAction] = useState<StageAction | null>(null);
+
+  // Documents state
+  const [documentos, setDocumentos] = useState<ProcessoDoc[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<ProcessoDoc | null>(null);
 
   useEffect(() => { fetchProcessos(); }, []);
 
