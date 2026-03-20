@@ -609,7 +609,64 @@ export default function AmbienteAnalisePage() {
                 </div>
               ) : (
                 <>
-                  {/* Estrutura Patrimonial */}
+                  {/* ── Gráficos Visuais ── */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Pie: Composição do Activo */}
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm">Composição do Activo</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={260}>
+                          <PieChart>
+                            <Pie
+                              data={[
+                                { name: "Não Corrente", value: Math.abs(totalAtivoNaoCorrente) },
+                                { name: "Corrente", value: Math.abs(totalAtivoCorrentes) },
+                              ].filter(d => d.value > 0)}
+                              cx="50%" cy="50%" innerRadius={50} outerRadius={90}
+                              paddingAngle={3} dataKey="value"
+                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                            >
+                              <Cell fill="hsl(var(--primary))" />
+                              <Cell fill="hsl(var(--primary) / 0.5)" />
+                            </Pie>
+                            <Tooltip formatter={(v: number) => formatKz(v)} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+
+                    {/* Pie: Estrutura de Financiamento */}
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm">Estrutura de Financiamento</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={260}>
+                          <PieChart>
+                            <Pie
+                              data={[
+                                { name: "Capital Próprio", value: Math.abs(totalCapProprio) },
+                                { name: "Passivo NC", value: Math.abs(totalPassNaoCorrente) },
+                                { name: "Passivo Corrente", value: Math.abs(totalPassCorrente) },
+                              ].filter(d => d.value > 0)}
+                              cx="50%" cy="50%" innerRadius={50} outerRadius={90}
+                              paddingAngle={3} dataKey="value"
+                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                            >
+                              <Cell fill="hsl(var(--primary))" />
+                              <Cell fill="hsl(var(--accent))" />
+                              <Cell fill="hsl(var(--destructive))" />
+                            </Pie>
+                            <Tooltip formatter={(v: number) => formatKz(v)} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Estrutura Patrimonial cards */}
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm">Estrutura Patrimonial</CardTitle>
@@ -633,7 +690,33 @@ export default function AmbienteAnalisePage() {
                     </CardContent>
                   </Card>
 
-                  {/* Demonstração de Resultados */}
+                  {/* Bar chart: Proveitos vs Custos */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Proveitos vs Custos</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={280}>
+                        <BarChart data={[
+                          { name: "Proveitos", valor: totalProveitos },
+                          { name: "Custos", valor: totalCustos },
+                          { name: "Resultado", valor: resultadoExercicio },
+                        ]}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                          <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                          <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(v / 1e6).toFixed(1)}M`} />
+                          <Tooltip formatter={(v: number) => formatKz(v)} />
+                          <Bar dataKey="valor" radius={[6, 6, 0, 0]}>
+                            <Cell fill="hsl(var(--primary))" />
+                            <Cell fill="hsl(var(--destructive))" />
+                            <Cell fill={resultadoExercicio >= 0 ? "hsl(var(--primary))" : "hsl(var(--destructive))"} />
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  {/* Resultados cards */}
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm">Resultados do Exercício</CardTitle>
@@ -656,6 +739,40 @@ export default function AmbienteAnalisePage() {
                           alert={totalProveitos > 0 && resultadoExercicio / totalProveitos < 0}
                         />
                       </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Radar: Rácios Financeiros */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Radar de Rácios Financeiros</CardTitle>
+                      <CardDescription>Visão geral dos principais rácios (valores normalizados 0–100).</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={320}>
+                        <RadarChart data={(() => {
+                          const liqCorr = totalPassCorrente > 0 ? totalAtivoCorrentes / totalPassCorrente : 0;
+                          const liqGeral = totalPassivo > 0 ? totalActivo / totalPassivo : 0;
+                          const roe = totalCapProprio !== 0 ? (resultadoExercicio / totalCapProprio) : 0;
+                          const roa = totalActivo !== 0 ? (resultadoExercicio / totalActivo) : 0;
+                          const autoFin = totalActivo !== 0 ? totalCapProprio / totalActivo : 0;
+                          const solvab = totalPassivo !== 0 ? totalCapProprio / totalPassivo : 0;
+                          // Normalize to 0-100 scale
+                          return [
+                            { subject: "Liq. Corrente", value: Math.min(liqCorr * 50, 100), full: 100 },
+                            { subject: "Liq. Geral", value: Math.min(liqGeral * 50, 100), full: 100 },
+                            { subject: "ROE", value: Math.min(Math.max(roe * 500 + 50, 0), 100), full: 100 },
+                            { subject: "ROA", value: Math.min(Math.max(roa * 1000 + 50, 0), 100), full: 100 },
+                            { subject: "Aut. Financeira", value: Math.min(autoFin * 100, 100), full: 100 },
+                            { subject: "Solvabilidade", value: Math.min(solvab * 50, 100), full: 100 },
+                          ];
+                        })()}>
+                          <PolarGrid className="stroke-muted" />
+                          <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11 }} />
+                          <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
+                          <Radar name="Rácios" dataKey="value" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.25} strokeWidth={2} />
+                        </RadarChart>
+                      </ResponsiveContainer>
                     </CardContent>
                   </Card>
 
