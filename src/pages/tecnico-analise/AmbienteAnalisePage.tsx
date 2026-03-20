@@ -172,6 +172,46 @@ export default function AmbienteAnalisePage() {
     
     setBalancete(allTb);
     if (allFi) setIndicators(allFi as unknown as Record<string, number>);
+
+    // Load historical data (up to 3 prior years)
+    const priorYears = [year - 1, year - 2, year - 3];
+    const historical: { year: number; totals: Record<string, number> }[] = [];
+
+    for (const py of priorYears) {
+      const pyPortalId = `${entityId}-${py}`;
+      const { data: pyFy } = await supabase.from("fiscal_years").select("id").eq("entity_id", entityId).eq("year", py).limit(1);
+      const pyFyId = pyFy?.[0]?.id;
+      const pyIds = pyFyId ? [pyFyId, pyPortalId] : [pyPortalId];
+      const pyUnique = [...new Set(pyIds)];
+
+      let pyTb: { account_code: string; balance: number }[] = [];
+      for (const fid of pyUnique) {
+        if (pyTb.length === 0) {
+          const { data: tb } = await supabase.from("trial_balance").select("account_code, balance").eq("entity_id", entityId).eq("fiscal_year_id", fid);
+          if (tb && tb.length > 0) pyTb = tb;
+        }
+      }
+
+      if (pyTb.length > 0) {
+        const cc3 = mapBalanceteToCC3(pyTb);
+        const tANC = sumEditable(activoNaoCorrente, cc3.ativNaoCorr);
+        const tAC = sumEditable(activoCorrentes, cc3.ativCorr);
+        const tCP = sumEditable(capitalProprioLines, cc3.capProprio);
+        const tPNC = sumEditable(passivoNaoCorrenteLines, cc3.passNaoCorr);
+        const tPC = sumEditable(passivoCorrenteLines, cc3.passCorr);
+        const tProv = sumEditable(proveitosLines, cc3.proveitos);
+        const tCust = sumEditable(custosLines, cc3.custos);
+        historical.push({
+          year: py,
+          totals: {
+            activo: tANC + tAC, ativoNC: tANC, ativoC: tAC,
+            capProprio: tCP, passivoNC: tPNC, passivoC: tPC, passivo: tPNC + tPC,
+            proveitos: tProv, custos: tCust, resultado: tProv - tCust,
+          },
+        });
+      }
+    }
+    setHistoricalData(historical);
     setLoadingBal(false);
   }
 
