@@ -140,14 +140,31 @@ export default function AmbienteAnalisePage() {
 
   async function loadFinancialData(entityId: string, year: number) {
     setLoadingBal(true);
+    // Try fiscal_years table first, then fallback to portal format "${entityId}-${year}"
     const { data: fyData } = await supabase.from("fiscal_years").select("id").eq("entity_id", entityId).eq("year", year).limit(1);
     const fyId = fyData?.[0]?.id;
-    if (fyId) {
-      const { data: tb } = await supabase.from("trial_balance").select("*").eq("entity_id", entityId).eq("fiscal_year_id", fyId).order("account_code");
-      setBalancete((tb as BalanceteLine[]) || []);
-      const { data: fi } = await supabase.from("financial_indicators").select("*").eq("entity_id", entityId).eq("fiscal_year_id", fyId).limit(1);
-      if (fi?.[0]) setIndicators(fi[0] as unknown as Record<string, number>);
+    const portalFyId = `${entityId}-${year}`;
+    
+    // Try both fiscal_year_id formats
+    const fyIds = fyId ? [fyId, portalFyId] : [portalFyId];
+    const uniqueFyIds = [...new Set(fyIds)];
+    
+    let allTb: BalanceteLine[] = [];
+    let allFi: any = null;
+    
+    for (const fid of uniqueFyIds) {
+      if (allTb.length === 0) {
+        const { data: tb } = await supabase.from("trial_balance").select("*").eq("entity_id", entityId).eq("fiscal_year_id", fid).order("account_code");
+        if (tb && tb.length > 0) allTb = tb as BalanceteLine[];
+      }
+      if (!allFi) {
+        const { data: fi } = await supabase.from("financial_indicators").select("*").eq("entity_id", entityId).eq("fiscal_year_id", fid).limit(1);
+        if (fi?.[0]) allFi = fi[0];
+      }
     }
+    
+    setBalancete(allTb);
+    if (allFi) setIndicators(allFi as unknown as Record<string, number>);
     setLoadingBal(false);
   }
 
