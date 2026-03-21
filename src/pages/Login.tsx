@@ -136,10 +136,17 @@ export default function Login() {
   const [showLoginPw, setShowLoginPw] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [showDemoUsers, setShowDemoUsers] = useState(true);
+  const [selectedEntityId, setSelectedEntityId] = useState("");
+  const { entities, loading: loadingEntities } = useEntities();
+
+  const isEntidadeLogin = loginEmail === "entidade@demo.tca.ao";
 
   const handleDemoFill = (demo: DemoUser) => {
     setLoginEmail(demo.email);
     setLoginPassword(demo.password);
+    if (demo.email !== "entidade@demo.tca.ao") {
+      setSelectedEntityId("");
+    }
     toast.info(`Credenciais preenchidas: ${demo.label}`);
   };
 
