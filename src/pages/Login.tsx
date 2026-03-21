@@ -153,8 +153,15 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginEmail || !loginPassword) return;
+    if (isEntidadeLogin && !selectedEntityId) {
+      toast.error("Seleccione a entidade que pretende representar.");
+      return;
+    }
     setLoginLoading(true);
     try {
+      if (isEntidadeLogin && selectedEntityId) {
+        localStorage.setItem("portal_entity_id", selectedEntityId);
+      }
       await login(loginEmail, loginPassword);
       toast.success("Autenticado com sucesso!");
     } catch (err: any) {
