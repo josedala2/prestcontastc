@@ -11,8 +11,7 @@ import {
   X,
   LogOut,
   Building2,
-  ChevronDown,
-  
+
   Bell,
   CheckCircle,
   XCircle,
@@ -23,7 +22,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { useSubmissions } from "@/contexts/SubmissionContext";
-import { useEntities } from "@/hooks/useEntities";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,8 +63,7 @@ export function PortalLayout({ children }: PortalLayoutProps) {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pageTitle = routeTitles[location.pathname] || "Portal";
-  const { entity, setEntityId } = usePortalEntity();
-  const { entities: allEntities } = useEntities();
+  const { entity } = usePortalEntity();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useSubmissions();
   const { logout } = useAuth();
   const entityNotifications = notifications.filter((n) => n.entityId === entity.id);
@@ -86,35 +84,12 @@ export function PortalLayout({ children }: PortalLayoutProps) {
           <span className="text-[12px] text-header-foreground/80 hidden sm:inline">Portal da Entidade</span>
         </div>
         <div className="flex items-center gap-3">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 px-3 py-1 rounded bg-header-foreground/10 hover:bg-header-foreground/20 transition-colors">
-                <Building2 className="h-3.5 w-3.5 text-header-foreground/70" />
-                <span className="text-[11px] text-header-foreground/90 font-medium max-w-[200px] truncate">
-                  {shortName}
-                </span>
-                <ChevronDown className="h-3 w-3 text-header-foreground/60" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 max-h-[400px] overflow-auto">
-              {allEntities.map((e) => {
-                const eName = e.name.split(" - ")[1] || e.name;
-                return (
-                  <DropdownMenuItem
-                    key={e.id}
-                    onClick={() => setEntityId(e.id)}
-                    className={cn(
-                      "flex flex-col items-start gap-0.5 py-2",
-                      e.id === entity.id && "bg-primary/10"
-                    )}
-                  >
-                    <span className="text-sm font-medium">{eName}</span>
-                    <span className="text-[10px] text-muted-foreground">NIF: {e.nif} · {e.provincia}</span>
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-2 px-3 py-1 rounded bg-header-foreground/10">
+            <Building2 className="h-3.5 w-3.5 text-header-foreground/70" />
+            <span className="text-[11px] text-header-foreground/90 font-medium max-w-[200px] truncate">
+              {shortName}
+            </span>
+          </div>
           {/* Notification Bell */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
