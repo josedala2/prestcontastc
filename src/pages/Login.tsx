@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Mail, Eye, EyeOff, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff, Users, ChevronDown, ChevronUp, Building2 } from "lucide-react";
 import { useAuth, roleDefaultRoute } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useEntities } from "@/hooks/useEntities";
 
 interface DemoUser {
   email: string;
@@ -134,18 +136,32 @@ export default function Login() {
   const [showLoginPw, setShowLoginPw] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [showDemoUsers, setShowDemoUsers] = useState(true);
+  const [selectedEntityId, setSelectedEntityId] = useState("");
+  const { entities, loading: loadingEntities } = useEntities();
+
+  const isEntidadeLogin = loginEmail === "entidade@demo.tca.ao";
 
   const handleDemoFill = (demo: DemoUser) => {
     setLoginEmail(demo.email);
     setLoginPassword(demo.password);
+    if (demo.email !== "entidade@demo.tca.ao") {
+      setSelectedEntityId("");
+    }
     toast.info(`Credenciais preenchidas: ${demo.label}`);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginEmail || !loginPassword) return;
+    if (isEntidadeLogin && !selectedEntityId) {
+      toast.error("Seleccione a entidade que pretende representar.");
+      return;
+    }
     setLoginLoading(true);
     try {
+      if (isEntidadeLogin && selectedEntityId) {
+        localStorage.setItem("portal_entity_id", selectedEntityId);
+      }
       await login(loginEmail, loginPassword);
       toast.success("Autenticado com sucesso!");
     } catch (err: any) {
@@ -233,7 +249,29 @@ export default function Login() {
                 </button>
               </div>
             </div>
-            <Button type="submit" className="w-full gap-2" disabled={loginLoading}>
+
+            {isEntidadeLogin && (
+              <div>
+                <Label htmlFor="entity-select" className="text-xs">Entidade que representa</Label>
+                <div className="relative mt-1">
+                  <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                  <Select value={selectedEntityId} onValueChange={setSelectedEntityId}>
+                    <SelectTrigger className="pl-10">
+                      <SelectValue placeholder={loadingEntities ? "A carregar entidades..." : "Seleccione a entidade"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {entities.map((ent) => (
+                        <SelectItem key={ent.id} value={ent.id}>
+                          {ent.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
+            <Button type="submit" className="w-full gap-2" disabled={loginLoading || (isEntidadeLogin && !selectedEntityId)}>
               {loginLoading ? "A autenticar..." : "Entrar no Sistema"}
             </Button>
           </form>
