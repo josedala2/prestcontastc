@@ -11,8 +11,7 @@ import {
   X,
   LogOut,
   Building2,
-  ChevronDown,
-  
+
   Bell,
   CheckCircle,
   XCircle,
