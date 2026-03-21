@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Mail, Eye, EyeOff, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff, Users, ChevronDown, ChevronUp, Building2 } from "lucide-react";
 import { useAuth, roleDefaultRoute } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useEntities } from "@/hooks/useEntities";
 
 interface DemoUser {
   email: string;
