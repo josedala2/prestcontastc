@@ -249,7 +249,29 @@ export default function Login() {
                 </button>
               </div>
             </div>
-            <Button type="submit" className="w-full gap-2" disabled={loginLoading}>
+
+            {isEntidadeLogin && (
+              <div>
+                <Label htmlFor="entity-select" className="text-xs">Entidade que representa</Label>
+                <div className="relative mt-1">
+                  <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                  <Select value={selectedEntityId} onValueChange={setSelectedEntityId}>
+                    <SelectTrigger className="pl-10">
+                      <SelectValue placeholder={loadingEntities ? "A carregar entidades..." : "Seleccione a entidade"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {entities.map((ent) => (
+                        <SelectItem key={ent.id} value={ent.id}>
+                          {ent.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
+            <Button type="submit" className="w-full gap-2" disabled={loginLoading || (isEntidadeLogin && !selectedEntityId)}>
               {loginLoading ? "A autenticar..." : "Entrar no Sistema"}
             </Button>
           </form>

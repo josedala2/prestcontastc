@@ -22,7 +22,8 @@ const defaultEntity: Entity = {
 };
 
 export function PortalEntityProvider({ children }: { children: ReactNode }) {
-  const [entityId, setEntityId] = useState("1");
+  const savedEntityId = typeof window !== "undefined" ? localStorage.getItem("portal_entity_id") || "1" : "1";
+  const [entityId, setEntityId] = useState(savedEntityId);
   const [userRole, setUserRole] = useState<PortalUserRole>("entidade");
   const { entities, loading: loadingEntities } = useEntities();
 
