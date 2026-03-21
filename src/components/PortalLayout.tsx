@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { useSubmissions } from "@/contexts/SubmissionContext";
-import { useEntities } from "@/hooks/useEntities";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
