@@ -323,7 +323,7 @@ const SubmissaoDetalhe = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {submissionChecklist.map((item) => {
+                  {dynamicChecklist.map((item) => {
                     const isChecked = !!checkedDocs[item.id];
                     const subDoc = findSubmissionDoc(item.id);
                     return (
