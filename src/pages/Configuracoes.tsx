@@ -9,8 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Settings,
   Save,
@@ -25,6 +26,8 @@ import {
   LayoutGrid,
   GitBranch,
   UserPlus,
+  DatabaseZap,
+  Loader2,
 } from "lucide-react";
 import { MenuPerfilMatrix } from "@/components/configuracoes/MenuPerfilMatrix";
 import { WorkflowDesigner } from "@/components/configuracoes/WorkflowDesigner";
