@@ -15,7 +15,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { submissionChecklist } from "@/lib/dataUtils";
+import { getDocumentRequirements } from "@/components/portal/EntidadeDocumentosTab";
+import { TIPOLOGIA_RESOLUCAO, RESOLUCAO_LABELS } from "@/types";
 import { useEntities } from "@/hooks/useEntities";
 import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
 import { useSubmissions } from "@/contexts/SubmissionContext";
@@ -116,34 +117,27 @@ const SubmissaoDetalhe = () => {
     loadDocs();
   }, [entity.id, fiscalYearId]);
 
-  const requiredItems = submissionChecklist.filter((c) => c.required);
+  // Dynamic checklist based on entity tipologia
+  const resolucao = TIPOLOGIA_RESOLUCAO[entity.tipologia];
+  const resolucaoLabel = RESOLUCAO_LABELS[resolucao]?.label || "Resolução 1/17";
+  const docRequirements = getDocumentRequirements(entity.tipologia);
+  const dynamicChecklist = docRequirements.map((doc) => ({
+    id: doc.id,
+    label: doc.label,
+    required: doc.required,
+    category: doc.id,
+  }));
+
+  const requiredItems = dynamicChecklist.filter((c) => c.required);
   const allRequiredChecked = requiredItems.every((item) => checkedDocs[item.id]);
-  const checkedCount = submissionChecklist.filter((item) => checkedDocs[item.id]).length;
+  const checkedCount = dynamicChecklist.filter((item) => checkedDocs[item.id]).length;
 
   const handleToggleDoc = (docId: string) => {
     setCheckedDocs((prev) => ({ ...prev, [docId]: !prev[docId] }));
   };
 
-  // Map checklist IDs to submission doc_ids from EntidadeDocumentosTab
-  const DOC_CATEGORY_MAP: Record<string, string[]> = {
-    c1: ["relatorio_gestao"],
-    c2: ["balanco"],
-    c3: ["dem_resultados"],
-    c4: ["fluxo_caixa"],
-    c5: ["balancete_analitico"],
-    c6: ["parecer_fiscal"],
-    c7: ["parecer_auditor"],
-    c8: ["modelos"],
-    c9: ["comprov_impostos"],
-    c10: ["comprov_seguranca"],
-    c11: ["inventario"],
-    c12: ["extractos", "folhas_caixa"],
-    c13: ["reconciliacoes", "ordens_saque"],
-  };
-
   const findSubmissionDoc = (checklistId: string): SubmissionDoc | undefined => {
-    const docIds = DOC_CATEGORY_MAP[checklistId] || [];
-    return submissionDocs.find(d => docIds.includes(d.doc_id));
+    return submissionDocs.find(d => d.doc_id === checklistId);
   };
 
   const handleOpenDocPreview = async (label: string, category: string, checklistId: string) => {
@@ -197,7 +191,7 @@ const SubmissaoDetalhe = () => {
     submittedAt: now.toISOString(),
     totalDebito: 0,
     totalCredito: 0,
-    documentosVerificados: submissionChecklist.map((item) => ({
+    documentosVerificados: dynamicChecklist.map((item) => ({
       label: item.label,
       required: item.required,
       checked: !!checkedDocs[item.id],
@@ -300,15 +294,15 @@ const SubmissaoDetalhe = () => {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2">
                   <FileText className="h-4 w-4 text-primary" />
-                  Verificação Documental (Resolução 1/17)
+                  Verificação Documental ({resolucaoLabel})
                 </CardTitle>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-[10px] gap-1">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    {submissionChecklist.filter(i => findSubmissionDoc(i.id)).length}/{submissionChecklist.length} carregados
+                    {dynamicChecklist.filter(i => findSubmissionDoc(i.id)).length}/{dynamicChecklist.length} carregados
                   </Badge>
                   <Badge variant={allRequiredChecked ? "default" : "secondary"}>
-                    {checkedCount}/{submissionChecklist.length} verificados
+                    {checkedCount}/{dynamicChecklist.length} verificados
                   </Badge>
                 </div>
               </div>
@@ -329,7 +323,7 @@ const SubmissaoDetalhe = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {submissionChecklist.map((item) => {
+                  {dynamicChecklist.map((item) => {
                     const isChecked = !!checkedDocs[item.id];
                     const subDoc = findSubmissionDoc(item.id);
                     return (
@@ -727,7 +721,7 @@ const SubmissaoDetalhe = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Documentos verificados</span>
-                    <span className="font-medium text-foreground">{checkedCount}/{submissionChecklist.length}</span>
+                    <span className="font-medium text-foreground">{checkedCount}/{dynamicChecklist.length}</span>
                   </div>
                 </div>
               </div>
