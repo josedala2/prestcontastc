@@ -302,7 +302,7 @@ const SubmissaoDetalhe = () => {
                     {dynamicChecklist.filter(i => findSubmissionDoc(i.id)).length}/{dynamicChecklist.length} carregados
                   </Badge>
                   <Badge variant={allRequiredChecked ? "default" : "secondary"}>
-                    {checkedCount}/{submissionChecklist.length} verificados
+                    {checkedCount}/{dynamicChecklist.length} verificados
                   </Badge>
                 </div>
               </div>
