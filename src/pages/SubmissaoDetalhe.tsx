@@ -117,34 +117,27 @@ const SubmissaoDetalhe = () => {
     loadDocs();
   }, [entity.id, fiscalYearId]);
 
-  const requiredItems = submissionChecklist.filter((c) => c.required);
+  // Dynamic checklist based on entity tipologia
+  const resolucao = TIPOLOGIA_RESOLUCAO[entity.tipologia];
+  const resolucaoLabel = RESOLUCAO_LABELS[resolucao]?.label || "Resolução 1/17";
+  const docRequirements = getDocumentRequirements(entity.tipologia);
+  const dynamicChecklist = docRequirements.map((doc) => ({
+    id: doc.id,
+    label: doc.label,
+    required: doc.required,
+    category: doc.id,
+  }));
+
+  const requiredItems = dynamicChecklist.filter((c) => c.required);
   const allRequiredChecked = requiredItems.every((item) => checkedDocs[item.id]);
-  const checkedCount = submissionChecklist.filter((item) => checkedDocs[item.id]).length;
+  const checkedCount = dynamicChecklist.filter((item) => checkedDocs[item.id]).length;
 
   const handleToggleDoc = (docId: string) => {
     setCheckedDocs((prev) => ({ ...prev, [docId]: !prev[docId] }));
   };
 
-  // Map checklist IDs to submission doc_ids from EntidadeDocumentosTab
-  const DOC_CATEGORY_MAP: Record<string, string[]> = {
-    c1: ["relatorio_gestao"],
-    c2: ["balanco"],
-    c3: ["dem_resultados"],
-    c4: ["fluxo_caixa"],
-    c5: ["balancete_analitico"],
-    c6: ["parecer_fiscal"],
-    c7: ["parecer_auditor"],
-    c8: ["modelos"],
-    c9: ["comprov_impostos"],
-    c10: ["comprov_seguranca"],
-    c11: ["inventario"],
-    c12: ["extractos", "folhas_caixa"],
-    c13: ["reconciliacoes", "ordens_saque"],
-  };
-
   const findSubmissionDoc = (checklistId: string): SubmissionDoc | undefined => {
-    const docIds = DOC_CATEGORY_MAP[checklistId] || [];
-    return submissionDocs.find(d => docIds.includes(d.doc_id));
+    return submissionDocs.find(d => d.doc_id === checklistId);
   };
 
   const handleOpenDocPreview = async (label: string, category: string, checklistId: string) => {
