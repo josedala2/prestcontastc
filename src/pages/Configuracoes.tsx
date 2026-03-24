@@ -382,6 +382,19 @@ const Configuracoes = () => {
                 ))}
               </div>
             </div>
+
+
+            <div className="bg-card rounded-lg border border-destructive/30 card-shadow p-6 animate-fade-in lg:col-span-2">
+              <h3 className="text-sm font-semibold text-destructive flex items-center gap-2 mb-2">
+                <DatabaseZap className="h-4 w-4" /> Limpeza de Dados
+              </h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                Remove todos os exercícios fiscais, submissões, notificações, balancetes, indicadores financeiros e actas de recepção. Esta acção é irreversível.
+              </p>
+              <Button variant="destructive" size="sm" className="gap-1.5" onClick={() => setCleanupDialogOpen(true)}>
+                <Trash2 className="h-3.5 w-3.5" /> Limpar Todos os Exercícios
+              </Button>
+            </div>
           </div>
         </TabsContent>
       </Tabs>
