@@ -15,7 +15,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { submissionChecklist } from "@/lib/dataUtils";
+import { getDocumentRequirements } from "@/components/portal/EntidadeDocumentosTab";
+import { TIPOLOGIA_RESOLUCAO, RESOLUCAO_LABELS } from "@/types";
 import { useEntities } from "@/hooks/useEntities";
 import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
 import { useSubmissions } from "@/contexts/SubmissionContext";
