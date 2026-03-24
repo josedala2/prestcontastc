@@ -299,7 +299,7 @@ const SubmissaoDetalhe = () => {
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-[10px] gap-1">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    {submissionChecklist.filter(i => findSubmissionDoc(i.id)).length}/{submissionChecklist.length} carregados
+                    {dynamicChecklist.filter(i => findSubmissionDoc(i.id)).length}/{dynamicChecklist.length} carregados
                   </Badge>
                   <Badge variant={allRequiredChecked ? "default" : "secondary"}>
                     {checkedCount}/{submissionChecklist.length} verificados
