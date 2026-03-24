@@ -9,8 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Settings,
   Save,
@@ -25,6 +26,8 @@ import {
   LayoutGrid,
   GitBranch,
   UserPlus,
+  DatabaseZap,
+  Loader2,
 } from "lucide-react";
 import { MenuPerfilMatrix } from "@/components/configuracoes/MenuPerfilMatrix";
 import { WorkflowDesigner } from "@/components/configuracoes/WorkflowDesigner";
@@ -72,6 +75,36 @@ const Configuracoes = () => {
   const [editingRule, setEditingRule] = useState<ValidationRule | null>(null);
   const [ruleDialogOpen, setRuleDialogOpen] = useState(false);
   const [ruleForm, setRuleForm] = useState<Partial<ValidationRule>>({});
+  const [cleanupDialogOpen, setCleanupDialogOpen] = useState(false);
+  const [cleaningUp, setCleaningUp] = useState(false);
+
+  const handleLimparExercicios = async () => {
+    setCleaningUp(true);
+    try {
+      // Delete in order: notifications, submissions, trial_balance, financial_indicators, fiscal_years
+      const { error: e1 } = await supabase.from("submission_notifications").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e2 } = await supabase.from("submissions").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e3 } = await supabase.from("trial_balance").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e4 } = await supabase.from("financial_indicators").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e5 } = await supabase.from("submission_documents").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e6 } = await supabase.from("actas_recepcao").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e7 } = await supabase.from("fiscal_years").delete().neq("id", "placeholder");
+
+      const errors = [e1, e2, e3, e4, e5, e6, e7].filter(Boolean);
+      if (errors.length > 0) {
+        console.error("Erros ao limpar:", errors);
+        toast.error(`Limpeza parcial — ${errors.length} erro(s). Verifique a consola.`);
+      } else {
+        toast.success("Todos os exercícios, submissões e dados associados foram eliminados.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao limpar exercícios.");
+    } finally {
+      setCleaningUp(false);
+      setCleanupDialogOpen(false);
+    }
+  };
 
   const openNewRule = () => {
     setEditingRule(null);
@@ -349,6 +382,19 @@ const Configuracoes = () => {
                 ))}
               </div>
             </div>
+
+
+            <div className="bg-card rounded-lg border border-destructive/30 card-shadow p-6 animate-fade-in lg:col-span-2">
+              <h3 className="text-sm font-semibold text-destructive flex items-center gap-2 mb-2">
+                <DatabaseZap className="h-4 w-4" /> Limpeza de Dados
+              </h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                Remove todos os exercícios fiscais, submissões, notificações, balancetes, indicadores financeiros e actas de recepção. Esta acção é irreversível.
+              </p>
+              <Button variant="destructive" size="sm" className="gap-1.5" onClick={() => setCleanupDialogOpen(true)}>
+                <Trash2 className="h-3.5 w-3.5" /> Limpar Todos os Exercícios
+              </Button>
+            </div>
           </div>
         </TabsContent>
       </Tabs>
@@ -410,6 +456,27 @@ const Configuracoes = () => {
               <Button onClick={handleSaveRule}>Guardar Regra</Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cleanup Confirmation Dialog */}
+      <Dialog open={cleanupDialogOpen} onOpenChange={setCleanupDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-destructive flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" /> Confirmar Limpeza Total
+            </DialogTitle>
+            <DialogDescription>
+              Esta acção vai eliminar <strong>todos</strong> os exercícios fiscais, submissões, notificações, balancetes, indicadores financeiros, documentos de submissão e actas de recepção. Esta operação é <strong>irreversível</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCleanupDialogOpen(false)} disabled={cleaningUp}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleLimparExercicios} disabled={cleaningUp} className="gap-1.5">
+              {cleaningUp ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              {cleaningUp ? "A limpar..." : "Confirmar Eliminação"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </AppLayout>
