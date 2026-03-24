@@ -212,6 +212,39 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
   }, [submissions]);
 
   const submit = useCallback(async (entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string, uploadedDocIds?: string[]) => {
+    const year = fiscalYearId.split("-").pop() || fiscalYearId;
+    const yearNum = parseInt(year, 10);
+
+    // Ensure fiscal_year record exists before allowing submission
+    const { data: existingFY } = await supabase
+      .from("fiscal_years")
+      .select("id")
+      .eq("id", fiscalYearId)
+      .maybeSingle();
+
+    if (!existingFY) {
+      // Auto-create the fiscal year record
+      const { error: fyError } = await supabase.from("fiscal_years").insert({
+        id: fiscalYearId,
+        entity_id: entityId,
+        year: isNaN(yearNum) ? new Date().getFullYear() : yearNum,
+        status: "submetido",
+        deadline: `${(isNaN(yearNum) ? new Date().getFullYear() : yearNum) + 1}-06-30`,
+        completude: 0,
+        total_receita: 0,
+        total_despesa: 0,
+      });
+      if (fyError) {
+        console.error("Erro ao criar exercício fiscal:", fyError);
+      }
+    } else {
+      // Update existing fiscal year status to submetido
+      await supabase
+        .from("fiscal_years")
+        .update({ status: "submetido", submitted_at: new Date().toISOString() })
+        .eq("id", fiscalYearId);
+    }
+
     const entry: SubmissionEntry = {
       entityId,
       fiscalYearId,
@@ -230,7 +263,6 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     // Persist
     await upsertSubmission(entry);
 
-    const year = fiscalYearId.split("-").pop() || fiscalYearId;
     sendNotification(entityId, fiscalYearId, "submissao",
       `Nova prestação de contas submetida — Exercício ${year}`,
       `A entidade ${entityName || entityId} submeteu a prestação de contas do exercício ${year}. Aguarda recepção e conferência documental pela Secretaria.`,
