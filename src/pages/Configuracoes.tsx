@@ -458,6 +458,27 @@ const Configuracoes = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Cleanup Confirmation Dialog */}
+      <Dialog open={cleanupDialogOpen} onOpenChange={setCleanupDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-destructive flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" /> Confirmar Limpeza Total
+            </DialogTitle>
+            <DialogDescription>
+              Esta acção vai eliminar <strong>todos</strong> os exercícios fiscais, submissões, notificações, balancetes, indicadores financeiros, documentos de submissão e actas de recepção. Esta operação é <strong>irreversível</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCleanupDialogOpen(false)} disabled={cleaningUp}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleLimparExercicios} disabled={cleaningUp} className="gap-1.5">
+              {cleaningUp ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              {cleaningUp ? "A limpar..." : "Confirmar Eliminação"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };
