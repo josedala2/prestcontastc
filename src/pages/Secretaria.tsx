@@ -17,10 +17,11 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { submissionChecklist, formatKz } from "@/lib/dataUtils";
+import { formatKz } from "@/lib/dataUtils";
 import { useFiscalYears } from "@/hooks/useFiscalYears";
 import { useEntities } from "@/hooks/useEntities";
 import { getDocumentRequirements } from "@/components/portal/EntidadeDocumentosTab";
+import { RESOLUCAO_LABELS, TIPOLOGIA_RESOLUCAO } from "@/types";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
@@ -175,10 +176,22 @@ const Secretaria = () => {
 
   const selectedFy = submetidos.find((fy) => fy.id === selectedId);
   const selectedEntity = selectedFy ? allEntities.find((e) => e.id === selectedFy.entityId) : null;
+  const checklist = useMemo(() => {
+    if (!selectedEntity) return [];
+    return getDocumentRequirements(selectedEntity.tipologia).map((doc) => ({
+      id: doc.id,
+      label: doc.label,
+      required: doc.required,
+      category: doc.id,
+    }));
+  }, [selectedEntity]);
+  const resolucaoLabel = selectedEntity
+    ? RESOLUCAO_LABELS[TIPOLOGIA_RESOLUCAO[selectedEntity.tipologia]]?.label || "Resolução 1/17"
+    : "Resolução 1/17";
 
-  const requiredItems = submissionChecklist.filter((c) => c.required);
+  const requiredItems = checklist.filter((c) => c.required);
   const allRequiredChecked = requiredItems.every((item) => checkedDocs[item.id]);
-  const checkedCount = submissionChecklist.filter((item) => checkedDocs[item.id]).length;
+  const checkedCount = checklist.filter((item) => checkedDocs[item.id]).length;
 
   const handleSelectExercicio = (fyId: string) => {
     setSelectedId(fyId);
@@ -208,7 +221,7 @@ const Secretaria = () => {
       submittedAt: selectedFy.submittedAt || "",
       totalDebito: selectedFy.totalDebito,
       totalCredito: selectedFy.totalCredito,
-      documentosVerificados: submissionChecklist.map((item) => ({
+      documentosVerificados: checklist.map((item) => ({
         label: item.label,
         required: item.required,
         checked: !!checkedDocs[item.id],
@@ -284,7 +297,7 @@ const Secretaria = () => {
     const fiscalYearId = `${selectedFy.entityId}-${selectedFy.year}`;
 
     // Build documentos em falta list
-    const docsEmFalta = submissionChecklist
+    const docsEmFalta = checklist
       .filter((item) => item.required && !checkedDocs[item.id])
       .map((item) => item.label);
 
@@ -302,7 +315,7 @@ const Secretaria = () => {
       submittedAt: selectedFy.submittedAt || "",
       motivoDevolucao: motivoRejeicao.trim(),
       documentosEmFalta: docsEmFalta,
-      documentosVerificados: submissionChecklist.map((item) => ({
+      documentosVerificados: checklist.map((item) => ({
         label: item.label,
         required: item.required,
         checked: !!checkedDocs[item.id],
@@ -438,20 +451,14 @@ const Secretaria = () => {
     const fromContext = getUploadedDocs(selectedFy.entityId, fiscalYearId);
     // Mock data entries: assume all docs uploaded
     if (fromContext.length === 0 && allFYs.some(f => f.id === selectedFy.id && f.status === "submetido")) {
-      return submissionChecklist.map(c => c.id);
+      return checklist.map(c => c.id);
     }
     return fromContext;
-  }, [selectedFy, getUploadedDocs, submittedDocs]);
+  }, [selectedFy, getUploadedDocs, submittedDocs, allFYs, checklist]);
 
   // Helper to get submitted doc info by checklist ID
   const getSubmittedDocByChecklistId = (checklistId: string): SubmittedDoc | undefined => {
-    // Direct match
-    const direct = submittedDocs.find(d => d.doc_id === checklistId);
-    if (direct) return direct;
-    // Via mapping
-    const mappedDocId = Object.entries(DOC_ID_MAP).find(([, cId]) => cId === checklistId)?.[0];
-    if (mappedDocId) return submittedDocs.find(d => d.doc_id === mappedDocId);
-    return undefined;
+    return submittedDocs.find((d) => d.doc_id === checklistId);
   };
 
   const handleViewDoc = async (doc: SubmittedDoc) => {
@@ -474,33 +481,9 @@ const Secretaria = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
   };
 
-  // Map EntidadeDocumentosTab doc IDs to submissionChecklist IDs
-  const DOC_ID_MAP: Record<string, string> = {
-    relatorio_gestao: "c1",
-    balanco: "c2",
-    dem_resultados: "c3",
-    fluxo_caixa: "c4",
-    balancete_analitico: "c5",
-    parecer_fiscal: "c6",
-    parecer_auditor: "c7",
-    modelos: "c8",
-    comprov_impostos: "c9",
-    comprov_seguranca: "c10",
-    inventario: "c11",
-    acta_apreciacao: "c12",
-    extractos: "c13",
-    reconciliacoes: "c14",
-    abates: "c15",
-    emolumentos: "c16",
-  };
-
   const isDocUploaded = (checklistId: string): boolean => {
-    // Direct match (mock data uses checklist IDs)
     if (selectedUploadedDocs.includes(checklistId)) return true;
-    // Match via mapping (portal uses doc IDs from EntidadeDocumentosTab)
-    return Object.entries(DOC_ID_MAP).some(
-      ([docId, cId]) => cId === checklistId && selectedUploadedDocs.includes(docId)
-    );
+    return submittedDocs.some((doc) => doc.doc_id === checklistId);
   };
 
   // ── Verificação Documental content (passed as children to tabs) ──
@@ -511,7 +494,7 @@ const Secretaria = () => {
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Verificação Documental (Resolução 1/17)
+              Verificação Documental ({resolucaoLabel})
             </CardTitle>
             <div className="flex items-center gap-2">
               <Button
@@ -524,7 +507,7 @@ const Secretaria = () => {
                 Visualizar PDF
               </Button>
               <Badge variant={allRequiredChecked ? "default" : "secondary"}>
-                {checkedCount}/{submissionChecklist.length} verificados
+                {checkedCount}/{checklist.length} verificados
               </Badge>
             </div>
           </div>
@@ -548,7 +531,7 @@ const Secretaria = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {submissionChecklist.map((item) => {
+              {checklist.map((item) => {
                 const isChecked = !!checkedDocs[item.id];
                 const uploaded = isDocUploaded(item.id);
                 const submittedDoc = getSubmittedDocByChecklistId(item.id);
@@ -1058,7 +1041,7 @@ const Secretaria = () => {
                     <div className="flex justify-between"><span className="text-muted-foreground">Entidade</span><span className="font-medium text-foreground">{selectedEntity.name}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">NIF</span><span className="font-medium text-foreground font-mono">{selectedEntity.nif}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Exercício</span><span className="font-medium text-foreground">{selectedFy.year}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Documentos verificados</span><span className="font-medium text-foreground">{checkedCount}/{submissionChecklist.length}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Documentos verificados</span><span className="font-medium text-foreground">{checkedCount}/{checklist.length}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Data de recepção</span><span className="font-medium text-foreground">{now.toLocaleDateString("pt-AO")}</span></div>
                   </div>
                 )}
@@ -1116,13 +1099,13 @@ const Secretaria = () => {
                   <div className="bg-muted/50 rounded-lg p-3 space-y-2 text-sm">
                     <div className="flex justify-between"><span className="text-muted-foreground">Entidade</span><span className="font-medium text-foreground">{selectedEntity.name}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Exercício</span><span className="font-medium text-foreground">{selectedFy.year}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Documentos verificados</span><span className="font-medium text-foreground">{checkedCount}/{submissionChecklist.length}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Documentos verificados</span><span className="font-medium text-foreground">{checkedCount}/{checklist.length}</span></div>
                   </div>
                 )}
 
                 {/* Documentos em falta */}
                 {(() => {
-                  const emFalta = submissionChecklist.filter((item) => item.required && !checkedDocs[item.id]);
+                  const emFalta = checklist.filter((item) => item.required && !checkedDocs[item.id]);
                   if (emFalta.length === 0) return null;
                   return (
                     <div className="space-y-2">
