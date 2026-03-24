@@ -75,6 +75,36 @@ const Configuracoes = () => {
   const [editingRule, setEditingRule] = useState<ValidationRule | null>(null);
   const [ruleDialogOpen, setRuleDialogOpen] = useState(false);
   const [ruleForm, setRuleForm] = useState<Partial<ValidationRule>>({});
+  const [cleanupDialogOpen, setCleanupDialogOpen] = useState(false);
+  const [cleaningUp, setCleaningUp] = useState(false);
+
+  const handleLimparExercicios = async () => {
+    setCleaningUp(true);
+    try {
+      // Delete in order: notifications, submissions, trial_balance, financial_indicators, fiscal_years
+      const { error: e1 } = await supabase.from("submission_notifications").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e2 } = await supabase.from("submissions").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e3 } = await supabase.from("trial_balance").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e4 } = await supabase.from("financial_indicators").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e5 } = await supabase.from("submission_documents").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e6 } = await supabase.from("actas_recepcao").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e7 } = await supabase.from("fiscal_years").delete().neq("id", "placeholder");
+
+      const errors = [e1, e2, e3, e4, e5, e6, e7].filter(Boolean);
+      if (errors.length > 0) {
+        console.error("Erros ao limpar:", errors);
+        toast.error(`Limpeza parcial — ${errors.length} erro(s). Verifique a consola.`);
+      } else {
+        toast.success("Todos os exercícios, submissões e dados associados foram eliminados.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao limpar exercícios.");
+    } finally {
+      setCleaningUp(false);
+      setCleanupDialogOpen(false);
+    }
+  };
 
   const openNewRule = () => {
     setEditingRule(null);
