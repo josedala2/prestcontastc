@@ -721,7 +721,7 @@ const SubmissaoDetalhe = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Documentos verificados</span>
-                    <span className="font-medium text-foreground">{checkedCount}/{submissionChecklist.length}</span>
+                    <span className="font-medium text-foreground">{checkedCount}/{dynamicChecklist.length}</span>
                   </div>
                 </div>
               </div>
