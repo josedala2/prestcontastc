@@ -294,7 +294,7 @@ const SubmissaoDetalhe = () => {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2">
                   <FileText className="h-4 w-4 text-primary" />
-                  Verificação Documental (Resolução 1/17)
+                  Verificação Documental ({resolucaoLabel})
                 </CardTitle>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-[10px] gap-1">
