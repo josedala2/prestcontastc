@@ -99,8 +99,10 @@ export default function ContadoriaTriagem() {
 
   const handleSelectProcesso = (p: Processo) => {
     setSelectedProcesso(p);
-    setDivisaoDestino("");
-    setObservacoes("");
+    // Auto-route based on categoria if routing rule exists
+    const routing = CATEGORIA_DIVISAO_ROUTING[p.categoria_entidade];
+    setDivisaoDestino(routing ? routing.divisao : "");
+    setObservacoes(routing ? `Encaminhamento obrigatório conforme ${routing.baseLegal}.` : "");
     fetchDocumentos(p.id);
   };
 
