@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, DIVISOES_ESTRUTURA } from "@/contexts/AuthContext";
 import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
+import { CATEGORIA_DIVISAO_ROUTING } from "@/types/workflow";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -98,8 +99,10 @@ export default function ContadoriaTriagem() {
 
   const handleSelectProcesso = (p: Processo) => {
     setSelectedProcesso(p);
-    setDivisaoDestino("");
-    setObservacoes("");
+    // Auto-route based on categoria if routing rule exists
+    const routing = CATEGORIA_DIVISAO_ROUTING[p.categoria_entidade];
+    setDivisaoDestino(routing ? routing.divisao : "");
+    setObservacoes(routing ? `Encaminhamento obrigatório conforme ${routing.baseLegal}.` : "");
     fetchDocumentos(p.id);
   };
 
@@ -292,6 +295,15 @@ export default function ContadoriaTriagem() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {CATEGORIA_DIVISAO_ROUTING[selectedProcesso.categoria_entidade] && (
+                <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
+                  <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-semibold">Encaminhamento obrigatório</p>
+                    <p>Processos de <strong>{selectedProcesso.categoria_entidade.replace("_", " ")}</strong> devem ser encaminhados à <strong>{DIVISOES_ESTRUTURA[CATEGORIA_DIVISAO_ROUTING[selectedProcesso.categoria_entidade].divisao]?.nome}</strong> conforme {CATEGORIA_DIVISAO_ROUTING[selectedProcesso.categoria_entidade].baseLegal}.</p>
+                  </div>
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-xs font-semibold">Divisão de Destino *</Label>

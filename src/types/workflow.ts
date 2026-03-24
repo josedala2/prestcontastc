@@ -262,6 +262,12 @@ export const CATEGORIAS_ENTIDADE = [
   },
 ];
 
+// Routing rules: which division handles each entity category
+export const CATEGORIA_DIVISAO_ROUTING: Record<string, { divisao: string; baseLegal: string }> = {
+  categoria_1: { divisao: "3ª Divisão", baseLegal: "Resolução n.º 2/16, de 2 de dezembro" },
+  // categoria_2, categoria_3, categoria_4 can be added here as rules are defined
+};
+
 export interface Processo {
   id: string;
   numero_processo: string;
