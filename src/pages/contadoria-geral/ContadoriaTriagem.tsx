@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, DIVISOES_ESTRUTURA } from "@/contexts/AuthContext";
 import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
+import { CATEGORIA_DIVISAO_ROUTING } from "@/types/workflow";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
