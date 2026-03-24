@@ -71,6 +71,8 @@ const Secretaria = () => {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [actasGeradas, setActasGeradas] = useState<string[]>([]);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [previewBeforeConfirm, setPreviewBeforeConfirm] = useState(false);
+  const [generatingPreview, setGeneratingPreview] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [motivoRejeicao, setMotivoRejeicao] = useState("");
   const [encaminhados, setEncaminhados] = useState<string[]>([]);
@@ -233,7 +235,23 @@ const Secretaria = () => {
     const data = buildActaData();
     if (!data) return;
     const dataUri = await exportActaRecepcaoPdf(data, true);
+    setPreviewBeforeConfirm(false);
     setPdfPreviewUrl(dataUri);
+  };
+
+  // New: generate preview from confirm dialog before finalising
+  const handleGeneratePreviewBeforeConfirm = async () => {
+    const data = buildActaData();
+    if (!data) return;
+    setGeneratingPreview(true);
+    try {
+      const dataUri = await exportActaRecepcaoPdf(data, true);
+      setConfirmDialogOpen(false);
+      setPreviewBeforeConfirm(true);
+      setPdfPreviewUrl(dataUri);
+    } finally {
+      setGeneratingPreview(false);
+    }
   };
 
   const handleConfirmRecepcao = async () => {
@@ -1051,9 +1069,9 @@ const Secretaria = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmRecepcao} className="gap-2">
-              <CheckCircle className="h-4 w-4" />
-              Confirmar e Autuar
+            <AlertDialogAction onClick={handleGeneratePreviewBeforeConfirm} disabled={generatingPreview} className="gap-2">
+              {generatingPreview ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
+              {generatingPreview ? "A gerar..." : "Gerar e Verificar Acta"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1063,14 +1081,17 @@ const Secretaria = () => {
       <Dialog
         open={!!pdfPreviewUrl}
         onOpenChange={(open) => {
-          if (!open) setPdfPreviewUrl(null);
+          if (!open) {
+            setPdfPreviewUrl(null);
+            setPreviewBeforeConfirm(false);
+          }
         }}
       >
         <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 gap-0">
           <DialogHeader className="px-6 py-4 border-b shrink-0">
             <DialogTitle className="flex items-center gap-2 text-base">
               <Eye className="h-4 w-4 text-primary" />
-              Pré-visualização — Acta de Recepção (Rascunho)
+              {previewBeforeConfirm ? "Verificar Acta de Recepção antes de Confirmar" : "Pré-visualização — Acta de Recepção (Rascunho)"}
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 min-h-0">
@@ -1082,6 +1103,37 @@ const Secretaria = () => {
               />
             )}
           </div>
+          {previewBeforeConfirm && (
+            <div className="px-6 py-4 border-t flex items-center justify-between bg-muted/30">
+              <p className="text-xs text-muted-foreground">Verifique o conteúdo da acta. Se estiver correcta, confirme. Caso contrário, volte para editar o checklist.</p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => {
+                    setPdfPreviewUrl(null);
+                    setPreviewBeforeConfirm(false);
+                  }}
+                >
+                  <Undo2 className="h-3.5 w-3.5" />
+                  Voltar e Editar
+                </Button>
+                <Button
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={async () => {
+                    setPdfPreviewUrl(null);
+                    setPreviewBeforeConfirm(false);
+                    await handleConfirmRecepcao();
+                  }}
+                >
+                  <CheckCircle className="h-3.5 w-3.5" />
+                  Confirmar e Autuar
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
