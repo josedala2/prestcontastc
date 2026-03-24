@@ -50,6 +50,7 @@ const DEMO_GROUPS: DemoGroup[] = [
     users: [
       { email: "chefe.divisao@demo.tca.ao", password: "demo123456", label: "Chefe de Divisão", shortLabel: "Ch. Divisão", divisao: "3ª Divisão" },
       { email: "chefe.seccao@demo.tca.ao", password: "demo123456", label: "Chefe de Secção", shortLabel: "Ch. Secção", divisao: "3ª Divisão" },
+      { email: "tecnico.analise3@demo.tca.ao", password: "demo123456", label: "Técnico de Análise", shortLabel: "Téc. Análise", divisao: "3ª Divisão" },
     ],
   },
   {
@@ -57,6 +58,7 @@ const DEMO_GROUPS: DemoGroup[] = [
     users: [
       { email: "chefe.divisao4@demo.tca.ao", password: "demo123456", label: "Chefe de Divisão", shortLabel: "Ch. Divisão", divisao: "4ª Divisão" },
       { email: "chefe.seccao4@demo.tca.ao", password: "demo123456", label: "Chefe de Secção", shortLabel: "Ch. Secção", divisao: "4ª Divisão" },
+      { email: "tecnico.analise4@demo.tca.ao", password: "demo123456", label: "Técnico de Análise", shortLabel: "Téc. Análise", divisao: "4ª Divisão" },
     ],
   },
   {
@@ -72,6 +74,7 @@ const DEMO_GROUPS: DemoGroup[] = [
     users: [
       { email: "chefe.divisao6@demo.tca.ao", password: "demo123456", label: "Chefe de Divisão", shortLabel: "Ch. Divisão", divisao: "6ª Divisão" },
       { email: "chefe.seccao6@demo.tca.ao", password: "demo123456", label: "Chefe de Secção", shortLabel: "Ch. Secção", divisao: "6ª Divisão" },
+      { email: "tecnico.analise6@demo.tca.ao", password: "demo123456", label: "Técnico de Análise", shortLabel: "Téc. Análise", divisao: "6ª Divisão" },
     ],
   },
   {
@@ -79,6 +82,7 @@ const DEMO_GROUPS: DemoGroup[] = [
     users: [
       { email: "chefe.divisao7@demo.tca.ao", password: "demo123456", label: "Chefe de Divisão", shortLabel: "Ch. Divisão", divisao: "7ª Divisão" },
       { email: "chefe.seccao7@demo.tca.ao", password: "demo123456", label: "Chefe de Secção", shortLabel: "Ch. Secção", divisao: "7ª Divisão" },
+      { email: "tecnico.analise7@demo.tca.ao", password: "demo123456", label: "Técnico de Análise", shortLabel: "Téc. Análise", divisao: "7ª Divisão" },
     ],
   },
   {
@@ -86,6 +90,7 @@ const DEMO_GROUPS: DemoGroup[] = [
     users: [
       { email: "chefe.divisao8@demo.tca.ao", password: "demo123456", label: "Chefe de Divisão", shortLabel: "Ch. Divisão", divisao: "8ª Divisão" },
       { email: "chefe.seccao8@demo.tca.ao", password: "demo123456", label: "Chefe de Secção", shortLabel: "Ch. Secção", divisao: "8ª Divisão" },
+      { email: "tecnico.analise8@demo.tca.ao", password: "demo123456", label: "Técnico de Análise", shortLabel: "Téc. Análise", divisao: "8ª Divisão" },
     ],
   },
   {
