@@ -266,7 +266,8 @@ export const CATEGORIAS_ENTIDADE = [
 export const CATEGORIA_DIVISAO_ROUTING: Record<string, { divisao: string; baseLegal: string }> = {
   categoria_1: { divisao: "3ª Divisão", baseLegal: "Resolução n.º 2/16, de 2 de dezembro" },
   categoria_3: { divisao: "4ª Divisão", baseLegal: "Resolução n.º 5/16, de 8 de dezembro" },
-  // categoria_2, categoria_4 can be added here as rules are defined
+  categoria_4: { divisao: "6ª Divisão", baseLegal: "Resolução n.º 1/17, de 5 de janeiro" },
+  // categoria_2 can be added here as rules are defined
 };
 
 export interface Processo {
