@@ -191,7 +191,7 @@ const SubmissaoDetalhe = () => {
     submittedAt: now.toISOString(),
     totalDebito: 0,
     totalCredito: 0,
-    documentosVerificados: submissionChecklist.map((item) => ({
+    documentosVerificados: dynamicChecklist.map((item) => ({
       label: item.label,
       required: item.required,
       checked: !!checkedDocs[item.id],
