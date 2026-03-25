@@ -77,6 +77,8 @@ const Configuracoes = () => {
   const [ruleForm, setRuleForm] = useState<Partial<ValidationRule>>({});
   const [cleanupDialogOpen, setCleanupDialogOpen] = useState(false);
   const [cleaningUp, setCleaningUp] = useState(false);
+  const [cleanupVistosOpen, setCleanupVistosOpen] = useState(false);
+  const [cleaningVistos, setCleaningVistos] = useState(false);
 
   const handleLimparExercicios = async () => {
     setCleaningUp(true);
@@ -103,6 +105,33 @@ const Configuracoes = () => {
     } finally {
       setCleaningUp(false);
       setCleanupDialogOpen(false);
+    }
+  };
+
+  const handleLimparVistos = async () => {
+    setCleaningVistos(true);
+    try {
+      const { error: e1 } = await supabase.from("atividade_historico").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e2 } = await supabase.from("atividades").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e3 } = await supabase.from("processo_documentos").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e4 } = await supabase.from("processo_historico").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e5 } = await supabase.from("processos").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e6 } = await supabase.from("pareceres").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e7 } = await supabase.from("documentos_tribunal").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+
+      const errors = [e1, e2, e3, e4, e5, e6, e7].filter(Boolean);
+      if (errors.length > 0) {
+        console.error("Erros ao limpar vistos:", errors);
+        toast.error(`Limpeza parcial — ${errors.length} erro(s). Verifique a consola.`);
+      } else {
+        toast.success("Todos os processos, pareceres, atividades e documentos de tribunal foram eliminados.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao limpar submissões de vistos.");
+    } finally {
+      setCleaningVistos(false);
+      setCleanupVistosOpen(false);
     }
   };
 
@@ -391,9 +420,14 @@ const Configuracoes = () => {
               <p className="text-xs text-muted-foreground mb-4">
                 Remove todos os exercícios fiscais, submissões, notificações, balancetes, indicadores financeiros e actas de recepção. Esta acção é irreversível.
               </p>
-              <Button variant="destructive" size="sm" className="gap-1.5" onClick={() => setCleanupDialogOpen(true)}>
-                <Trash2 className="h-3.5 w-3.5" /> Limpar Todos os Exercícios
-              </Button>
+              <div className="flex flex-wrap gap-3">
+                <Button variant="destructive" size="sm" className="gap-1.5" onClick={() => setCleanupDialogOpen(true)}>
+                  <Trash2 className="h-3.5 w-3.5" /> Limpar Todos os Exercícios
+                </Button>
+                <Button variant="destructive" size="sm" className="gap-1.5" onClick={() => setCleanupVistosOpen(true)}>
+                  <Scale className="h-3.5 w-3.5" /> Limpar Submissões de Vistos
+                </Button>
+              </div>
             </div>
           </div>
         </TabsContent>
@@ -475,6 +509,27 @@ const Configuracoes = () => {
             <Button variant="destructive" onClick={handleLimparExercicios} disabled={cleaningUp} className="gap-1.5">
               {cleaningUp ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
               {cleaningUp ? "A limpar..." : "Confirmar Eliminação"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cleanup Vistos Dialog */}
+      <Dialog open={cleanupVistosOpen} onOpenChange={setCleanupVistosOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-destructive flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" /> Confirmar Limpeza de Vistos
+            </DialogTitle>
+            <DialogDescription>
+              Esta acção vai eliminar <strong>todos</strong> os processos, pareceres, atividades, histórico de processos e documentos de tribunal. Esta operação é <strong>irreversível</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCleanupVistosOpen(false)} disabled={cleaningVistos}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleLimparVistos} disabled={cleaningVistos} className="gap-1.5">
+              {cleaningVistos ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              {cleaningVistos ? "A limpar..." : "Confirmar Eliminação"}
             </Button>
           </DialogFooter>
         </DialogContent>
