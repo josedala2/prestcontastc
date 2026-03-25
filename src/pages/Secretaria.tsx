@@ -36,6 +36,7 @@ import { EntityProfilePanel } from "@/components/secretaria/EntityProfilePanel";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { SecretariaVistoTab } from "@/components/secretaria/SecretariaVistoTab";
 import { SecretariaValidacaoTab } from "@/components/secretaria/SecretariaValidacaoTab";
+import { SecretariaPendentesTab } from "@/components/secretaria/SecretariaPendentesTab";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface SecretariaProps {
