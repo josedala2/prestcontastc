@@ -417,7 +417,7 @@ const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
     return { counts, total };
   }, [rascunhoCount, submetidos.length, emAnalise, comPedidosCount, conformeCount, naoConformeCount]);
 
-  const [activeMainTab, setActiveMainTab] = useState("dashboard");
+  const [activeMainTab, setActiveMainTab] = useState(initialTab || "dashboard");
 
   // Fetch actual submitted documents from submission_documents table
   interface SubmittedDoc {
