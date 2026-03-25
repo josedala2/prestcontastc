@@ -1229,6 +1229,10 @@ const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
           <SecretariaValidacaoTab />
         </TabsContent>
 
+        <TabsContent value="pendentes" className="mt-6">
+          <SecretariaPendentesTab />
+        </TabsContent>
+
         <TabsContent value="vistos" className="mt-6">
           <SecretariaVistoTab />
         </TabsContent>
