@@ -134,7 +134,8 @@ function EntidadeView({
   const statusMessages: Record<string, string> = {
     pendente: "A Secretaria do Tribunal irá verificar a documentação e emitir a Acta de Recepção.",
     recepcionado: "A Secretaria validou a documentação e emitiu a Acta de Recepção.",
-    rejeitado: "A Secretaria devolveu a submissão. Corrija os documentos indicados e resubmeta.",
+    rejeitado: "O processo foi devolvido pela Contadoria. Corrija os documentos indicados e resubmeta.",
+    aguardando_elementos: "Foram solicitados elementos adicionais. Consulte as Solicitações e resubmeta após correcção.",
   };
 
   const disabled = isSubmitted && !canResubmit;
