@@ -570,7 +570,7 @@ export default function ContadoriaVerificacao() {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
                       <ClipboardCheck className="h-4 w-4 text-primary" />
-                      Checklist de Conformidade — Resolução nº 1/17
+                      Checklist de Conformidade — {resolucaoInfo.label}
                       <Badge variant="outline" className="ml-auto text-[10px]">
                         {checkedCount}/{CHECKLIST_ITEMS.length} verificados
                       </Badge>
