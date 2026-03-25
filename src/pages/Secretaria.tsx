@@ -1141,7 +1141,7 @@ const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
                   }}
                 >
                   <CheckCircle className="h-3.5 w-3.5" />
-                  Confirmar e Autuar
+                  Confirmar e Gerar Acta
                 </Button>
               </div>
             </div>
