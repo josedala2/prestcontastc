@@ -734,6 +734,10 @@ const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
             <FileCheck className="h-4 w-4" />
             Validação
           </TabsTrigger>
+          <TabsTrigger value="pendentes" className="gap-2">
+            <Send className="h-4 w-4" />
+            Pendentes de Envio
+          </TabsTrigger>
           <TabsTrigger value="vistos" className="gap-2">
             <ShieldCheck className="h-4 w-4" />
             Processos de Visto
