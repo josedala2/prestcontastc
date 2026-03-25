@@ -248,35 +248,58 @@ export default function ContadoriaVerificacao() {
     }
   };
 
-  // Reject → return to etapa 3
+  // Reject → return process to entity for re-editing
   const handleReject = async () => {
     if (!selectedProcesso || !motivoRejeicao.trim()) return;
     setActing(true);
     try {
+      const fiscalYearId = `${selectedProcesso.entity_id}-${selectedProcesso.ano_gerencia}`;
+      const fiscalYear = String(selectedProcesso.ano_gerencia);
+
+      // Return to etapa 2 (devolvido à entidade)
       await avancarEtapaProcesso({
         processoId: selectedProcesso.id,
-        novaEtapa: 3,
-        novoEstado: "em_validacao",
+        novaEtapa: 2,
+        novoEstado: "devolvido",
         executadoPor,
         perfilExecutor: "Técnico da Contadoria Geral",
-        observacoes: `Devolvido à Secretaria: ${motivoRejeicao.trim()}`,
+        observacoes: `Processo devolvido à entidade pela Contadoria: ${motivoRejeicao.trim()}`,
       });
 
       await supabase.from("processos").update({
-        responsavel_atual: "Chefe da Secretaria-Geral",
+        responsavel_atual: "Entidade",
       } as any).eq("id", selectedProcesso.id);
 
+      // Update submission status to allow entity to re-edit and resubmit
+      await supabase.from("submissions").update({
+        status: "rejeitado",
+        rejeitado_at: new Date().toISOString(),
+        motivo_rejeicao: motivoRejeicao.trim(),
+      } as any).eq("entity_id", selectedProcesso.entity_id).eq("fiscal_year_id", fiscalYearId);
+
+      // Notify entity about rejection
       await supabase.from("submission_notifications").insert({
         entity_id: selectedProcesso.entity_id,
         entity_name: selectedProcesso.entity_name,
-        fiscal_year_id: `${selectedProcesso.entity_id}-${selectedProcesso.ano_gerencia}`,
-        fiscal_year: String(selectedProcesso.ano_gerencia),
-        type: "devolucao_contadoria",
-        message: `Processo ${selectedProcesso.numero_processo} devolvido pela Contadoria Geral`,
-        detail: motivoRejeicao.trim(),
+        fiscal_year_id: fiscalYearId,
+        fiscal_year: fiscalYear,
+        type: "rejeitado",
+        message: `Processo ${selectedProcesso.numero_processo} devolvido pela Contadoria Geral — Exercício ${fiscalYear}`,
+        detail: `O Técnico da Contadoria Geral devolveu o processo com o seguinte motivo:\n\n${motivoRejeicao.trim()}\n\nPor favor, corrija as irregularidades apontadas e volte a submeter a prestação de contas através do Portal.`,
       } as any);
 
-      toast.warning(`Processo ${selectedProcesso.numero_processo} devolvido à Secretaria`);
+      // Notify Secretaria about the return
+      await supabase.from("submission_notifications").insert({
+        entity_id: selectedProcesso.entity_id,
+        entity_name: selectedProcesso.entity_name,
+        fiscal_year_id: fiscalYearId,
+        fiscal_year: fiscalYear,
+        type: "devolucao_contadoria",
+        message: `Processo ${selectedProcesso.numero_processo} devolvido pela Contadoria à entidade ${selectedProcesso.entity_name}`,
+        detail: `Motivo: ${motivoRejeicao.trim()}\n\nO processo foi devolvido à entidade para correcção. A Secretaria será notificada quando a entidade resubmeter.`,
+      } as any);
+
+      toast.warning(`Processo ${selectedProcesso.numero_processo} devolvido à entidade ${selectedProcesso.entity_name}`);
       setRejectDialogOpen(false);
       setMotivoRejeicao("");
       setSelectedProcesso(null);
