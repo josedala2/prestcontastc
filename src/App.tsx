@@ -167,7 +167,7 @@ const App = () => (
 
           {/* Contadoria Geral — mirrors Técnico routes */}
           <Route path="/contadoria/*" element={
-            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Contadoria Geral"]}>
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Contadoria Geral", "Contadoria Geral"]}>
               <PortalEntityProvider>
                 <Routes>
                   <Route index element={<TecnicoDashboard />} />
