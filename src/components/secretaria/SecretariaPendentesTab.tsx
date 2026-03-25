@@ -69,7 +69,7 @@ export function SecretariaPendentesTab() {
         processoId: processo.id,
         novaEtapa: 3,
         novoEstado: "em_validacao",
-        executadoPor: user?.name || "Técnico da Secretaria-Geral",
+        executadoPor: user?.role || "Técnico da Secretaria-Geral",
         perfilExecutor: "Técnico da Secretaria-Geral",
         observacoes: "Encaminhado para validação da Chefe da Secretaria-Geral",
       });
