@@ -38,7 +38,11 @@ import { SecretariaVistoTab } from "@/components/secretaria/SecretariaVistoTab";
 import { SecretariaValidacaoTab } from "@/components/secretaria/SecretariaValidacaoTab";
 import { useAuth } from "@/contexts/AuthContext";
 
-const Secretaria = () => {
+interface SecretariaProps {
+  initialTab?: string;
+}
+
+const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
   const { recepcionar, rejeitar, submissions, getUploadedDocs } = useSubmissions();
   const { entities: allEntities } = useEntities();
   const { user } = useAuth();
