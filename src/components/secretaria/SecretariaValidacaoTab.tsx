@@ -73,6 +73,7 @@ export function SecretariaValidacaoTab() {
   const [selectedProcesso, setSelectedProcesso] = useState<ProcessoValidacao | null>(null);
   const [documentos, setDocumentos] = useState<ProcessoDoc[]>([]);
   const [loadingDocs, setLoadingDocs] = useState(false);
+  const [entityTipologia, setEntityTipologia] = useState<EntityTipologia>("empresa_publica");
 
   // Notifications
   const [notificacoes, setNotificacoes] = useState<any[]>([]);
