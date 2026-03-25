@@ -64,7 +64,7 @@ const PortalPrestacaoContas = () => {
 };
 
 // ─── Status config ───
-type SubmissionStatusType = "rascunho" | "pendente" | "recepcionado" | "rejeitado" | "em_analise";
+type SubmissionStatusType = "rascunho" | "pendente" | "recepcionado" | "rejeitado" | "em_analise" | "aguardando_elementos";
 
 const STATUS_CONFIG: Record<SubmissionStatusType, { label: string; color: string; icon: typeof Clock }> = {
   rascunho: { label: "Rascunho", color: "bg-muted text-muted-foreground", icon: FileText },
@@ -72,6 +72,7 @@ const STATUS_CONFIG: Record<SubmissionStatusType, { label: string; color: string
   recepcionado: { label: "Recepcionado — Acta de Recepção Emitida", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400", icon: CheckCircle },
   rejeitado: { label: "Devolvido — Documentação Incompleta", color: "bg-destructive/10 text-destructive", icon: AlertTriangle },
   em_analise: { label: "Em Análise — Processo remetido ao Técnico Validador", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400", icon: FileText },
+  aguardando_elementos: { label: "Aguardando Elementos — Foram solicitados documentos adicionais", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400", icon: AlertTriangle },
 };
 
 function EntidadeView({
