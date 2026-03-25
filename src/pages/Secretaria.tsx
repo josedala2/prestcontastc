@@ -107,10 +107,10 @@ const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
           await avancarEtapaProcesso({
             processoId,
             novaEtapa: 3,
-            novoEstado: "em_validacao",
+            novoEstado: "pendente",
             executadoPor: "Técnico da Secretaria-Geral",
             perfilExecutor: "Técnico da Secretaria-Geral",
-            observacoes: "Encaminhado para validação da Chefe da Secretaria-Geral",
+            observacoes: "Recepção concluída — processo pendente de validação",
             documentosGerados: ["Acta de Recepção"],
           });
         }
@@ -125,10 +125,10 @@ const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
           ano_gerencia: fy.year,
           canal_entrada: "portal",
           etapa_atual: 3,
-          estado: "em_validacao",
-          responsavel_atual: "Chefe da Secretaria-Geral",
+          estado: "pendente",
+          responsavel_atual: "Técnico da Secretaria-Geral",
           submetido_por: "Técnico da Secretaria-Geral",
-          observacoes: "Encaminhado para validação da Chefe da Secretaria-Geral",
+          observacoes: "Recepção concluída — processo pendente de validação",
         } as any).select("id").single();
         if (error) throw error;
         processoId = newProc!.id;
@@ -139,8 +139,8 @@ const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
           etapa_anterior: 1,
           etapa_seguinte: 3,
           estado_anterior: "submetido",
-          estado_seguinte: "em_validacao",
-          acao: "Recepção concluída e encaminhado para validação da Chefe da Secretaria-Geral",
+          estado_seguinte: "pendente",
+          acao: "Recepção concluída — processo pendente de validação",
           executado_por: "Técnico da Secretaria-Geral",
           perfil_executor: "Técnico da Secretaria-Geral",
           documentos_gerados: ["Acta de Recepção"],

@@ -118,7 +118,7 @@ export function SecretariaValidacaoTab() {
       .from("processos")
       .select("*")
       .eq("etapa_atual", 3)
-      .eq("estado", "em_validacao")
+      .in("estado", ["pendente", "em_validacao"])
       .order("created_at", { ascending: false });
 
     if (!error && data) {
