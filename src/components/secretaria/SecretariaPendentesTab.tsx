@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatCard } from "@/components/ui-custom/PageElements";
 import {
-  Clock, Send, Loader2, CheckCircle, Building2, FileText, Inbox,
+  Clock, Send, Loader2, CheckCircle, Building2, FileText, Inbox, Search, Filter,
 } from "lucide-react";
 import { toast } from "sonner";
 import { avancarEtapaProcesso, gerarNumeroProcesso } from "@/hooks/useBackendFunctions";
