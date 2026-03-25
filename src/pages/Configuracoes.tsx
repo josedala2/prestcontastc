@@ -77,6 +77,8 @@ const Configuracoes = () => {
   const [ruleForm, setRuleForm] = useState<Partial<ValidationRule>>({});
   const [cleanupDialogOpen, setCleanupDialogOpen] = useState(false);
   const [cleaningUp, setCleaningUp] = useState(false);
+  const [cleanupVistosOpen, setCleanupVistosOpen] = useState(false);
+  const [cleaningVistos, setCleaningVistos] = useState(false);
 
   const handleLimparExercicios = async () => {
     setCleaningUp(true);
