@@ -1,0 +1,1 @@
+UPDATE processos SET etapa_atual = 8, estado = 'em_analise' WHERE id = '3a0bc35f-17eb-420f-98a1-cf41320014a7';
