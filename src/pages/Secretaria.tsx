@@ -46,6 +46,7 @@ const Secretaria = () => {
   const isChefe = user?.role === "Chefe da Secretaria-Geral" ||
     user?.role === "Administrador do Sistema" ||
     user?.role === "Presidente do Tribunal de Contas";
+  const isTecnicoSecretaria = user?.role === "Técnico da Secretaria-Geral";
 
   // Merge: DB fiscal years with status "submetido" + dynamically submitted via Portal
   const submetidos = useMemo(() => {
