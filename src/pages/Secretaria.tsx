@@ -1014,7 +1014,7 @@ const Secretaria = () => {
                           size="sm"
                           className="w-full gap-2 mt-1"
                           onClick={() => handleEncaminharValidacao(fyId)}
-                          disabled={isEncaminhando}
+                          disabled={isEncaminhando || (isChefe && !isTecnicoSecretaria && user?.role === "Chefe da Secretaria-Geral")}
                         >
                           {isEncaminhando ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
