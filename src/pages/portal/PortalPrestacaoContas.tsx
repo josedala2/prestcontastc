@@ -95,13 +95,14 @@ function EntidadeView({
   const { hasData, setData, clearData } = useFinancialData();
   const fiscalYearId = `${entityId}-${periodo}`;
   const dataKey = `${entityId}-${periodo}`;
-  const submissionStatus = getStatus(entityId, fiscalYearId);
+  const rawStatus = getStatus(entityId, fiscalYearId);
+  const submissionStatus: SubmissionStatusType = (rawStatus in STATUS_CONFIG) ? rawStatus as SubmissionStatusType : "rascunho";
   const balanceteCarregado = hasData(dataKey);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isSubmitted = submissionStatus !== "rascunho";
-  const canResubmit = submissionStatus === "rejeitado";
+  const canResubmit = submissionStatus === "rejeitado" || submissionStatus === "aguardando_elementos";
   const StatusIcon = STATUS_CONFIG[submissionStatus].icon;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
