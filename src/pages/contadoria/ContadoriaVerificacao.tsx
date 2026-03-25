@@ -47,21 +47,10 @@ interface ProcessoDoc {
   observacoes: string | null;
 }
 
-const CHECKLIST_ITEMS = [
-  { id: "balancete", label: "Balancete de Verificação", obrigatorio: true },
-  { id: "balanco", label: "Balanço Patrimonial", obrigatorio: true },
-  { id: "dr", label: "Demonstração de Resultados", obrigatorio: true },
-  { id: "fluxo_caixa", label: "Mapa de Fluxos de Caixa", obrigatorio: true },
-  { id: "notas", label: "Notas às Demonstrações Financeiras", obrigatorio: true },
-  { id: "inventario", label: "Inventário Patrimonial", obrigatorio: true },
-  { id: "extracto", label: "Extracto Bancário", obrigatorio: true },
-  { id: "reconciliacao", label: "Reconciliação Bancária", obrigatorio: true },
-  { id: "relatorio_gestao", label: "Relatório de Gestão", obrigatorio: true },
-  { id: "certidao_divida", label: "Certidão de Dívida", obrigatorio: false },
-  { id: "orcamento", label: "Mapa de Execução Orçamental", obrigatorio: true },
-  { id: "relacao_abates", label: "Relação de Abates", obrigatorio: false },
-  { id: "acta_recepcao", label: "Acta de Recepção", obrigatorio: true },
-  { id: "nota_remessa", label: "Nota de Remessa", obrigatorio: true },
+// Internal process documents always shown in checklist
+const INTERNAL_CHECKLIST_ITEMS = [
+  { id: "acta_recepcao", label: "Acta de Recepção", required: true },
+  { id: "nota_remessa", label: "Nota de Remessa", required: true },
 ];
 
 export default function ContadoriaVerificacao() {
