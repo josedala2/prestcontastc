@@ -26,6 +26,8 @@ import { generateNotaRemessa, type ProcessoDocData } from "@/lib/workflowDocGene
 import { useAuth } from "@/contexts/AuthContext";
 import { WORKFLOW_STAGES } from "@/types/workflow";
 import { saveAs } from "file-saver";
+import { getDocumentRequirements } from "@/components/portal/EntidadeDocumentosTab";
+import { EntityTipologia } from "@/types";
 
 interface ProcessoValidacao {
   id: string;
