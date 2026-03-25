@@ -661,6 +661,12 @@ const Secretaria = () => {
       </Card>
 
       {/* Acções */}
+      {isChefe && !isTecnicoSecretaria && user?.role === "Chefe da Secretaria-Geral" ? (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border text-sm text-muted-foreground">
+          <Eye className="h-4 w-4" />
+          Modo de consulta — as acções de recepção são da responsabilidade do Técnico da Secretaria. O processo será encaminhado para validação após a recepção.
+        </div>
+      ) : (
       <div className="flex items-center justify-between">
         {!allRequiredChecked ? (
           <p className="text-xs text-warning flex items-center gap-1">
@@ -698,6 +704,7 @@ const Secretaria = () => {
           </Button>
         </div>
       </div>
+      )}
     </div>
   ) : null;
 
