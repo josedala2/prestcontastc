@@ -1,9 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { EntityTipologia, TIPOLOGIA_RESOLUCAO, RESOLUCAO_LABELS } from "@/types";
 import { PortalLayout } from "@/components/PortalLayout";
 import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
 import { PageHeader } from "@/components/ui-custom/PageElements";
-import { AnaliseFinanceira } from "@/components/AnaliseFinanceiraReadonly";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,11 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
-import { FileSpreadsheet, CheckCircle, AlertTriangle, Send, Clock, FileText, Paperclip } from "lucide-react";
+import { FileSpreadsheet, CheckCircle, AlertTriangle, Send, Clock, FileText, Paperclip, Upload, Trash2 } from "lucide-react";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { toast } from "sonner";
 import { EntidadeDocumentosTab, getDocumentRequirements } from "@/components/portal/EntidadeDocumentosTab";
+import { supabase } from "@/integrations/supabase/client";
 
 const PortalPrestacaoContas = () => {
   const { entity } = usePortalEntity();
