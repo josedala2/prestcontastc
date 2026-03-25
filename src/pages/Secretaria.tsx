@@ -107,10 +107,10 @@ const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
           await avancarEtapaProcesso({
             processoId,
             novaEtapa: 3,
-            novoEstado: "em_validacao",
+            novoEstado: "pendente",
             executadoPor: "Técnico da Secretaria-Geral",
             perfilExecutor: "Técnico da Secretaria-Geral",
-            observacoes: "Encaminhado para validação da Chefe da Secretaria-Geral",
+            observacoes: "Recepção concluída — processo pendente de validação",
             documentosGerados: ["Acta de Recepção"],
           });
         }
