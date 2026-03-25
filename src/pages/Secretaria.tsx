@@ -569,7 +569,7 @@ const Secretaria = () => {
                       <Checkbox
                         checked={isChecked}
                         onCheckedChange={() => handleToggleDoc(item.id)}
-                        disabled={!uploaded}
+                        disabled={!uploaded || (isChefe && !isTecnicoSecretaria)}
                       />
                     </TableCell>
                     <TableCell className={`text-sm ${!uploaded ? "text-muted-foreground line-through" : ""}`}>
