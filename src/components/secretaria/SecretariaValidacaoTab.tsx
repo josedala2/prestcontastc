@@ -643,20 +643,25 @@ export function SecretariaValidacaoTab() {
                 </CardContent>
               </Card>
 
-              {/* Documentos Submetidos pela Entidade */}
+              {/* Checklist de Conformidade */}
               <Card>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm flex items-center gap-2">
-                      <Eye className="h-4 w-4 text-primary" />
-                      Documentos Submetidos pela Entidade
+                      <ShieldCheck className="h-4 w-4 text-primary" />
+                      Checklist de Conformidade
                     </CardTitle>
-                    <Badge variant="outline" className="text-[10px]">
-                      {submittedDocs.length} ficheiro(s)
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={checklistProgress.allRequired ? "default" : "destructive"} className="text-[10px]">
+                        {checklistProgress.submitted}/{checklistProgress.required} obrigatórios
+                      </Badge>
+                      <Badge variant="outline" className="text-[10px]">
+                        {submittedDocs.length} ficheiro(s) total
+                      </Badge>
+                    </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Documentos carregados pela entidade no portal. Visualize cada um antes de aprovar.
+                    Documentos exigidos conforme a resolução aplicável. Visualize cada documento antes de aprovar.
                   </p>
                 </CardHeader>
                 <CardContent>
@@ -664,65 +669,115 @@ export function SecretariaValidacaoTab() {
                     <div className="flex items-center justify-center py-6 gap-2 text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" /> A carregar documentos…
                     </div>
-                  ) : submittedDocs.length === 0 ? (
-                    <div className="text-center py-6 text-muted-foreground">
-                      <FileText className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                      <p className="text-sm">Nenhum documento submetido via portal para este exercício.</p>
-                      <p className="text-xs mt-1">A verificação será baseada na acta de recepção e documentos físicos.</p>
-                    </div>
                   ) : (
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Documento</TableHead>
+                          <TableHead className="w-8"></TableHead>
+                          <TableHead>Documento Exigido</TableHead>
+                          <TableHead className="text-center">Obrigatório</TableHead>
                           <TableHead>Ficheiro</TableHead>
                           <TableHead className="text-center">Tamanho</TableHead>
-                          <TableHead className="text-center">Data</TableHead>
                           <TableHead className="text-center w-24">Acções</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {submittedDocs.map((doc) => (
-                          <TableRow key={doc.id}>
-                            <TableCell>
-                              <span className="text-sm font-medium">{doc.doc_label}</span>
-                              <p className="text-[10px] text-muted-foreground">{doc.doc_category}</p>
+                        {checklistItems.map((item) => (
+                          <TableRow key={item.id} className={cn(!item.submitted && item.required && "bg-destructive/5")}>
+                            <TableCell className="text-center">
+                              {item.submitted ? (
+                                <CheckCircle className="h-4 w-4 text-success" />
+                              ) : (
+                                <XCircle className="h-4 w-4 text-muted-foreground opacity-40" />
+                              )}
                             </TableCell>
                             <TableCell>
-                              <span className="text-xs truncate max-w-[180px] block" title={doc.file_name}>
-                                {doc.file_name}
+                              <span className={cn("text-sm", item.submitted ? "font-medium" : "text-muted-foreground")}>
+                                {item.label}
                               </span>
                             </TableCell>
-                            <TableCell className="text-center text-xs text-muted-foreground">
-                              {formatFileSize(doc.file_size)}
+                            <TableCell className="text-center">
+                              {item.required ? (
+                                <Badge variant="destructive" className="text-[10px]">Obrigatório</Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-[10px]">Opcional</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {item.doc ? (
+                                <span className="text-xs truncate max-w-[180px] block" title={item.doc.file_name}>
+                                  {item.doc.file_name}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-muted-foreground italic">Não submetido</span>
+                              )}
                             </TableCell>
                             <TableCell className="text-center text-xs text-muted-foreground">
-                              {new Date(doc.created_at).toLocaleDateString("pt-AO")}
+                              {item.doc ? formatFileSize(item.doc.file_size) : "—"}
                             </TableCell>
                             <TableCell className="text-center">
-                              <div className="flex items-center justify-center gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-7 w-7 p-0"
-                                  title={`Visualizar ${doc.file_name}`}
-                                  onClick={() => handleViewSubmittedDoc(doc)}
-                                >
-                                  <Eye className="h-3.5 w-3.5" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-7 w-7 p-0"
-                                  title={`Descarregar ${doc.file_name}`}
-                                  onClick={() => handleViewSubmittedDoc(doc)}
-                                >
-                                  <Download className="h-3.5 w-3.5" />
-                                </Button>
-                              </div>
+                              {item.doc ? (
+                                <div className="flex items-center justify-center gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0"
+                                    title={`Visualizar ${item.doc.file_name}`}
+                                    onClick={() => handleViewSubmittedDoc(item.doc!)}
+                                  >
+                                    <Eye className="h-3.5 w-3.5" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0"
+                                    title={`Descarregar ${item.doc.file_name}`}
+                                    onClick={() => handleViewSubmittedDoc(item.doc!)}
+                                  >
+                                    <Download className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground text-xs">—</span>
+                              )}
                             </TableCell>
                           </TableRow>
                         ))}
+                        {/* Additional submitted docs not in checklist */}
+                        {submittedDocs
+                          .filter((sd) => !checklistItems.some((ci) => ci.doc?.id === sd.id))
+                          .map((doc) => (
+                            <TableRow key={doc.id}>
+                              <TableCell className="text-center">
+                                <FileText className="h-4 w-4 text-primary opacity-60" />
+                              </TableCell>
+                              <TableCell>
+                                <span className="text-sm font-medium">{doc.doc_label}</span>
+                                <p className="text-[10px] text-muted-foreground">{doc.doc_category}</p>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge variant="secondary" className="text-[10px]">Adicional</Badge>
+                              </TableCell>
+                              <TableCell>
+                                <span className="text-xs truncate max-w-[180px] block" title={doc.file_name}>
+                                  {doc.file_name}
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-center text-xs text-muted-foreground">
+                                {formatFileSize(doc.file_size)}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <div className="flex items-center justify-center gap-1">
+                                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleViewSubmittedDoc(doc)}>
+                                    <Eye className="h-3.5 w-3.5" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleViewSubmittedDoc(doc)}>
+                                    <Download className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
                       </TableBody>
                     </Table>
                   )}
