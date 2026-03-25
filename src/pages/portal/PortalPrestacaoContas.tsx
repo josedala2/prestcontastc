@@ -103,15 +103,30 @@ function EntidadeView({
   const canResubmit = submissionStatus === "rejeitado";
   const StatusIcon = STATUS_CONFIG[submissionStatus].icon;
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const name = file.name;
+    setUploadedFileName(name);
+    // Mark as having data so submission is unblocked
+    setData(dataKey, {
+      ativNaoCorr: {}, ativCorr: {}, capProprio: {},
+      passNaoCorr: {}, passCorr: {}, proveitos: {}, custos: {},
+      uploadedFile: name,
+    });
+    toast.success(`Ficheiro "${name}" carregado com sucesso.`);
+  };
+
+  const handleRemoveFile = () => {
+    setUploadedFileName(null);
+    clearData(dataKey);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    toast.info("Ficheiro removido.");
+  };
+
   const handleSubmit = () => {
     submit(entityId, fiscalYearId, entityName, undefined, docsCompliance.uploadedDocIds);
     toast.success("Prestação de contas submetida com sucesso! Aguarda recepção pela Secretaria.");
-  };
-
-  const statusMessages: Record<string, string> = {
-    pendente: "A Secretaria do Tribunal irá verificar a documentação e emitir a Acta de Recepção.",
-    recepcionado: "A Secretaria validou a documentação e emitiu a Acta de Recepção.",
-    rejeitado: "A Secretaria devolveu a submissão. Corrija os documentos indicados e resubmeta.",
   };
 
   return (
