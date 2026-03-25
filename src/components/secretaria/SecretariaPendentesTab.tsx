@@ -336,7 +336,7 @@ export function SecretariaPendentesTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {processos.map((p) => {
+                {processosFiltrados.map((p) => {
                   const isEnviado = enviados.includes(p.id);
                   const isEnviando = enviando === p.id;
                   return (
