@@ -117,7 +117,20 @@ export function SecretariaPendentesTab() {
     fetchProcessos();
   }, [fetchProcessos]);
 
-  const pendentesCount = processos.filter(p => !enviados.includes(p.id)).length;
+  const anosDisponiveis = useMemo(() => {
+    const anos = [...new Set(processos.map((p) => p.ano_gerencia))].sort((a, b) => b - a);
+    return anos;
+  }, [processos]);
+
+  const processosFiltrados = useMemo(() => {
+    return processos.filter((p) => {
+      if (filtroAno !== "todos" && p.ano_gerencia !== Number(filtroAno)) return false;
+      if (filtroEntidade && !p.entity_name.toLowerCase().includes(filtroEntidade.toLowerCase())) return false;
+      return true;
+    });
+  }, [processos, filtroAno, filtroEntidade]);
+
+  const pendentesCount = processosFiltrados.filter(p => !enviados.includes(p.id)).length;
 
   const handleEnviarParaChefe = async (processo: ProcessoPendente) => {
     setEnviando(processo.id);
