@@ -420,9 +420,14 @@ const Configuracoes = () => {
               <p className="text-xs text-muted-foreground mb-4">
                 Remove todos os exercícios fiscais, submissões, notificações, balancetes, indicadores financeiros e actas de recepção. Esta acção é irreversível.
               </p>
-              <Button variant="destructive" size="sm" className="gap-1.5" onClick={() => setCleanupDialogOpen(true)}>
-                <Trash2 className="h-3.5 w-3.5" /> Limpar Todos os Exercícios
-              </Button>
+              <div className="flex flex-wrap gap-3">
+                <Button variant="destructive" size="sm" className="gap-1.5" onClick={() => setCleanupDialogOpen(true)}>
+                  <Trash2 className="h-3.5 w-3.5" /> Limpar Todos os Exercícios
+                </Button>
+                <Button variant="destructive" size="sm" className="gap-1.5" onClick={() => setCleanupVistosOpen(true)}>
+                  <Scale className="h-3.5 w-3.5" /> Limpar Submissões de Vistos
+                </Button>
+              </div>
             </div>
           </div>
         </TabsContent>
