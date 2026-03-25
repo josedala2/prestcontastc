@@ -132,6 +132,8 @@ export default function ContadoriaVerificacao() {
     })();
   }, [selectedProcesso]);
 
+  const [submissionDocs, setSubmissionDocs] = useState<any[]>([]);
+
   const fetchDocumentos = async (processoId: string) => {
     const { data } = await supabase
       .from("processo_documentos")
@@ -140,6 +142,20 @@ export default function ContadoriaVerificacao() {
       .order("created_at", { ascending: true });
     setDocumentos((data as any[]) || []);
   };
+
+  // Also load submission documents uploaded by the entity
+  useEffect(() => {
+    if (!selectedProcesso) { setSubmissionDocs([]); return; }
+    const fiscalYearId = `${selectedProcesso.entity_id}-${selectedProcesso.ano_gerencia}`;
+    (async () => {
+      const { data } = await supabase
+        .from("submission_documents")
+        .select("*")
+        .eq("entity_id", selectedProcesso.entity_id)
+        .eq("fiscal_year_id", fiscalYearId);
+      setSubmissionDocs(data || []);
+    })();
+  }, [selectedProcesso]);
 
   const handlePreviewDoc = async (doc: ProcessoDoc) => {
     if (!doc.caminho_ficheiro) return;
