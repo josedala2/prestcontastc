@@ -36,6 +36,7 @@ import { EntityProfilePanel } from "@/components/secretaria/EntityProfilePanel";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { SecretariaVistoTab } from "@/components/secretaria/SecretariaVistoTab";
 import { SecretariaValidacaoTab } from "@/components/secretaria/SecretariaValidacaoTab";
+import { SecretariaPendentesTab } from "@/components/secretaria/SecretariaPendentesTab";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface SecretariaProps {
@@ -733,6 +734,10 @@ const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
             <FileCheck className="h-4 w-4" />
             Validação
           </TabsTrigger>
+          <TabsTrigger value="pendentes" className="gap-2">
+            <Send className="h-4 w-4" />
+            Pendentes de Envio
+          </TabsTrigger>
           <TabsTrigger value="vistos" className="gap-2">
             <ShieldCheck className="h-4 w-4" />
             Processos de Visto
@@ -1222,6 +1227,10 @@ const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
 
         <TabsContent value="validacao" className="mt-6">
           <SecretariaValidacaoTab />
+        </TabsContent>
+
+        <TabsContent value="pendentes" className="mt-6">
+          <SecretariaPendentesTab />
         </TabsContent>
 
         <TabsContent value="vistos" className="mt-6">
