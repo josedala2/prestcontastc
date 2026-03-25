@@ -513,6 +513,27 @@ const Configuracoes = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Cleanup Vistos Dialog */}
+      <Dialog open={cleanupVistosOpen} onOpenChange={setCleanupVistosOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-destructive flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" /> Confirmar Limpeza de Vistos
+            </DialogTitle>
+            <DialogDescription>
+              Esta acção vai eliminar <strong>todos</strong> os processos, pareceres, atividades, histórico de processos e documentos de tribunal. Esta operação é <strong>irreversível</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCleanupVistosOpen(false)} disabled={cleaningVistos}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleLimparVistos} disabled={cleaningVistos} className="gap-1.5">
+              {cleaningVistos ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              {cleaningVistos ? "A limpar..." : "Confirmar Eliminação"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };
