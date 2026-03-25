@@ -108,6 +108,33 @@ const Configuracoes = () => {
     }
   };
 
+  const handleLimparVistos = async () => {
+    setCleaningVistos(true);
+    try {
+      const { error: e1 } = await supabase.from("atividade_historico").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e2 } = await supabase.from("atividades").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e3 } = await supabase.from("processo_documentos").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e4 } = await supabase.from("processo_historico").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e5 } = await supabase.from("processos").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e6 } = await supabase.from("pareceres").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error: e7 } = await supabase.from("documentos_tribunal").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+
+      const errors = [e1, e2, e3, e4, e5, e6, e7].filter(Boolean);
+      if (errors.length > 0) {
+        console.error("Erros ao limpar vistos:", errors);
+        toast.error(`Limpeza parcial — ${errors.length} erro(s). Verifique a consola.`);
+      } else {
+        toast.success("Todos os processos, pareceres, atividades e documentos de tribunal foram eliminados.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao limpar submissões de vistos.");
+    } finally {
+      setCleaningVistos(false);
+      setCleanupVistosOpen(false);
+    }
+  };
+
   const openNewRule = () => {
     setEditingRule(null);
     setRuleForm({
