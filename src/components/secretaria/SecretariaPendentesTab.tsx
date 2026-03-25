@@ -205,7 +205,7 @@ export function SecretariaPendentesTab() {
                             <CheckCircle className="h-3 w-3" /> Enviado
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-300 bg-amber-50">
+                          <Badge variant="outline" className="text-[10px] text-warning border-warning/30 bg-warning/5">
                             Pendente
                           </Badge>
                         )}
