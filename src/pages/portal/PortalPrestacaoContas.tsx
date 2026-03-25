@@ -64,7 +64,7 @@ const PortalPrestacaoContas = () => {
 };
 
 // ─── Status config ───
-type SubmissionStatusType = "rascunho" | "pendente" | "recepcionado" | "rejeitado" | "em_analise";
+type SubmissionStatusType = "rascunho" | "pendente" | "recepcionado" | "rejeitado" | "em_analise" | "aguardando_elementos";
 
 const STATUS_CONFIG: Record<SubmissionStatusType, { label: string; color: string; icon: typeof Clock }> = {
   rascunho: { label: "Rascunho", color: "bg-muted text-muted-foreground", icon: FileText },
@@ -72,6 +72,7 @@ const STATUS_CONFIG: Record<SubmissionStatusType, { label: string; color: string
   recepcionado: { label: "Recepcionado — Acta de Recepção Emitida", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400", icon: CheckCircle },
   rejeitado: { label: "Devolvido — Documentação Incompleta", color: "bg-destructive/10 text-destructive", icon: AlertTriangle },
   em_analise: { label: "Em Análise — Processo remetido ao Técnico Validador", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400", icon: FileText },
+  aguardando_elementos: { label: "Aguardando Elementos — Foram solicitados documentos adicionais", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400", icon: AlertTriangle },
 };
 
 function EntidadeView({
@@ -94,13 +95,14 @@ function EntidadeView({
   const { hasData, setData, clearData } = useFinancialData();
   const fiscalYearId = `${entityId}-${periodo}`;
   const dataKey = `${entityId}-${periodo}`;
-  const submissionStatus = getStatus(entityId, fiscalYearId);
+  const rawStatus = getStatus(entityId, fiscalYearId);
+  const submissionStatus: SubmissionStatusType = (rawStatus in STATUS_CONFIG) ? rawStatus as SubmissionStatusType : "rascunho";
   const balanceteCarregado = hasData(dataKey);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isSubmitted = submissionStatus !== "rascunho";
-  const canResubmit = submissionStatus === "rejeitado";
+  const canResubmit = submissionStatus === "rejeitado" || submissionStatus === "aguardando_elementos";
   const StatusIcon = STATUS_CONFIG[submissionStatus].icon;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,7 +134,8 @@ function EntidadeView({
   const statusMessages: Record<string, string> = {
     pendente: "A Secretaria do Tribunal irá verificar a documentação e emitir a Acta de Recepção.",
     recepcionado: "A Secretaria validou a documentação e emitiu a Acta de Recepção.",
-    rejeitado: "A Secretaria devolveu a submissão. Corrija os documentos indicados e resubmeta.",
+    rejeitado: "O processo foi devolvido pela Contadoria. Corrija os documentos indicados e resubmeta.",
+    aguardando_elementos: "Foram solicitados elementos adicionais. Consulte as Solicitações e resubmeta após correcção.",
   };
 
   const disabled = isSubmitted && !canResubmit;

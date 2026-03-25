@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export type SubmissionStatus = "rascunho" | "pendente" | "recepcionado" | "rejeitado" | "em_analise";
+export type SubmissionStatus = "rascunho" | "pendente" | "recepcionado" | "rejeitado" | "em_analise" | "aguardando_elementos";
 export type NotificationType = "submissao" | "recepcionado" | "rejeitado" | "solicitacao_elementos" | "em_analise";
 
 interface SubmissionEntry {
@@ -215,6 +215,10 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     const year = fiscalYearId.split("-").pop() || fiscalYearId;
     const yearNum = parseInt(year, 10);
 
+    // Check previous status to determine if this is a resubmission
+    const previousStatus = submissions.find(s => s.entityId === entityId && s.fiscalYearId === fiscalYearId)?.status;
+    const isResubmission = previousStatus === "rejeitado" || previousStatus === "aguardando_elementos";
+
     // Ensure fiscal_year record exists before allowing submission
     const { data: existingFY } = await supabase
       .from("fiscal_years")
@@ -223,7 +227,6 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
       .maybeSingle();
 
     if (!existingFY) {
-      // Auto-create the fiscal year record
       const { error: fyError } = await supabase.from("fiscal_years").insert({
         id: fiscalYearId,
         entity_id: entityId,
@@ -238,7 +241,6 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
         console.error("Erro ao criar exercício fiscal:", fyError);
       }
     } else {
-      // Update existing fiscal year status to submetido
       await supabase
         .from("fiscal_years")
         .update({ status: "submetido", submitted_at: new Date().toISOString() })
@@ -251,6 +253,8 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
       status: "pendente",
       submittedAt: new Date().toISOString(),
       uploadedDocIds,
+      motivoRejeicao: undefined,
+      rejeitadoAt: undefined,
     };
 
     // Optimistic update
@@ -263,12 +267,52 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
     // Persist
     await upsertSubmission(entry);
 
-    sendNotification(entityId, fiscalYearId, "submissao",
-      `Nova prestação de contas submetida — Exercício ${year}`,
-      `A entidade ${entityName || entityId} submeteu a prestação de contas do exercício ${year}. Aguarda recepção e conferência documental pela Secretaria.`,
-      entityName, entityEmail
-    );
-  }, [upsertSubmission, sendNotification]);
+    // If resubmission, create history and notify Secretaria specifically
+    if (isResubmission) {
+      // Find the process to add history
+      const { data: processoData } = await supabase
+        .from("processos")
+        .select("id, numero_processo")
+        .eq("entity_id", entityId)
+        .eq("ano_gerencia", yearNum)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (processoData) {
+        // Create history record
+        await supabase.from("processo_historico").insert({
+          processo_id: processoData.id,
+          etapa_anterior: 2,
+          etapa_seguinte: 2,
+          estado_anterior: previousStatus === "rejeitado" ? "devolvido" : "aguardando_elementos",
+          estado_seguinte: "resubmetido",
+          acao: `Entidade ${entityName || entityId} resubmeteu a prestação de contas após ${previousStatus === "rejeitado" ? "devolução" : "solicitação de elementos"}`,
+          executado_por: entityName || entityId,
+          perfil_executor: "Entidade",
+        } as any);
+
+        // Update process back to pending state for Secretaria
+        await supabase.from("processos").update({
+          etapa_atual: 3,
+          estado: "resubmetido",
+          responsavel_atual: "Chefe da Secretaria-Geral",
+        } as any).eq("id", processoData.id);
+      }
+
+      sendNotification(entityId, fiscalYearId, "submissao",
+        `Resubmissão de prestação de contas — Exercício ${year}`,
+        `A entidade ${entityName || entityId} resubmeteu a prestação de contas do exercício ${year} após ${previousStatus === "rejeitado" ? "devolução pela Contadoria" : "solicitação de elementos"}. Aguarda nova verificação pela Secretaria.`,
+        entityName, entityEmail
+      );
+    } else {
+      sendNotification(entityId, fiscalYearId, "submissao",
+        `Nova prestação de contas submetida — Exercício ${year}`,
+        `A entidade ${entityName || entityId} submeteu a prestação de contas do exercício ${year}. Aguarda recepção e conferência documental pela Secretaria.`,
+        entityName, entityEmail
+      );
+    }
+  }, [submissions, upsertSubmission, sendNotification]);
 
   const recepcionar = useCallback(async (entityId: string, fiscalYearId: string, entityName?: string, entityEmail?: string) => {
     const now = new Date().toISOString();
