@@ -507,37 +507,67 @@ export default function ContadoriaVerificacao() {
                           <TableHead className="text-xs w-10">✓</TableHead>
                           <TableHead className="text-xs">Documento</TableHead>
                           <TableHead className="text-xs w-24">Obrigatório</TableHead>
+                          <TableHead className="text-xs w-20">Anexo</TableHead>
                           <TableHead className="text-xs">Observações</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {CHECKLIST_ITEMS.map((item) => (
-                          <TableRow key={item.id}>
-                            <TableCell>
-                              <Checkbox
-                                checked={!!checkedItems[item.id]}
-                                onCheckedChange={() => toggleCheck(item.id)}
-                              />
-                            </TableCell>
-                            <TableCell className="text-xs font-medium">{item.label}</TableCell>
-                            <TableCell>
-                              {item.obrigatorio ? (
-                                <Badge variant="destructive" className="text-[10px]">Obrigatório</Badge>
-                              ) : (
-                                <Badge variant="outline" className="text-[10px]">Facultativo</Badge>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              <input
-                                type="text"
-                                placeholder="Observação..."
-                                className="text-xs bg-transparent border-b border-border w-full focus:outline-none focus:border-primary py-1"
-                                value={observacoes[item.id] || ""}
-                                onChange={(e) => setObservacoes((prev) => ({ ...prev, [item.id]: e.target.value }))}
-                              />
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                        {CHECKLIST_ITEMS.map((item) => {
+                          // Match checklist item to an attached document by label similarity
+                          const matchedDoc = documentos.find((d) =>
+                            d.tipo_documento.toLowerCase().includes(item.label.toLowerCase().split(" ")[0]) ||
+                            item.label.toLowerCase().includes(d.tipo_documento.toLowerCase().split(" ")[0]) ||
+                            d.nome_ficheiro.toLowerCase().includes(item.id.replace(/_/g, ""))
+                          );
+                          return (
+                            <TableRow key={item.id} className={matchedDoc ? "" : "bg-muted/30"}>
+                              <TableCell>
+                                <Checkbox
+                                  checked={!!checkedItems[item.id]}
+                                  onCheckedChange={() => toggleCheck(item.id)}
+                                />
+                              </TableCell>
+                              <TableCell className="text-xs font-medium">
+                                {item.label}
+                                {matchedDoc && (
+                                  <p className="text-[10px] text-muted-foreground truncate max-w-[200px]">
+                                    {matchedDoc.nome_ficheiro}
+                                  </p>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {item.obrigatorio ? (
+                                  <Badge variant="destructive" className="text-[10px]">Obrigatório</Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-[10px]">Facultativo</Badge>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {matchedDoc ? (
+                                  <div className="flex items-center gap-1">
+                                    <Button size="sm" variant="ghost" className="h-7 px-2" title="Visualizar" onClick={() => handlePreviewDoc(matchedDoc)}>
+                                      <Eye className="h-3.5 w-3.5 text-primary" />
+                                    </Button>
+                                    <Button size="sm" variant="ghost" className="h-7 px-2" title="Descarregar" onClick={() => handleDownloadDoc(matchedDoc)}>
+                                      <Download className="h-3.5 w-3.5 text-muted-foreground" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <span className="text-[10px] text-muted-foreground">—</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <input
+                                  type="text"
+                                  placeholder="Observação..."
+                                  className="text-xs bg-transparent border-b border-border w-full focus:outline-none focus:border-primary py-1"
+                                  value={observacoes[item.id] || ""}
+                                  onChange={(e) => setObservacoes((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </CardContent>
