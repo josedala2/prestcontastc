@@ -605,14 +605,43 @@ export default function ContadoriaVerificacao() {
                       </TableHeader>
                       <TableBody>
                         {CHECKLIST_ITEMS.map((item) => {
-                          // Match checklist item to an attached document by label similarity
+                          // Match to processo_documentos
                           const matchedDoc = documentos.find((d) =>
                             d.tipo_documento.toLowerCase().includes(item.label.toLowerCase().split(" ")[0]) ||
                             item.label.toLowerCase().includes(d.tipo_documento.toLowerCase().split(" ")[0]) ||
                             d.nome_ficheiro.toLowerCase().includes(item.id.replace(/_/g, ""))
                           );
+                          // Match to submission_documents by doc_id
+                          const matchedSubDoc = submissionDocs.find((sd) => sd.doc_id === item.id);
+                          const hasMatch = !!matchedDoc || !!matchedSubDoc;
+                          const matchedFileName = matchedDoc?.nome_ficheiro || matchedSubDoc?.file_name;
+
+                          const handlePreview = () => {
+                            if (matchedDoc) {
+                              handlePreviewDoc(matchedDoc);
+                            } else if (matchedSubDoc?.file_path) {
+                              supabase.storage.from("submission-documents").download(matchedSubDoc.file_path).then(({ data }) => {
+                                if (data) window.open(URL.createObjectURL(data), "_blank");
+                              });
+                            }
+                          };
+                          const handleDownload = () => {
+                            if (matchedDoc) {
+                              handleDownloadDoc(matchedDoc);
+                            } else if (matchedSubDoc?.file_path) {
+                              supabase.storage.from("submission-documents").download(matchedSubDoc.file_path).then(({ data }) => {
+                                if (data) {
+                                  const url = URL.createObjectURL(data);
+                                  const a = document.createElement("a");
+                                  a.href = url; a.download = matchedSubDoc.file_name; a.click();
+                                  URL.revokeObjectURL(url);
+                                }
+                              });
+                            }
+                          };
+
                           return (
-                            <TableRow key={item.id} className={matchedDoc ? "" : "bg-muted/30"}>
+                            <TableRow key={item.id} className={hasMatch ? "" : "bg-muted/30"}>
                               <TableCell>
                                 <Checkbox
                                   checked={!!checkedItems[item.id]}
@@ -621,9 +650,9 @@ export default function ContadoriaVerificacao() {
                               </TableCell>
                               <TableCell className="text-xs font-medium">
                                 {item.label}
-                                {matchedDoc && (
+                                {matchedFileName && (
                                   <p className="text-[10px] text-muted-foreground truncate max-w-[200px]">
-                                    {matchedDoc.nome_ficheiro}
+                                    {matchedFileName}
                                   </p>
                                 )}
                               </TableCell>
@@ -635,12 +664,12 @@ export default function ContadoriaVerificacao() {
                                 )}
                               </TableCell>
                               <TableCell>
-                                {matchedDoc ? (
+                                {hasMatch ? (
                                   <div className="flex items-center gap-1">
-                                    <Button size="sm" variant="ghost" className="h-7 px-2" title="Visualizar" onClick={() => handlePreviewDoc(matchedDoc)}>
+                                    <Button size="sm" variant="ghost" className="h-7 px-2" title="Visualizar" onClick={handlePreview}>
                                       <Eye className="h-3.5 w-3.5 text-primary" />
                                     </Button>
-                                    <Button size="sm" variant="ghost" className="h-7 px-2" title="Descarregar" onClick={() => handleDownloadDoc(matchedDoc)}>
+                                    <Button size="sm" variant="ghost" className="h-7 px-2" title="Descarregar" onClick={handleDownload}>
                                       <Download className="h-3.5 w-3.5 text-muted-foreground" />
                                     </Button>
                                   </div>
