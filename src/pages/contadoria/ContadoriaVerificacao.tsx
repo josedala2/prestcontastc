@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
@@ -19,6 +19,8 @@ import { CATEGORIAS_ENTIDADE } from "@/types/workflow";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { generateRelatorioVerificacao, type ProcessoDocData, type ChecklistItem } from "@/lib/workflowDocGenerator";
 import { saveAs } from "file-saver";
+import { getDocumentRequirements } from "@/components/portal/EntidadeDocumentosTab";
+import { EntityTipologia, TIPOLOGIA_RESOLUCAO, RESOLUCAO_LABELS } from "@/types";
 
 interface Processo {
   id: string;
@@ -45,21 +47,10 @@ interface ProcessoDoc {
   observacoes: string | null;
 }
 
-const CHECKLIST_ITEMS = [
-  { id: "balancete", label: "Balancete de Verificação", obrigatorio: true },
-  { id: "balanco", label: "Balanço Patrimonial", obrigatorio: true },
-  { id: "dr", label: "Demonstração de Resultados", obrigatorio: true },
-  { id: "fluxo_caixa", label: "Mapa de Fluxos de Caixa", obrigatorio: true },
-  { id: "notas", label: "Notas às Demonstrações Financeiras", obrigatorio: true },
-  { id: "inventario", label: "Inventário Patrimonial", obrigatorio: true },
-  { id: "extracto", label: "Extracto Bancário", obrigatorio: true },
-  { id: "reconciliacao", label: "Reconciliação Bancária", obrigatorio: true },
-  { id: "relatorio_gestao", label: "Relatório de Gestão", obrigatorio: true },
-  { id: "certidao_divida", label: "Certidão de Dívida", obrigatorio: false },
-  { id: "orcamento", label: "Mapa de Execução Orçamental", obrigatorio: true },
-  { id: "relacao_abates", label: "Relação de Abates", obrigatorio: false },
-  { id: "acta_recepcao", label: "Acta de Recepção", obrigatorio: true },
-  { id: "nota_remessa", label: "Nota de Remessa", obrigatorio: true },
+// Internal process documents always shown in checklist
+const INTERNAL_CHECKLIST_ITEMS = [
+  { id: "acta_recepcao", label: "Acta de Recepção", required: true },
+  { id: "nota_remessa", label: "Nota de Remessa", required: true },
 ];
 
 export default function ContadoriaVerificacao() {
@@ -68,6 +59,7 @@ export default function ContadoriaVerificacao() {
 
   const [processos, setProcessos] = useState<Processo[]>([]);
   const [selectedProcesso, setSelectedProcesso] = useState<Processo | null>(null);
+  const [entityTipologia, setEntityTipologia] = useState<EntityTipologia>("empresa_publica");
   const [documentos, setDocumentos] = useState<ProcessoDoc[]>([]);
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [observacoes, setObservacoes] = useState<Record<string, string>>({});
@@ -79,6 +71,26 @@ export default function ContadoriaVerificacao() {
   const [mensagemSolicitacao, setMensagemSolicitacao] = useState("");
   const [motivoRejeicao, setMotivoRejeicao] = useState("");
   const [acting, setActing] = useState(false);
+
+  // Dynamic checklist based on entity tipologia
+  const docRequirements = useMemo(() => getDocumentRequirements(entityTipologia), [entityTipologia]);
+  const resolucao = TIPOLOGIA_RESOLUCAO[entityTipologia];
+  const resolucaoInfo = RESOLUCAO_LABELS[resolucao];
+
+  const CHECKLIST_ITEMS = useMemo(() => {
+    const items = docRequirements.map(d => ({
+      id: d.id,
+      label: d.label,
+      obrigatorio: d.required,
+    }));
+    // Add internal process docs
+    INTERNAL_CHECKLIST_ITEMS.forEach(item => {
+      if (!items.find(i => i.id === item.id)) {
+        items.push({ id: item.id, label: item.label, obrigatorio: item.required });
+      }
+    });
+    return items;
+  }, [docRequirements]);
 
   const executadoPor = user?.displayName || "Técnico da Contadoria Geral";
 
@@ -107,7 +119,20 @@ export default function ContadoriaVerificacao() {
       return;
     }
     fetchDocumentos(selectedProcesso.id);
+    // Fetch entity tipologia for dynamic checklist
+    (async () => {
+      const { data } = await supabase
+        .from("entities")
+        .select("tipologia")
+        .eq("id", selectedProcesso.entity_id)
+        .single();
+      if (data?.tipologia) {
+        setEntityTipologia(data.tipologia as EntityTipologia);
+      }
+    })();
   }, [selectedProcesso]);
+
+  const [submissionDocs, setSubmissionDocs] = useState<any[]>([]);
 
   const fetchDocumentos = async (processoId: string) => {
     const { data } = await supabase
@@ -117,6 +142,20 @@ export default function ContadoriaVerificacao() {
       .order("created_at", { ascending: true });
     setDocumentos((data as any[]) || []);
   };
+
+  // Also load submission documents uploaded by the entity
+  useEffect(() => {
+    if (!selectedProcesso) { setSubmissionDocs([]); return; }
+    const fiscalYearId = `${selectedProcesso.entity_id}-${selectedProcesso.ano_gerencia}`;
+    (async () => {
+      const { data } = await supabase
+        .from("submission_documents")
+        .select("*")
+        .eq("entity_id", selectedProcesso.entity_id)
+        .eq("fiscal_year_id", fiscalYearId);
+      setSubmissionDocs(data || []);
+    })();
+  }, [selectedProcesso]);
 
   const handlePreviewDoc = async (doc: ProcessoDoc) => {
     if (!doc.caminho_ficheiro) return;
@@ -547,7 +586,7 @@ export default function ContadoriaVerificacao() {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
                       <ClipboardCheck className="h-4 w-4 text-primary" />
-                      Checklist de Conformidade — Resolução nº 1/17
+                      Checklist de Conformidade — {resolucaoInfo.label}
                       <Badge variant="outline" className="ml-auto text-[10px]">
                         {checkedCount}/{CHECKLIST_ITEMS.length} verificados
                       </Badge>
@@ -566,14 +605,43 @@ export default function ContadoriaVerificacao() {
                       </TableHeader>
                       <TableBody>
                         {CHECKLIST_ITEMS.map((item) => {
-                          // Match checklist item to an attached document by label similarity
+                          // Match to processo_documentos
                           const matchedDoc = documentos.find((d) =>
                             d.tipo_documento.toLowerCase().includes(item.label.toLowerCase().split(" ")[0]) ||
                             item.label.toLowerCase().includes(d.tipo_documento.toLowerCase().split(" ")[0]) ||
                             d.nome_ficheiro.toLowerCase().includes(item.id.replace(/_/g, ""))
                           );
+                          // Match to submission_documents by doc_id
+                          const matchedSubDoc = submissionDocs.find((sd) => sd.doc_id === item.id);
+                          const hasMatch = !!matchedDoc || !!matchedSubDoc;
+                          const matchedFileName = matchedDoc?.nome_ficheiro || matchedSubDoc?.file_name;
+
+                          const handlePreview = () => {
+                            if (matchedDoc) {
+                              handlePreviewDoc(matchedDoc);
+                            } else if (matchedSubDoc?.file_path) {
+                              supabase.storage.from("submission-documents").download(matchedSubDoc.file_path).then(({ data }) => {
+                                if (data) window.open(URL.createObjectURL(data), "_blank");
+                              });
+                            }
+                          };
+                          const handleDownload = () => {
+                            if (matchedDoc) {
+                              handleDownloadDoc(matchedDoc);
+                            } else if (matchedSubDoc?.file_path) {
+                              supabase.storage.from("submission-documents").download(matchedSubDoc.file_path).then(({ data }) => {
+                                if (data) {
+                                  const url = URL.createObjectURL(data);
+                                  const a = document.createElement("a");
+                                  a.href = url; a.download = matchedSubDoc.file_name; a.click();
+                                  URL.revokeObjectURL(url);
+                                }
+                              });
+                            }
+                          };
+
                           return (
-                            <TableRow key={item.id} className={matchedDoc ? "" : "bg-muted/30"}>
+                            <TableRow key={item.id} className={hasMatch ? "" : "bg-muted/30"}>
                               <TableCell>
                                 <Checkbox
                                   checked={!!checkedItems[item.id]}
@@ -582,9 +650,9 @@ export default function ContadoriaVerificacao() {
                               </TableCell>
                               <TableCell className="text-xs font-medium">
                                 {item.label}
-                                {matchedDoc && (
+                                {matchedFileName && (
                                   <p className="text-[10px] text-muted-foreground truncate max-w-[200px]">
-                                    {matchedDoc.nome_ficheiro}
+                                    {matchedFileName}
                                   </p>
                                 )}
                               </TableCell>
@@ -596,12 +664,12 @@ export default function ContadoriaVerificacao() {
                                 )}
                               </TableCell>
                               <TableCell>
-                                {matchedDoc ? (
+                                {hasMatch ? (
                                   <div className="flex items-center gap-1">
-                                    <Button size="sm" variant="ghost" className="h-7 px-2" title="Visualizar" onClick={() => handlePreviewDoc(matchedDoc)}>
+                                    <Button size="sm" variant="ghost" className="h-7 px-2" title="Visualizar" onClick={handlePreview}>
                                       <Eye className="h-3.5 w-3.5 text-primary" />
                                     </Button>
-                                    <Button size="sm" variant="ghost" className="h-7 px-2" title="Descarregar" onClick={() => handleDownloadDoc(matchedDoc)}>
+                                    <Button size="sm" variant="ghost" className="h-7 px-2" title="Descarregar" onClick={handleDownload}>
                                       <Download className="h-3.5 w-3.5 text-muted-foreground" />
                                     </Button>
                                   </div>
