@@ -201,10 +201,40 @@ export function SecretariaValidacaoTab() {
     if (selectedProcesso) {
       fetchDocumentos(selectedProcesso.id);
       fetchSubmittedDocs(selectedProcesso.entity_id, selectedProcesso.ano_gerencia);
+      // Fetch entity tipologia for document requirements
+      (async () => {
+        const { data } = await supabase
+          .from("entities")
+          .select("tipologia")
+          .eq("id", selectedProcesso.entity_id)
+          .limit(1);
+        if (data && data.length > 0) {
+          setEntityTipologia(data[0].tipologia as EntityTipologia);
+        }
+      })();
     } else {
       setSubmittedDocs([]);
     }
   }, [selectedProcesso, fetchDocumentos, fetchSubmittedDocs]);
+
+  // Build checklist: required docs mapped to submitted docs
+  const checklistItems = useMemo(() => {
+    const requirements = getDocumentRequirements(entityTipologia);
+    return requirements.map((req) => {
+      const matchedDoc = submittedDocs.find((d) => d.doc_id === req.id);
+      return {
+        ...req,
+        submitted: !!matchedDoc,
+        doc: matchedDoc || null,
+      };
+    });
+  }, [entityTipologia, submittedDocs]);
+
+  const checklistProgress = useMemo(() => {
+    const required = checklistItems.filter((c) => c.required);
+    const submitted = required.filter((c) => c.submitted);
+    return { total: checklistItems.length, required: required.length, submitted: submitted.length, allRequired: submitted.length === required.length };
+  }, [checklistItems]);
 
   // Approve validation
   const handleApprove = async () => {
