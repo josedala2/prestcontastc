@@ -996,8 +996,6 @@ const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
                 {actasGeradas.map((fyId) => {
                   const fy = allFYs.find((f) => f.id === fyId) || submetidos.find((f) => f.id === fyId);
                   if (!fy) return null;
-                  const isEncaminhado = encaminhados.includes(fyId);
-                  const isEncaminhando = encaminhando === fyId;
                     return (
                     <div key={fyId} className="p-3 rounded-lg border bg-success/5 border-success/20">
                       <div className="flex items-center justify-between">
