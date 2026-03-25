@@ -91,11 +91,13 @@ function EntidadeView({
   const initialRequired = useMemo(() => getDocumentRequirements(entityTipologia).filter(d => d.required).length, [entityTipologia]);
   const [docsCompliance, setDocsCompliance] = useState({ allDone: false, uploaded: 0, required: initialRequired, uploadedDocIds: [] as string[] });
   const { getStatus, submit } = useSubmissions();
-  const { hasData } = useFinancialData();
+  const { hasData, setData, clearData } = useFinancialData();
   const fiscalYearId = `${entityId}-${periodo}`;
   const dataKey = `${entityId}-${periodo}`;
   const submissionStatus = getStatus(entityId, fiscalYearId);
   const balanceteCarregado = hasData(dataKey);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isSubmitted = submissionStatus !== "rascunho";
   const canResubmit = submissionStatus === "rejeitado";
