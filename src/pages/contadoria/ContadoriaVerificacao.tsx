@@ -59,6 +59,7 @@ export default function ContadoriaVerificacao() {
 
   const [processos, setProcessos] = useState<Processo[]>([]);
   const [selectedProcesso, setSelectedProcesso] = useState<Processo | null>(null);
+  const [entityTipologia, setEntityTipologia] = useState<EntityTipologia>("empresa_publica");
   const [documentos, setDocumentos] = useState<ProcessoDoc[]>([]);
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [observacoes, setObservacoes] = useState<Record<string, string>>({});
@@ -70,6 +71,26 @@ export default function ContadoriaVerificacao() {
   const [mensagemSolicitacao, setMensagemSolicitacao] = useState("");
   const [motivoRejeicao, setMotivoRejeicao] = useState("");
   const [acting, setActing] = useState(false);
+
+  // Dynamic checklist based on entity tipologia
+  const docRequirements = useMemo(() => getDocumentRequirements(entityTipologia), [entityTipologia]);
+  const resolucao = TIPOLOGIA_RESOLUCAO[entityTipologia];
+  const resolucaoInfo = RESOLUCAO_LABELS[resolucao];
+
+  const CHECKLIST_ITEMS = useMemo(() => {
+    const items = docRequirements.map(d => ({
+      id: d.id,
+      label: d.label,
+      obrigatorio: d.required,
+    }));
+    // Add internal process docs
+    INTERNAL_CHECKLIST_ITEMS.forEach(item => {
+      if (!items.find(i => i.id === item.id)) {
+        items.push({ id: item.id, label: item.label, obrigatorio: item.required });
+      }
+    });
+    return items;
+  }, [docRequirements]);
 
   const executadoPor = user?.displayName || "Técnico da Contadoria Geral";
 
