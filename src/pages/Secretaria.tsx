@@ -46,6 +46,7 @@ const Secretaria = () => {
   const isChefe = user?.role === "Chefe da Secretaria-Geral" ||
     user?.role === "Administrador do Sistema" ||
     user?.role === "Presidente do Tribunal de Contas";
+  const isTecnicoSecretaria = user?.role === "Técnico da Secretaria-Geral";
 
   // Merge: DB fiscal years with status "submetido" + dynamically submitted via Portal
   const submetidos = useMemo(() => {
@@ -568,7 +569,7 @@ const Secretaria = () => {
                       <Checkbox
                         checked={isChecked}
                         onCheckedChange={() => handleToggleDoc(item.id)}
-                        disabled={!uploaded}
+                        disabled={!uploaded || (isChefe && !isTecnicoSecretaria)}
                       />
                     </TableCell>
                     <TableCell className={`text-sm ${!uploaded ? "text-muted-foreground line-through" : ""}`}>
@@ -660,6 +661,12 @@ const Secretaria = () => {
       </Card>
 
       {/* Acções */}
+      {isChefe && !isTecnicoSecretaria && user?.role === "Chefe da Secretaria-Geral" ? (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border text-sm text-muted-foreground">
+          <Eye className="h-4 w-4" />
+          Modo de consulta — as acções de recepção são da responsabilidade do Técnico da Secretaria. O processo será encaminhado para validação após a recepção.
+        </div>
+      ) : (
       <div className="flex items-center justify-between">
         {!allRequiredChecked ? (
           <p className="text-xs text-warning flex items-center gap-1">
@@ -697,6 +704,7 @@ const Secretaria = () => {
           </Button>
         </div>
       </div>
+      )}
     </div>
   ) : null;
 
@@ -1006,7 +1014,7 @@ const Secretaria = () => {
                           size="sm"
                           className="w-full gap-2 mt-1"
                           onClick={() => handleEncaminharValidacao(fyId)}
-                          disabled={isEncaminhando}
+                          disabled={isEncaminhando || (isChefe && !isTecnicoSecretaria && user?.role === "Chefe da Secretaria-Geral")}
                         >
                           {isEncaminhando ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
