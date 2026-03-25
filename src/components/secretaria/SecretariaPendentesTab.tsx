@@ -40,6 +40,8 @@ export function SecretariaPendentesTab() {
   const [loading, setLoading] = useState(true);
   const [enviando, setEnviando] = useState<string | null>(null);
   const [enviados, setEnviados] = useState<string[]>([]);
+  const [filtroAno, setFiltroAno] = useState<string>("todos");
+  const [filtroEntidade, setFiltroEntidade] = useState("");
 
   const isChefe = user?.role === "Chefe da Secretaria-Geral" ||
     user?.role === "Administrador do Sistema" ||
