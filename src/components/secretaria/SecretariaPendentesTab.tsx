@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatCard } from "@/components/ui-custom/PageElements";
 import {
-  Clock, Send, Loader2, CheckCircle, Building2, FileText, Inbox,
+  Clock, Send, Loader2, CheckCircle, Building2, FileText, Inbox, Search, Filter,
 } from "lucide-react";
 import { toast } from "sonner";
 import { avancarEtapaProcesso, gerarNumeroProcesso } from "@/hooks/useBackendFunctions";
@@ -38,6 +40,8 @@ export function SecretariaPendentesTab() {
   const [loading, setLoading] = useState(true);
   const [enviando, setEnviando] = useState<string | null>(null);
   const [enviados, setEnviados] = useState<string[]>([]);
+  const [filtroAno, setFiltroAno] = useState<string>("todos");
+  const [filtroEntidade, setFiltroEntidade] = useState("");
 
   const isChefe = user?.role === "Chefe da Secretaria-Geral" ||
     user?.role === "Administrador do Sistema" ||
@@ -113,7 +117,20 @@ export function SecretariaPendentesTab() {
     fetchProcessos();
   }, [fetchProcessos]);
 
-  const pendentesCount = processos.filter(p => !enviados.includes(p.id)).length;
+  const anosDisponiveis = useMemo(() => {
+    const anos = [...new Set(processos.map((p) => p.ano_gerencia))].sort((a, b) => b - a);
+    return anos;
+  }, [processos]);
+
+  const processosFiltrados = useMemo(() => {
+    return processos.filter((p) => {
+      if (filtroAno !== "todos" && p.ano_gerencia !== Number(filtroAno)) return false;
+      if (filtroEntidade && !p.entity_name.toLowerCase().includes(filtroEntidade.toLowerCase())) return false;
+      return true;
+    });
+  }, [processos, filtroAno, filtroEntidade]);
+
+  const pendentesCount = processosFiltrados.filter(p => !enviados.includes(p.id)).length;
 
   const handleEnviarParaChefe = async (processo: ProcessoPendente) => {
     setEnviando(processo.id);
@@ -254,17 +271,57 @@ export function SecretariaPendentesTab() {
           <p className="text-xs text-muted-foreground">
             Processos com acta gerada que aguardam encaminhamento para validação da Chefe da Secretaria-Geral.
           </p>
+          {/* Filtros */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-3">
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                placeholder="Pesquisar entidade…"
+                value={filtroEntidade}
+                onChange={(e) => setFiltroEntidade(e.target.value)}
+                className="pl-8 h-8 text-xs"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+              <Select value={filtroAno} onValueChange={setFiltroAno}>
+                <SelectTrigger className="h-8 w-[130px] text-xs">
+                  <SelectValue placeholder="Ano" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos os anos</SelectItem>
+                  {anosDisponiveis.map((ano) => (
+                    <SelectItem key={ano} value={String(ano)}>{ano}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {(filtroAno !== "todos" || filtroEntidade) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={() => { setFiltroAno("todos"); setFiltroEntidade(""); }}
+              >
+                Limpar filtros
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
-          ) : processos.length === 0 ? (
+          ) : processosFiltrados.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <CheckCircle className="h-8 w-8 mx-auto mb-2 opacity-40" />
-              <p className="text-sm font-medium">Nenhum processo pendente de envio.</p>
-              <p className="text-xs mt-1">Todos os processos foram encaminhados.</p>
+              <p className="text-sm font-medium">
+                {processos.length === 0 ? "Nenhum processo pendente de envio." : "Nenhum resultado para os filtros aplicados."}
+              </p>
+              <p className="text-xs mt-1">
+                {processos.length === 0 ? "Todos os processos foram encaminhados." : "Ajuste os filtros para ver mais resultados."}
+              </p>
             </div>
           ) : (
             <Table>
@@ -279,7 +336,7 @@ export function SecretariaPendentesTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {processos.map((p) => {
+                {processosFiltrados.map((p) => {
                   const isEnviado = enviados.includes(p.id);
                   const isEnviando = enviando === p.id;
                   return (
