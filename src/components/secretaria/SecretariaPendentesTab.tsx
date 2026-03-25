@@ -9,12 +9,15 @@ import {
   Clock, Send, Loader2, CheckCircle, Building2, FileText, Inbox,
 } from "lucide-react";
 import { toast } from "sonner";
-import { avancarEtapaProcesso } from "@/hooks/useBackendFunctions";
+import { avancarEtapaProcesso, gerarNumeroProcesso } from "@/hooks/useBackendFunctions";
 import { gerarAtividadesParaEvento } from "@/lib/atividadeEngine";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface ProcessoPendente {
   id: string;
+  processo_id: string | null;
+  acta_id: string;
+  acta_numero: string;
   numero_processo: string;
   entity_id: string;
   entity_name: string;
@@ -43,15 +46,65 @@ export function SecretariaPendentesTab() {
 
   const fetchProcessos = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("processos")
-      .select("*")
-      .eq("etapa_atual", 3)
-      .eq("estado", "pendente")
-      .order("created_at", { ascending: false });
+    const [actasResult, processosResult] = await Promise.all([
+      supabase
+        .from("actas_recepcao")
+        .select("id, acta_numero, entity_id, entity_name, fiscal_year, created_at")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("processos")
+        .select("*")
+        .order("created_at", { ascending: false }),
+    ]);
 
-    if (!error && data) {
-      setProcessos(data as unknown as ProcessoPendente[]);
+    if (!actasResult.error && !processosResult.error && actasResult.data && processosResult.data) {
+      const processosPorChave = new Map(
+        (processosResult.data as any[]).map((processo) => [
+          `${processo.entity_id}-${processo.ano_gerencia}`,
+          processo,
+        ])
+      );
+
+      const pendentes = actasResult.data
+        .map((acta) => {
+          const anoGerencia = Number(acta.fiscal_year);
+          const processo = processosPorChave.get(`${acta.entity_id}-${anoGerencia}`);
+
+          if (
+            processo &&
+            (
+              processo.etapa_atual > 3 ||
+              processo.estado === "em_analise" ||
+              processo.estado === "arquivado" ||
+              (processo.etapa_atual === 3 && processo.estado === "em_validacao")
+            )
+          ) {
+            return null;
+          }
+
+          return {
+            id: processo?.id ?? `acta-${acta.id}`,
+            processo_id: processo?.id ?? null,
+            acta_id: acta.id,
+            acta_numero: acta.acta_numero,
+            numero_processo: processo?.numero_processo ?? "Por gerar",
+            entity_id: acta.entity_id,
+            entity_name: acta.entity_name,
+            categoria_entidade: processo?.categoria_entidade ?? "categoria_1",
+            ano_gerencia: anoGerencia,
+            etapa_atual: processo?.etapa_atual ?? 3,
+            estado: processo?.estado ?? "pendente",
+            responsavel_atual: processo?.responsavel_atual ?? "Técnico da Secretaria-Geral",
+            observacoes: processo?.observacoes ?? `Acta ${acta.acta_numero} gerada e pronta para encaminhamento.`,
+            data_submissao: processo?.data_submissao ?? acta.created_at,
+            created_at: processo?.created_at ?? acta.created_at,
+            completude_documental: processo?.completude_documental ?? 100,
+          } satisfies ProcessoPendente;
+        })
+        .filter((item): item is ProcessoPendente => item !== null)
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setProcessos(pendentes);
     }
     setLoading(false);
   }, []);
@@ -65,23 +118,65 @@ export function SecretariaPendentesTab() {
   const handleEnviarParaChefe = async (processo: ProcessoPendente) => {
     setEnviando(processo.id);
     try {
-      await avancarEtapaProcesso({
-        processoId: processo.id,
-        novaEtapa: 3,
-        novoEstado: "em_validacao",
-        executadoPor: user?.role || "Técnico da Secretaria-Geral",
-        perfilExecutor: "Técnico da Secretaria-Geral",
-        observacoes: "Encaminhado para validação da Chefe da Secretaria-Geral",
-      });
+      let processoId = processo.processo_id;
+      let numeroProcesso = processo.numero_processo;
 
-      // Update responsavel_atual
-      await supabase.from("processos").update({
-        responsavel_atual: "Chefe da Secretaria-Geral",
-      } as any).eq("id", processo.id);
+      if (!processoId) {
+        numeroProcesso = await gerarNumeroProcesso(processo.ano_gerencia);
+        const { data: novoProcesso, error: novoProcessoError } = await supabase
+          .from("processos")
+          .insert({
+            numero_processo: numeroProcesso,
+            entity_id: processo.entity_id,
+            entity_name: processo.entity_name,
+            categoria_entidade: processo.categoria_entidade,
+            ano_gerencia: processo.ano_gerencia,
+            canal_entrada: "portal",
+            etapa_atual: 3,
+            estado: "em_validacao",
+            responsavel_atual: "Chefe da Secretaria-Geral",
+            submetido_por: "Técnico da Secretaria-Geral",
+            observacoes: "Encaminhado para validação da Chefe da Secretaria-Geral",
+            completude_documental: processo.completude_documental,
+          } as any)
+          .select("id, numero_processo")
+          .single();
+
+        if (novoProcessoError || !novoProcesso) throw novoProcessoError;
+
+        processoId = novoProcesso.id;
+        numeroProcesso = novoProcesso.numero_processo;
+
+        await supabase.from("processo_historico").insert({
+          processo_id: processoId,
+          etapa_anterior: 1,
+          etapa_seguinte: 3,
+          estado_anterior: "submetido",
+          estado_seguinte: "em_validacao",
+          acao: "Acta gerada e processo encaminhado para validação da Chefe da Secretaria-Geral",
+          executado_por: user?.role || "Técnico da Secretaria-Geral",
+          perfil_executor: "Técnico da Secretaria-Geral",
+          observacoes: `Encaminhamento originado a partir da acta ${processo.acta_numero}.`,
+          documentos_gerados: ["Acta de Recepção"],
+        } as any);
+      } else {
+        await avancarEtapaProcesso({
+          processoId,
+          novaEtapa: 3,
+          novoEstado: "em_validacao",
+          executadoPor: user?.role || "Técnico da Secretaria-Geral",
+          perfilExecutor: "Técnico da Secretaria-Geral",
+          observacoes: "Encaminhado para validação da Chefe da Secretaria-Geral",
+        });
+
+        await supabase.from("processos").update({
+          responsavel_atual: "Chefe da Secretaria-Geral",
+        } as any).eq("id", processoId);
+      }
 
       // Generate activities
       try {
-        await gerarAtividadesParaEvento("validacao_aprovada", processo.id, {
+        await gerarAtividadesParaEvento("validacao_aprovada", processoId, {
           categoriaEntidade: processo.categoria_entidade || "resolucao_1_17",
         });
       } catch (err) {
@@ -104,7 +199,8 @@ export function SecretariaPendentesTab() {
       }
 
       setEnviados(prev => [...prev, processo.id]);
-      toast.success(`Processo ${processo.numero_processo} encaminhado para a Chefe da Secretaria-Geral`);
+      setProcessos(prev => prev.filter((item) => item.id !== processo.id));
+      toast.success(`Processo ${numeroProcesso} encaminhado para a Chefe da Secretaria-Geral`);
     } catch (err: any) {
       console.error("Erro ao encaminhar:", err);
       toast.error(`Erro ao encaminhar: ${err.message}`);
@@ -188,7 +284,9 @@ export function SecretariaPendentesTab() {
                   const isEnviando = enviando === p.id;
                   return (
                     <TableRow key={p.id} className={isEnviado ? "opacity-50" : ""}>
-                      <TableCell className="font-mono text-xs">{p.numero_processo}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {p.numero_processo !== "Por gerar" ? p.numero_processo : p.acta_numero}
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
