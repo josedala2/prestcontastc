@@ -129,6 +129,14 @@ function EntidadeView({
     toast.success("Prestação de contas submetida com sucesso! Aguarda recepção pela Secretaria.");
   };
 
+  const statusMessages: Record<string, string> = {
+    pendente: "A Secretaria do Tribunal irá verificar a documentação e emitir a Acta de Recepção.",
+    recepcionado: "A Secretaria validou a documentação e emitiu a Acta de Recepção.",
+    rejeitado: "A Secretaria devolveu a submissão. Corrija os documentos indicados e resubmeta.",
+  };
+
+  const disabled = isSubmitted && !canResubmit;
+
   return (
     <div className="space-y-4">
       {/* Status Banner */}
@@ -162,17 +170,58 @@ function EntidadeView({
           </TabsTrigger>
         </TabsList>
 
-        {/* ─── TAB 1: BALANCETE (uses shared AnaliseFinanceira) ─── */}
+        {/* ─── TAB 1: BALANCETE (upload only) ─── */}
         <TabsContent value="balancete" className="space-y-4">
-          <AnaliseFinanceira
-            entityName={entityName}
-            nif={entityNif}
-            year={periodo}
-            dataKey={dataKey}
-            entityId={entityId}
-            readOnly={isSubmitted && !canResubmit}
-            hideTabs={["dre", "indicadores", "resumo"]}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            className="hidden"
+            onChange={handleFileUpload}
           />
+
+          {!balanceteCarregado && !uploadedFileName ? (
+            <div
+              className="bg-card rounded-lg border-2 border-dashed border-border p-10 text-center cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={() => !disabled && fileInputRef.current?.click()}
+            >
+              <div className="mx-auto w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                <Upload className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-base font-semibold text-foreground mb-1">Carregar Balancete</h3>
+              <p className="text-xs text-muted-foreground mb-4 max-w-sm mx-auto">
+                Seleccione o ficheiro Excel (.xlsx) ou CSV com o balancete do exercício.
+              </p>
+              <Button onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }} className="gap-2" disabled={disabled}>
+                <FileSpreadsheet className="h-4 w-4" /> Seleccionar Ficheiro
+              </Button>
+              <p className="text-[11px] text-muted-foreground mt-3">
+                Colunas esperadas: Conta, Descrição, Débito, Crédito, Saldo
+              </p>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+                  <FileSpreadsheet className="h-5 w-5 text-green-700 dark:text-green-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{uploadedFileName || "Balancete carregado"}</p>
+                  <p className="text-xs text-muted-foreground">Ficheiro carregado com sucesso</p>
+                </div>
+                {!disabled && (
+                  <div className="flex gap-2 shrink-0">
+                    <Button variant="outline" size="sm" className="gap-1.5" onClick={() => fileInputRef.current?.click()}>
+                      <Upload className="h-3.5 w-3.5" /> Substituir
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-1.5 text-destructive hover:text-destructive" onClick={handleRemoveFile}>
+                      <Trash2 className="h-3.5 w-3.5" /> Remover
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* ─── TAB 2: DOCUMENTOS ─── */}
