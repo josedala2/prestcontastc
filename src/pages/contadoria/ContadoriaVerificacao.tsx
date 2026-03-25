@@ -119,6 +119,17 @@ export default function ContadoriaVerificacao() {
       return;
     }
     fetchDocumentos(selectedProcesso.id);
+    // Fetch entity tipologia for dynamic checklist
+    (async () => {
+      const { data } = await supabase
+        .from("entities")
+        .select("tipologia")
+        .eq("id", selectedProcesso.entity_id)
+        .single();
+      if (data?.tipologia) {
+        setEntityTipologia(data.tipologia as EntityTipologia);
+      }
+    })();
   }, [selectedProcesso]);
 
   const fetchDocumentos = async (processoId: string) => {
