@@ -998,41 +998,15 @@ const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
                   if (!fy) return null;
                   const isEncaminhado = encaminhados.includes(fyId);
                   const isEncaminhando = encaminhando === fyId;
-                  return (
-                    <div key={fyId} className={`p-3 rounded-lg border ${isEncaminhado ? "bg-muted/40 border-muted" : "bg-success/5 border-success/20"}`}>
-                      <div className="flex items-center justify-between mb-2">
+                    return (
+                    <div key={fyId} className="p-3 rounded-lg border bg-success/5 border-success/20">
+                      <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium">{fy.entityName} — {fy.year}</p>
                           <p className="text-[10px] text-muted-foreground">Acta emitida em {now.toLocaleDateString("pt-AO")}</p>
                         </div>
-                        {isEncaminhado ? (
-                          <Badge variant="secondary" className="gap-1 text-[10px]">
-                            <Lock className="h-3 w-3" /> Bloqueado
-                          </Badge>
-                        ) : (
-                          <CheckCircle className="h-4 w-4 text-success" />
-                        )}
+                        <CheckCircle className="h-4 w-4 text-success" />
                       </div>
-                      {isEncaminhado ? (
-                        <div className="flex items-center gap-2 p-2 rounded-md bg-muted/60 text-xs text-muted-foreground">
-                          <Lock className="h-3.5 w-3.5" />
-                          Encaminhado para validação da Chefe da Secretaria-Geral
-                        </div>
-                      ) : (
-                        <Button
-                          size="sm"
-                          className="w-full gap-2 mt-1"
-                          onClick={() => handleEncaminharValidacao(fyId)}
-                          disabled={isEncaminhando || (isChefe && !isTecnicoSecretaria && user?.role === "Chefe da Secretaria-Geral")}
-                        >
-                          {isEncaminhando ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Send className="h-4 w-4" />
-                          )}
-                          Encaminhar para Validação da Chefe da Secretaria
-                        </Button>
-                      )}
                     </div>
                   );
                 })}
