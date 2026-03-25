@@ -38,7 +38,11 @@ import { SecretariaVistoTab } from "@/components/secretaria/SecretariaVistoTab";
 import { SecretariaValidacaoTab } from "@/components/secretaria/SecretariaValidacaoTab";
 import { useAuth } from "@/contexts/AuthContext";
 
-const Secretaria = () => {
+interface SecretariaProps {
+  initialTab?: string;
+}
+
+const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
   const { recepcionar, rejeitar, submissions, getUploadedDocs } = useSubmissions();
   const { entities: allEntities } = useEntities();
   const { user } = useAuth();
@@ -413,7 +417,7 @@ const Secretaria = () => {
     return { counts, total };
   }, [rascunhoCount, submetidos.length, emAnalise, comPedidosCount, conformeCount, naoConformeCount]);
 
-  const [activeMainTab, setActiveMainTab] = useState("dashboard");
+  const [activeMainTab, setActiveMainTab] = useState(initialTab || "dashboard");
 
   // Fetch actual submitted documents from submission_documents table
   interface SubmittedDoc {
