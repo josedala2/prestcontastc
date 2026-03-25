@@ -151,11 +151,45 @@ const PortalSolicitacoes = () => {
       // 3. Mark notification as read
       markAsRead(notif.id);
 
-      // 4. Update local state
+      // 4. Notify Secretaria that entity responded
+      await supabase.from("submission_notifications").insert({
+        entity_id: entity.id,
+        entity_name: entity.name,
+        fiscal_year_id: notif.fiscalYearId,
+        fiscal_year: notif.fiscalYearId.split("-").pop() || "",
+        type: "resposta_entidade",
+        message: `Entidade ${entity.name} respondeu à solicitação de elementos — Exercício ${notif.fiscalYearId.split("-").pop() || ""}`,
+        detail: `A entidade enviou ${state.files.length} ficheiro(s)${state.message ? ` com a mensagem: "${state.message}"` : ""}. O processo pode ser reencaminhado para verificação.`,
+      } as any);
+
+      // 5. Create history record for the response
+      // Find the process for this entity/fiscal year
+      const { data: processoData } = await supabase
+        .from("processos")
+        .select("id, numero_processo")
+        .eq("entity_id", entity.id)
+        .eq("ano_gerencia", parseInt(notif.fiscalYearId.split("-").pop() || "0"))
+        .maybeSingle();
+
+      if (processoData) {
+        await supabase.from("processo_historico").insert({
+          processo_id: processoData.id,
+          etapa_anterior: 2,
+          etapa_seguinte: 2,
+          estado_anterior: "aguardando_elementos",
+          estado_seguinte: "aguardando_elementos",
+          acao: `Entidade respondeu à solicitação de elementos — ${state.files.length} ficheiro(s) enviado(s)`,
+          executado_por: entity.name,
+          perfil_executor: "Entidade",
+          observacoes: state.message || null,
+        } as any);
+      }
+
+      // 6. Update local state
       setSubmittedIds((prev) => new Set([...prev, notif.id]));
       updateResponse(notif.id, { message: "", files: [], uploading: false });
 
-      toast.success("Resposta enviada com sucesso!");
+      toast.success("Resposta enviada com sucesso! A Secretaria foi notificada.");
     } catch (err) {
       console.error("Error submitting response:", err);
       toast.error("Erro ao enviar resposta. Tente novamente.");

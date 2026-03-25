@@ -323,39 +323,69 @@ export default function ContadoriaVerificacao() {
     }
     setActing(true);
     try {
+      const fiscalYearId = `${selectedProcesso.entity_id}-${selectedProcesso.ano_gerencia}`;
+      const fiscalYear = String(selectedProcesso.ano_gerencia);
       const listaElementos = selected.map((i) => `• ${i.label}`).join("\n");
       const detalhe = mensagemSolicitacao.trim()
         ? `${listaElementos}\n\nObservações: ${mensagemSolicitacao.trim()}`
         : listaElementos;
 
+      // Return process to entity (etapa 2) to allow re-submission
+      await avancarEtapaProcesso({
+        processoId: selectedProcesso.id,
+        novaEtapa: 2,
+        novoEstado: "aguardando_elementos",
+        executadoPor,
+        perfilExecutor: "Técnico da Contadoria Geral",
+        observacoes: `Solicitação de ${selected.length} elemento(s) em falta. Processo devolvido à entidade.`,
+      });
+
+      await supabase.from("processos").update({
+        responsavel_atual: "Entidade",
+      } as any).eq("id", selectedProcesso.id);
+
+      // Notify entity about missing elements
       await supabase.from("submission_notifications").insert({
         entity_id: selectedProcesso.entity_id,
         entity_name: selectedProcesso.entity_name,
-        fiscal_year_id: `${selectedProcesso.entity_id}-${selectedProcesso.ano_gerencia}`,
-        fiscal_year: String(selectedProcesso.ano_gerencia),
+        fiscal_year_id: fiscalYearId,
+        fiscal_year: fiscalYear,
         type: "solicitacao_elementos",
         message: `Solicitação de elementos em falta — Processo ${selectedProcesso.numero_processo}`,
         detail: detalhe,
         deadline: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
       } as any);
 
+      // Notify Secretaria about the solicitation
+      await supabase.from("submission_notifications").insert({
+        entity_id: selectedProcesso.entity_id,
+        entity_name: selectedProcesso.entity_name,
+        fiscal_year_id: fiscalYearId,
+        fiscal_year: fiscalYear,
+        type: "devolucao_contadoria",
+        message: `Processo ${selectedProcesso.numero_processo} — Elementos solicitados à entidade ${selectedProcesso.entity_name}`,
+        detail: `Foram solicitados ${selected.length} elemento(s) em falta:\n\n${detalhe}\n\nPrazo: 15 dias. A Secretaria será notificada quando a entidade responder.`,
+      } as any);
+
       // Log in processo_historico
       await supabase.from("processo_historico").insert({
         processo_id: selectedProcesso.id,
         etapa_anterior: 4,
-        etapa_seguinte: 4,
+        etapa_seguinte: 2,
         estado_anterior: selectedProcesso.estado,
-        estado_seguinte: selectedProcesso.estado,
-        acao: `Solicitação de ${selected.length} elemento(s) em falta à entidade`,
+        estado_seguinte: "aguardando_elementos",
+        acao: `Solicitação de ${selected.length} elemento(s) em falta — processo devolvido à entidade`,
         executado_por: executadoPor,
         perfil_executor: "Técnico da Contadoria Geral",
         observacoes: detalhe,
       } as any);
 
-      toast.success(`Solicitação de ${selected.length} elemento(s) enviada à entidade ${selectedProcesso.entity_name}`);
+      toast.success(`Solicitação de ${selected.length} elemento(s) enviada — processo devolvido à entidade ${selectedProcesso.entity_name}`);
       setSolicitarDialogOpen(false);
       setElementosSelecionados({});
       setMensagemSolicitacao("");
+      setSelectedProcesso(null);
+      fetchProcessos();
     } catch (err: any) {
       toast.error(`Erro: ${err.message}`);
     } finally {
