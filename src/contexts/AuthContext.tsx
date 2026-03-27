@@ -37,7 +37,7 @@ export const roleStagePermissions: Record<UserRole, number[]> = {
   "Chefe da Secretaria-Geral": [3],
   "Técnico da Contadoria Geral": [4],
   "Escrivão dos Autos": [5, 15],
-  "Contadoria Geral": [5, 6],
+  "Contadoria Geral": [6],
   "Chefe de Divisão": [6, 10],
   "Chefe de Secção": [7, 9],
   "Técnico de Análise": [8],
