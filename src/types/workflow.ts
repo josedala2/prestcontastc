@@ -262,12 +262,27 @@ export const CATEGORIAS_ENTIDADE = [
   },
 ];
 
-// Routing rules: which division handles each entity category
+// Routing rules: which division handles each entity category/tipologia
 export const CATEGORIA_DIVISAO_ROUTING: Record<string, { divisao: string; baseLegal: string }> = {
+  // Categoria 1 — Órgãos de Soberania
+  orgao_soberania: { divisao: "3ª Divisão", baseLegal: "Resolução n.º 2/16, de 2 de dezembro" },
   categoria_1: { divisao: "3ª Divisão", baseLegal: "Resolução n.º 2/16, de 2 de dezembro" },
+  // Categoria 2 — Administração Central (Ministérios) e Institutos → 4ª Divisão (Resolução 4/16)
+  admin_central: { divisao: "4ª Divisão", baseLegal: "Resolução n.º 4/16, de 6 de dezembro" },
+  instituto_admin: { divisao: "4ª Divisão", baseLegal: "Resolução n.º 4/16, de 6 de dezembro" },
+  instituto_publico: { divisao: "4ª Divisão", baseLegal: "Resolução n.º 4/16, de 6 de dezembro" },
+  categoria_2: { divisao: "4ª Divisão", baseLegal: "Resolução n.º 4/16, de 6 de dezembro" },
+  // Administrações Municipais (Locais) → 5ª Divisão
+  admin_local: { divisao: "5ª Divisão", baseLegal: "Resolução n.º 4/16, de 6 de dezembro" },
+  // Categoria 3 — Serviços no Estrangeiro
+  servico_estrangeiro: { divisao: "4ª Divisão", baseLegal: "Resolução n.º 5/16, de 8 de dezembro" },
   categoria_3: { divisao: "4ª Divisão", baseLegal: "Resolução n.º 5/16, de 8 de dezembro" },
+  // Categoria 4 — Sector Empresarial Público
+  empresa_publica: { divisao: "6ª Divisão", baseLegal: "Resolução n.º 1/17, de 5 de janeiro" },
+  orgao_autonomo: { divisao: "6ª Divisão", baseLegal: "Resolução n.º 1/17, de 5 de janeiro" },
+  fundo_autonomo: { divisao: "6ª Divisão", baseLegal: "Resolução n.º 1/17, de 5 de janeiro" },
+  servico_autonomo: { divisao: "6ª Divisão", baseLegal: "Resolução n.º 1/17, de 5 de janeiro" },
   categoria_4: { divisao: "6ª Divisão", baseLegal: "Resolução n.º 1/17, de 5 de janeiro" },
-  // categoria_2 can be added here as rules are defined
 };
 
 export interface Processo {
