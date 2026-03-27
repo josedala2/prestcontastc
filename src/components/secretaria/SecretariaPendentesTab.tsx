@@ -80,6 +80,8 @@ export function SecretariaPendentesTab() {
               processo.etapa_atual > 3 ||
               processo.estado === "em_analise" ||
               processo.estado === "arquivado" ||
+              processo.estado === "aguardando_elementos" ||
+              processo.estado === "devolvido" ||
               (processo.etapa_atual === 3 && processo.estado === "em_validacao")
             )
           ) {
