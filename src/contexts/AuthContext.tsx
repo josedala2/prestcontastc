@@ -37,7 +37,7 @@ export const roleStagePermissions: Record<UserRole, number[]> = {
   "Chefe da Secretaria-Geral": [3],
   "Técnico da Contadoria Geral": [4],
   "Escrivão dos Autos": [5, 15],
-  "Contadoria Geral": [5, 6],
+  "Contadoria Geral": [6],
   "Chefe de Divisão": [6, 10],
   "Chefe de Secção": [7, 9],
   "Técnico de Análise": [8],
@@ -48,7 +48,7 @@ export const roleStagePermissions: Record<UserRole, number[]> = {
   "Ministério Público": [14],
   "Técnico da Secção de Custas e Emolumentos": [13],
   "Oficial de Diligências": [17],
-  "Presidente da Câmara": [12, 14, 18],
+  "Presidente da Câmara": [12, 18],
   "Presidente do Tribunal de Contas": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
   "Administrador do Sistema": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
 };
@@ -349,28 +349,28 @@ export const roleDefaultRoute: Record<UserRole, string> = {
 // Divisions 3-8 with their sections
 export const DIVISOES_ESTRUTURA: Record<string, { nome: string; seccoes: string[] }> = {
   "3ª Divisão": {
-    nome: "3ª Divisão — Administração Local I",
-    seccoes: ["Secção A — Governos Provinciais", "Secção B — Administrações Municipais I"],
+    nome: "3ª Divisão — Órgãos de Soberania e Afins",
+    seccoes: ["Secção A — Presidência e Assembleia", "Secção B — Tribunais e MP"],
   },
   "4ª Divisão": {
-    nome: "4ª Divisão — Administração Local II",
-    seccoes: ["Secção A — Administrações Municipais II", "Secção B — Institutos e Fundos Locais"],
+    nome: "4ª Divisão — Administração Central e Institutos",
+    seccoes: ["Secção A — Ministérios", "Secção B — Institutos Públicos"],
   },
   "5ª Divisão": {
-    nome: "5ª Divisão — Sector Empresarial Público",
-    seccoes: ["Secção A — Empresas Públicas", "Secção B — Sociedades Comerciais do Estado", "Secção C — Participações Públicas"],
+    nome: "5ª Divisão — Administração Local (Municípios)",
+    seccoes: ["Secção A — Administrações Municipais I", "Secção B — Administrações Municipais II"],
   },
   "6ª Divisão": {
-    nome: "6ª Divisão — Administração Central I",
-    seccoes: ["Secção A — Ministérios I", "Secção B — Ministérios II"],
+    nome: "6ª Divisão — Sector Empresarial Público",
+    seccoes: ["Secção A — Empresas Públicas", "Secção B — Sociedades Comerciais do Estado", "Secção C — Fundos e Serviços Autónomos"],
   },
   "7ª Divisão": {
-    nome: "7ª Divisão — Administração Central II",
-    seccoes: ["Secção A — Institutos Públicos", "Secção B — Fundos Autónomos", "Secção C — Serviços Integrados"],
+    nome: "7ª Divisão — Serviços no Estrangeiro",
+    seccoes: ["Secção A — Embaixadas e Consulados", "Secção B — Missões e Representações"],
   },
   "8ª Divisão": {
-    nome: "8ª Divisão — Órgãos de Soberania",
-    seccoes: ["Secção A — Presidência e Assembleia", "Secção B — Tribunais e MP"],
+    nome: "8ª Divisão — Contas Especiais",
+    seccoes: ["Secção A — Contas Especiais I", "Secção B — Contas Especiais II"],
   },
 };
 

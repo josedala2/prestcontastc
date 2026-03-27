@@ -121,7 +121,7 @@ export function SecretariaValidacaoTab() {
       .from("processos")
       .select("*")
       .eq("etapa_atual", 3)
-      .in("estado", ["pendente", "em_validacao"])
+      .in("estado", ["pendente", "em_validacao", "validado"])
       .order("created_at", { ascending: false });
 
     if (!error && data) {
@@ -244,11 +244,15 @@ export function SecretariaValidacaoTab() {
       await avancarEtapaProcesso({
         processoId: selectedProcesso.id,
         novaEtapa: 3,
-        novoEstado: "em_validacao",
+        novoEstado: "validado",
         executadoPor: user?.displayName || "Chefe da Secretaria-Geral",
         perfilExecutor: "Chefe da Secretaria-Geral",
         observacoes: "Validação da Secretaria aprovada. Pronto para encaminhamento à Contadoria Geral.",
       });
+
+      await supabase.from("processos").update({
+        responsavel_atual: "Chefe da Secretaria-Geral",
+      } as any).eq("id", selectedProcesso.id);
 
       setApprovedProcessos((prev) => [...prev, selectedProcesso.id]);
       setApproveDialogOpen(false);

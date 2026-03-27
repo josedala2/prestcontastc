@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.audit_processo_changes() CASCADE;
