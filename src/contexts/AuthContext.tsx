@@ -48,7 +48,7 @@ export const roleStagePermissions: Record<UserRole, number[]> = {
   "Ministério Público": [14],
   "Técnico da Secção de Custas e Emolumentos": [13],
   "Oficial de Diligências": [17],
-  "Presidente da Câmara": [12, 14, 18],
+  "Presidente da Câmara": [12, 18],
   "Presidente do Tribunal de Contas": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
   "Administrador do Sistema": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
 };

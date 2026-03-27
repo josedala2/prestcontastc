@@ -73,11 +73,11 @@ export default function ContadoriaTriagem() {
 
   const fetchProcessos = async () => {
     setLoading(true);
-    // Fetch processes at stage 5 (after Escrivão autuação) or stage 6 waiting for Contadoria routing
+    // Fetch processes at stage 6 (after Escrivão autuação) waiting for division assignment
     const { data } = await supabase
       .from("processos")
       .select("*")
-      .in("etapa_atual", [5, 6])
+      .eq("etapa_atual", 6)
       .is("divisao_competente", null)
       .order("created_at", { ascending: false });
     setProcessos((data as any[]) || []);
