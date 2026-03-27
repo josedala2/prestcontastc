@@ -195,8 +195,8 @@ export function SecretariaPendentesTab() {
 
       // Generate activities
       try {
-        await gerarAtividadesParaEvento("validacao_aprovada", processoId, {
-          categoriaEntidade: processo.categoria_entidade || "resolucao_1_17",
+        await gerarAtividadesParaEvento("encaminhamento_validacao", processoId, {
+          categoriaEntidade: processo.categoria_entidade || "empresa_publica",
         });
       } catch (err) {
         console.error("Erro ao gerar atividades:", err);
