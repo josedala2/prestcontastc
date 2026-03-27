@@ -122,7 +122,7 @@ const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
           numero_processo: numero,
           entity_id: entity.id,
           entity_name: entity.name,
-          categoria_entidade: entity.tipologia || "categoria_1",
+          categoria_entidade: entity.tipologia || "empresa_publica",
           ano_gerencia: fy.year,
           canal_entrada: "portal",
           etapa_atual: 3,
@@ -150,8 +150,8 @@ const Secretaria = ({ initialTab }: SecretariaProps = {}) => {
 
       // Generate activities for validation event
       try {
-        await gerarAtividadesParaEvento("validacao_aprovada", processoId, {
-          categoriaEntidade: entity.tipologia || "resolucao_1_17",
+        await gerarAtividadesParaEvento("encaminhamento_validacao", processoId, {
+          categoriaEntidade: entity.tipologia || "empresa_publica",
         });
       } catch (err) {
         console.error("Erro ao gerar atividades de validação:", err);

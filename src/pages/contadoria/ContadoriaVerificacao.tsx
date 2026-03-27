@@ -406,18 +406,7 @@ export default function ContadoriaVerificacao() {
         detail: `Foram solicitados ${selected.length} elemento(s) em falta:\n\n${detalhe}\n\nPrazo: 15 dias. A Secretaria será notificada quando a entidade responder.`,
       } as any);
 
-      // Log in processo_historico
-      await supabase.from("processo_historico").insert({
-        processo_id: selectedProcesso.id,
-        etapa_anterior: 4,
-        etapa_seguinte: 2,
-        estado_anterior: selectedProcesso.estado,
-        estado_seguinte: "aguardando_elementos",
-        acao: `Solicitação de ${selected.length} elemento(s) em falta — processo devolvido à entidade`,
-        executado_por: executadoPor,
-        perfil_executor: "Técnico da Contadoria Geral",
-        observacoes: detalhe,
-      } as any);
+      // History already recorded by avancarEtapaProcesso — no duplicate insert needed
 
       toast.success(`Solicitação de ${selected.length} elemento(s) enviada — processo devolvido à entidade ${selectedProcesso.entity_name}`);
       setSolicitarDialogOpen(false);

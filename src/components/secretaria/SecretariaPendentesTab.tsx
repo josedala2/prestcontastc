@@ -80,6 +80,8 @@ export function SecretariaPendentesTab() {
               processo.etapa_atual > 3 ||
               processo.estado === "em_analise" ||
               processo.estado === "arquivado" ||
+              processo.estado === "aguardando_elementos" ||
+              processo.estado === "devolvido" ||
               (processo.etapa_atual === 3 && processo.estado === "em_validacao")
             )
           ) {
@@ -94,7 +96,7 @@ export function SecretariaPendentesTab() {
             numero_processo: processo?.numero_processo ?? "Por gerar",
             entity_id: acta.entity_id,
             entity_name: acta.entity_name,
-            categoria_entidade: processo?.categoria_entidade ?? "categoria_1",
+            categoria_entidade: processo?.categoria_entidade ?? "empresa_publica",
             ano_gerencia: anoGerencia,
             etapa_atual: processo?.etapa_atual ?? 3,
             estado: processo?.estado ?? "pendente",
@@ -146,7 +148,7 @@ export function SecretariaPendentesTab() {
             numero_processo: numeroProcesso,
             entity_id: processo.entity_id,
             entity_name: processo.entity_name,
-            categoria_entidade: processo.categoria_entidade,
+            categoria_entidade: processo.categoria_entidade || "empresa_publica",
             ano_gerencia: processo.ano_gerencia,
             canal_entrada: "portal",
             etapa_atual: 3,
@@ -193,8 +195,8 @@ export function SecretariaPendentesTab() {
 
       // Generate activities
       try {
-        await gerarAtividadesParaEvento("validacao_aprovada", processoId, {
-          categoriaEntidade: processo.categoria_entidade || "resolucao_1_17",
+        await gerarAtividadesParaEvento("encaminhamento_validacao", processoId, {
+          categoriaEntidade: processo.categoria_entidade || "empresa_publica",
         });
       } catch (err) {
         console.error("Erro ao gerar atividades:", err);
