@@ -96,7 +96,7 @@ export function SecretariaPendentesTab() {
             numero_processo: processo?.numero_processo ?? "Por gerar",
             entity_id: acta.entity_id,
             entity_name: acta.entity_name,
-            categoria_entidade: processo?.categoria_entidade ?? "categoria_1",
+            categoria_entidade: processo?.categoria_entidade ?? "empresa_publica",
             ano_gerencia: anoGerencia,
             etapa_atual: processo?.etapa_atual ?? 3,
             estado: processo?.estado ?? "pendente",
