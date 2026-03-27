@@ -148,7 +148,7 @@ export function SecretariaPendentesTab() {
             numero_processo: numeroProcesso,
             entity_id: processo.entity_id,
             entity_name: processo.entity_name,
-            categoria_entidade: processo.categoria_entidade,
+            categoria_entidade: processo.categoria_entidade || "empresa_publica",
             ano_gerencia: processo.ano_gerencia,
             canal_entrada: "portal",
             etapa_atual: 3,
