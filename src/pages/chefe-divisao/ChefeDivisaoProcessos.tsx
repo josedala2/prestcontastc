@@ -219,7 +219,7 @@ export default function ChefeDivisaoProcessos() {
         observacoes: `Chefe de Divisão assume como técnico. ${tecnicoObs}`.trim(),
       });
 
-      await gerarAtividadesParaEvento("validacao_aprovada", selectedProcesso.id, {
+      await gerarAtividadesParaEvento("analise_iniciada", selectedProcesso.id, {
         categoriaEntidade: selectedProcesso.categoria_entidade,
       });
 

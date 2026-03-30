@@ -16,7 +16,8 @@ export default function DecisaoJuizRelator() {
         },
       ],
       actions: [
-        { label: "Emitir Decisão e Avançar", nextEtapa: 13, nextEstado: "em_decisao", evento: "decisao_juiz" },
+        { label: "Conta em Termos — Avançar para Emolumentos", nextEtapa: 13, nextEstado: "conta_em_termos", evento: "decisao_juiz" },
+        { label: "Conta Não em Termos — Avançar para Emolumentos", nextEtapa: 13, nextEstado: "conta_nao_em_termos", evento: "decisao_juiz", variant: "destructive" },
         { label: "Solicitar Diligências", nextEtapa: 11, nextEstado: "pendente_correccao", evento: "diligencia", variant: "outline" },
       ],
     }} />

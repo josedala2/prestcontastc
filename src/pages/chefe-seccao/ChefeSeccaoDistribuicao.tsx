@@ -215,7 +215,7 @@ export default function ChefeSeccaoDistribuicao() {
         observacoes: obsText,
       });
 
-      await gerarAtividadesParaEvento("validacao_aprovada", selectedProcesso.id, {
+      await gerarAtividadesParaEvento("distribuicao_equipa", selectedProcesso.id, {
         categoriaEntidade: selectedProcesso.categoria_entidade,
       });
 

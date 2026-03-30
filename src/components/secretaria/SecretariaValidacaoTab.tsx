@@ -355,7 +355,7 @@ export function SecretariaValidacaoTab() {
 
       // Generate activities for the next stage
       try {
-        await gerarAtividadesParaEvento("validacao_aprovada", processo.id, {
+        await gerarAtividadesParaEvento("encaminhamento_contadoria", processo.id, {
           categoriaEntidade: processo.categoria_entidade,
         });
       } catch (err) {
