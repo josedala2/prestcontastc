@@ -506,12 +506,12 @@ export default function EscrivaoRegistoAutuacao() {
         novoEstado: "em_analise",
         executadoPor,
         perfilExecutor: "Escrivão dos Autos",
-        observacoes: `Processo autuado e remetido ao Chefe de Divisão — ${totalPaginas} páginas`,
+        observacoes: `Processo autuado e remetido à Contadoria Geral para triagem — ${totalPaginas} páginas`,
         documentosGerados: ["Capa do Processo", "Processo Completo (Compilado)"],
       });
 
       await supabase.from("processos").update({
-        responsavel_atual: "Chefe de Divisão",
+        responsavel_atual: "Contadoria Geral",
       } as any).eq("id", selectedProcesso.id);
 
       // 11. Gerar atividades

@@ -236,27 +236,14 @@ export function SecretariaValidacaoTab() {
     return { total: checklistItems.length, required: required.length, submitted: submitted.length, allRequired: submitted.length === required.length };
   }, [checklistItems]);
 
-  // Approve validation
+  // Approve validation — mark as validated and immediately advance to etapa 4 (Contadoria)
   const handleApprove = async () => {
     if (!selectedProcesso) return;
     setApproving(true);
     try {
-      await avancarEtapaProcesso({
-        processoId: selectedProcesso.id,
-        novaEtapa: 3,
-        novoEstado: "validado",
-        executadoPor: user?.displayName || "Chefe da Secretaria-Geral",
-        perfilExecutor: "Chefe da Secretaria-Geral",
-        observacoes: "Validação da Secretaria aprovada. Pronto para encaminhamento à Contadoria Geral.",
-      });
-
-      await supabase.from("processos").update({
-        responsavel_atual: "Chefe da Secretaria-Geral",
-      } as any).eq("id", selectedProcesso.id);
-
-      setApprovedProcessos((prev) => [...prev, selectedProcesso.id]);
+      // Directly advance to etapa 4 (combines approve + forward in one step)
+      await handleEncaminharContadoria(selectedProcesso);
       setApproveDialogOpen(false);
-      toast.success(`Validação aprovada — ${selectedProcesso.entity_name}`);
     } catch (err: any) {
       toast.error(`Erro: ${err.message}`);
     } finally {
@@ -368,7 +355,7 @@ export function SecretariaValidacaoTab() {
 
       // Generate activities for the next stage
       try {
-        await gerarAtividadesParaEvento("validacao_aprovada", processo.id, {
+        await gerarAtividadesParaEvento("encaminhamento_contadoria", processo.id, {
           categoriaEntidade: processo.categoria_entidade,
         });
       } catch (err) {
@@ -449,20 +436,13 @@ export function SecretariaValidacaoTab() {
   return (
     <div className="space-y-6">
       {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <StatCard
           title="Pendentes de Validação"
-          value={pendentesCount}
+          value={processos.length}
           subtitle="aguardam decisão da chefia"
           icon={<Clock className="h-5 w-5" />}
-          variant={pendentesCount > 0 ? "warning" : "success"}
-        />
-        <StatCard
-          title="Aprovados (por encaminhar)"
-          value={aprovadosCount}
-          subtitle="prontos para Contadoria Geral"
-          icon={<CheckCircle className="h-5 w-5" />}
-          variant={aprovadosCount > 0 ? "primary" : "default"}
+          variant={processos.length > 0 ? "warning" : "success"}
         />
         <StatCard
           title="Total Processos"

@@ -25,29 +25,41 @@ import {
 } from "lucide-react";
 
 /* ── técnicos demo por divisão/secção ── */
+/* Keys MUST match DIVISOES_ESTRUTURA seccoes exactly */
 const TECNICOS_POR_SECCAO: Record<string, { nome: string; especialidade: string }[]> = {
-  // 3ª Divisão
-  "Secção A — Governos Provinciais": [
-    { nome: "Dr. António Silva", especialidade: "Auditoria Financeira" },
-    { nome: "Dra. Cláudia Neves", especialidade: "Contabilidade Pública" },
-    { nome: "Dr. Hélder Gaspar", especialidade: "Gestão Orçamental" },
+  // 3ª Divisão — Órgãos de Soberania e Afins
+  "Secção A — Presidência e Assembleia": [
+    { nome: "Dr. Bruno Nogueira", especialidade: "Auditoria Institucional" },
+    { nome: "Dra. Catarina Dias", especialidade: "Fiscalização" },
+    { nome: "Dr. Fábio Santos", especialidade: "Análise Patrimonial" },
   ],
-  "Secção B — Administrações Municipais I": [
-    { nome: "Dra. Maria Santos", especialidade: "Fiscalização" },
-    { nome: "Dr. Paulo Costa", especialidade: "Análise Patrimonial" },
-    { nome: "Dra. Joana Baptista", especialidade: "Contabilidade" },
+  "Secção B — Tribunais e MP": [
+    { nome: "Dra. Diana Cunha", especialidade: "Contabilidade Pública" },
+    { nome: "Dr. Marco Teixeira", especialidade: "Auditoria" },
   ],
-  // 4ª Divisão
-  "Secção A — Administrações Municipais II": [
+  // 4ª Divisão — Administração Central e Institutos
+  "Secção A — Ministérios": [
+    { nome: "Dr. Pedro Gonçalves", especialidade: "Auditoria" },
+    { nome: "Dra. Margarida Pinto", especialidade: "Contabilidade" },
+    { nome: "Dr. Tiago Ramos", especialidade: "Análise Orçamental" },
+  ],
+  "Secção B — Institutos Públicos": [
+    { nome: "Dr. Gustavo Reis", especialidade: "Auditoria" },
+    { nome: "Dra. Inês Machado", especialidade: "Contabilidade" },
+    { nome: "Dr. Vasco Pereira", especialidade: "Controlo Interno" },
+  ],
+  // 5ª Divisão — Administração Local (Municípios)
+  "Secção A — Administrações Municipais I": [
     { nome: "Dr. João Martins", especialidade: "Auditoria" },
     { nome: "Dra. Teresa Rocha", especialidade: "Fiscalização" },
     { nome: "Dr. Rui Fernandes", especialidade: "Análise Financeira" },
   ],
-  "Secção B — Institutos e Fundos Locais": [
+  "Secção B — Administrações Municipais II": [
     { nome: "Dr. Manuel Sousa", especialidade: "Contabilidade" },
     { nome: "Dra. Beatriz Lopes", especialidade: "Gestão Pública" },
+    { nome: "Dra. Maria Santos", especialidade: "Fiscalização" },
   ],
-  // 5ª Divisão
+  // 6ª Divisão — Sector Empresarial Público
   "Secção A — Empresas Públicas": [
     { nome: "Dra. Ana Ferreira", especialidade: "Auditoria Empresarial" },
     { nome: "Dr. Carlos Mendes", especialidade: "Contabilidade Empresarial" },
@@ -57,43 +69,27 @@ const TECNICOS_POR_SECCAO: Record<string, { nome: string; especialidade: string 
     { nome: "Dr. Ricardo Sousa", especialidade: "Análise Financeira" },
     { nome: "Dra. Isabel Fernandes", especialidade: "Gestão de Risco" },
   ],
-  "Secção C — Participações Públicas": [
+  "Secção C — Fundos e Serviços Autónomos": [
     { nome: "Dr. Nuno Alves", especialidade: "Avaliação Patrimonial" },
     { nome: "Dra. Sofia Cardoso", especialidade: "Fiscalização" },
   ],
-  // 6ª Divisão
-  "Secção A — Ministérios I": [
-    { nome: "Dr. Pedro Gonçalves", especialidade: "Auditoria" },
-    { nome: "Dra. Margarida Pinto", especialidade: "Contabilidade" },
-    { nome: "Dr. Tiago Ramos", especialidade: "Análise Orçamental" },
-  ],
-  "Secção B — Ministérios II": [
+  // 7ª Divisão — Serviços no Estrangeiro
+  "Secção A — Embaixadas e Consulados": [
     { nome: "Dr. André Oliveira", especialidade: "Fiscalização" },
     { nome: "Dra. Filipa Costa", especialidade: "Gestão Financeira" },
   ],
-  // 7ª Divisão
-  "Secção A — Institutos Públicos": [
-    { nome: "Dr. Gustavo Reis", especialidade: "Auditoria" },
-    { nome: "Dra. Inês Machado", especialidade: "Contabilidade" },
-    { nome: "Dr. Vasco Pereira", especialidade: "Controlo Interno" },
-  ],
-  "Secção B — Fundos Autónomos": [
+  "Secção B — Missões e Representações": [
     { nome: "Dra. Helena Vieira", especialidade: "Análise Financeira" },
     { nome: "Dr. Duarte Fonseca", especialidade: "Gestão Pública" },
   ],
-  "Secção C — Serviços Integrados": [
+  // 8ª Divisão — Contas Especiais
+  "Secção A — Contas Especiais I": [
     { nome: "Dr. Luís Barros", especialidade: "Fiscalização" },
     { nome: "Dra. Patrícia Melo", especialidade: "Contabilidade" },
   ],
-  // 8ª Divisão
-  "Secção A — Presidência e Assembleia": [
-    { nome: "Dr. Bruno Nogueira", especialidade: "Auditoria Institucional" },
-    { nome: "Dra. Catarina Dias", especialidade: "Fiscalização" },
-    { nome: "Dr. Fábio Santos", especialidade: "Análise Patrimonial" },
-  ],
-  "Secção B — Tribunais e MP": [
-    { nome: "Dra. Diana Cunha", especialidade: "Contabilidade Pública" },
-    { nome: "Dr. Marco Teixeira", especialidade: "Auditoria" },
+  "Secção B — Contas Especiais II": [
+    { nome: "Dr. António Silva", especialidade: "Auditoria Financeira" },
+    { nome: "Dra. Cláudia Neves", especialidade: "Contabilidade Pública" },
   ],
 };
 
@@ -219,7 +215,7 @@ export default function ChefeSeccaoDistribuicao() {
         observacoes: obsText,
       });
 
-      await gerarAtividadesParaEvento("validacao_aprovada", selectedProcesso.id, {
+      await gerarAtividadesParaEvento("distribuicao_equipa", selectedProcesso.id, {
         categoriaEntidade: selectedProcesso.categoria_entidade,
       });
 

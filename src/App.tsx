@@ -276,7 +276,7 @@ const App = () => (
 
           {/* Ofício de Remessa */}
           <Route path="/secretaria/oficio-remessa" element={
-            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secretaria-Geral"]}>
+            <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secretaria-Geral", "Chefe da Secretaria-Geral"]}>
               <OficioRemessa />
             </ProtectedRoute>
           } />

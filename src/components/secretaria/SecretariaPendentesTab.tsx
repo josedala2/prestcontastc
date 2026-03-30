@@ -140,6 +140,19 @@ export function SecretariaPendentesTab() {
       let processoId = processo.processo_id;
       let numeroProcesso = processo.numero_processo;
 
+      // Fetch entity tipologia to use as categoria_entidade
+      let categoriaReal = processo.categoria_entidade;
+      if (categoriaReal === "empresa_publica" || !categoriaReal) {
+        const { data: entData } = await supabase
+          .from("entities")
+          .select("tipologia")
+          .eq("id", processo.entity_id)
+          .limit(1);
+        if (entData && entData.length > 0) {
+          categoriaReal = entData[0].tipologia;
+        }
+      }
+
       if (!processoId) {
         numeroProcesso = await gerarNumeroProcesso(processo.ano_gerencia);
         const { data: novoProcesso, error: novoProcessoError } = await supabase
@@ -148,7 +161,7 @@ export function SecretariaPendentesTab() {
             numero_processo: numeroProcesso,
             entity_id: processo.entity_id,
             entity_name: processo.entity_name,
-            categoria_entidade: processo.categoria_entidade || "empresa_publica",
+            categoria_entidade: categoriaReal,
             ano_gerencia: processo.ano_gerencia,
             canal_entrada: "portal",
             etapa_atual: 3,
@@ -196,7 +209,7 @@ export function SecretariaPendentesTab() {
       // Generate activities
       try {
         await gerarAtividadesParaEvento("encaminhamento_validacao", processoId, {
-          categoriaEntidade: processo.categoria_entidade || "empresa_publica",
+          categoriaEntidade: categoriaReal,
         });
       } catch (err) {
         console.error("Erro ao gerar atividades:", err);
