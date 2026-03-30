@@ -184,7 +184,7 @@ export default function ChefeDivisaoProcessos() {
         observacoes: `Encaminhado à secção: ${seccao}. ${observacoes}`.trim(),
       });
 
-      await gerarAtividadesParaEvento("validacao_aprovada", selectedProcesso.id, {
+      await gerarAtividadesParaEvento("encaminhamento_seccao", selectedProcesso.id, {
         categoriaEntidade: selectedProcesso.categoria_entidade,
       });
 
