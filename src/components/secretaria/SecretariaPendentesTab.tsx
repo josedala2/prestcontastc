@@ -209,7 +209,7 @@ export function SecretariaPendentesTab() {
       // Generate activities
       try {
         await gerarAtividadesParaEvento("encaminhamento_validacao", processoId, {
-          categoriaEntidade: processo.categoria_entidade || "empresa_publica",
+          categoriaEntidade: categoriaReal,
         });
       } catch (err) {
         console.error("Erro ao gerar atividades:", err);
