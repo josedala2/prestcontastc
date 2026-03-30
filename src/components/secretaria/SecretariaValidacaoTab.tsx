@@ -236,27 +236,14 @@ export function SecretariaValidacaoTab() {
     return { total: checklistItems.length, required: required.length, submitted: submitted.length, allRequired: submitted.length === required.length };
   }, [checklistItems]);
 
-  // Approve validation
+  // Approve validation — mark as validated and immediately advance to etapa 4 (Contadoria)
   const handleApprove = async () => {
     if (!selectedProcesso) return;
     setApproving(true);
     try {
-      await avancarEtapaProcesso({
-        processoId: selectedProcesso.id,
-        novaEtapa: 3,
-        novoEstado: "validado",
-        executadoPor: user?.displayName || "Chefe da Secretaria-Geral",
-        perfilExecutor: "Chefe da Secretaria-Geral",
-        observacoes: "Validação da Secretaria aprovada. Pronto para encaminhamento à Contadoria Geral.",
-      });
-
-      await supabase.from("processos").update({
-        responsavel_atual: "Chefe da Secretaria-Geral",
-      } as any).eq("id", selectedProcesso.id);
-
-      setApprovedProcessos((prev) => [...prev, selectedProcesso.id]);
+      // Directly advance to etapa 4 (combines approve + forward in one step)
+      await handleEncaminharContadoria(selectedProcesso);
       setApproveDialogOpen(false);
-      toast.success(`Validação aprovada — ${selectedProcesso.entity_name}`);
     } catch (err: any) {
       toast.error(`Erro: ${err.message}`);
     } finally {
