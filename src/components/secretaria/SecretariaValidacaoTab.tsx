@@ -436,20 +436,13 @@ export function SecretariaValidacaoTab() {
   return (
     <div className="space-y-6">
       {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <StatCard
           title="Pendentes de Validação"
-          value={pendentesCount}
+          value={processos.length}
           subtitle="aguardam decisão da chefia"
           icon={<Clock className="h-5 w-5" />}
-          variant={pendentesCount > 0 ? "warning" : "success"}
-        />
-        <StatCard
-          title="Aprovados (por encaminhar)"
-          value={aprovadosCount}
-          subtitle="prontos para Contadoria Geral"
-          icon={<CheckCircle className="h-5 w-5" />}
-          variant={aprovadosCount > 0 ? "primary" : "default"}
+          variant={processos.length > 0 ? "warning" : "success"}
         />
         <StatCard
           title="Total Processos"
