@@ -346,3 +346,69 @@ function RegistarPagamentoDialog({ emolumentoId, guias, onDone }: { emolumentoId
     </Dialog>
   );
 }
+
+/* ---------- Validar Pagamento (Contadoria) ---------- */
+function ValidarPagamentoButton({ emolumentoId, estadoAtual, entityId, entityName, onDone }: { emolumentoId: string; estadoAtual: string; entityId: string; entityName: string; onDone: () => void }) {
+  const { user } = useAuth();
+  const [saving, setSaving] = useState(false);
+
+  const permitido = ["pago", "pago_em_excesso"].includes(estadoAtual);
+
+  const handleValidar = async () => {
+    setSaving(true);
+    await supabase.from("emolumentos").update({ estado: "validado" } as any).eq("id", emolumentoId);
+    await supabase.from("emolumento_historico").insert({
+      emolumento_id: emolumentoId,
+      acao: "Pagamento validado pela Contadoria",
+      estado_anterior: estadoAtual,
+      estado_novo: "validado",
+      executado_por: user?.displayName || "sistema",
+      perfil_executor: user?.role || "Contadoria",
+      observacoes: "Pagamento verificado e validado. Formulário de prestação de contas libertado para a entidade.",
+    } as any);
+
+    // Notify entity that payment was validated and form is now available
+    await supabase.from("submission_notifications").insert({
+      entity_id: entityId,
+      entity_name: entityName,
+      fiscal_year_id: `${entityId}-${new Date().getFullYear()}`,
+      fiscal_year: String(new Date().getFullYear()),
+      type: "submissao",
+      message: `Pagamento de emolumento validado — Formulário de prestação de contas disponível`,
+      detail: `O pagamento do emolumento foi validado pela Contadoria. O formulário de submissão da prestação de contas está agora disponível no Portal.`,
+    } as any);
+
+    toast.success("Pagamento validado! Formulário de prestação de contas libertado para a entidade.");
+    setSaving(false);
+    onDone();
+  };
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline" size="sm" disabled={!permitido} className="gap-1.5">
+          <ShieldCheck className="h-4 w-4" />
+          Validar Pagamento
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            Validar Pagamento do Emolumento
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            Ao validar o pagamento, o formulário de prestação de contas será libertado para a entidade <strong className="text-foreground">{entityName}</strong>. Esta acção confirma que o pagamento foi verificado e está conforme.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={handleValidar} disabled={saving} className="gap-2">
+            <ShieldCheck className="h-4 w-4" />
+            {saving ? "A validar..." : "Confirmar Validação"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
