@@ -92,11 +92,11 @@ export default function ReconciliacaoFinanceira() {
                 </thead>
                 <tbody>
                   {reconciliacao.map((r) => (
-                    <tr key={r.id} className={`border-b ${r.conciliado ? "" : "bg-red-50/50"}`}>
+                    <tr key={r.id} className={`border-b ${r.conciliado ? "" : "bg-destructive/5"}`}>
                       <td className="p-3 font-mono text-xs">{r.numero_guia}</td>
                       <td className="p-3 text-right">{formatKz(r.valor)}</td>
-                      <td className="p-3 text-right text-green-700">{formatKz(r.total_pago)}</td>
-                      <td className={`p-3 text-right font-medium ${r.diferenca > 0 ? "text-red-700" : r.diferenca < 0 ? "text-blue-700" : ""}`}>
+                      <td className="p-3 text-right text-success">{formatKz(r.total_pago)}</td>
+                      <td className={`p-3 text-right font-medium ${r.diferenca > 0 ? "text-destructive" : r.diferenca < 0 ? "text-info" : ""}`}>
                         {formatKz(r.diferenca)}
                       </td>
                       <td className="p-3 text-xs">{new Date(r.data_emissao).toLocaleDateString("pt-AO")}</td>
