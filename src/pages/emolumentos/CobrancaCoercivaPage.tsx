@@ -21,10 +21,13 @@ export default function CobrancaCoercivaPage() {
   const eligiveis = emolumentos.filter((e) => ["em_divida", "aguardando_pagamento", "pago_a_menor", "em_cobranca_coerciva"].includes(e.estado));
 
   const handleIniciarCoerciva = async (emId: string) => {
+    const emol = eligiveis.find((e) => e.id === emId);
+    const estadoAnterior = emol?.estado || "";
     await supabase.from("emolumentos").update({ estado: "em_cobranca_coerciva" } as any).eq("id", emId);
     await supabase.from("emolumento_historico").insert({
       emolumento_id: emId,
       acao: "Processo de cobrança coerciva iniciado",
+      estado_anterior: estadoAnterior,
       estado_novo: "em_cobranca_coerciva",
       executado_por: user?.displayName || "sistema",
       perfil_executor: user?.role || "",
