@@ -147,6 +147,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/dashboard", "/entidades", "/exercicios", "/gestao-processos",
     "/submissoes", "/processos-visto", "/relatorios", "/mapas", "/anexos",
     "/actas-recepcao", "/documentos-obrigatorios", "/auditoria",
+    "/emolumentos", "/emolumentos/lista", "/emolumentos/reclamacoes", "/emolumentos/relatorios",
   ],
   "Presidente do Tribunal de Contas": [
     "/dashboard", "/entidades", "/exercicios", "/gestao-processos",
