@@ -127,8 +127,8 @@ const TecnicoDashboard = () => {
         <StatCard title="Total Processos" value={rpcStats?.total_processos ?? 0} subtitle="no sistema" icon={<FileBarChart className="h-5 w-5" />} variant="primary" />
         {isContadoria && (
           <>
-            <StatCard title="Solicitações Emolumentos" value={solicitacoes.length} subtitle="pendentes de processamento" icon={<Receipt className="h-5 w-5" />} variant="default" />
-            <StatCard title="Emolumentos Activos" value={emolumentos.filter(e => !["pago", "isento", "anulado"].includes(e.estado)).length} subtitle="aguardando pagamento/validação" icon={<DollarSign className="h-5 w-5" />} variant="success" />
+            <StatCard title="Solicitações Pendentes" value={solicitacoes.filter(s => !s.read).length} subtitle="aguardam processamento" icon={<Receipt className="h-5 w-5" />} variant="default" />
+            <StatCard title="Guias Emitidas" value={emolumentos.filter(e => e.estado === "guia_emitida" || e.estado === "aguardando_pagamento").length} subtitle="aguardam pagamento" icon={<FileBarChart className="h-5 w-5" />} variant="primary" />
           </>
         )}
         {!isContadoria && (
@@ -138,6 +138,47 @@ const TecnicoDashboard = () => {
           </>
         )}
       </div>
+
+      {isContadoria && (
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate("/emolumentos/solicitacoes")}>
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-destructive">{solicitacoes.filter(s => !s.read).length}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">Solicitações Pendentes</p>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate("/emolumentos/lista")}>
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-primary">{emolumentos.filter(e => ["guia_emitida", "aguardando_pagamento"].includes(e.estado)).length}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">Guias Emitidas</p>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate("/emolumentos/lista")}>
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-warning">{emolumentos.filter(e => e.estado === "pago").length}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">Pagamentos p/ Validar</p>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate("/emolumentos/lista")}>
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-success">{emolumentos.filter(e => e.estado === "validado").length}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">Validados</p>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate("/emolumentos/reclamacoes")}>
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-secondary">{emolumentos.filter(e => ["em_reclamacao", "em_pedido_reducao"].includes(e.estado)).length}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">Reclamações</p>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate("/emolumentos/cobranca-coerciva")}>
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-destructive">{emolumentos.filter(e => e.estado === "em_cobranca_coerciva").length}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">Cobrança Coerciva</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
