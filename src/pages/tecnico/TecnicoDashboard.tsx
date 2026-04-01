@@ -99,8 +99,18 @@ const TecnicoDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard title="Em Análise" value={processos.length} subtitle="processos atribuídos" icon={<Clock className="h-5 w-5" />} variant="warning" />
         <StatCard title="Total Processos" value={rpcStats?.total_processos ?? 0} subtitle="no sistema" icon={<FileBarChart className="h-5 w-5" />} variant="primary" />
-        <StatCard title="Concluídas" value={perfilStats?.concluidas ?? 0} subtitle="atividades do perfil" icon={<CheckCircle className="h-5 w-5" />} variant="success" />
-        <StatCard title="Atrasadas" value={perfilStats?.atrasadas ?? 0} subtitle="atividades atrasadas" icon={<AlertTriangle className="h-5 w-5" />} variant="default" />
+        {isContadoria && (
+          <>
+            <StatCard title="Solicitações Emolumentos" value={solicitacoes.length} subtitle="pendentes de processamento" icon={<Receipt className="h-5 w-5" />} variant="default" />
+            <StatCard title="Emolumentos Activos" value={emolumentos.filter(e => !["pago", "isento", "anulado"].includes(e.estado)).length} subtitle="aguardando pagamento/validação" icon={<DollarSign className="h-5 w-5" />} variant="success" />
+          </>
+        )}
+        {!isContadoria && (
+          <>
+            <StatCard title="Concluídas" value={perfilStats?.concluidas ?? 0} subtitle="atividades do perfil" icon={<CheckCircle className="h-5 w-5" />} variant="success" />
+            <StatCard title="Atrasadas" value={perfilStats?.atrasadas ?? 0} subtitle="atividades atrasadas" icon={<AlertTriangle className="h-5 w-5" />} variant="default" />
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
