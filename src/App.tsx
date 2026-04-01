@@ -280,6 +280,7 @@ const App = () => (
           <Route path="/emolumentos/cobranca-coerciva" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secção de Custas e Emolumentos", "Contadoria Geral", "Oficial de Diligências"]}><CobrancaCoercivaPage /></ProtectedRoute>} />
           <Route path="/emolumentos/reconciliacao" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secção de Custas e Emolumentos", "Contadoria Geral"]}><ReconciliacaoFinanceira /></ProtectedRoute>} />
           <Route path="/emolumentos/relatorios" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><RelatoriosEmolumentos /></ProtectedRoute>} />
+          <Route path="/emolumentos/solicitacoes" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secção de Custas e Emolumentos", "Contadoria Geral"]}><SolicitacoesEmolumentos /></ProtectedRoute>} />
 
           {/* Ministério Público */}
           <Route path="/ministerio-publico/despacho" element={
