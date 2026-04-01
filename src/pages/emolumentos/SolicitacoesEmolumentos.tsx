@@ -73,7 +73,7 @@ export default function SolicitacoesEmolumentos() {
       detail: n.detail,
       created_at: n.created_at,
       read: n.read,
-      processada: emolMap.has(n.entity_id),
+      processada: emolKeySet.has(`${n.entity_id}|${n.fiscal_year}`),
     }));
 
     setSolicitacoes(mapped);
