@@ -178,7 +178,7 @@ export const roleSidebarSections: Record<UserRole, string[]> = {
   "Representante da Entidade": [],
   "Técnico da Secretaria-Geral": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
   "Chefe da Secretaria-Geral": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
-  "Técnico da Contadoria Geral": ["Principal", "Relatórios", "Dossiê"],
+  "Técnico da Contadoria Geral": ["Principal", "Relatórios", "Dossiê", "Emolumentos"],
   "Escrivão dos Autos": ["Principal", "Dossiê", "Emolumentos", "Acesso Externo"],
   "Contadoria Geral": ["Principal", "Relatórios", "Dossiê", "Emolumentos", "Acesso Externo"],
   "Chefe de Divisão": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
