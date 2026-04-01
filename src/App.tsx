@@ -262,12 +262,23 @@ const App = () => (
             </ProtectedRoute>
           } />
 
-          {/* Custas e Emolumentos */}
+          {/* Custas e Emolumentos (workflow stage) */}
           <Route path="/custas/emolumentos" element={
             <ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secção de Custas e Emolumentos"]}>
               <CobrancaEmolumentos />
             </ProtectedRoute>
           } />
+
+          {/* Módulo Gestão de Emolumentos */}
+          {["Administrador do Sistema", "Técnico da Secção de Custas e Emolumentos", "Contadoria / Cofre", "Escrivão dos Autos", "Diretor dos Serviços Técnicos", "Juiz Relator", "Presidente da Câmara", "Presidente do Tribunal de Contas"].map(() => null)}
+          <Route path="/emolumentos" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><EmolumentosDashboard /></ProtectedRoute>} />
+          <Route path="/emolumentos/lista" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><EmolumentosLista /></ProtectedRoute>} />
+          <Route path="/emolumentos/novo" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secção de Custas e Emolumentos", "Contadoria / Cofre", "Escrivão dos Autos"]}><NovoEmolumento /></ProtectedRoute>} />
+          <Route path="/emolumentos/:id" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><EmolumentoDetalhe /></ProtectedRoute>} />
+          <Route path="/emolumentos/reclamacoes" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><ReclamacoesEmolumentos /></ProtectedRoute>} />
+          <Route path="/emolumentos/cobranca-coerciva" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secção de Custas e Emolumentos", "Contadoria / Cofre", "Oficial de Diligências"]}><CobrancaCoercivaPage /></ProtectedRoute>} />
+          <Route path="/emolumentos/reconciliacao" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secção de Custas e Emolumentos", "Contadoria / Cofre"]}><ReconciliacaoFinanceira /></ProtectedRoute>} />
+          <Route path="/emolumentos/relatorios" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><RelatoriosEmolumentos /></ProtectedRoute>} />
 
           {/* Ministério Público */}
           <Route path="/ministerio-publico/despacho" element={
