@@ -48,6 +48,7 @@ export const ESTADO_LABELS: Record<EstadoEmolumento, { label: string; color: str
   pago: { label: "Pago", color: "bg-success/10 text-success" },
   pago_a_menor: { label: "Pago a Menor", color: "bg-warning/15 text-warning" },
   pago_em_excesso: { label: "Pago em Excesso", color: "bg-success/20 text-success" },
+  validado: { label: "Validado pela Contadoria", color: "bg-primary/15 text-primary" },
   em_divida: { label: "Em Dívida", color: "bg-destructive/10 text-destructive" },
   em_reclamacao: { label: "Em Reclamação", color: "bg-secondary text-secondary-foreground" },
   em_pedido_reducao: { label: "Em Pedido de Redução", color: "bg-secondary/80 text-secondary-foreground" },
