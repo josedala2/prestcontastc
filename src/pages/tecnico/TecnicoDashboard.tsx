@@ -56,6 +56,31 @@ const TecnicoDashboard = () => {
     load();
     fetchProcessos();
     fetchSolicitacoes();
+
+    // Realtime: escutar novas solicitações de emolumentos
+    const channel = supabase
+      .channel("contadoria-solicitacoes")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "submission_notifications",
+          filter: "type=eq.solicitacao_emolumento",
+        },
+        (payload) => {
+          const newRow = payload.new as any;
+          setSolicitacoes((prev) => [newRow, ...prev]);
+          toast.info(`Nova solicitação de emolumento`, {
+            description: `${newRow.entity_name} — Exercício ${newRow.fiscal_year}`,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchSolicitacoes = async () => {
