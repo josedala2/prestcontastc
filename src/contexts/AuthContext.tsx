@@ -166,6 +166,10 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/documentos-obrigatorios", "/auditoria", "/esclarecimentos", "/configuracoes",
     "/submissoes", "/processos-visto", "/gestao-processos", "/secretaria", "/portal", "/tecnico",
     "/contadoria-geral/triagem",
+    "/emolumentos", "/emolumentos/lista", "/emolumentos/novo",
+    "/emolumentos/reclamacoes", "/emolumentos/cobranca-coerciva",
+    "/emolumentos/reconciliacao", "/emolumentos/relatorios",
+    "/custas/emolumentos",
   ],
 };
 

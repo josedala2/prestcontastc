@@ -47,8 +47,8 @@ export default function EmolumentoDetalhe() {
             { label: "Base Cálculo", value: formatKz(Number(emolumento.base_calculo)) },
             { label: "Valor Mínimo", value: formatKz(Number(emolumento.valor_minimo)) },
             { label: "Valor Final", value: formatKz(Number(emolumento.valor_final)) },
-            { label: "Valor Pago", value: formatKz(Number(emolumento.valor_pago)), color: "text-green-700" },
-            { label: "Em Dívida", value: formatKz(Number(emolumento.valor_divida)), color: "text-red-700" },
+            { label: "Valor Pago", value: formatKz(Number(emolumento.valor_pago)), color: "text-success" },
+            { label: "Em Dívida", value: formatKz(Number(emolumento.valor_divida)), color: "text-destructive" },
           ].map((c) => (
             <Card key={c.label}>
               <CardContent className="p-3 text-center">
@@ -85,7 +85,7 @@ export default function EmolumentoDetalhe() {
 
             {/* Actions */}
             <div className="flex flex-wrap gap-2 mt-4">
-              <EmitirGuiaDialog emolumentoId={emolumento.id} valorFinal={Number(emolumento.valor_final)} valorDivida={Number(emolumento.valor_divida)} onDone={refresh} />
+              <EmitirGuiaDialog emolumentoId={emolumento.id} valorFinal={Number(emolumento.valor_final)} valorDivida={Number(emolumento.valor_divida)} estadoAtual={emolumento.estado} onDone={refresh} />
               <RegistarPagamentoDialog emolumentoId={emolumento.id} guias={guias} onDone={refresh} />
             </div>
           </TabsContent>
@@ -129,7 +129,7 @@ export default function EmolumentoDetalhe() {
                     <tbody>
                       {pagamentos.map((p) => (
                         <tr key={p.id} className="border-b">
-                          <td className="p-3 text-right font-medium text-green-700">{formatKz(Number(p.valor_pago))}</td>
+                          <td className="p-3 text-right font-medium text-success">{formatKz(Number(p.valor_pago))}</td>
                           <td className="p-3 text-xs">{new Date(p.data_pagamento).toLocaleDateString("pt-AO")}</td>
                           <td className="p-3 text-xs">{p.meio_pagamento}</td>
                           <td className="p-3 text-xs font-mono">{p.referencia_comprovativo || "—"}</td>
@@ -203,14 +203,19 @@ export default function EmolumentoDetalhe() {
 }
 
 /* ---------- Emitir Guia Dialog ---------- */
-function EmitirGuiaDialog({ emolumentoId, valorFinal, valorDivida, onDone }: { emolumentoId: string; valorFinal: number; valorDivida: number; onDone: () => void }) {
+const ESTADOS_PERMITIDOS_GUIA = ["calculado", "guia_emitida", "aguardando_pagamento", "pagamento_parcial", "pago_a_menor", "em_divida"];
+
+function EmitirGuiaDialog({ emolumentoId, valorFinal, valorDivida, estadoAtual, onDone }: { emolumentoId: string; valorFinal: number; valorDivida: number; estadoAtual: string; onDone: () => void }) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [valor, setValor] = useState(valorDivida || valorFinal);
   const [dataLimite, setDataLimite] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const permitido = ESTADOS_PERMITIDOS_GUIA.includes(estadoAtual);
+
   const handleEmitir = async () => {
+    if (!permitido) { toast.error("Não é possível emitir guia no estado actual"); return; }
     setSaving(true);
     const seq = Date.now().toString().slice(-6);
     const numGuia = `GC-${new Date().getFullYear()}/${seq}`;
@@ -227,7 +232,7 @@ function EmitirGuiaDialog({ emolumentoId, valorFinal, valorDivida, onDone }: { e
     await supabase.from("emolumento_historico").insert({
       emolumento_id: emolumentoId,
       acao: `Guia ${numGuia} emitida no valor de ${formatKz(valor)}`,
-      estado_anterior: "calculado",
+      estado_anterior: estadoAtual,
       estado_novo: "guia_emitida",
       executado_por: user?.displayName || "sistema",
       perfil_executor: user?.role || "",
@@ -241,7 +246,7 @@ function EmitirGuiaDialog({ emolumentoId, valorFinal, valorDivida, onDone }: { e
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button variant="outline" size="sm"><Receipt className="h-4 w-4 mr-1" /> Emitir Guia</Button></DialogTrigger>
+      <DialogTrigger asChild><Button variant="outline" size="sm" disabled={!permitido}><Receipt className="h-4 w-4 mr-1" /> Emitir Guia</Button></DialogTrigger>
       <DialogContent>
         <DialogHeader><DialogTitle>Emitir Guia de Cobrança</DialogTitle></DialogHeader>
         <div className="space-y-3">
