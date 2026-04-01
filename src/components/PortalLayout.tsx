@@ -39,6 +39,7 @@ interface PortalLayoutProps {
 const portalNav = [
   { title: "Painel", icon: LayoutDashboard, path: "/portal" },
   { title: "Exercícios", icon: FileBarChart, path: "/portal/exercicios" },
+  { title: "Emolumentos", icon: FileSearch, path: "/portal/emolumentos" },
   { title: "Prestação de Contas", icon: FileBarChart, path: "/portal/prestacao-contas" },
   { title: "Solicitação de Visto", icon: ShieldCheck, path: "/portal/solicitacao-visto" },
   { title: "Solicitações", icon: MessageSquare, path: "/portal/solicitacoes" },
@@ -50,6 +51,7 @@ const portalNav = [
 const routeTitles: Record<string, string> = {
   "/portal": "Painel da Entidade",
   "/portal/exercicios": "Exercícios Fiscais",
+  "/portal/emolumentos": "Emolumentos",
   "/portal/prestacao-contas": "Prestação de Contas",
   "/portal/solicitacao-visto": "Solicitação de Visto",
   "/portal/solicitacoes": "Solicitações de Elementos",
