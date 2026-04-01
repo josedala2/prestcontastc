@@ -80,6 +80,7 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/dashboard", "/gestao-processos", "/entidades", "/submissoes",
     "/actas-recepcao", "/documentos-obrigatorios", "/escrivao/registo-autuacao",
     "/escrivao/cumprimento-despachos",
+    "/emolumentos", "/emolumentos/lista", "/emolumentos/novo",
   ],
   "Contadoria Geral": [
     "/dashboard", "/gestao-processos", "/entidades", "/submissoes",
