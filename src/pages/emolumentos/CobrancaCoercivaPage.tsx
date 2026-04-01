@@ -69,8 +69,8 @@ export default function CobrancaCoercivaPage() {
                         <td className="p-3 font-mono text-xs cursor-pointer hover:underline" onClick={() => navigate(`/emolumentos/${em.id}`)}>{em.numero_processo}</td>
                         <td className="p-3 truncate max-w-[180px]">{em.entity_name}</td>
                         <td className="p-3 text-right">{formatKz(Number(em.valor_final))}</td>
-                        <td className="p-3 text-right text-green-700">{formatKz(Number(em.valor_pago))}</td>
-                        <td className="p-3 text-right font-bold text-red-700">{formatKz(Number(em.valor_divida))}</td>
+                        <td className="p-3 text-right text-success">{formatKz(Number(em.valor_pago))}</td>
+                        <td className="p-3 text-right font-bold text-destructive">{formatKz(Number(em.valor_divida))}</td>
                         <td className="p-3"><Badge variant="outline" className={`text-[10px] ${info?.color || ""}`}>{info?.label || em.estado}</Badge></td>
                         <td className="p-3">
                           {em.estado !== "em_cobranca_coerciva" ? (
