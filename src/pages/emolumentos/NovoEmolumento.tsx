@@ -12,7 +12,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSalarioMinimo } from "@/hooks/useEmolumentos";
 import { calcularEmolumento, formatKz, TIPO_PROCESSO_LABELS, TipoProcesso } from "@/lib/emolumentosCalculo";
 import { toast } from "sonner";
-import { Calculator, Save } from "lucide-react";
+import { Calculator, Save, HelpCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface ProcessoOption {
   id: string;
