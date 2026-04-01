@@ -154,6 +154,8 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/submissoes", "/processos-visto", "/relatorios", "/mapas", "/anexos",
     "/actas-recepcao", "/documentos-obrigatorios", "/auditoria", "/esclarecimentos",
     "/configuracoes",
+    "/emolumentos", "/emolumentos/lista", "/emolumentos/reclamacoes",
+    "/emolumentos/reconciliacao", "/emolumentos/relatorios",
   ],
   "Administrador do Sistema": [
     "/dashboard", "/entidades", "/exercicios", "/importacao", "/plano-contas",
