@@ -129,7 +129,7 @@ export default function EmolumentoDetalhe() {
                     <tbody>
                       {pagamentos.map((p) => (
                         <tr key={p.id} className="border-b">
-                          <td className="p-3 text-right font-medium text-green-700">{formatKz(Number(p.valor_pago))}</td>
+                          <td className="p-3 text-right font-medium text-success">{formatKz(Number(p.valor_pago))}</td>
                           <td className="p-3 text-xs">{new Date(p.data_pagamento).toLocaleDateString("pt-AO")}</td>
                           <td className="p-3 text-xs">{p.meio_pagamento}</td>
                           <td className="p-3 text-xs font-mono">{p.referencia_comprovativo || "—"}</td>

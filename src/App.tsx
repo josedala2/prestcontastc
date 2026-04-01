@@ -88,7 +88,6 @@ const DASHBOARD_ROLES = [
   "Juiz Adjunto",
   "Ministério Público",
   "Técnico da Secção de Custas e Emolumentos",
-  "Contadoria Geral",
   "Oficial de Diligências",
   "Presidente da Câmara",
   "Presidente do Tribunal de Contas",
