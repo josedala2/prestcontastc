@@ -102,6 +102,23 @@ function EntidadeView({
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ── Check emolumento validation status ──
+  const [emolumentoValidado, setEmolumentoValidado] = useState<boolean | null>(null);
+  const [loadingEmolumento, setLoadingEmolumento] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      setLoadingEmolumento(true);
+      const { data } = await supabase
+        .from("emolumentos")
+        .select("id, estado")
+        .eq("entity_id", entityId)
+        .in("estado", ["validado", "isento"]);
+      setEmolumentoValidado(data != null && data.length > 0);
+      setLoadingEmolumento(false);
+    })();
+  }, [entityId]);
+
   const isSubmitted = submissionStatus !== "rascunho";
   const canResubmit = submissionStatus === "rejeitado" || submissionStatus === "aguardando_elementos";
   const StatusIcon = STATUS_CONFIG[submissionStatus].icon;
