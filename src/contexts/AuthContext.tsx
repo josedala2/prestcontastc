@@ -90,7 +90,8 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/documentos-obrigatorios", "/contadoria-geral/triagem",
     "/mapas", "/relatorios",
     "/emolumentos", "/emolumentos/lista", "/emolumentos/novo",
-    "/emolumentos/reclamacoes", "/emolumentos/cobranca-coerciva",
+    "/emolumentos/solicitacoes", "/emolumentos/reclamacoes",
+    "/emolumentos/cobranca-coerciva",
     "/emolumentos/reconciliacao", "/emolumentos/relatorios",
   ],
   "Chefe de Divisão": [
