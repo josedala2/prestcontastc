@@ -336,6 +336,14 @@ function InformarPagamentoDialog({
       estado: "aguardando_pagamento",
     } as any).eq("id", emolumentoId);
 
+    // Registar no log de auditoria
+    await supabase.from("audit_log").insert({
+      action: `Pagamento de emolumento informado — ${formatKz(valor)}`,
+      username: entityName,
+      action_type: "pagamento_emolumento_informado",
+      detail: `Entidade: ${entityName}\nValor: ${formatKz(valor)}\nMeio: ${meio}\nReferência: ${referencia}${dataPagamento ? `\nData: ${dataPagamento}` : ""}`,
+    } as any);
+
     toast.success("Pagamento informado com sucesso! A Contadoria irá verificar e validar.");
     setSaving(false);
     setOpen(false);
@@ -443,6 +451,14 @@ function SolicitarGuiaDialog({ entityId, entityName, onDone }: { entityId: strin
       type: "submissao",
       message: `Solicitação de guia de pagamento de emolumento — Exercício ${exercicio}`,
       detail: `A entidade ${entityName} solicita a emissão da guia de pagamento do emolumento para o exercício ${exercicio}.\n\nTipo de processo: ${TIPOS.find(t => t.value === tipoProcesso)?.label || tipoProcesso}\n\n${observacoes ? `Observações: ${observacoes}` : ""}`,
+    } as any);
+
+    // Registar no log de auditoria
+    await supabase.from("audit_log").insert({
+      action: `Solicitação de guia de pagamento de emolumento — Exercício ${exercicio}`,
+      username: entityName,
+      action_type: "solicitacao_emolumento",
+      detail: `Entidade: ${entityName}\nTipo: ${TIPOS.find(t => t.value === tipoProcesso)?.label || tipoProcesso}\nExercício: ${exercicio}${observacoes ? `\nObservações: ${observacoes}` : ""}`,
     } as any);
 
     toast.success("Solicitação de guia de pagamento enviada com sucesso! A Contadoria irá processar o pedido.");
