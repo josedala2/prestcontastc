@@ -12,7 +12,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSalarioMinimo } from "@/hooks/useEmolumentos";
 import { calcularEmolumento, formatKz, TIPO_PROCESSO_LABELS, TipoProcesso } from "@/lib/emolumentosCalculo";
 import { toast } from "sonner";
-import { Calculator, Save } from "lucide-react";
+import { Calculator, Save, HelpCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface ProcessoOption {
   id: string;
@@ -97,8 +98,13 @@ export default function NovoEmolumento() {
   return (
     <AppLayout>
       <div className="p-6 max-w-3xl space-y-4">
-        <h1 className="text-2xl font-bold font-serif">Novo Emolumento</h1>
-        <p className="text-sm text-muted-foreground">Criar emolumento vinculado a um processo existente</p>
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-2xl font-bold font-serif">Novo Emolumento</h1>
+            <p className="text-sm text-muted-foreground">Criar emolumento vinculado a um processo existente</p>
+          </div>
+          <AjudaCalculoDialog />
+        </div>
 
         <Card>
           <CardHeader><CardTitle className="text-base">Dados do Emolumento</CardTitle></CardHeader>
@@ -166,5 +172,74 @@ export default function NovoEmolumento() {
         </Card>
       </div>
     </AppLayout>
+  );
+}
+
+/* ---------- Ajuda de Cálculo ---------- */
+function AjudaCalculoDialog() {
+  const regras = [
+    { tipo: "Visto — Actos relativos a pessoal", regra: "3% da remuneração ilíquida mensal", minimo: "1/5 do salário mínimo" },
+    { tipo: "Visto — Restantes actos e contratos", regra: "1% do valor do contrato", minimo: "1/2 do salário mínimo" },
+    { tipo: "Visto — Contratos de prestação periódica", regra: "1% do valor do contrato (ou valor anual se ≥ 1 ano)", minimo: "1/2 do salário mínimo" },
+    { tipo: "Processo de Contas", regra: "1% da receita cobrada", minimo: "5 salários mínimos" },
+    { tipo: "Contas — Empresa Pública / afins", regra: "1% dos lucros do exercício", minimo: "5 salários mínimos" },
+    { tipo: "Multas", regra: "10% da multa aplicada", minimo: "—" },
+    { tipo: "Responsabilidade Financeira", regra: "1% a 5% do valor da responsabilidade", minimo: "—" },
+    { tipo: "Recurso não admitido", regra: "Valor fixo", minimo: "1/4 do salário mínimo" },
+    { tipo: "Recurso admitido", regra: "1/4 dos emolumentos contados no processo até à interposição", minimo: "1/4 do salário mínimo" },
+    { tipo: "Certidão", regra: "Tabela aplicável (valor inserido manualmente)", minimo: "—" },
+    { tipo: "Reclamação / Pedido de redução", regra: "Valor fixo de 1/5 do salário mínimo; se atendida, não cobrar", minimo: "1/5 do salário mínimo" },
+  ];
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-1.5">
+          <HelpCircle className="h-4 w-4" /> Ajuda
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-serif">Regras de Cálculo de Emolumentos</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 text-sm">
+          <p className="text-muted-foreground">
+            O cálculo de emolumentos segue as regras definidas pelo Tribunal de Contas de Angola. 
+            O valor final é sempre o <strong>maior</strong> entre o valor calculado (taxa × base) e o valor mínimo legal.
+          </p>
+
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-muted/50 border-b">
+                  <th className="p-2.5 text-left font-medium text-muted-foreground text-xs">Tipo de Processo</th>
+                  <th className="p-2.5 text-left font-medium text-muted-foreground text-xs">Regra de Cálculo</th>
+                  <th className="p-2.5 text-left font-medium text-muted-foreground text-xs">Mínimo Legal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {regras.map((r, i) => (
+                  <tr key={i} className="border-b last:border-0 hover:bg-muted/20">
+                    <td className="p-2.5 font-medium text-xs">{r.tipo}</td>
+                    <td className="p-2.5 text-xs">{r.regra}</td>
+                    <td className="p-2.5 text-xs text-muted-foreground">{r.minimo}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="bg-muted/30 rounded-lg p-3 space-y-1.5">
+            <p className="font-semibold text-xs">Fórmula Geral:</p>
+            <p className="text-xs font-mono bg-background rounded px-2 py-1.5">
+              Valor Final = MAX( Base de Cálculo × Taxa , Valor Mínimo Legal )
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              O salário mínimo de referência é actualizado conforme tabela de vigência configurada no sistema.
+            </p>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
