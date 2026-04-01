@@ -46,14 +46,22 @@ export default function SolicitacoesEmolumentos() {
 
     if (!notifs) { setLoading(false); return; }
 
-    // Check which ones already have emolumentos created
+    // Check which ones already have emolumentos created (match by entity_id + fiscal year via numero_processo)
     const entityIds = [...new Set(notifs.map(n => n.entity_id))];
     const { data: emols } = await supabase
       .from("emolumentos")
       .select("entity_id, numero_processo, estado")
       .in("entity_id", entityIds.length > 0 ? entityIds : ["__none__"]);
 
-    const emolMap = new Set((emols || []).map(e => e.entity_id));
+    // Build a set of "entity_id|fiscal_year" keys from existing emolumentos
+    const emolKeySet = new Set(
+      (emols || []).map(e => {
+        // Extract year from numero_processo (e.g. "EMO-2024/123456" or "PC-2024/0001")
+        const yearMatch = e.numero_processo.match(/(\d{4})/);
+        const year = yearMatch ? yearMatch[1] : "";
+        return `${e.entity_id}|${year}`;
+      })
+    );
 
     const mapped: Solicitacao[] = notifs.map(n => ({
       id: n.id,
@@ -65,7 +73,7 @@ export default function SolicitacoesEmolumentos() {
       detail: n.detail,
       created_at: n.created_at,
       read: n.read,
-      processada: emolMap.has(n.entity_id),
+      processada: emolKeySet.has(`${n.entity_id}|${n.fiscal_year}`),
     }));
 
     setSolicitacoes(mapped);
