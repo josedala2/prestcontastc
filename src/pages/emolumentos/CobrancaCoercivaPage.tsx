@@ -21,10 +21,13 @@ export default function CobrancaCoercivaPage() {
   const eligiveis = emolumentos.filter((e) => ["em_divida", "aguardando_pagamento", "pago_a_menor", "em_cobranca_coerciva"].includes(e.estado));
 
   const handleIniciarCoerciva = async (emId: string) => {
+    const emol = eligiveis.find((e) => e.id === emId);
+    const estadoAnterior = emol?.estado || "";
     await supabase.from("emolumentos").update({ estado: "em_cobranca_coerciva" } as any).eq("id", emId);
     await supabase.from("emolumento_historico").insert({
       emolumento_id: emId,
       acao: "Processo de cobrança coerciva iniciado",
+      estado_anterior: estadoAnterior,
       estado_novo: "em_cobranca_coerciva",
       executado_por: user?.displayName || "sistema",
       perfil_executor: user?.role || "",
@@ -66,8 +69,8 @@ export default function CobrancaCoercivaPage() {
                         <td className="p-3 font-mono text-xs cursor-pointer hover:underline" onClick={() => navigate(`/emolumentos/${em.id}`)}>{em.numero_processo}</td>
                         <td className="p-3 truncate max-w-[180px]">{em.entity_name}</td>
                         <td className="p-3 text-right">{formatKz(Number(em.valor_final))}</td>
-                        <td className="p-3 text-right text-green-700">{formatKz(Number(em.valor_pago))}</td>
-                        <td className="p-3 text-right font-bold text-red-700">{formatKz(Number(em.valor_divida))}</td>
+                        <td className="p-3 text-right text-success">{formatKz(Number(em.valor_pago))}</td>
+                        <td className="p-3 text-right font-bold text-destructive">{formatKz(Number(em.valor_divida))}</td>
                         <td className="p-3"><Badge variant="outline" className={`text-[10px] ${info?.color || ""}`}>{info?.label || em.estado}</Badge></td>
                         <td className="p-3">
                           {em.estado !== "em_cobranca_coerciva" ? (
@@ -75,7 +78,7 @@ export default function CobrancaCoercivaPage() {
                               <Ban className="h-3 w-3 mr-1" /> Iniciar Coerciva
                             </Button>
                           ) : (
-                            <Badge className="bg-red-200 text-red-900 text-[10px]">Em Cobrança</Badge>
+                            <Badge className="bg-destructive/20 text-destructive text-[10px]">Em Cobrança</Badge>
                           )}
                         </td>
                       </tr>

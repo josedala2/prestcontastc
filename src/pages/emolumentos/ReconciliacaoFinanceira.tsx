@@ -66,8 +66,8 @@ export default function ReconciliacaoFinanceira() {
         {/* Summary */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Card><CardContent className="p-3 text-center"><p className="text-xs text-muted-foreground">Total Guias</p><p className="text-lg font-bold">{formatKz(totalGuias)}</p></CardContent></Card>
-          <Card><CardContent className="p-3 text-center"><p className="text-xs text-muted-foreground">Total Pago</p><p className="text-lg font-bold text-green-700">{formatKz(totalPago)}</p></CardContent></Card>
-          <Card><CardContent className="p-3 text-center"><p className="text-xs text-muted-foreground">Diferença</p><p className={`text-lg font-bold ${totalDif > 0 ? "text-red-700" : "text-green-700"}`}>{formatKz(totalDif)}</p></CardContent></Card>
+          <Card><CardContent className="p-3 text-center"><p className="text-xs text-muted-foreground">Total Pago</p><p className="text-lg font-bold text-success">{formatKz(totalPago)}</p></CardContent></Card>
+          <Card><CardContent className="p-3 text-center"><p className="text-xs text-muted-foreground">Diferença</p><p className={`text-lg font-bold ${totalDif > 0 ? "text-destructive" : "text-success"}`}>{formatKz(totalDif)}</p></CardContent></Card>
           <Card><CardContent className="p-3 text-center"><p className="text-xs text-muted-foreground">Conciliados</p><p className="text-lg font-bold">{conciliados}/{reconciliacao.length}</p></CardContent></Card>
         </div>
 
@@ -92,19 +92,19 @@ export default function ReconciliacaoFinanceira() {
                 </thead>
                 <tbody>
                   {reconciliacao.map((r) => (
-                    <tr key={r.id} className={`border-b ${r.conciliado ? "" : "bg-red-50/50"}`}>
+                    <tr key={r.id} className={`border-b ${r.conciliado ? "" : "bg-destructive/5"}`}>
                       <td className="p-3 font-mono text-xs">{r.numero_guia}</td>
                       <td className="p-3 text-right">{formatKz(r.valor)}</td>
-                      <td className="p-3 text-right text-green-700">{formatKz(r.total_pago)}</td>
-                      <td className={`p-3 text-right font-medium ${r.diferenca > 0 ? "text-red-700" : r.diferenca < 0 ? "text-blue-700" : ""}`}>
+                      <td className="p-3 text-right text-success">{formatKz(r.total_pago)}</td>
+                      <td className={`p-3 text-right font-medium ${r.diferenca > 0 ? "text-destructive" : r.diferenca < 0 ? "text-info" : ""}`}>
                         {formatKz(r.diferenca)}
                       </td>
                       <td className="p-3 text-xs">{new Date(r.data_emissao).toLocaleDateString("pt-AO")}</td>
                       <td className="p-3 text-center">
                         {r.conciliado ? (
-                          <CheckCircle className="h-4 w-4 text-green-600 mx-auto" />
+                          <CheckCircle className="h-4 w-4 text-success mx-auto" />
                         ) : (
-                          <AlertTriangle className="h-4 w-4 text-amber-600 mx-auto" />
+                          <AlertTriangle className="h-4 w-4 text-warning mx-auto" />
                         )}
                       </td>
                     </tr>
