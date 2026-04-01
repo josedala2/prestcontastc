@@ -85,7 +85,7 @@ export default function EmolumentoDetalhe() {
 
             {/* Actions */}
             <div className="flex flex-wrap gap-2 mt-4">
-              <EmitirGuiaDialog emolumentoId={emolumento.id} valorFinal={Number(emolumento.valor_final)} valorDivida={Number(emolumento.valor_divida)} onDone={refresh} />
+              <EmitirGuiaDialog emolumentoId={emolumento.id} valorFinal={Number(emolumento.valor_final)} valorDivida={Number(emolumento.valor_divida)} estadoAtual={emolumento.estado} onDone={refresh} />
               <RegistarPagamentoDialog emolumentoId={emolumento.id} guias={guias} onDone={refresh} />
             </div>
           </TabsContent>
