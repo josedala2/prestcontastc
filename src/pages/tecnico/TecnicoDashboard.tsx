@@ -8,8 +8,9 @@ import { useEntities } from "@/hooks/useEntities";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { obterEstatisticasDashboard, obterEstatisticasPorPerfil } from "@/hooks/useBackendFunctions";
-import { FileBarChart, CheckCircle, Clock, AlertTriangle, ArrowRight, BarChart3 } from "lucide-react";
+import { FileBarChart, CheckCircle, Clock, AlertTriangle, ArrowRight, BarChart3, Receipt, DollarSign } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useEmolumentos } from "@/hooks/useEmolumentos";
 
 interface Processo {
   id: string;
