@@ -24,6 +24,10 @@ import {
   AlertTriangle,
   UserCheck,
   GitBranch,
+  Receipt,
+  CreditCard,
+  Scale,
+  DollarSign,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth, roleHiddenPaths, roleSidebarSections } from "@/contexts/AuthContext";
