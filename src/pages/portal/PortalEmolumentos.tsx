@@ -234,3 +234,103 @@ export default function PortalEmolumentos() {
     </PortalLayout>
   );
 }
+
+/* ---------- Solicitar Guia de Pagamento Dialog ---------- */
+function SolicitarGuiaDialog({ entityId, entityName, onDone }: { entityId: string; entityName: string; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [exercicio, setExercicio] = useState(String(new Date().getFullYear()));
+  const [tipoProcesso, setTipoProcesso] = useState("contas");
+  const [observacoes, setObservacoes] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const TIPOS = [
+    { value: "contas", label: "Processo de Contas" },
+    { value: "contas_empresa_publica", label: "Contas — Empresa Pública" },
+    { value: "visto_pessoal", label: "Visto — Actos relativos a pessoal" },
+    { value: "visto_contratos", label: "Visto — Restantes actos e contratos" },
+  ];
+
+  const handleSolicitar = async () => {
+    if (!exercicio.trim()) { toast.error("Indique o exercício fiscal"); return; }
+    setSaving(true);
+
+    // Create a notification to the Secretaria/Contadoria requesting the guide
+    await supabase.from("submission_notifications").insert({
+      entity_id: entityId,
+      entity_name: entityName,
+      fiscal_year_id: `${entityId}-${exercicio}`,
+      fiscal_year: exercicio,
+      type: "submissao",
+      message: `Solicitação de guia de pagamento de emolumento — Exercício ${exercicio}`,
+      detail: `A entidade ${entityName} solicita a emissão da guia de pagamento do emolumento para o exercício ${exercicio}.\n\nTipo de processo: ${TIPOS.find(t => t.value === tipoProcesso)?.label || tipoProcesso}\n\n${observacoes ? `Observações: ${observacoes}` : ""}`,
+    } as any);
+
+    toast.success("Solicitação de guia de pagamento enviada com sucesso! A Contadoria irá processar o pedido.");
+    setSaving(false);
+    setOpen(false);
+    setObservacoes("");
+    onDone();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="gap-2 shrink-0">
+          <Plus className="h-4 w-4" />
+          Solicitar Guia de Pagamento
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="font-serif flex items-center gap-2">
+            <Receipt className="h-5 w-5 text-primary" />
+            Solicitar Guia de Pagamento
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Solicite a emissão da guia de pagamento do emolumento. Após o processamento, a guia ficará disponível nesta página.
+          </p>
+
+          <div>
+            <Label className="text-xs">Exercício Fiscal *</Label>
+            <Input
+              value={exercicio}
+              onChange={(e) => setExercicio(e.target.value)}
+              placeholder="Ex: 2024"
+              className="mt-1"
+            />
+          </div>
+
+          <div>
+            <Label className="text-xs">Tipo de Processo *</Label>
+            <Select value={tipoProcesso} onValueChange={setTipoProcesso}>
+              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {TIPOS.map(t => (
+                  <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label className="text-xs">Observações</Label>
+            <Textarea
+              value={observacoes}
+              onChange={(e) => setObservacoes(e.target.value)}
+              placeholder="Informações adicionais sobre o pedido..."
+              className="mt-1"
+              rows={3}
+            />
+          </div>
+
+          <Button onClick={handleSolicitar} disabled={saving} className="w-full gap-2">
+            <Send className="h-4 w-4" />
+            {saving ? "A enviar..." : "Enviar Solicitação"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
