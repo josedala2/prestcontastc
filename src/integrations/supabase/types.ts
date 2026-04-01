@@ -423,6 +423,296 @@ export type Database = {
         }
         Relationships: []
       }
+      emolumento_guias: {
+        Row: {
+          anulado_at: string | null
+          anulado_motivo: string | null
+          created_at: string
+          data_emissao: string
+          data_limite: string | null
+          emitido_por: string
+          emolumento_id: string
+          estado: string
+          id: string
+          numero_guia: string
+          valor: number
+        }
+        Insert: {
+          anulado_at?: string | null
+          anulado_motivo?: string | null
+          created_at?: string
+          data_emissao?: string
+          data_limite?: string | null
+          emitido_por?: string
+          emolumento_id: string
+          estado?: string
+          id?: string
+          numero_guia: string
+          valor: number
+        }
+        Update: {
+          anulado_at?: string | null
+          anulado_motivo?: string | null
+          created_at?: string
+          data_emissao?: string
+          data_limite?: string | null
+          emitido_por?: string
+          emolumento_id?: string
+          estado?: string
+          id?: string
+          numero_guia?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emolumento_guias_emolumento_id_fkey"
+            columns: ["emolumento_id"]
+            isOneToOne: false
+            referencedRelation: "emolumentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      emolumento_historico: {
+        Row: {
+          acao: string
+          created_at: string
+          detalhes_json: Json | null
+          emolumento_id: string
+          estado_anterior: string | null
+          estado_novo: string | null
+          executado_por: string
+          id: string
+          observacoes: string | null
+          perfil_executor: string | null
+        }
+        Insert: {
+          acao: string
+          created_at?: string
+          detalhes_json?: Json | null
+          emolumento_id: string
+          estado_anterior?: string | null
+          estado_novo?: string | null
+          executado_por?: string
+          id?: string
+          observacoes?: string | null
+          perfil_executor?: string | null
+        }
+        Update: {
+          acao?: string
+          created_at?: string
+          detalhes_json?: Json | null
+          emolumento_id?: string
+          estado_anterior?: string | null
+          estado_novo?: string | null
+          executado_por?: string
+          id?: string
+          observacoes?: string | null
+          perfil_executor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emolumento_historico_emolumento_id_fkey"
+            columns: ["emolumento_id"]
+            isOneToOne: false
+            referencedRelation: "emolumentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      emolumento_pagamentos: {
+        Row: {
+          caminho_comprovativo: string | null
+          created_at: string
+          data_pagamento: string
+          emolumento_id: string
+          guia_id: string | null
+          id: string
+          meio_pagamento: string
+          referencia_comprovativo: string | null
+          registado_por: string
+          valor_pago: number
+        }
+        Insert: {
+          caminho_comprovativo?: string | null
+          created_at?: string
+          data_pagamento?: string
+          emolumento_id: string
+          guia_id?: string | null
+          id?: string
+          meio_pagamento?: string
+          referencia_comprovativo?: string | null
+          registado_por?: string
+          valor_pago: number
+        }
+        Update: {
+          caminho_comprovativo?: string | null
+          created_at?: string
+          data_pagamento?: string
+          emolumento_id?: string
+          guia_id?: string | null
+          id?: string
+          meio_pagamento?: string
+          referencia_comprovativo?: string | null
+          registado_por?: string
+          valor_pago?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emolumento_pagamentos_emolumento_id_fkey"
+            columns: ["emolumento_id"]
+            isOneToOne: false
+            referencedRelation: "emolumentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emolumento_pagamentos_guia_id_fkey"
+            columns: ["guia_id"]
+            isOneToOne: false
+            referencedRelation: "emolumento_guias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      emolumento_reclamacoes: {
+        Row: {
+          anexo_path: string | null
+          created_at: string
+          decidido_at: string | null
+          decidido_por: string | null
+          decisao: string | null
+          emolumento_id: string
+          estado: string
+          fundamentacao: string
+          id: string
+          tipo: string
+          updated_at: string
+          valor_original: number
+          valor_reduzido: number | null
+        }
+        Insert: {
+          anexo_path?: string | null
+          created_at?: string
+          decidido_at?: string | null
+          decidido_por?: string | null
+          decisao?: string | null
+          emolumento_id: string
+          estado?: string
+          fundamentacao: string
+          id?: string
+          tipo?: string
+          updated_at?: string
+          valor_original?: number
+          valor_reduzido?: number | null
+        }
+        Update: {
+          anexo_path?: string | null
+          created_at?: string
+          decidido_at?: string | null
+          decidido_por?: string | null
+          decisao?: string | null
+          emolumento_id?: string
+          estado?: string
+          fundamentacao?: string
+          id?: string
+          tipo?: string
+          updated_at?: string
+          valor_original?: number
+          valor_reduzido?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emolumento_reclamacoes_emolumento_id_fkey"
+            columns: ["emolumento_id"]
+            isOneToOne: false
+            referencedRelation: "emolumentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      emolumentos: {
+        Row: {
+          base_calculo: number
+          base_legal: string | null
+          created_at: string
+          decisao_associada: string | null
+          entity_id: string
+          entity_name: string
+          estado: string
+          id: string
+          numero_processo: string
+          observacoes: string | null
+          processo_id: string
+          responsavel_pagamento: string | null
+          salario_minimo_ref: number
+          subtipo_processo: string | null
+          taxa_aplicada: number
+          tipo_processo: string
+          updated_at: string
+          valor_antecipado: number
+          valor_divida: number
+          valor_final: number
+          valor_minimo: number
+          valor_pago: number
+        }
+        Insert: {
+          base_calculo?: number
+          base_legal?: string | null
+          created_at?: string
+          decisao_associada?: string | null
+          entity_id: string
+          entity_name: string
+          estado?: string
+          id?: string
+          numero_processo: string
+          observacoes?: string | null
+          processo_id: string
+          responsavel_pagamento?: string | null
+          salario_minimo_ref?: number
+          subtipo_processo?: string | null
+          taxa_aplicada?: number
+          tipo_processo: string
+          updated_at?: string
+          valor_antecipado?: number
+          valor_divida?: number
+          valor_final?: number
+          valor_minimo?: number
+          valor_pago?: number
+        }
+        Update: {
+          base_calculo?: number
+          base_legal?: string | null
+          created_at?: string
+          decisao_associada?: string | null
+          entity_id?: string
+          entity_name?: string
+          estado?: string
+          id?: string
+          numero_processo?: string
+          observacoes?: string | null
+          processo_id?: string
+          responsavel_pagamento?: string | null
+          salario_minimo_ref?: number
+          subtipo_processo?: string | null
+          taxa_aplicada?: number
+          tipo_processo?: string
+          updated_at?: string
+          valor_antecipado?: number
+          valor_divida?: number
+          valor_final?: number
+          valor_minimo?: number
+          valor_pago?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emolumentos_processo_id_fkey"
+            columns: ["processo_id"]
+            isOneToOne: false
+            referencedRelation: "processos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       entities: {
         Row: {
           contacto: string | null
@@ -936,6 +1226,33 @@ export type Database = {
           telefone?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      salario_minimo_vigencia: {
+        Row: {
+          created_at: string
+          criado_por: string
+          data_fim: string | null
+          data_inicio: string
+          id: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          criado_por?: string
+          data_fim?: string | null
+          data_inicio: string
+          id?: string
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          criado_por?: string
+          data_fim?: string | null
+          data_inicio?: string
+          id?: string
+          valor?: number
         }
         Relationships: []
       }
