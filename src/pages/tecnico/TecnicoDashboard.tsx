@@ -54,7 +54,18 @@ const TecnicoDashboard = () => {
     };
     load();
     fetchProcessos();
+    fetchSolicitacoes();
   }, []);
+
+  const fetchSolicitacoes = async () => {
+    const { data } = await supabase
+      .from("submission_notifications")
+      .select("*")
+      .eq("type", "solicitacao_emolumento")
+      .order("created_at", { ascending: false })
+      .limit(10);
+    setSolicitacoes(data || []);
+  };
 
   const fetchProcessos = async () => {
     setLoadingProcessos(true);
