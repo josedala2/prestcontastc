@@ -98,8 +98,13 @@ export default function NovoEmolumento() {
   return (
     <AppLayout>
       <div className="p-6 max-w-3xl space-y-4">
-        <h1 className="text-2xl font-bold font-serif">Novo Emolumento</h1>
-        <p className="text-sm text-muted-foreground">Criar emolumento vinculado a um processo existente</p>
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-2xl font-bold font-serif">Novo Emolumento</h1>
+            <p className="text-sm text-muted-foreground">Criar emolumento vinculado a um processo existente</p>
+          </div>
+          <AjudaCalculoDialog />
+        </div>
 
         <Card>
           <CardHeader><CardTitle className="text-base">Dados do Emolumento</CardTitle></CardHeader>
