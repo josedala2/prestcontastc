@@ -158,6 +158,47 @@ const TecnicoDashboard = () => {
           </CardContent>
         </Card>
 
+        {isContadoria && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Receipt className="h-4 w-4 text-primary" />
+                Solicitações de Emolumentos
+              </CardTitle>
+              <Button variant="link" size="sm" className="text-xs" onClick={() => navigate("/emolumentos/solicitacoes")}>
+                Ver todas →
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {solicitacoes.length > 0 ? (
+                solicitacoes.slice(0, 5).map((s) => (
+                  <div key={s.id} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 transition-colors cursor-pointer"
+                    onClick={() => navigate("/emolumentos/solicitacoes")}
+                  >
+                    <div>
+                      <p className="text-sm font-medium">{s.entity_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Exercício {s.fiscal_year} · {new Date(s.created_at).toLocaleDateString("pt-AO")}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={s.read ? "secondary" : "destructive"} className="text-[10px]">
+                        {s.read ? "Processada" : "Pendente"}
+                      </Badge>
+                      <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-6 text-muted-foreground">
+                  <Receipt className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">Sem solicitações de emolumentos pendentes.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
