@@ -47,8 +47,8 @@ export default function EmolumentoDetalhe() {
             { label: "Base Cálculo", value: formatKz(Number(emolumento.base_calculo)) },
             { label: "Valor Mínimo", value: formatKz(Number(emolumento.valor_minimo)) },
             { label: "Valor Final", value: formatKz(Number(emolumento.valor_final)) },
-            { label: "Valor Pago", value: formatKz(Number(emolumento.valor_pago)), color: "text-green-700" },
-            { label: "Em Dívida", value: formatKz(Number(emolumento.valor_divida)), color: "text-red-700" },
+            { label: "Valor Pago", value: formatKz(Number(emolumento.valor_pago)), color: "text-success" },
+            { label: "Em Dívida", value: formatKz(Number(emolumento.valor_divida)), color: "text-destructive" },
           ].map((c) => (
             <Card key={c.label}>
               <CardContent className="p-3 text-center">
