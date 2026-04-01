@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { EntityTipologia, TIPOLOGIA_RESOLUCAO, RESOLUCAO_LABELS } from "@/types";
 import { PortalLayout } from "@/components/PortalLayout";
 import { ActasRecepcaoList } from "@/components/ActasRecepcaoList";
@@ -10,12 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
-import { FileSpreadsheet, CheckCircle, AlertTriangle, Send, Clock, FileText, Paperclip, Upload, Trash2 } from "lucide-react";
+import { FileSpreadsheet, CheckCircle, AlertTriangle, Send, Clock, FileText, Paperclip, Upload, Trash2, ShieldCheck, CreditCard } from "lucide-react";
 import { useSubmissions } from "@/contexts/SubmissionContext";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { toast } from "sonner";
 import { EntidadeDocumentosTab, getDocumentRequirements } from "@/components/portal/EntidadeDocumentosTab";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 const PortalPrestacaoContas = () => {
   const { entity } = usePortalEntity();
