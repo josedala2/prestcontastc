@@ -25,13 +25,13 @@ export default function EmolumentosDashboard() {
 
   const kpis = [
     { label: "Total Emolumentos", value: emolumentos.length, icon: FileText, color: "text-primary" },
-    { label: "Valor Total", value: formatKz(totalFinal), icon: DollarSign, color: "text-blue-600" },
-    { label: "Receita Cobrada", value: formatKz(totalPago), icon: TrendingUp, color: "text-green-600" },
-    { label: "Em Dívida", value: formatKz(totalDivida), icon: AlertTriangle, color: "text-red-600" },
-    { label: "Pendentes", value: pendentes, icon: Clock, color: "text-yellow-600" },
-    { label: "Pagos", value: byEstado["pago"] || 0, icon: CheckCircle, color: "text-green-600" },
-    { label: "Cobrança Coerciva", value: coercivos, icon: Ban, color: "text-red-700" },
-    { label: "Reclamações", value: reclamacoes, icon: Receipt, color: "text-purple-600" },
+    { label: "Valor Total", value: formatKz(totalFinal), icon: DollarSign, color: "text-info" },
+    { label: "Receita Cobrada", value: formatKz(totalPago), icon: TrendingUp, color: "text-success" },
+    { label: "Em Dívida", value: formatKz(totalDivida), icon: AlertTriangle, color: "text-destructive" },
+    { label: "Pendentes", value: pendentes, icon: Clock, color: "text-warning" },
+    { label: "Pagos", value: byEstado["pago"] || 0, icon: CheckCircle, color: "text-success" },
+    { label: "Cobrança Coerciva", value: coercivos, icon: Ban, color: "text-destructive" },
+    { label: "Reclamações", value: reclamacoes, icon: Receipt, color: "text-secondary" },
   ];
 
   // Recent emolumentos

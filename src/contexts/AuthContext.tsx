@@ -80,11 +80,15 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/dashboard", "/gestao-processos", "/entidades", "/submissoes",
     "/actas-recepcao", "/documentos-obrigatorios", "/escrivao/registo-autuacao",
     "/escrivao/cumprimento-despachos",
+    "/emolumentos", "/emolumentos/lista", "/emolumentos/novo",
   ],
   "Contadoria Geral": [
     "/dashboard", "/gestao-processos", "/entidades", "/submissoes",
     "/documentos-obrigatorios", "/contadoria-geral/triagem",
     "/mapas", "/relatorios",
+    "/emolumentos", "/emolumentos/lista", "/emolumentos/novo",
+    "/emolumentos/reclamacoes", "/emolumentos/cobranca-coerciva",
+    "/emolumentos/reconciliacao", "/emolumentos/relatorios",
   ],
   "Chefe de Divisão": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
@@ -111,12 +115,14 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/submissoes", "/relatorios", "/mapas", "/anexos",
     "/documentos-obrigatorios", "/esclarecimentos", "/auditoria",
     "/dst/controle-qualidade",
+    "/emolumentos", "/emolumentos/lista", "/emolumentos/relatorios",
   ],
   "Juiz Relator": [
     "/dashboard", "/entidades", "/exercicios", "/gestao-processos",
     "/submissoes", "/relatorios", "/mapas", "/anexos",
     "/documentos-obrigatorios", "/auditoria", "/processos-visto",
     "/juiz/decisao", "/juiz/arquivamento",
+    "/emolumentos", "/emolumentos/lista", "/emolumentos/reclamacoes", "/emolumentos/relatorios",
   ],
   "Juiz Adjunto": [
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
@@ -131,21 +137,28 @@ export const rolePermissions: Record<UserRole, string[]> = {
   "Técnico da Secção de Custas e Emolumentos": [
     "/dashboard", "/gestao-processos", "/submissoes", "/entidades",
     "/custas/emolumentos",
+    "/emolumentos", "/emolumentos/lista", "/emolumentos/novo",
+    "/emolumentos/reclamacoes", "/emolumentos/cobranca-coerciva",
+    "/emolumentos/reconciliacao", "/emolumentos/relatorios",
   ],
   "Oficial de Diligências": [
     "/dashboard", "/gestao-processos", "/entidades",
     "/diligencias/expediente-saida",
+    "/emolumentos", "/emolumentos/lista", "/emolumentos/cobranca-coerciva",
   ],
   "Presidente da Câmara": [
     "/dashboard", "/entidades", "/exercicios", "/gestao-processos",
     "/submissoes", "/processos-visto", "/relatorios", "/mapas", "/anexos",
     "/actas-recepcao", "/documentos-obrigatorios", "/auditoria",
+    "/emolumentos", "/emolumentos/lista", "/emolumentos/reclamacoes", "/emolumentos/relatorios",
   ],
   "Presidente do Tribunal de Contas": [
     "/dashboard", "/entidades", "/exercicios", "/gestao-processos",
     "/submissoes", "/processos-visto", "/relatorios", "/mapas", "/anexos",
     "/actas-recepcao", "/documentos-obrigatorios", "/auditoria", "/esclarecimentos",
     "/configuracoes",
+    "/emolumentos", "/emolumentos/lista", "/emolumentos/reclamacoes",
+    "/emolumentos/reconciliacao", "/emolumentos/relatorios",
   ],
   "Administrador do Sistema": [
     "/dashboard", "/entidades", "/exercicios", "/importacao", "/plano-contas",
