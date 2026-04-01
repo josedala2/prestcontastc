@@ -8,8 +8,9 @@ import { useEntities } from "@/hooks/useEntities";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { obterEstatisticasDashboard, obterEstatisticasPorPerfil } from "@/hooks/useBackendFunctions";
-import { FileBarChart, CheckCircle, Clock, AlertTriangle, ArrowRight, BarChart3 } from "lucide-react";
+import { FileBarChart, CheckCircle, Clock, AlertTriangle, ArrowRight, BarChart3, Receipt, DollarSign } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useEmolumentos } from "@/hooks/useEmolumentos";
 
 interface Processo {
   id: string;
@@ -35,6 +36,8 @@ const TecnicoDashboard = () => {
   const [perfilStats, setPerfilStats] = useState<any>(null);
   const [processos, setProcessos] = useState<Processo[]>([]);
   const [loadingProcessos, setLoadingProcessos] = useState(true);
+  const [solicitacoes, setSolicitacoes] = useState<any[]>([]);
+  const { emolumentos } = useEmolumentos();
 
   useEffect(() => {
     const load = async () => {
@@ -51,7 +54,18 @@ const TecnicoDashboard = () => {
     };
     load();
     fetchProcessos();
+    fetchSolicitacoes();
   }, []);
+
+  const fetchSolicitacoes = async () => {
+    const { data } = await supabase
+      .from("submission_notifications")
+      .select("*")
+      .eq("type", "solicitacao_emolumento")
+      .order("created_at", { ascending: false })
+      .limit(10);
+    setSolicitacoes(data || []);
+  };
 
   const fetchProcessos = async () => {
     setLoadingProcessos(true);
@@ -85,8 +99,18 @@ const TecnicoDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard title="Em Análise" value={processos.length} subtitle="processos atribuídos" icon={<Clock className="h-5 w-5" />} variant="warning" />
         <StatCard title="Total Processos" value={rpcStats?.total_processos ?? 0} subtitle="no sistema" icon={<FileBarChart className="h-5 w-5" />} variant="primary" />
-        <StatCard title="Concluídas" value={perfilStats?.concluidas ?? 0} subtitle="atividades do perfil" icon={<CheckCircle className="h-5 w-5" />} variant="success" />
-        <StatCard title="Atrasadas" value={perfilStats?.atrasadas ?? 0} subtitle="atividades atrasadas" icon={<AlertTriangle className="h-5 w-5" />} variant="default" />
+        {isContadoria && (
+          <>
+            <StatCard title="Solicitações Emolumentos" value={solicitacoes.length} subtitle="pendentes de processamento" icon={<Receipt className="h-5 w-5" />} variant="default" />
+            <StatCard title="Emolumentos Activos" value={emolumentos.filter(e => !["pago", "isento", "anulado"].includes(e.estado)).length} subtitle="aguardando pagamento/validação" icon={<DollarSign className="h-5 w-5" />} variant="success" />
+          </>
+        )}
+        {!isContadoria && (
+          <>
+            <StatCard title="Concluídas" value={perfilStats?.concluidas ?? 0} subtitle="atividades do perfil" icon={<CheckCircle className="h-5 w-5" />} variant="success" />
+            <StatCard title="Atrasadas" value={perfilStats?.atrasadas ?? 0} subtitle="atividades atrasadas" icon={<AlertTriangle className="h-5 w-5" />} variant="default" />
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -133,6 +157,47 @@ const TecnicoDashboard = () => {
             )}
           </CardContent>
         </Card>
+
+        {isContadoria && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Receipt className="h-4 w-4 text-primary" />
+                Solicitações de Emolumentos
+              </CardTitle>
+              <Button variant="link" size="sm" className="text-xs" onClick={() => navigate("/emolumentos/solicitacoes")}>
+                Ver todas →
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {solicitacoes.length > 0 ? (
+                solicitacoes.slice(0, 5).map((s) => (
+                  <div key={s.id} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 transition-colors cursor-pointer"
+                    onClick={() => navigate("/emolumentos/solicitacoes")}
+                  >
+                    <div>
+                      <p className="text-sm font-medium">{s.entity_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Exercício {s.fiscal_year} · {new Date(s.created_at).toLocaleDateString("pt-AO")}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={s.read ? "secondary" : "destructive"} className="text-[10px]">
+                        {s.read ? "Processada" : "Pendente"}
+                      </Badge>
+                      <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-6 text-muted-foreground">
+                  <Receipt className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">Sem solicitações de emolumentos pendentes.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>
