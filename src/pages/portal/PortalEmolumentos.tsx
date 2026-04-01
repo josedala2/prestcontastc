@@ -76,10 +76,23 @@ export default function PortalEmolumentos() {
 
   return (
     <PortalLayout>
-      <PageHeader
-        title="Emolumentos"
-        description="Consulte o estado dos emolumentos e guias de pagamento"
-      />
+      <div className="flex items-center justify-between mb-6">
+        <PageHeader
+          title="Emolumentos"
+          description="Consulte o estado dos emolumentos e guias de pagamento"
+        />
+        <SolicitarGuiaDialog entityId={entity.id} entityName={entity.name} onDone={() => {
+          // Reload emolumentos
+          (async () => {
+            const { data } = await supabase
+              .from("emolumentos")
+              .select("id, numero_processo, tipo_processo, valor_final, valor_pago, valor_divida, estado, created_at")
+              .eq("entity_id", entity.id)
+              .order("created_at", { ascending: false });
+            setEmolumentos((data as unknown as EmolumentoPortal[]) || []);
+          })();
+        }} />
+      </div>
 
       {/* Status geral */}
       <Card className="mb-6">
