@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { usePortalEntity } from "@/contexts/PortalEntityContext";
 import { supabase } from "@/integrations/supabase/client";
 import { formatKz, ESTADO_LABELS, EstadoEmolumento } from "@/lib/emolumentosCalculo";
-import { Receipt, CheckCircle, Clock, AlertTriangle, CreditCard, ShieldCheck, Send, Plus } from "lucide-react";
+import { Receipt, CheckCircle, Clock, AlertTriangle, CreditCard, ShieldCheck, Send, Plus, Upload, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 interface EmolumentoPortal {
@@ -35,42 +35,77 @@ interface GuiaPortal {
   estado: string;
 }
 
+interface SolicitacaoPendente {
+  id: string;
+  message: string;
+  detail: string | null;
+  created_at: string;
+}
+
 export default function PortalEmolumentos() {
   const { entity } = usePortalEntity();
   const [emolumentos, setEmolumentos] = useState<EmolumentoPortal[]>([]);
   const [guias, setGuias] = useState<Record<string, GuiaPortal[]>>({});
+  const [solicitacoesPendentes, setSolicitacoesPendentes] = useState<SolicitacaoPendente[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      const { data } = await supabase
-        .from("emolumentos")
-        .select("id, numero_processo, tipo_processo, valor_final, valor_pago, valor_divida, estado, created_at")
-        .eq("entity_id", entity.id)
-        .order("created_at", { ascending: false });
-      const ems = (data as unknown as EmolumentoPortal[]) || [];
-      setEmolumentos(ems);
+  const fetchData = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("emolumentos")
+      .select("id, numero_processo, tipo_processo, valor_final, valor_pago, valor_divida, estado, created_at")
+      .eq("entity_id", entity.id)
+      .order("created_at", { ascending: false });
+    const ems = (data as unknown as EmolumentoPortal[]) || [];
+    setEmolumentos(ems);
 
-      // Load guias for each emolumento
-      if (ems.length > 0) {
-        const ids = ems.map(e => e.id);
-        const { data: guiasData } = await supabase
-          .from("emolumento_guias")
-          .select("id, emolumento_id, numero_guia, valor, data_emissao, data_limite, estado")
-          .in("emolumento_id", ids)
-          .order("created_at", { ascending: false });
-        
-        const guiasMap: Record<string, GuiaPortal[]> = {};
-        (guiasData || []).forEach((g: any) => {
-          if (!guiasMap[g.emolumento_id]) guiasMap[g.emolumento_id] = [];
-          guiasMap[g.emolumento_id].push(g);
-        });
-        setGuias(guiasMap);
-      }
-      setLoading(false);
-    })();
-  }, [entity.id]);
+    // Load guias for each emolumento
+    if (ems.length > 0) {
+      const ids = ems.map(e => e.id);
+      const { data: guiasData } = await supabase
+        .from("emolumento_guias")
+        .select("id, emolumento_id, numero_guia, valor, data_emissao, data_limite, estado")
+        .in("emolumento_id", ids)
+        .order("created_at", { ascending: false });
+      
+      const guiasMap: Record<string, GuiaPortal[]> = {};
+      (guiasData || []).forEach((g: any) => {
+        if (!guiasMap[g.emolumento_id]) guiasMap[g.emolumento_id] = [];
+        guiasMap[g.emolumento_id].push(g);
+      });
+      setGuias(guiasMap);
+    }
+
+    // Load pending solicitations (requests sent but no emolumento yet)
+    const { data: notifs } = await supabase
+      .from("submission_notifications")
+      .select("id, message, detail, created_at")
+      .eq("entity_id", entity.id)
+      .like("message", "%Solicitação de guia de pagamento%")
+      .order("created_at", { ascending: false });
+
+    // Filter: only show solicitations that don't have a matching emolumento
+    const solPendentes = (notifs || []).filter(() => {
+      // If entity has no emolumentos at all, all solicitations are pending
+      return ems.length === 0;
+    });
+    // More precise: show if no emolumento created after the solicitation
+    if (ems.length > 0) {
+      const emolCreatedDates = ems.map(e => new Date(e.created_at).getTime());
+      const filteredSols = (notifs || []).filter(n => {
+        const solDate = new Date(n.created_at).getTime();
+        // Pending if no emolumento was created after this solicitation
+        return !emolCreatedDates.some(d => d >= solDate);
+      });
+      setSolicitacoesPendentes(filteredSols);
+    } else {
+      setSolicitacoesPendentes(notifs || []);
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchData(); }, [entity.id]);
 
   const temEmolumentoValidado = emolumentos.some(e => e.estado === "validado" || e.estado === "isento");
 
@@ -81,18 +116,29 @@ export default function PortalEmolumentos() {
           title="Emolumentos"
           description="Consulte o estado dos emolumentos e guias de pagamento"
         />
-        <SolicitarGuiaDialog entityId={entity.id} entityName={entity.name} onDone={() => {
-          // Reload emolumentos
-          (async () => {
-            const { data } = await supabase
-              .from("emolumentos")
-              .select("id, numero_processo, tipo_processo, valor_final, valor_pago, valor_divida, estado, created_at")
-              .eq("entity_id", entity.id)
-              .order("created_at", { ascending: false });
-            setEmolumentos((data as unknown as EmolumentoPortal[]) || []);
-          })();
-        }} />
+        <SolicitarGuiaDialog entityId={entity.id} entityName={entity.name} onDone={fetchData} />
       </div>
+
+      {/* Solicitações pendentes */}
+      {solicitacoesPendentes.length > 0 && (
+        <Card className="mb-6 border-l-4 border-l-warning">
+          <CardContent className="p-4 space-y-2">
+            <div className="flex items-center gap-2 text-warning">
+              <Clock className="h-4 w-4" />
+              <span className="text-sm font-semibold">Solicitações Pendentes de Processamento</span>
+            </div>
+            {solicitacoesPendentes.map(sol => (
+              <div key={sol.id} className="bg-muted/30 rounded-lg p-3 text-sm">
+                <p className="text-xs text-muted-foreground">
+                  Enviada em {new Date(sol.created_at).toLocaleString("pt-AO")}
+                </p>
+                <p className="text-xs mt-1">{sol.message}</p>
+                <Badge variant="outline" className="mt-1 text-[10px]">Aguarda processamento pela Contadoria</Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Status geral */}
       <Card className="mb-6">
@@ -125,7 +171,7 @@ export default function PortalEmolumentos() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-muted-foreground">Sem Emolumentos</p>
-                  <p className="text-xs text-muted-foreground">Não existem emolumentos associados a esta entidade. Contacte o Tribunal para solicitar a guia de pagamento.</p>
+                  <p className="text-xs text-muted-foreground">Solicite a guia de pagamento usando o botão acima.</p>
                 </div>
               </>
             )}
@@ -141,7 +187,7 @@ export default function PortalEmolumentos() {
           <CardContent className="py-12 text-center">
             <Receipt className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
             <p className="text-sm text-muted-foreground">Sem emolumentos registados para esta entidade.</p>
-            <p className="text-xs text-muted-foreground mt-1">Contacte a Secretaria do Tribunal para solicitar a emissão da guia de pagamento.</p>
+            <p className="text-xs text-muted-foreground mt-1">Utilize o botão "Solicitar Guia de Pagamento" para iniciar o processo.</p>
           </CardContent>
         </Card>
       ) : (
@@ -206,6 +252,17 @@ export default function PortalEmolumentos() {
                     </div>
                   )}
 
+                  {/* Action: Informar Pagamento */}
+                  {["guia_emitida", "aguardando_pagamento", "calculado"].includes(em.estado) && (
+                    <InformarPagamentoDialog
+                      emolumentoId={em.id}
+                      entityId={entity.id}
+                      entityName={entity.name}
+                      valorDivida={Number(em.valor_divida)}
+                      onDone={fetchData}
+                    />
+                  )}
+
                   {/* Status message */}
                   {em.estado === "validado" && (
                     <div className="flex items-center gap-2 p-2.5 rounded-lg bg-success/5 border border-success/20">
@@ -216,7 +273,7 @@ export default function PortalEmolumentos() {
                   {["guia_emitida", "aguardando_pagamento"].includes(em.estado) && (
                     <div className="flex items-center gap-2 p-2.5 rounded-lg bg-warning/5 border border-warning/20">
                       <CreditCard className="h-4 w-4 text-warning shrink-0" />
-                      <p className="text-xs text-warning">Guia emitida. Efectue o pagamento para prosseguir.</p>
+                      <p className="text-xs text-warning">Guia emitida. Efectue o pagamento e informe abaixo.</p>
                     </div>
                   )}
                   {["pago", "pago_em_excesso"].includes(em.estado) && (
@@ -232,6 +289,129 @@ export default function PortalEmolumentos() {
         </div>
       )}
     </PortalLayout>
+  );
+}
+
+/* ---------- Informar Pagamento Dialog ---------- */
+function InformarPagamentoDialog({
+  emolumentoId, entityId, entityName, valorDivida, onDone,
+}: {
+  emolumentoId: string; entityId: string; entityName: string; valorDivida: number; onDone: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [valor, setValor] = useState(valorDivida);
+  const [meio, setMeio] = useState("deposito_bancario");
+  const [referencia, setReferencia] = useState("");
+  const [dataPagamento, setDataPagamento] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const handleInformar = async () => {
+    if (valor <= 0) { toast.error("Indique o valor pago"); return; }
+    if (!referencia.trim()) { toast.error("Indique a referência do comprovativo"); return; }
+    setSaving(true);
+
+    // Send notification to Contadoria with payment info
+    await supabase.from("submission_notifications").insert({
+      entity_id: entityId,
+      entity_name: entityName,
+      fiscal_year_id: `${entityId}-${new Date().getFullYear()}`,
+      fiscal_year: String(new Date().getFullYear()),
+      type: "submissao",
+      message: `Pagamento de emolumento informado — ${formatKz(valor)}`,
+      detail: `A entidade ${entityName} informa o pagamento do emolumento.\n\nValor: ${formatKz(valor)}\nMeio: ${meio === "deposito_bancario" ? "Depósito Bancário" : meio === "transferencia" ? "Transferência" : meio === "multicaixa" ? "Multicaixa" : "Numerário"}\nReferência: ${referencia}\n${dataPagamento ? `Data: ${new Date(dataPagamento).toLocaleDateString("pt-AO")}` : ""}\n\nEmolumento ID: ${emolumentoId}`,
+    } as any);
+
+    // Record in emolumento history
+    await supabase.from("emolumento_historico").insert({
+      emolumento_id: emolumentoId,
+      acao: `Entidade informou pagamento de ${formatKz(valor)} via ${meio} (Ref: ${referencia})`,
+      estado_novo: "aguardando_pagamento",
+      executado_por: entityName,
+      perfil_executor: "Entidade",
+      observacoes: `Aguarda registo e validação pela Contadoria`,
+    } as any);
+
+    // Update emolumento state to awaiting payment confirmation
+    await supabase.from("emolumentos").update({
+      estado: "aguardando_pagamento",
+    } as any).eq("id", emolumentoId);
+
+    toast.success("Pagamento informado com sucesso! A Contadoria irá verificar e validar.");
+    setSaving(false);
+    setOpen(false);
+    onDone();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="w-full gap-2">
+          <Upload className="h-4 w-4" />
+          Informar Pagamento Efectuado
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="font-serif flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-primary" />
+            Informar Pagamento
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-xs text-muted-foreground">
+            Informe os detalhes do pagamento efectuado. A Contadoria irá verificar e validar o pagamento.
+          </p>
+
+          <div>
+            <Label className="text-xs">Valor Pago (Kz) *</Label>
+            <Input
+              type="number"
+              value={valor || ""}
+              onChange={(e) => setValor(Number(e.target.value))}
+              className="mt-1"
+            />
+          </div>
+
+          <div>
+            <Label className="text-xs">Meio de Pagamento</Label>
+            <Select value={meio} onValueChange={setMeio}>
+              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="deposito_bancario">Depósito Bancário</SelectItem>
+                <SelectItem value="transferencia">Transferência Bancária</SelectItem>
+                <SelectItem value="multicaixa">Multicaixa</SelectItem>
+                <SelectItem value="numerario">Numerário</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label className="text-xs">Referência / Nº Comprovativo *</Label>
+            <Input
+              value={referencia}
+              onChange={(e) => setReferencia(e.target.value)}
+              placeholder="Nº do comprovativo de pagamento..."
+              className="mt-1"
+            />
+          </div>
+
+          <div>
+            <Label className="text-xs">Data do Pagamento</Label>
+            <Input
+              type="date"
+              value={dataPagamento}
+              onChange={(e) => setDataPagamento(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+
+          <Button onClick={handleInformar} disabled={saving} className="w-full gap-2">
+            <Send className="h-4 w-4" />
+            {saving ? "A enviar..." : "Informar Pagamento"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
