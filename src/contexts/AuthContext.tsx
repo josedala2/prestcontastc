@@ -75,6 +75,9 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/contadoria/esclarecimentos", "/contadoria/processos",
     "/dashboard", "/entidades", "/gestao-processos", "/submissoes",
     "/documentos-obrigatorios", "/esclarecimentos", "/mapas", "/relatorios",
+    "/emolumentos", "/emolumentos/lista", "/emolumentos/novo",
+    "/emolumentos/solicitacoes", "/emolumentos/reclamacoes",
+    "/emolumentos/reconciliacao", "/emolumentos/relatorios",
   ],
   "Escrivão dos Autos": [
     "/dashboard", "/gestao-processos", "/entidades", "/submissoes",
@@ -87,7 +90,8 @@ export const rolePermissions: Record<UserRole, string[]> = {
     "/documentos-obrigatorios", "/contadoria-geral/triagem",
     "/mapas", "/relatorios",
     "/emolumentos", "/emolumentos/lista", "/emolumentos/novo",
-    "/emolumentos/reclamacoes", "/emolumentos/cobranca-coerciva",
+    "/emolumentos/solicitacoes", "/emolumentos/reclamacoes",
+    "/emolumentos/cobranca-coerciva",
     "/emolumentos/reconciliacao", "/emolumentos/relatorios",
   ],
   "Chefe de Divisão": [
@@ -178,7 +182,7 @@ export const roleSidebarSections: Record<UserRole, string[]> = {
   "Representante da Entidade": [],
   "Técnico da Secretaria-Geral": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
   "Chefe da Secretaria-Geral": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
-  "Técnico da Contadoria Geral": ["Principal", "Relatórios", "Dossiê"],
+  "Técnico da Contadoria Geral": ["Principal", "Relatórios", "Dossiê", "Emolumentos"],
   "Escrivão dos Autos": ["Principal", "Dossiê", "Emolumentos", "Acesso Externo"],
   "Contadoria Geral": ["Principal", "Relatórios", "Dossiê", "Emolumentos", "Acesso Externo"],
   "Chefe de Divisão": ["Principal", "Relatórios", "Dossiê", "Acesso Externo"],
