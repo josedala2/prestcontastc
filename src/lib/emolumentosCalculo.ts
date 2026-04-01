@@ -32,6 +32,7 @@ export const TIPO_PROCESSO_LABELS: Record<TipoProcesso, string> = {
 export const ESTADOS_EMOLUMENTO = [
   "rascunho", "calculado", "guia_emitida", "aguardando_pagamento",
   "pagamento_parcial", "pago", "pago_a_menor", "pago_em_excesso",
+  "validado",
   "em_divida", "em_reclamacao", "em_pedido_reducao", "isento",
   "em_cobranca_coerciva", "encerrado", "anulado",
 ] as const;
