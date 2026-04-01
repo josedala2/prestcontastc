@@ -51,6 +51,7 @@ const portalNav = [
 const routeTitles: Record<string, string> = {
   "/portal": "Painel da Entidade",
   "/portal/exercicios": "Exercícios Fiscais",
+  "/portal/emolumentos": "Emolumentos",
   "/portal/prestacao-contas": "Prestação de Contas",
   "/portal/solicitacao-visto": "Solicitação de Visto",
   "/portal/solicitacoes": "Solicitações de Elementos",
