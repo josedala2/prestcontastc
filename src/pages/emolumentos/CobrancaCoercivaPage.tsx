@@ -78,7 +78,7 @@ export default function CobrancaCoercivaPage() {
                               <Ban className="h-3 w-3 mr-1" /> Iniciar Coerciva
                             </Button>
                           ) : (
-                            <Badge className="bg-red-200 text-red-900 text-[10px]">Em Cobrança</Badge>
+                            <Badge className="bg-destructive/20 text-destructive text-[10px]">Em Cobrança</Badge>
                           )}
                         </td>
                       </tr>

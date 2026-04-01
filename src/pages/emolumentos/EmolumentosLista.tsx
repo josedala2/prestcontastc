@@ -111,8 +111,8 @@ export default function EmolumentosLista() {
                           <td className="p-3 text-xs">{TIPO_PROCESSO_LABELS[em.tipo_processo as TipoProcesso] || em.tipo_processo}</td>
                           <td className="p-3 text-right">{formatKz(Number(em.base_calculo))}</td>
                           <td className="p-3 text-right font-medium">{formatKz(Number(em.valor_final))}</td>
-                          <td className="p-3 text-right text-green-700">{formatKz(Number(em.valor_pago))}</td>
-                          <td className="p-3 text-right text-red-700">{formatKz(Number(em.valor_divida))}</td>
+                          <td className="p-3 text-right text-success">{formatKz(Number(em.valor_pago))}</td>
+                          <td className="p-3 text-right text-destructive">{formatKz(Number(em.valor_divida))}</td>
                           <td className="p-3">
                             <Badge variant="outline" className={`text-[10px] ${info?.color || ""}`}>{info?.label || em.estado}</Badge>
                           </td>

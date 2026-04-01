@@ -102,9 +102,9 @@ export default function ReconciliacaoFinanceira() {
                       <td className="p-3 text-xs">{new Date(r.data_emissao).toLocaleDateString("pt-AO")}</td>
                       <td className="p-3 text-center">
                         {r.conciliado ? (
-                          <CheckCircle className="h-4 w-4 text-green-600 mx-auto" />
+                          <CheckCircle className="h-4 w-4 text-success mx-auto" />
                         ) : (
-                          <AlertTriangle className="h-4 w-4 text-amber-600 mx-auto" />
+                          <AlertTriangle className="h-4 w-4 text-warning mx-auto" />
                         )}
                       </td>
                     </tr>

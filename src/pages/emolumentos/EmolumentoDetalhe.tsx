@@ -283,8 +283,9 @@ function RegistarPagamentoDialog({ emolumentoId, guias, onDone }: { emolumentoId
     } as any);
 
     // Update emolumento totals
-    const { data: em } = await supabase.from("emolumentos").select("valor_pago, valor_final").eq("id", emolumentoId).single();
+    const { data: em } = await supabase.from("emolumentos").select("valor_pago, valor_final, estado").eq("id", emolumentoId).single();
     if (em) {
+      const estadoAnterior = (em as any).estado;
       const novoPago = Number((em as any).valor_pago) + valor;
       const novaDivida = Number((em as any).valor_final) - novoPago;
       const novoEstado = novaDivida <= 0 ? (novaDivida < 0 ? "pago_em_excesso" : "pago") : "pagamento_parcial";
@@ -293,6 +294,7 @@ function RegistarPagamentoDialog({ emolumentoId, guias, onDone }: { emolumentoId
       await supabase.from("emolumento_historico").insert({
         emolumento_id: emolumentoId,
         acao: `Pagamento de ${formatKz(valor)} registado (${meio})`,
+        estado_anterior: estadoAnterior,
         estado_novo: novoEstado,
         executado_por: user?.displayName || "sistema",
         perfil_executor: user?.role || "",
