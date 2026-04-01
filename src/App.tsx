@@ -66,6 +66,7 @@ import ReclamacoesEmolumentos from "./pages/emolumentos/ReclamacoesEmolumentos";
 import CobrancaCoercivaPage from "./pages/emolumentos/CobrancaCoercivaPage";
 import ReconciliacaoFinanceira from "./pages/emolumentos/ReconciliacaoFinanceira";
 import RelatoriosEmolumentos from "./pages/emolumentos/RelatoriosEmolumentos";
+import SolicitacoesEmolumentos from "./pages/emolumentos/SolicitacoesEmolumentos";
 import DespachoMinisterioPublico from "./pages/ministerio-publico/DespachoMinisterioPublico";
 import CumprimentoDespachos from "./pages/escrivao/CumprimentoDespachos";
 import OficioRemessa from "./pages/secretaria/OficioRemessa";
