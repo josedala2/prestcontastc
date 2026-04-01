@@ -36,6 +36,8 @@ const TecnicoDashboard = () => {
   const [perfilStats, setPerfilStats] = useState<any>(null);
   const [processos, setProcessos] = useState<Processo[]>([]);
   const [loadingProcessos, setLoadingProcessos] = useState(true);
+  const [solicitacoes, setSolicitacoes] = useState<any[]>([]);
+  const { emolumentos } = useEmolumentos();
 
   useEffect(() => {
     const load = async () => {
