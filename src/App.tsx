@@ -66,6 +66,7 @@ import ReclamacoesEmolumentos from "./pages/emolumentos/ReclamacoesEmolumentos";
 import CobrancaCoercivaPage from "./pages/emolumentos/CobrancaCoercivaPage";
 import ReconciliacaoFinanceira from "./pages/emolumentos/ReconciliacaoFinanceira";
 import RelatoriosEmolumentos from "./pages/emolumentos/RelatoriosEmolumentos";
+import SolicitacoesEmolumentos from "./pages/emolumentos/SolicitacoesEmolumentos";
 import DespachoMinisterioPublico from "./pages/ministerio-publico/DespachoMinisterioPublico";
 import CumprimentoDespachos from "./pages/escrivao/CumprimentoDespachos";
 import OficioRemessa from "./pages/secretaria/OficioRemessa";
@@ -279,6 +280,7 @@ const App = () => (
           <Route path="/emolumentos/cobranca-coerciva" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secção de Custas e Emolumentos", "Contadoria Geral", "Oficial de Diligências"]}><CobrancaCoercivaPage /></ProtectedRoute>} />
           <Route path="/emolumentos/reconciliacao" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secção de Custas e Emolumentos", "Contadoria Geral"]}><ReconciliacaoFinanceira /></ProtectedRoute>} />
           <Route path="/emolumentos/relatorios" element={<ProtectedRoute allowedRoles={ALL_INTERNAL}><RelatoriosEmolumentos /></ProtectedRoute>} />
+          <Route path="/emolumentos/solicitacoes" element={<ProtectedRoute allowedRoles={["Administrador do Sistema", "Técnico da Secção de Custas e Emolumentos", "Contadoria Geral"]}><SolicitacoesEmolumentos /></ProtectedRoute>} />
 
           {/* Ministério Público */}
           <Route path="/ministerio-publico/despacho" element={
