@@ -66,8 +66,8 @@ export default function ReconciliacaoFinanceira() {
         {/* Summary */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Card><CardContent className="p-3 text-center"><p className="text-xs text-muted-foreground">Total Guias</p><p className="text-lg font-bold">{formatKz(totalGuias)}</p></CardContent></Card>
-          <Card><CardContent className="p-3 text-center"><p className="text-xs text-muted-foreground">Total Pago</p><p className="text-lg font-bold text-green-700">{formatKz(totalPago)}</p></CardContent></Card>
-          <Card><CardContent className="p-3 text-center"><p className="text-xs text-muted-foreground">Diferença</p><p className={`text-lg font-bold ${totalDif > 0 ? "text-red-700" : "text-green-700"}`}>{formatKz(totalDif)}</p></CardContent></Card>
+          <Card><CardContent className="p-3 text-center"><p className="text-xs text-muted-foreground">Total Pago</p><p className="text-lg font-bold text-success">{formatKz(totalPago)}</p></CardContent></Card>
+          <Card><CardContent className="p-3 text-center"><p className="text-xs text-muted-foreground">Diferença</p><p className={`text-lg font-bold ${totalDif > 0 ? "text-destructive" : "text-success"}`}>{formatKz(totalDif)}</p></CardContent></Card>
           <Card><CardContent className="p-3 text-center"><p className="text-xs text-muted-foreground">Conciliados</p><p className="text-lg font-bold">{conciliados}/{reconciliacao.length}</p></CardContent></Card>
         </div>
 
