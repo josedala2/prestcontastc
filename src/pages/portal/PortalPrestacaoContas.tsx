@@ -158,6 +158,49 @@ function EntidadeView({
 
   const disabled = isSubmitted && !canResubmit;
 
+  // If emolumento not validated, block the entire form
+  if (loadingEmolumento) {
+    return (
+      <div className="py-12 text-center">
+        <p className="text-sm text-muted-foreground">A verificar estado do emolumento...</p>
+      </div>
+    );
+  }
+
+  if (!emolumentoValidado && !isSubmitted) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center space-y-4">
+          <div className="mx-auto w-16 h-16 rounded-full bg-warning/10 flex items-center justify-center">
+            <CreditCard className="h-8 w-8 text-warning" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">Pagamento de Emolumento Pendente</h3>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto mt-2">
+              O formulário de submissão da prestação de contas só fica disponível após o pagamento do emolumento
+              e a respectiva validação pela Contadoria.
+            </p>
+          </div>
+          <div className="bg-muted/50 rounded-lg p-4 max-w-md mx-auto text-left space-y-2">
+            <p className="text-xs font-semibold text-foreground">Passos necessários:</p>
+            <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+              <li>Solicitar a guia de pagamento do emolumento</li>
+              <li>Efectuar o pagamento conforme a guia emitida</li>
+              <li>Aguardar a validação do pagamento pela Contadoria</li>
+              <li>Após validação, o formulário será libertado automaticamente</li>
+            </ol>
+          </div>
+          <Link to="/portal/emolumentos">
+            <Button variant="outline" className="gap-2 mt-2">
+              <ShieldCheck className="h-4 w-4" />
+              Consultar Estado dos Emolumentos
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Status Banner */}
