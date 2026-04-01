@@ -203,14 +203,19 @@ export default function EmolumentoDetalhe() {
 }
 
 /* ---------- Emitir Guia Dialog ---------- */
-function EmitirGuiaDialog({ emolumentoId, valorFinal, valorDivida, onDone }: { emolumentoId: string; valorFinal: number; valorDivida: number; onDone: () => void }) {
+const ESTADOS_PERMITIDOS_GUIA = ["calculado", "guia_emitida", "aguardando_pagamento", "pagamento_parcial", "pago_a_menor", "em_divida"];
+
+function EmitirGuiaDialog({ emolumentoId, valorFinal, valorDivida, estadoAtual, onDone }: { emolumentoId: string; valorFinal: number; valorDivida: number; estadoAtual: string; onDone: () => void }) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [valor, setValor] = useState(valorDivida || valorFinal);
   const [dataLimite, setDataLimite] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const permitido = ESTADOS_PERMITIDOS_GUIA.includes(estadoAtual);
+
   const handleEmitir = async () => {
+    if (!permitido) { toast.error("Não é possível emitir guia no estado actual"); return; }
     setSaving(true);
     const seq = Date.now().toString().slice(-6);
     const numGuia = `GC-${new Date().getFullYear()}/${seq}`;
@@ -227,7 +232,7 @@ function EmitirGuiaDialog({ emolumentoId, valorFinal, valorDivida, onDone }: { e
     await supabase.from("emolumento_historico").insert({
       emolumento_id: emolumentoId,
       acao: `Guia ${numGuia} emitida no valor de ${formatKz(valor)}`,
-      estado_anterior: "calculado",
+      estado_anterior: estadoAtual,
       estado_novo: "guia_emitida",
       executado_por: user?.displayName || "sistema",
       perfil_executor: user?.role || "",
@@ -241,7 +246,7 @@ function EmitirGuiaDialog({ emolumentoId, valorFinal, valorDivida, onDone }: { e
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button variant="outline" size="sm"><Receipt className="h-4 w-4 mr-1" /> Emitir Guia</Button></DialogTrigger>
+      <DialogTrigger asChild><Button variant="outline" size="sm" disabled={!permitido}><Receipt className="h-4 w-4 mr-1" /> Emitir Guia</Button></DialogTrigger>
       <DialogContent>
         <DialogHeader><DialogTitle>Emitir Guia de Cobrança</DialogTitle></DialogHeader>
         <div className="space-y-3">
