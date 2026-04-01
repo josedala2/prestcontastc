@@ -97,6 +97,17 @@ const navSections: { label: string; items: NavEntry[] }[] = [
     ],
   },
   {
+    label: "Emolumentos",
+    items: [
+      { title: "Dashboard Emolumentos", icon: Receipt, path: "/emolumentos" },
+      { title: "Lista de Emolumentos", icon: FileText, path: "/emolumentos/lista" },
+      { title: "Reclamações / Isenções", icon: Scale, path: "/emolumentos/reclamacoes" },
+      { title: "Cobrança Coerciva", icon: AlertTriangle, path: "/emolumentos/cobranca-coerciva" },
+      { title: "Reconciliação", icon: CreditCard, path: "/emolumentos/reconciliacao" },
+      { title: "Relatórios Emolumentos", icon: DollarSign, path: "/emolumentos/relatorios" },
+    ],
+  },
+  {
     label: "Acesso Externo",
     items: [
       { title: "Portal da Entidade", icon: ExternalLink, path: "/portal" },
