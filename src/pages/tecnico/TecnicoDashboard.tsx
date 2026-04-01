@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 import { TecnicoLayout } from "@/components/TecnicoLayout";
 import { PageHeader, StatCard } from "@/components/ui-custom/PageElements";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,6 +56,31 @@ const TecnicoDashboard = () => {
     load();
     fetchProcessos();
     fetchSolicitacoes();
+
+    // Realtime: escutar novas solicitações de emolumentos
+    const channel = supabase
+      .channel("contadoria-solicitacoes")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "submission_notifications",
+          filter: "type=eq.solicitacao_emolumento",
+        },
+        (payload) => {
+          const newRow = payload.new as any;
+          setSolicitacoes((prev) => [newRow, ...prev]);
+          toast.info(`Nova solicitação de emolumento`, {
+            description: `${newRow.entity_name} — Exercício ${newRow.fiscal_year}`,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchSolicitacoes = async () => {
