@@ -336,6 +336,14 @@ function InformarPagamentoDialog({
       estado: "aguardando_pagamento",
     } as any).eq("id", emolumentoId);
 
+    // Registar no log de auditoria
+    await supabase.from("audit_log").insert({
+      action: `Pagamento de emolumento informado — ${formatKz(valor)}`,
+      username: entityName,
+      action_type: "pagamento_emolumento_informado",
+      detail: `Entidade: ${entityName}\nValor: ${formatKz(valor)}\nMeio: ${meio}\nReferência: ${referencia}${dataPagamento ? `\nData: ${dataPagamento}` : ""}`,
+    } as any);
+
     toast.success("Pagamento informado com sucesso! A Contadoria irá verificar e validar.");
     setSaving(false);
     setOpen(false);
