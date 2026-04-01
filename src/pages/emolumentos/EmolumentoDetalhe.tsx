@@ -14,8 +14,9 @@ import { formatKz, ESTADO_LABELS, EstadoEmolumento, TIPO_PROCESSO_LABELS, TipoPr
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, FileText, CreditCard, History, AlertTriangle, Receipt, Ban } from "lucide-react";
+import { ArrowLeft, FileText, CreditCard, History, AlertTriangle, Receipt, Ban, ShieldCheck } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 export default function EmolumentoDetalhe() {
   const { id } = useParams();
