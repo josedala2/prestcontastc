@@ -445,6 +445,14 @@ function SolicitarGuiaDialog({ entityId, entityName, onDone }: { entityId: strin
       detail: `A entidade ${entityName} solicita a emissão da guia de pagamento do emolumento para o exercício ${exercicio}.\n\nTipo de processo: ${TIPOS.find(t => t.value === tipoProcesso)?.label || tipoProcesso}\n\n${observacoes ? `Observações: ${observacoes}` : ""}`,
     } as any);
 
+    // Registar no log de auditoria
+    await supabase.from("audit_log").insert({
+      action: `Solicitação de guia de pagamento de emolumento — Exercício ${exercicio}`,
+      username: entityName,
+      action_type: "solicitacao_emolumento",
+      detail: `Entidade: ${entityName}\nTipo: ${TIPOS.find(t => t.value === tipoProcesso)?.label || tipoProcesso}\nExercício: ${exercicio}${observacoes ? `\nObservações: ${observacoes}` : ""}`,
+    } as any);
+
     toast.success("Solicitação de guia de pagamento enviada com sucesso! A Contadoria irá processar o pedido.");
     setSaving(false);
     setOpen(false);
