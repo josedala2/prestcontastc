@@ -443,7 +443,7 @@ function SolicitarGuiaDialog({ entityId, entityName, onDone }: { entityId: strin
     setSaving(true);
 
     // Create a notification to the Secretaria/Contadoria requesting the guide
-    await supabase.from("submission_notifications").insert({
+    const { error } = await supabase.from("submission_notifications").insert({
       entity_id: entityId,
       entity_name: entityName,
       fiscal_year_id: `${entityId}-${exercicio}`,
@@ -452,6 +452,12 @@ function SolicitarGuiaDialog({ entityId, entityName, onDone }: { entityId: strin
       message: `Solicitação de guia de pagamento de emolumento — Exercício ${exercicio}`,
       detail: `A entidade ${entityName} solicita a emissão da guia de pagamento do emolumento para o exercício ${exercicio}.\n\nTipo de processo: ${TIPOS.find(t => t.value === tipoProcesso)?.label || tipoProcesso}\n\n${observacoes ? `Observações: ${observacoes}` : ""}`,
     } as any);
+
+    if (error) {
+      toast.error("Erro ao enviar solicitação. Tente novamente.");
+      setSaving(false);
+      return;
+    }
 
     // Registar no log de auditoria
     await supabase.from("audit_log").insert({
