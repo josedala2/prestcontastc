@@ -151,6 +151,7 @@ const App = () => (
                   <Route path="prestacao-contas" element={<PortalPrestacaoContas />} />
                   <Route path="solicitacao-visto" element={<PortalSolicitacaoVisto />} />
                   <Route path="solicitacoes" element={<PortalSolicitacoes />} />
+                  <Route path="emolumentos" element={<PortalEmolumentos />} />
                 </Routes>
               </PortalEntityProvider>
             </ProtectedRoute>

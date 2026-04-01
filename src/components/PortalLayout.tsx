@@ -39,6 +39,7 @@ interface PortalLayoutProps {
 const portalNav = [
   { title: "Painel", icon: LayoutDashboard, path: "/portal" },
   { title: "Exercícios", icon: FileBarChart, path: "/portal/exercicios" },
+  { title: "Emolumentos", icon: FileSearch, path: "/portal/emolumentos" },
   { title: "Prestação de Contas", icon: FileBarChart, path: "/portal/prestacao-contas" },
   { title: "Solicitação de Visto", icon: ShieldCheck, path: "/portal/solicitacao-visto" },
   { title: "Solicitações", icon: MessageSquare, path: "/portal/solicitacoes" },
