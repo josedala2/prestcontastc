@@ -24,6 +24,10 @@ import {
   AlertTriangle,
   UserCheck,
   GitBranch,
+  Receipt,
+  CreditCard,
+  Scale,
+  DollarSign,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth, roleHiddenPaths, roleSidebarSections } from "@/contexts/AuthContext";
@@ -90,6 +94,17 @@ const navSections: { label: string; items: NavEntry[] }[] = [
       { title: "Docs. Obrigatórios", icon: FileText, path: "/documentos-obrigatorios" },
       { title: "Esclarecimentos", icon: MessageSquare, path: "/esclarecimentos" },
       { title: "Auditoria", icon: History, path: "/auditoria" },
+    ],
+  },
+  {
+    label: "Emolumentos",
+    items: [
+      { title: "Dashboard Emolumentos", icon: Receipt, path: "/emolumentos" },
+      { title: "Lista de Emolumentos", icon: FileText, path: "/emolumentos/lista" },
+      { title: "Reclamações / Isenções", icon: Scale, path: "/emolumentos/reclamacoes" },
+      { title: "Cobrança Coerciva", icon: AlertTriangle, path: "/emolumentos/cobranca-coerciva" },
+      { title: "Reconciliação", icon: CreditCard, path: "/emolumentos/reconciliacao" },
+      { title: "Relatórios Emolumentos", icon: DollarSign, path: "/emolumentos/relatorios" },
     ],
   },
   {
