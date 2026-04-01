@@ -273,8 +273,7 @@ function EmitirGuiaFromSolicitacao({
 
     // If no processo exists, we still need a valid UUID for the FK
     if (!existingProc) {
-      // Create a minimal processo entry
-      await supabase.from("processos").insert({
+      const { error: procErr } = await supabase.from("processos").insert({
         id: processoId,
         numero_processo: processoNumero,
         entity_id: solicitacao.entity_id,
@@ -285,6 +284,12 @@ function EmitirGuiaFromSolicitacao({
         etapa_atual: 13,
         submetido_por: userName,
       } as any);
+      if (procErr) {
+        console.error("Erro ao criar processo:", procErr);
+        toast.error("Erro ao criar processo: " + procErr.message);
+        setSaving(false);
+        return;
+      }
     }
 
     // 2. Create emolumento
