@@ -35,6 +35,7 @@ import PortalValidacoes from "./pages/portal/PortalValidacoes";
 import PortalMapas from "./pages/portal/PortalMapas";
 import PortalPrestacaoContas from "./pages/portal/PortalPrestacaoContas";
 import PortalSolicitacoes from "./pages/portal/PortalSolicitacoes";
+import PortalEmolumentos from "./pages/portal/PortalEmolumentos";
 import PortalSolicitacaoVisto from "./pages/portal/PortalSolicitacaoVisto";
 import TecnicoDashboard from "./pages/tecnico/TecnicoDashboard";
 import TecnicoPrestacaoContas from "./pages/tecnico/TecnicoPrestacaoContas";
