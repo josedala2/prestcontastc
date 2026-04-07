@@ -497,16 +497,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     // 2. Listen for subsequent auth changes (sign in, sign out, token refresh)
+    let profileLoaded = false;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (!isMounted) return;
 
         if (event === "SIGNED_OUT") {
           setUser(null);
+          profileLoaded = false;
           return;
         }
 
-        if (session?.user && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED")) {
+        // Only reload profile on SIGNED_IN; skip TOKEN_REFRESHED to avoid refresh storms
+        if (session?.user && event === "SIGNED_IN" && !profileLoaded) {
+          profileLoaded = true;
           // Use setTimeout to avoid Supabase auth deadlock
           setTimeout(async () => {
             if (!isMounted) return;
