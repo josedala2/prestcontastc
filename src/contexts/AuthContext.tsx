@@ -462,13 +462,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async (event, session) => {
         if (session?.user) {
           // Use setTimeout to avoid Supabase auth deadlock
-          setTimeout(() => {
-            loadProfile(session.user.id, session.user.email || "", session.user.user_metadata);
+          setTimeout(async () => {
+            await loadProfile(session.user.id, session.user.email || "", session.user.user_metadata);
+            setLoading(false);
           }, 0);
         } else {
           setUser(null);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
