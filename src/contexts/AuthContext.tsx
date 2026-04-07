@@ -485,31 +485,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [applyUser]);
 
   useEffect(() => {
-    // 1. Set up auth state listener FIRST
+    let isMounted = true;
+
+    // 1. Restore session from storage first
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!isMounted) return;
+      if (session?.user) {
+        await loadProfile(session.user.id, session.user.email || "", session.user.user_metadata);
+      }
+      if (isMounted) setLoading(false);
+    });
+
+    // 2. Listen for subsequent auth changes (sign in, sign out, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session?.user) {
+      (event, session) => {
+        if (!isMounted) return;
+
+        if (event === "SIGNED_OUT") {
+          setUser(null);
+          return;
+        }
+
+        if (session?.user && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED")) {
           // Use setTimeout to avoid Supabase auth deadlock
           setTimeout(async () => {
+            if (!isMounted) return;
             await loadProfile(session.user.id, session.user.email || "", session.user.user_metadata);
-            setLoading(false);
           }, 0);
-        } else {
-          setUser(null);
-          setLoading(false);
         }
       }
     );
 
-    // 2. Then check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        setLoading(false);
-      }
-      // onAuthStateChange will handle setting the user if session exists
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [loadProfile]);
 
   const login = async (email: string, password: string) => {
