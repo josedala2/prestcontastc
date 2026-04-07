@@ -414,6 +414,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const getInitials = (name: string) =>
     name.split(" ").filter(Boolean).map(n => n[0]).join("").substring(0, 2).toUpperCase() || "U";
 
+  const applyUser = useCallback((email: string, role?: string | null, displayName?: string | null, divisao?: string | null) => {
+    if (!role) return false;
+
+    const safeRole = role as UserRole;
+    const safeName = displayName || email;
+
+    setUser({
+      email,
+      displayName: safeName,
+      role: safeRole,
+      initials: getInitials(safeName),
+      divisao: divisao || undefined,
+    });
+
+    return true;
+  }, []);
+
   const loadProfile = useCallback(async (userId: string, email: string, metadata?: Record<string, any>) => {
     try {
       let { data: profile } = await supabase
@@ -427,7 +444,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const nomeCompleto = metadata?.nome_completo || email.split("@")[0];
         const cargo = metadata?.cargo || null;
         const divisao = metadata?.divisao || null;
-        const { data: newProfile } = await supabase
+        const { data: newProfile, error: insertError } = await supabase
           .from("profiles")
           .insert({
             user_id: userId,
@@ -438,23 +455,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           })
           .select()
           .single();
+
+        if (insertError) {
+          console.error("Erro ao criar perfil:", insertError);
+        }
+
         profile = newProfile;
       }
 
       if (profile) {
-        const role = (profile.cargo as UserRole) || "Administrador do Sistema";
-        setUser({
-          email,
-          displayName: profile.nome_completo || email,
-          role,
-          initials: getInitials(profile.nome_completo || email),
-          divisao: profile.divisao || undefined,
-        });
+        if (applyUser(email, profile.cargo, profile.nome_completo, profile.divisao)) {
+          return;
+        }
       }
+
+      // Fallback to auth metadata when profile read/creation is delayed or fails transiently
+      if (applyUser(email, metadata?.cargo, metadata?.nome_completo, metadata?.divisao)) {
+        return;
+      }
+
+      setUser(null);
     } catch (err) {
       console.error("Erro ao carregar perfil:", err);
+
+      if (!applyUser(email, metadata?.cargo, metadata?.nome_completo, metadata?.divisao)) {
+        setUser(null);
+      }
     }
-  }, []);
+  }, [applyUser]);
 
   useEffect(() => {
     // 1. Set up auth state listener FIRST
